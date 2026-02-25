@@ -81,8 +81,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 03-01: HCL Jinja2 templates with custom delimiters (main.tf, variables.tf, backend.tf)
-- [ ] 03-02: IAM derivation, iam.tf, cloudwatch.tf, outputs.tf, name sanitizer, Generation Gap
+- [x] 03-01: HCL Jinja2 templates with custom delimiters (main.tf, variables.tf, backend.tf)
+- [x] 03-02: IAM derivation, iam.tf, cloudwatch.tf, outputs.tf, name sanitizer, Generation Gap
 
 ### Phase 4: ASL Importer
 **Goal**: Users can point RSF at any existing AWS Step Functions ASL JSON file and receive a valid RSF workflow YAML plus handler stubs for every Task state
@@ -236,7 +236,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 |-------|----------------|--------|-----------|
 | 1. DSL Core | 5/5 | Complete | 2026-02-25 |
 | 2. Code Generation | 3/3 | Complete | 2026-02-25 |
-| 3. Terraform Generation | 0/2 | Not started | - |
+| 3. Terraform Generation | 2/2 | Complete | 2026-02-25 |
 | 4. ASL Importer | 0/2 | Not started | - |
 | 5. CLI Toolchain | 0/4 | Not started | - |
 | 6. Graph Editor Backend | 0/2 | Not started | - |
