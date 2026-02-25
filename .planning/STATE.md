@@ -5,23 +5,23 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** Phase 9 — Inspector UI
+**Current focus:** Phase 10 — Testing
 
 ## Current Position
 
-Phase: 9 of 11 (Inspector UI)
-Plan: 0 of 5 in current phase
+Phase: 10 of 11 (Testing)
+Plan: 0 of 9 in current phase
 Status: Ready to plan
-Last activity: 2026-02-25 — Phase 8 complete
+Last activity: 2026-02-25 — Phase 9 complete
 
-Progress: [██████░░░░] 60%
+Progress: [███████░░░] 68%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 21
+- Total plans completed: 26
 - Average duration: ~3 min/plan
-- Total execution time: ~58 min
+- Total execution time: ~65 min
 
 **By Phase:**
 
@@ -34,9 +34,10 @@ Progress: [██████░░░░] 60%
 | 6. Graph Editor Backend | 2 | ~2 min | ~1 min |
 | 7. Graph Editor UI | 5 | ~15 min | ~3 min |
 | 8. Inspector Backend | 2 | ~3 min | ~1.5 min |
+| 9. Inspector UI | 5 | ~7 min | ~1.5 min |
 
 **Recent Trend:**
-- Last 5 plans: 07-03 through 08-02 (Phase 7 + Phase 8)
+- Last 5 plans: 09-01 through 09-05 (Phase 9)
 - Trend: steady execution
 
 *Updated after each plan completion*
@@ -66,6 +67,12 @@ Recent decisions affecting current work:
 - Token bucket rate limiter (12 req/s) wrapping async boto3 calls to stay under 15 req/s Lambda control plane limit
 - asyncio.to_thread wrapping synchronous boto3 calls (avoids aiobotocore dependency)
 - SSE stream lifecycle: initial fetch → poll every 5s → close on terminal status
+- Hash-based routing (#/editor, #/inspector) for SPA mode switching
+- Separate Zustand inspectStore for inspector (parallel to flowStore for editor)
+- Precomputed TransitionSnapshots array for O(1) time machine scrubbing
+- InspectorNode/InspectorEdge components with overlay props (separate from editor node types)
+- Flat path comparison for structural JSON diff (color-coded: green/red/yellow)
+- Tab visibility API to pause SSE when browser tab hidden
 
 ### Pending Todos
 
@@ -78,5 +85,5 @@ None yet.
 ## Session Continuity
 
 Last session: 2026-02-25
-Stopped at: Phase 8 complete (359 tests passing), ready for Phase 9
+Stopped at: Phase 9 complete (359 tests passing), ready for Phase 10
 Resume file: None

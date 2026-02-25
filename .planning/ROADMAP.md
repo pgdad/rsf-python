@@ -26,7 +26,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 6: Graph Editor Backend** - FastAPI server with REST, WebSocket, static file serving, and JSON Schema endpoint
 - [x] **Phase 7: Graph Editor UI** - React graph editor with YAML/graph bidirectional sync, ELK layout, Monaco editor
 - [x] **Phase 8: Inspector Backend** - FastAPI SSE server with Lambda polling, rate limiter, execution history endpoints
-- [ ] **Phase 9: Inspector UI** - React inspector with time machine, structural diffs, live SSE updates, three-panel layout
+- [x] **Phase 9: Inspector UI** - React inspector with time machine, structural diffs, live SSE updates, three-panel layout
 - [ ] **Phase 10: Testing** - Mock SDK, unit tests, integration tests, golden fixtures, React UI tests
 - [ ] **Phase 11: Documentation** - Tutorial, migration guide, DSL reference, README, MkDocs site
 
@@ -180,11 +180,11 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 09-01: React inspector project setup, Zustand inspect store, SSE connection management
-- [ ] 09-02: ExecutionList (filter, search, status icons), ExecutionHeader
-- [ ] 09-03: Graph with node overlays (status, timing, I/O, retry) and edge overlays (traversed, timestamp)
-- [ ] 09-04: Time machine (precomputed TransitionSnapshots, TimelineScrubber slider)
-- [ ] 09-05: EventTimeline, StateDetailPanel, structural JSON diff component
+- [x] 09-01: React inspector project setup, Zustand inspect store, SSE connection management
+- [x] 09-02: ExecutionList (filter, search, status icons), ExecutionHeader
+- [x] 09-03: Graph with node overlays (status, timing, I/O, retry) and edge overlays (traversed, timestamp)
+- [x] 09-04: Time machine (precomputed TransitionSnapshots, TimelineScrubber slider)
+- [x] 09-05: EventTimeline, StateDetailPanel, structural JSON diff component
 
 ### Phase 10: Testing
 **Goal**: The complete RSF codebase is verified by a comprehensive automated test suite covering every DSL state type, every operator, every code generation path, every I/O stage, and every API endpoint
@@ -242,6 +242,6 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 6. Graph Editor Backend | 2/2 | Complete | 2026-02-25 |
 | 7. Graph Editor UI | 5/5 | Complete | 2026-02-25 |
 | 8. Inspector Backend | 2/2 | Complete | 2026-02-25 |
-| 9. Inspector UI | 0/5 | Not started | - |
+| 9. Inspector UI | 5/5 | Complete | 2026-02-25 |
 | 10. Testing | 0/9 | Not started | - |
 | 11. Documentation | 0/4 | Not started | - |
