@@ -198,13 +198,123 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| (Populated during roadmap creation) | | |
+| DSL-01 | Phase 1 | Pending |
+| DSL-02 | Phase 1 | Pending |
+| DSL-03 | Phase 1 | Pending |
+| DSL-04 | Phase 1 | Pending |
+| DSL-05 | Phase 1 | Pending |
+| DSL-06 | Phase 1 | Pending |
+| DSL-07 | Phase 1 | Pending |
+| DSL-08 | Phase 1 | Pending |
+| DSL-09 | Phase 1 | Pending |
+| DSL-10 | Phase 1 | Pending |
+| IO-01 | Phase 1 | Pending |
+| IO-02 | Phase 1 | Pending |
+| IO-03 | Phase 1 | Pending |
+| IO-04 | Phase 1 | Pending |
+| IO-05 | Phase 1 | Pending |
+| FUNC-01 | Phase 1 | Pending |
+| FUNC-02 | Phase 1 | Pending |
+| CTX-01 | Phase 1 | Pending |
+| VAR-01 | Phase 1 | Pending |
+| SCH-01 | Phase 1 | Pending |
+| SCH-02 | Phase 1 | Pending |
+| REG-01 | Phase 2 | Pending |
+| REG-02 | Phase 2 | Pending |
+| REG-03 | Phase 2 | Pending |
+| REG-04 | Phase 2 | Pending |
+| REG-05 | Phase 2 | Pending |
+| GEN-01 | Phase 2 | Pending |
+| GEN-02 | Phase 2 | Pending |
+| GEN-03 | Phase 2 | Pending |
+| GEN-04 | Phase 2 | Pending |
+| GEN-05 | Phase 2 | Pending |
+| GEN-06 | Phase 2 | Pending |
+| TF-01 | Phase 3 | Pending |
+| TF-02 | Phase 3 | Pending |
+| TF-03 | Phase 3 | Pending |
+| TF-04 | Phase 3 | Pending |
+| TF-05 | Phase 3 | Pending |
+| TF-06 | Phase 3 | Pending |
+| TF-07 | Phase 3 | Pending |
+| TF-08 | Phase 3 | Pending |
+| TF-09 | Phase 3 | Pending |
+| TF-10 | Phase 3 | Pending |
+| IMP-01 | Phase 4 | Pending |
+| IMP-02 | Phase 4 | Pending |
+| IMP-03 | Phase 4 | Pending |
+| IMP-04 | Phase 4 | Pending |
+| IMP-05 | Phase 4 | Pending |
+| IMP-06 | Phase 4 | Pending |
+| CLI-01 | Phase 5 | Pending |
+| CLI-02 | Phase 5 | Pending |
+| CLI-03 | Phase 5 | Pending |
+| CLI-04 | Phase 5 | Pending |
+| CLI-05 | Phase 5 | Pending |
+| CLI-06 | Phase 5 | Pending |
+| CLI-07 | Phase 5 | Pending |
+| CLI-08 | Phase 5 | Pending |
+| GEB-01 | Phase 6 | Pending |
+| GEB-02 | Phase 6 | Pending |
+| GEB-03 | Phase 6 | Pending |
+| GEB-04 | Phase 6 | Pending |
+| GEB-05 | Phase 6 | Pending |
+| GEU-01 | Phase 7 | Pending |
+| GEU-02 | Phase 7 | Pending |
+| GEU-03 | Phase 7 | Pending |
+| GEU-04 | Phase 7 | Pending |
+| GEU-05 | Phase 7 | Pending |
+| GEU-06 | Phase 7 | Pending |
+| GEU-07 | Phase 7 | Pending |
+| GEU-08 | Phase 7 | Pending |
+| GEU-09 | Phase 7 | Pending |
+| GEU-10 | Phase 7 | Pending |
+| GEU-11 | Phase 7 | Pending |
+| GEU-12 | Phase 7 | Pending |
+| INB-01 | Phase 8 | Pending |
+| INB-02 | Phase 8 | Pending |
+| INB-03 | Phase 8 | Pending |
+| INB-04 | Phase 8 | Pending |
+| INB-05 | Phase 8 | Pending |
+| INB-06 | Phase 8 | Pending |
+| INB-07 | Phase 8 | Pending |
+| INU-01 | Phase 9 | Pending |
+| INU-02 | Phase 9 | Pending |
+| INU-03 | Phase 9 | Pending |
+| INU-04 | Phase 9 | Pending |
+| INU-05 | Phase 9 | Pending |
+| INU-06 | Phase 9 | Pending |
+| INU-07 | Phase 9 | Pending |
+| INU-08 | Phase 9 | Pending |
+| INU-09 | Phase 9 | Pending |
+| INU-10 | Phase 9 | Pending |
+| INU-11 | Phase 9 | Pending |
+| INU-12 | Phase 9 | Pending |
+| TST-01 | Phase 10 | Pending |
+| TST-02 | Phase 10 | Pending |
+| TST-03 | Phase 10 | Pending |
+| TST-04 | Phase 10 | Pending |
+| TST-05 | Phase 10 | Pending |
+| TST-06 | Phase 10 | Pending |
+| TST-07 | Phase 10 | Pending |
+| TST-08 | Phase 10 | Pending |
+| TST-09 | Phase 10 | Pending |
+| TST-10 | Phase 10 | Pending |
+| TST-11 | Phase 10 | Pending |
+| TST-12 | Phase 10 | Pending |
+| TST-13 | Phase 10 | Pending |
+| TST-14 | Phase 10 | Pending |
+| DOC-01 | Phase 11 | Pending |
+| DOC-02 | Phase 11 | Pending |
+| DOC-03 | Phase 11 | Pending |
+| DOC-04 | Phase 11 | Pending |
+| DOC-05 | Phase 11 | Pending |
 
 **Coverage:**
-- v1 requirements: 89 total
-- Mapped to phases: 0
-- Unmapped: 89
+- v1 requirements: 111 total (10 DSL + 5 IO + 2 FUNC + 1 CTX + 1 VAR + 5 REG + 6 GEN + 10 TF + 6 IMP + 8 CLI + 5 GEB + 12 GEU + 7 INB + 12 INU + 2 SCH + 14 TST + 5 DOC)
+- Mapped to phases: 111
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-24*
-*Last updated: 2026-02-24 after initial definition*
+*Last updated: 2026-02-25 after roadmap creation*
