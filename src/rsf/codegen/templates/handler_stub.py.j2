@@ -1,0 +1,12 @@
+"""Handler for the {{ state_name }} task state."""
+
+from rsf.registry import state
+
+
+@state("{{ state_name }}")
+def {{ function_name }}(input_data: dict) -> dict:
+    """Handler for the {{ state_name }} task state.
+
+    Implement your business logic here.
+    """
+    raise NotImplementedError("Implement {{ state_name }} handler")
