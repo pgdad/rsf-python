@@ -1,0 +1,40 @@
+{
+  "Comment": "A simple Step Functions workflow",
+  "StartAt": "ValidateOrder",
+  "States": {
+    "ValidateOrder": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123456789:function:validate",
+      "Next": "CheckAmount",
+      "Retry": [
+        {
+          "ErrorEquals": ["TransientError"],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2.0
+        }
+      ]
+    },
+    "CheckAmount": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.amount",
+          "NumericGreaterThan": 1000,
+          "Next": "HighValueApproval"
+        }
+      ],
+      "Default": "ProcessOrder"
+    },
+    "HighValueApproval": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123456789:function:approve",
+      "Next": "ProcessOrder"
+    },
+    "ProcessOrder": {
+      "Type": "Task",
+      "Resource": "arn:aws:lambda:us-east-1:123456789:function:process",
+      "End": true
+    }
+  }
+}

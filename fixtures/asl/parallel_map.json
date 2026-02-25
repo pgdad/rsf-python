@@ -1,0 +1,50 @@
+{
+  "Comment": "Workflow with Parallel and Map states",
+  "StartAt": "RunBoth",
+  "States": {
+    "RunBoth": {
+      "Type": "Parallel",
+      "Branches": [
+        {
+          "StartAt": "BranchA",
+          "States": {
+            "BranchA": {
+              "Type": "Task",
+              "Resource": "arn:aws:lambda:us-east-1:123:function:a",
+              "End": true
+            }
+          }
+        },
+        {
+          "StartAt": "BranchB",
+          "States": {
+            "BranchB": {
+              "Type": "Task",
+              "Resource": "arn:aws:lambda:us-east-1:123:function:b",
+              "End": true
+            }
+          }
+        }
+      ],
+      "Next": "ProcessItems"
+    },
+    "ProcessItems": {
+      "Type": "Map",
+      "ItemsPath": "$.items",
+      "Iterator": {
+        "StartAt": "MapTask",
+        "States": {
+          "MapTask": {
+            "Type": "Task",
+            "Resource": "arn:aws:lambda:us-east-1:123:function:map",
+            "End": true
+          }
+        }
+      },
+      "Next": "Done"
+    },
+    "Done": {
+      "Type": "Succeed"
+    }
+  }
+}
