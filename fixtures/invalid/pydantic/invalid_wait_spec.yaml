@@ -1,0 +1,9 @@
+# Wait state with no wait specification (missing Seconds, Timestamp, etc.)
+rsf_version: "1.0"
+StartAt: WaitStep
+States:
+  WaitStep:
+    Type: Wait
+    Next: Done
+  Done:
+    Type: Succeed

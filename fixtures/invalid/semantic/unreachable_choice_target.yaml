@@ -1,0 +1,13 @@
+# Choice Default references a non-existent state
+rsf_version: "1.0"
+StartAt: Router
+States:
+  Router:
+    Type: Choice
+    Choices:
+      - Variable: "$.status"
+        StringEquals: "ok"
+        Next: Done
+    Default: GhostState
+  Done:
+    Type: Succeed

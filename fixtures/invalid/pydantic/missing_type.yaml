@@ -1,0 +1,8 @@
+# State without a Type field — discriminator cannot resolve
+rsf_version: "1.0"
+StartAt: A
+States:
+  A:
+    Next: B
+  B:
+    Type: Succeed

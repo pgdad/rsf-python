@@ -1,0 +1,10 @@
+# Task state with both Next and End: true — violates Next XOR End rule
+rsf_version: "1.0"
+StartAt: A
+States:
+  A:
+    Type: Task
+    Next: B
+    End: true
+  B:
+    Type: Succeed

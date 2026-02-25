@@ -1,0 +1,10 @@
+# All states loop back — no Succeed, Fail, or End: true anywhere
+rsf_version: "1.0"
+StartAt: A
+States:
+  A:
+    Type: Task
+    Next: B
+  B:
+    Type: Task
+    Next: A

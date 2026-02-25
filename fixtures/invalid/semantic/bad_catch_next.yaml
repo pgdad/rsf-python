@@ -1,0 +1,11 @@
+# Catch block references a non-existent recovery state
+rsf_version: "1.0"
+StartAt: DoWork
+States:
+  DoWork:
+    Type: Task
+    End: true
+    Catch:
+      - ErrorEquals:
+          - States.ALL
+        Next: NonExistentHandler
