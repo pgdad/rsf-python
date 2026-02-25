@@ -1,8 +1,9 @@
 /**
- * RSF Graph Editor - Main Application.
+ * RSF Application - Main entry point.
  *
- * Two-panel layout: YAML editor (left) + graph canvas (right)
- * with palette sidebar and inspector panel.
+ * Hash-based routing:
+ * - #/editor  → Graph Editor (default)
+ * - #/inspector → Execution Inspector
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
@@ -18,10 +19,33 @@ import { GraphCanvas } from './components/GraphCanvas';
 import { Palette } from './components/Palette';
 import { Inspector } from './components/Inspector';
 import { ValidationOverlay } from './components/ValidationOverlay';
+import { InspectorApp } from './inspector/InspectorApp';
 
 import type { WSResponse, ParsedResponse } from './types';
 
-function AppInner() {
+type AppRoute = 'editor' | 'inspector';
+
+function useHashRoute(): AppRoute {
+  const [route, setRoute] = useState<AppRoute>(() => {
+    const hash = window.location.hash;
+    if (hash === '#/inspector') return 'inspector';
+    return 'editor';
+  });
+
+  useEffect(() => {
+    const onHashChange = () => {
+      const hash = window.location.hash;
+      if (hash === '#/inspector') setRoute('inspector');
+      else setRoute('editor');
+    };
+    window.addEventListener('hashchange', onHashChange);
+    return () => window.removeEventListener('hashchange', onHashChange);
+  }, []);
+
+  return route;
+}
+
+function EditorApp() {
   const [schema, setSchema] = useState<Record<string, unknown> | undefined>();
   const [connected, setConnected] = useState(false);
 
@@ -30,7 +54,6 @@ function AppInner() {
 
   const handleParsedRef = useRef<((r: ParsedResponse) => void) | null>(null);
 
-  // WebSocket message handler
   const handleMessage = useCallback(
     (response: WSResponse) => {
       switch (response.type) {
@@ -64,23 +87,24 @@ function AppInner() {
     onClose: () => setConnected(false),
   });
 
-  // YAML -> Graph sync
   const { handleParsedResponse } = useYamlToGraphSync({ send });
 
   useEffect(() => {
     handleParsedRef.current = handleParsedResponse;
   }, [handleParsedResponse]);
 
-  // Graph -> YAML sync
   const { syncGraphToYaml } = useGraphToYamlSync({ send });
 
   return (
     <div className="app">
       <header className="app-header">
         <h1>RSF Graph Editor</h1>
-        <span className={`connection-status ${connected ? 'connected' : ''}`}>
-          {connected ? 'Connected' : 'Disconnected'}
-        </span>
+        <div className="header-right">
+          <a href="#/inspector" className="header-link">Inspector</a>
+          <span className={`connection-status ${connected ? 'connected' : ''}`}>
+            {connected ? 'Connected' : 'Disconnected'}
+          </span>
+        </div>
       </header>
       <div className="app-body">
         <Palette />
@@ -94,9 +118,19 @@ function AppInner() {
 }
 
 export default function App() {
+  const route = useHashRoute();
+
+  if (route === 'inspector') {
+    return (
+      <ReactFlowProvider>
+        <InspectorApp />
+      </ReactFlowProvider>
+    );
+  }
+
   return (
     <ReactFlowProvider>
-      <AppInner />
+      <EditorApp />
     </ReactFlowProvider>
   );
 }

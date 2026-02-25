@@ -503,3 +503,588 @@ body {
 .react-flow__handle:hover {
   background: var(--accent) !important;
 }
+
+/* ===== Header ===== */
+
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+  padding: 3px 8px;
+  border-radius: 3px;
+  border: 1px solid var(--accent);
+  transition: background 0.15s;
+}
+
+.header-link:hover {
+  background: rgba(74, 144, 217, 0.15);
+}
+
+/* ===== Inspector Layout ===== */
+
+.inspector-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+.inspector-left {
+  width: 280px;
+  min-width: 220px;
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.inspector-center {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.inspector-right {
+  width: 320px;
+  min-width: 260px;
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ===== Execution List ===== */
+
+.execution-list {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+}
+
+.execution-list-controls {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.execution-filter {
+  flex: 1;
+  padding: 4px 6px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  color: var(--text-primary);
+  font-size: 11px;
+}
+
+.execution-search {
+  flex: 1;
+  padding: 4px 6px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  color: var(--text-primary);
+  font-size: 11px;
+}
+
+.execution-search::placeholder {
+  color: var(--text-secondary);
+}
+
+.execution-refresh {
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  color: var(--text-primary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.execution-refresh:hover {
+  background: var(--bg-secondary);
+}
+
+.execution-list-items {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.execution-list-empty {
+  padding: 16px 12px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-style: italic;
+  text-align: center;
+}
+
+.execution-list-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border-color);
+  transition: background 0.15s;
+}
+
+.execution-list-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.execution-list-item.selected {
+  background: rgba(74, 144, 217, 0.15);
+  border-left: 3px solid var(--accent);
+}
+
+.execution-status-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+  width: 20px;
+  text-align: center;
+}
+
+.execution-item-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.execution-item-name {
+  font-size: 12px;
+  color: var(--text-bright);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.execution-item-meta {
+  display: flex;
+  gap: 8px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.execution-item-status {
+  font-weight: 600;
+  font-size: 9px;
+  text-transform: uppercase;
+}
+
+/* ===== Execution Header ===== */
+
+.execution-header {
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.execution-header-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.execution-header-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.execution-header-status {
+  padding: 2px 8px;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  border: 1px solid;
+}
+
+.execution-header-meta {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.execution-header-id {
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 10px;
+}
+
+/* ===== Inspector Graph ===== */
+
+.inspector-graph {
+  flex: 1;
+  background: var(--bg-tertiary);
+}
+
+.inspector-graph-empty {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-tertiary);
+}
+
+.inspector-graph-placeholder {
+  color: var(--text-secondary);
+  font-size: 14px;
+  font-style: italic;
+}
+
+/* Inspector node overlay */
+.inspector-node .node-overlay-info {
+  margin-top: 4px;
+}
+
+.node-overlay-status {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.node-overlay-timing {
+  font-size: 9px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+.node-overlay-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 3px;
+}
+
+.badge-io {
+  background: #4a90d922;
+  color: #4a90d9;
+  border: 1px solid #4a90d944;
+}
+
+/* Running pulse animation */
+.running-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(52, 152, 219, 0.4); }
+  50% { box-shadow: 0 0 0 6px rgba(52, 152, 219, 0); }
+}
+
+/* ===== Timeline Scrubber ===== */
+
+.timeline-scrubber {
+  padding: 8px 12px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.scrubber-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scrubber-label {
+  font-size: 10px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  min-width: 80px;
+}
+
+.scrubber-slider {
+  flex: 1;
+  height: 4px;
+  -webkit-appearance: none;
+  appearance: none;
+  background: var(--border-color);
+  border-radius: 2px;
+  outline: none;
+  cursor: pointer;
+}
+
+.scrubber-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+}
+
+.scrubber-slider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  cursor: pointer;
+  border: none;
+}
+
+.scrubber-timestamp {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-family: 'Fira Code', 'Consolas', monospace;
+  white-space: nowrap;
+  min-width: 70px;
+  text-align: right;
+}
+
+.scrubber-live-btn {
+  padding: 2px 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+  letter-spacing: 0.5px;
+}
+
+.scrubber-live-btn.active {
+  background: #e74c3c22;
+  color: #e74c3c;
+  border-color: #e74c3c44;
+}
+
+.scrubber-live-btn:hover {
+  background: var(--bg-secondary);
+}
+
+/* ===== Event Timeline ===== */
+
+.event-timeline {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.timeline-empty {
+  padding: 16px 12px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-style: italic;
+  text-align: center;
+}
+
+.timeline-events {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+}
+
+.timeline-event {
+  display: flex;
+  gap: 8px;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.timeline-event:hover {
+  background: var(--bg-tertiary);
+}
+
+.timeline-event.active {
+  background: rgba(74, 144, 217, 0.1);
+}
+
+.timeline-track {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 12px;
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.timeline-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.timeline-line {
+  width: 2px;
+  flex: 1;
+  background: var(--border-color);
+  margin-top: 2px;
+  min-height: 16px;
+}
+
+.timeline-event-content {
+  flex: 1;
+  min-width: 0;
+}
+
+.timeline-event-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 4px;
+}
+
+.timeline-event-name {
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.timeline-event-time {
+  font-size: 9px;
+  color: var(--text-secondary);
+  font-family: 'Fira Code', 'Consolas', monospace;
+  white-space: nowrap;
+}
+
+.timeline-event-type {
+  font-size: 9px;
+  color: var(--text-secondary);
+  margin-top: 1px;
+}
+
+/* ===== State Detail Panel ===== */
+
+.state-detail-panel {
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--border-color);
+  max-height: 50%;
+  overflow: hidden;
+}
+
+.state-detail-empty {
+  padding: 16px 12px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-style: italic;
+  text-align: center;
+}
+
+.state-detail-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.state-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.state-detail-label {
+  font-size: 10px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+}
+
+.state-detail-value {
+  font-size: 12px;
+  color: var(--text-primary);
+}
+
+.state-detail-json {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 6px 8px;
+  font-size: 10px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  overflow: auto;
+  max-height: 150px;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--text-primary);
+}
+
+.state-detail-error {
+  color: var(--error);
+  border-color: #e74c3c44;
+}
+
+/* ===== JSON Diff ===== */
+
+.json-diff {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 4px 0;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 10px;
+  overflow: auto;
+  max-height: 200px;
+}
+
+.json-diff-empty {
+  padding: 8px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-style: italic;
+}
+
+.json-diff-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.diff-prefix {
+  font-weight: 700;
+  width: 10px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.diff-path {
+  color: var(--text-primary);
+  flex-shrink: 0;
+}
+
+.diff-value {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.diff-arrow {
+  color: var(--text-secondary);
+  flex-shrink: 0;
+  padding: 0 2px;
+}
