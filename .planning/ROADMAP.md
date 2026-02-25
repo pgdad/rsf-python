@@ -64,9 +64,9 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 02-01: Handler registry (@state, @startup decorators, auto-discovery, test isolation)
-- [ ] 02-02: BFS traversal and SDK primitive mapping for all 8 state types
-- [ ] 02-03: Jinja2 orchestrator template, handler stub template, Generation Gap, topyrepr filter
+- [x] 02-01: Handler registry (@state, @startup decorators, auto-discovery, test isolation)
+- [x] 02-02: BFS traversal and SDK primitive mapping for all 8 state types
+- [x] 02-03: Jinja2 orchestrator template, handler stub template, Generation Gap, topyrepr filter
 
 ### Phase 3: Terraform Generation
 **Goal**: Users can generate a complete, deployable Terraform module for their Lambda Durable Function, with IAM permissions derived automatically and generated files never overwriting user customizations
@@ -235,7 +235,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. DSL Core | 5/5 | Complete | 2026-02-25 |
-| 2. Code Generation | 0/3 | Not started | - |
+| 2. Code Generation | 3/3 | Complete | 2026-02-25 |
 | 3. Terraform Generation | 0/2 | Not started | - |
 | 4. ASL Importer | 0/2 | Not started | - |
 | 5. CLI Toolchain | 0/4 | Not started | - |
