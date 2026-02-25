@@ -18,7 +18,7 @@ discoverable.
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: DSL Core** - Pydantic v2 models for all 8 state types, I/O pipeline, intrinsic functions, context object, variables, and JSON Schema
+- [x] **Phase 1: DSL Core** - Pydantic v2 models for all 8 state types, I/O pipeline, intrinsic functions, context object, variables, and JSON Schema
 - [ ] **Phase 2: Code Generation** - Handler registry, BFS orchestrator generator, Jinja2 templates, Generation Gap pattern
 - [ ] **Phase 3: Terraform Generation** - HCL file generation with custom delimiters, IAM derivation, Generation Gap
 - [ ] **Phase 4: ASL Importer** - Parse, convert, and emit YAML from AWS Step Functions ASL JSON
@@ -45,11 +45,11 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: TBD
 
 Plans:
-- [ ] 01-01: DSL state models (all 8 state types, Pydantic v2, discriminated union)
-- [ ] 01-02: Semantic validator (BFS cross-state validation)
-- [ ] 01-03: I/O processing pipeline (5 stages, JSONPath evaluator, payload templates)
-- [ ] 01-04: Intrinsic function registry and recursive descent parser
-- [ ] 01-05: Context object model, variable store, and JSON Schema generation
+- [x] 01-01: DSL state models (all 8 state types, Pydantic v2, discriminated union)
+- [x] 01-02: Semantic validator (BFS cross-state validation)
+- [x] 01-03: I/O processing pipeline (5 stages, JSONPath evaluator, payload templates)
+- [x] 01-04: Intrinsic function registry and recursive descent parser
+- [x] 01-05: Context object model, variable store, and JSON Schema generation
 
 ### Phase 2: Code Generation
 **Goal**: Users can generate a deployment-ready Lambda orchestrator Python file from any valid RSF workflow definition, with handler stubs created on first run and never overwritten on subsequent runs
@@ -234,7 +234,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. DSL Core | 0/5 | Not started | - |
+| 1. DSL Core | 5/5 | Complete | 2026-02-25 |
 | 2. Code Generation | 0/3 | Not started | - |
 | 3. Terraform Generation | 0/2 | Not started | - |
 | 4. ASL Importer | 0/2 | Not started | - |
