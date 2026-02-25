@@ -23,7 +23,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 3: Terraform Generation** - HCL file generation with custom delimiters, IAM derivation, Generation Gap
 - [ ] **Phase 4: ASL Importer** - Parse, convert, and emit YAML from AWS Step Functions ASL JSON
 - [ ] **Phase 5: CLI Toolchain** - Typer-based CLI with init, generate, validate, deploy, import, ui, inspect subcommands
-- [ ] **Phase 6: Graph Editor Backend** - FastAPI server with REST, WebSocket, static file serving, and JSON Schema endpoint
+- [x] **Phase 6: Graph Editor Backend** - FastAPI server with REST, WebSocket, static file serving, and JSON Schema endpoint
 - [ ] **Phase 7: Graph Editor UI** - React graph editor with YAML/graph bidirectional sync, ELK layout, Monaco editor
 - [ ] **Phase 8: Inspector Backend** - FastAPI SSE server with Lambda polling, rate limiter, execution history endpoints
 - [ ] **Phase 9: Inspector UI** - React inspector with time machine, structural diffs, live SSE updates, three-panel layout
@@ -130,8 +130,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 06-01: FastAPI server setup, static file serving, GET /api/schema endpoint
-- [ ] 06-02: WebSocket handler (parse, validate, load_file, save_file, get_schema messages and responses)
+- [x] 06-01: FastAPI server setup, static file serving, GET /api/schema endpoint
+- [x] 06-02: WebSocket handler (parse, validate, load_file, save_file, get_schema messages and responses)
 
 ### Phase 7: Graph Editor UI
 **Goal**: Users can visually view, navigate, and edit RSF workflows in a browser with changes reflected in YAML and vice versa in real time
@@ -239,7 +239,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 3. Terraform Generation | 2/2 | Complete | 2026-02-25 |
 | 4. ASL Importer | 2/2 | Complete | 2026-02-25 |
 | 5. CLI Toolchain | 0/4 | Not started | - |
-| 6. Graph Editor Backend | 0/2 | Not started | - |
+| 6. Graph Editor Backend | 2/2 | Complete | 2026-02-25 |
 | 7. Graph Editor UI | 0/5 | Not started | - |
 | 8. Inspector Backend | 0/2 | Not started | - |
 | 9. Inspector UI | 0/5 | Not started | - |
