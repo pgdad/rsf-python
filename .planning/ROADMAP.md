@@ -24,7 +24,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 4: ASL Importer** - Parse, convert, and emit YAML from AWS Step Functions ASL JSON
 - [ ] **Phase 5: CLI Toolchain** - Typer-based CLI with init, generate, validate, deploy, import, ui, inspect subcommands
 - [x] **Phase 6: Graph Editor Backend** - FastAPI server with REST, WebSocket, static file serving, and JSON Schema endpoint
-- [ ] **Phase 7: Graph Editor UI** - React graph editor with YAML/graph bidirectional sync, ELK layout, Monaco editor
+- [x] **Phase 7: Graph Editor UI** - React graph editor with YAML/graph bidirectional sync, ELK layout, Monaco editor
 - [ ] **Phase 8: Inspector Backend** - FastAPI SSE server with Lambda polling, rate limiter, execution history endpoints
 - [ ] **Phase 9: Inspector UI** - React inspector with time machine, structural diffs, live SSE updates, three-panel layout
 - [ ] **Phase 10: Testing** - Mock SDK, unit tests, integration tests, golden fixtures, React UI tests
@@ -146,11 +146,11 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 07-01: React project setup, Zustand flow store, WebSocket connection management
-- [ ] 07-02: 8 state-type node components, TransitionEdge, ELK.js auto-layout
-- [ ] 07-03: YAML → Graph sync (debounce, astToFlowElements, syncSource pattern)
-- [ ] 07-04: Graph → YAML sync (mergeGraphIntoYaml, AST-merge strategy, fallback)
-- [ ] 07-05: MonacoEditor with monaco-yaml, GraphCanvas (minimap, controls), Palette, Inspector panel, ValidationOverlay
+- [x] 07-01: React project setup, Zustand flow store, WebSocket connection management
+- [x] 07-02: 8 state-type node components, TransitionEdge, ELK.js auto-layout
+- [x] 07-03: YAML → Graph sync (debounce, astToFlowElements, syncSource pattern)
+- [x] 07-04: Graph → YAML sync (mergeGraphIntoYaml, AST-merge strategy, fallback)
+- [x] 07-05: MonacoEditor with monaco-yaml, GraphCanvas (minimap, controls), Palette, Inspector panel, ValidationOverlay
 
 ### Phase 8: Inspector Backend
 **Goal**: Users can retrieve live and historical Lambda Durable Function execution data via REST and SSE from a locally running server
@@ -240,7 +240,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 4. ASL Importer | 2/2 | Complete | 2026-02-25 |
 | 5. CLI Toolchain | 0/4 | Not started | - |
 | 6. Graph Editor Backend | 2/2 | Complete | 2026-02-25 |
-| 7. Graph Editor UI | 0/5 | Not started | - |
+| 7. Graph Editor UI | 5/5 | Complete | 2026-02-25 |
 | 8. Inspector Backend | 0/2 | Not started | - |
 | 9. Inspector UI | 0/5 | Not started | - |
 | 10. Testing | 0/9 | Not started | - |
