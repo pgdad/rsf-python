@@ -1,0 +1,505 @@
+/* RSF Graph Editor Styles */
+
+:root {
+  --bg-primary: #1e1e1e;
+  --bg-secondary: #252526;
+  --bg-tertiary: #2d2d2d;
+  --border-color: #3e3e3e;
+  --text-primary: #cccccc;
+  --text-secondary: #999999;
+  --text-bright: #ffffff;
+  --accent: #4a90d9;
+  --error: #e74c3c;
+  --warning: #e6a817;
+  --success: #27ae60;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  overflow: hidden;
+  height: 100vh;
+}
+
+#root {
+  height: 100vh;
+}
+
+/* App layout */
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 16px;
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  flex-shrink: 0;
+}
+
+.app-header h1 {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-bright);
+}
+
+.connection-status {
+  font-size: 12px;
+  color: var(--error);
+}
+
+.connection-status.connected {
+  color: var(--success);
+}
+
+.app-body {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Pane headers */
+.pane-header {
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-secondary);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Editor pane */
+.editor-pane {
+  width: 400px;
+  min-width: 300px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid var(--border-color);
+}
+
+/* Graph pane */
+.graph-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.graph-container {
+  flex: 1;
+  background: var(--bg-tertiary);
+}
+
+/* Palette */
+.palette {
+  width: 120px;
+  min-width: 120px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+}
+
+.palette-items {
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 4px;
+}
+
+.palette-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 4px;
+  border-left: 3px solid;
+  cursor: grab;
+  transition: background-color 0.15s;
+  font-size: 12px;
+}
+
+.palette-item:hover {
+  background: var(--bg-tertiary);
+}
+
+.palette-item:active {
+  cursor: grabbing;
+}
+
+.palette-icon {
+  width: 20px;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 3px;
+  font-size: 10px;
+  font-weight: 700;
+  color: white;
+  flex-shrink: 0;
+}
+
+.palette-label {
+  color: var(--text-primary);
+}
+
+/* Inspector */
+.inspector {
+  width: 250px;
+  min-width: 200px;
+  background: var(--bg-secondary);
+  border-left: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+}
+
+.inspector-empty {
+  padding: 16px 12px;
+  color: var(--text-secondary);
+  font-size: 12px;
+  font-style: italic;
+}
+
+.inspector-content {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.inspector-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.inspector-field label {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.inspector-field input {
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  color: var(--text-primary);
+  font-size: 12px;
+}
+
+.inspector-badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  background: var(--accent);
+  color: white;
+  border-radius: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  width: fit-content;
+}
+
+.inspector-separator {
+  height: 1px;
+  background: var(--border-color);
+  margin: 4px 0;
+}
+
+.inspector-section-title {
+  font-size: 11px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
+}
+
+.inspector-json {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  padding: 8px;
+  font-size: 11px;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  overflow: auto;
+  max-height: 300px;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+/* Flow nodes */
+.flow-node {
+  background: var(--bg-secondary);
+  border: 2px solid;
+  border-radius: 6px;
+  min-width: 160px;
+  font-size: 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  position: relative;
+}
+
+.flow-node.selected {
+  box-shadow: 0 0 0 2px var(--accent), 0 2px 8px rgba(74, 144, 217, 0.3);
+}
+
+.flow-node.has-errors {
+  box-shadow: 0 0 0 2px var(--error), 0 2px 8px rgba(231, 76, 60, 0.3);
+}
+
+.node-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 4px 4px 0 0;
+  color: white;
+  font-weight: 600;
+  font-size: 10px;
+}
+
+.node-icon {
+  font-weight: 800;
+  font-size: 11px;
+}
+
+.node-type {
+  flex: 1;
+}
+
+.node-start-badge {
+  background: rgba(255, 255, 255, 0.25);
+  padding: 1px 4px;
+  border-radius: 2px;
+  font-size: 8px;
+  letter-spacing: 0.5px;
+}
+
+.node-body {
+  padding: 6px 8px;
+}
+
+.node-label {
+  font-weight: 500;
+  color: var(--text-bright);
+  margin-bottom: 4px;
+}
+
+.node-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+.badge {
+  padding: 1px 5px;
+  border-radius: 3px;
+  font-size: 9px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.badge-retry {
+  background: #3498db22;
+  color: #3498db;
+  border: 1px solid #3498db44;
+}
+
+.badge-catch {
+  background: #e74c3c22;
+  color: #e74c3c;
+  border: 1px solid #e74c3c44;
+}
+
+.badge-timeout {
+  background: #9b59b622;
+  color: #9b59b6;
+  border: 1px solid #9b59b644;
+}
+
+.badge-result {
+  background: #7b68ee22;
+  color: #7b68ee;
+  border: 1px solid #7b68ee44;
+}
+
+.badge-rules {
+  background: #e6a81722;
+  color: #e6a817;
+  border: 1px solid #e6a81744;
+}
+
+.badge-default {
+  background: #95a5a622;
+  color: #95a5a6;
+  border: 1px solid #95a5a644;
+}
+
+.badge-wait {
+  background: #9b59b622;
+  color: #9b59b6;
+  border: 1px solid #9b59b644;
+}
+
+.badge-branches {
+  background: #3498db22;
+  color: #3498db;
+  border: 1px solid #3498db44;
+}
+
+.badge-concurrency {
+  background: #1abc9c22;
+  color: #1abc9c;
+  border: 1px solid #1abc9c44;
+}
+
+.node-error-badge {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--error);
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.node-detail {
+  margin-top: 2px;
+}
+
+.detail-line {
+  font-size: 10px;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 140px;
+}
+
+.terminal-node .node-body {
+  padding-bottom: 8px;
+}
+
+/* Validation overlay */
+.validation-overlay {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 200px;
+  background: var(--bg-secondary);
+  border-top: 1px solid var(--border-color);
+  overflow-y: auto;
+  z-index: 100;
+}
+
+.validation-header {
+  display: flex;
+  gap: 12px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.error-count {
+  color: var(--error);
+}
+
+.warning-count {
+  color: var(--warning);
+}
+
+.validation-list {
+  padding: 4px 0;
+}
+
+.validation-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
+.validation-item.error {
+  color: var(--error);
+}
+
+.validation-item.warning {
+  color: var(--warning);
+}
+
+.validation-icon {
+  flex-shrink: 0;
+  font-size: 10px;
+}
+
+.validation-message {
+  flex: 1;
+}
+
+.validation-path {
+  color: var(--text-secondary);
+  font-size: 10px;
+  font-family: monospace;
+}
+
+/* React Flow overrides */
+.react-flow__minimap {
+  background: var(--bg-tertiary) !important;
+  border: 1px solid var(--border-color) !important;
+  border-radius: 4px !important;
+}
+
+.react-flow__controls {
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.react-flow__controls-button {
+  background: var(--bg-secondary) !important;
+  border-bottom: 1px solid var(--border-color) !important;
+  fill: var(--text-primary) !important;
+}
+
+.react-flow__controls-button:hover {
+  background: var(--bg-tertiary) !important;
+}
+
+.react-flow__background {
+  background: var(--bg-tertiary) !important;
+}
+
+/* Handle styles */
+.react-flow__handle {
+  width: 8px !important;
+  height: 8px !important;
+  background: var(--text-secondary) !important;
+  border: 2px solid var(--bg-secondary) !important;
+}
+
+.react-flow__handle:hover {
+  background: var(--accent) !important;
+}
