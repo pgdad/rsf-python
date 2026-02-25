@@ -97,8 +97,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 04-01: ASL parser, format converter (Resource rejection, field rename, version inject, Fail state strip)
-- [ ] 04-02: Recursive branch conversion, YAML emitter, handler stub generator
+- [x] 04-01: ASL parser, format converter (Resource rejection, field rename, version inject, Fail state strip)
+- [x] 04-02: Recursive branch conversion, YAML emitter, handler stub generator
 
 ### Phase 5: CLI Toolchain
 **Goal**: Users can perform the complete RSF workflow (init → generate → validate → deploy → import → ui → inspect) from the terminal with a single entry point
@@ -237,7 +237,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 1. DSL Core | 5/5 | Complete | 2026-02-25 |
 | 2. Code Generation | 3/3 | Complete | 2026-02-25 |
 | 3. Terraform Generation | 2/2 | Complete | 2026-02-25 |
-| 4. ASL Importer | 0/2 | Not started | - |
+| 4. ASL Importer | 2/2 | Complete | 2026-02-25 |
 | 5. CLI Toolchain | 0/4 | Not started | - |
 | 6. Graph Editor Backend | 0/2 | Not started | - |
 | 7. Graph Editor UI | 0/5 | Not started | - |
