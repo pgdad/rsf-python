@@ -25,7 +25,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 5: CLI Toolchain** - Typer-based CLI with init, generate, validate, deploy, import, ui, inspect subcommands
 - [x] **Phase 6: Graph Editor Backend** - FastAPI server with REST, WebSocket, static file serving, and JSON Schema endpoint
 - [x] **Phase 7: Graph Editor UI** - React graph editor with YAML/graph bidirectional sync, ELK layout, Monaco editor
-- [ ] **Phase 8: Inspector Backend** - FastAPI SSE server with Lambda polling, rate limiter, execution history endpoints
+- [x] **Phase 8: Inspector Backend** - FastAPI SSE server with Lambda polling, rate limiter, execution history endpoints
 - [ ] **Phase 9: Inspector UI** - React inspector with time machine, structural diffs, live SSE updates, three-panel layout
 - [ ] **Phase 10: Testing** - Mock SDK, unit tests, integration tests, golden fixtures, React UI tests
 - [ ] **Phase 11: Documentation** - Tutorial, migration guide, DSL reference, README, MkDocs site
@@ -164,8 +164,8 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 08-01: FastAPI inspector server, async boto3 client, token bucket rate limiter
-- [ ] 08-02: REST endpoints (executions list, execution detail, history), SSE stream with lifecycle management
+- [x] 08-01: FastAPI inspector server, async boto3 client, token bucket rate limiter
+- [x] 08-02: REST endpoints (executions list, execution detail, history), SSE stream with lifecycle management
 
 ### Phase 9: Inspector UI
 **Goal**: Users can inspect, scrub through, and compare state transitions in any Lambda Durable Function execution using a three-panel web interface
@@ -241,7 +241,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 5. CLI Toolchain | 0/4 | Not started | - |
 | 6. Graph Editor Backend | 2/2 | Complete | 2026-02-25 |
 | 7. Graph Editor UI | 5/5 | Complete | 2026-02-25 |
-| 8. Inspector Backend | 0/2 | Not started | - |
+| 8. Inspector Backend | 2/2 | Complete | 2026-02-25 |
 | 9. Inspector UI | 0/5 | Not started | - |
 | 10. Testing | 0/9 | Not started | - |
 | 11. Documentation | 0/4 | Not started | - |
