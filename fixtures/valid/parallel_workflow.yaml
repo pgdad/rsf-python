@@ -1,0 +1,32 @@
+rsf_version: "1.0"
+Comment: "Parallel execution of branches"
+StartAt: ProcessBoth
+States:
+  ProcessBoth:
+    Type: Parallel
+    Branches:
+      - StartAt: ValidateAddress
+        States:
+          ValidateAddress:
+            Type: Task
+            End: true
+      - StartAt: CheckInventory
+        States:
+          CheckInventory:
+            Type: Task
+            End: true
+    ResultPath: "$.parallel_results"
+    Retry:
+      - ErrorEquals: ["States.ALL"]
+        MaxAttempts: 2
+    Catch:
+      - ErrorEquals: ["States.ALL"]
+        Next: HandleError
+    Next: MergeResults
+  MergeResults:
+    Type: Pass
+    End: true
+  HandleError:
+    Type: Fail
+    Error: "ParallelError"
+    Cause: "One or more branches failed"

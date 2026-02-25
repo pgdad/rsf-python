@@ -1,0 +1,32 @@
+rsf_version: "1.0"
+Comment: "Choice state with multiple rules"
+StartAt: RoutePayment
+States:
+  RoutePayment:
+    Type: Choice
+    Choices:
+      - Variable: "$.amount"
+        NumericGreaterThan: 1000
+        Next: HighValueApproval
+      - Variable: "$.type"
+        StringEquals: "refund"
+        Next: ProcessRefund
+      - And:
+          - Variable: "$.verified"
+            BooleanEquals: true
+          - Variable: "$.amount"
+            NumericLessThanEquals: 100
+        Next: AutoApprove
+    Default: ManualReview
+  HighValueApproval:
+    Type: Task
+    End: true
+  ProcessRefund:
+    Type: Task
+    End: true
+  AutoApprove:
+    Type: Pass
+    End: true
+  ManualReview:
+    Type: Task
+    End: true

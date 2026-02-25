@@ -1,0 +1,9 @@
+rsf_version: "1.0"
+Comment: "Simple two-state workflow"
+StartAt: ProcessOrder
+States:
+  ProcessOrder:
+    Type: Task
+    Next: Done
+  Done:
+    Type: Succeed

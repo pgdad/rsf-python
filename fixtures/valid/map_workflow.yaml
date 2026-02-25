@@ -1,0 +1,33 @@
+rsf_version: "1.0"
+Comment: "Map state iteration"
+StartAt: ProcessItems
+States:
+  ProcessItems:
+    Type: Map
+    ItemsPath: "$.orders"
+    ItemProcessor:
+      ProcessorConfig:
+        Mode: INLINE
+      StartAt: ProcessOneOrder
+      States:
+        ProcessOneOrder:
+          Type: Task
+          End: true
+    MaxConcurrency: 10
+    ItemSelector:
+      orderId.$: "$$.Map.Item.Value.id"
+      index.$: "$$.Map.Item.Index"
+    ResultPath: "$.processed"
+    Retry:
+      - ErrorEquals: ["States.ALL"]
+        MaxAttempts: 3
+    Catch:
+      - ErrorEquals: ["States.ALL"]
+        Next: HandleMapError
+    Next: AggregateResults
+  AggregateResults:
+    Type: Pass
+    End: true
+  HandleMapError:
+    Type: Fail
+    Error: "MapError"

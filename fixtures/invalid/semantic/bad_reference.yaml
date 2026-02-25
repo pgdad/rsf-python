@@ -1,0 +1,9 @@
+# Task.Next references a non-existent state
+rsf_version: "1.0"
+StartAt: A
+States:
+  A:
+    Type: Task
+    Next: NonExistent
+  B:
+    Type: Succeed

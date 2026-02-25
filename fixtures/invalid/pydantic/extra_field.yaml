@@ -1,0 +1,7 @@
+# Extra field that should be rejected
+rsf_version: "1.0"
+StartAt: A
+UnknownField: bad
+States:
+  A:
+    Type: Succeed

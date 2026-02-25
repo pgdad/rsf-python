@@ -1,0 +1,81 @@
+rsf_version: "1.0"
+Comment: "Workflow using all 8 state types"
+StartAt: InitTask
+States:
+  InitTask:
+    Type: Task
+    TimeoutSeconds: 300
+    HeartbeatSeconds: 60
+    Retry:
+      - ErrorEquals: ["TransientError"]
+        IntervalSeconds: 2
+        MaxAttempts: 3
+        BackoffRate: 2.0
+    Catch:
+      - ErrorEquals: ["States.ALL"]
+        Next: HandleError
+        ResultPath: "$.error"
+    Next: InjectData
+
+  InjectData:
+    Type: Pass
+    Result:
+      status: "initialized"
+    ResultPath: "$.init"
+    Next: WaitForApproval
+
+  WaitForApproval:
+    Type: Wait
+    Seconds: 60
+    Next: RouteDecision
+
+  RouteDecision:
+    Type: Choice
+    Choices:
+      - Variable: "$.approved"
+        BooleanEquals: true
+        Next: ProcessBoth
+      - Variable: "$.status"
+        StringEquals: "rejected"
+        Next: OrderFailed
+    Default: WaitForApproval
+
+  ProcessBoth:
+    Type: Parallel
+    Branches:
+      - StartAt: ProcessA
+        States:
+          ProcessA:
+            Type: Task
+            End: true
+      - StartAt: ProcessB
+        States:
+          ProcessB:
+            Type: Task
+            End: true
+    Next: ProcessItems
+
+  ProcessItems:
+    Type: Map
+    ItemsPath: "$.items"
+    ItemProcessor:
+      StartAt: ProcessOne
+      States:
+        ProcessOne:
+          Type: Task
+          End: true
+    MaxConcurrency: 5
+    Next: Done
+
+  Done:
+    Type: Succeed
+
+  OrderFailed:
+    Type: Fail
+    Error: "OrderRejected"
+    Cause: "The order was rejected"
+
+  HandleError:
+    Type: Fail
+    Error: "UnexpectedError"
+    Cause: "An unexpected error occurred"

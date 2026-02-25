@@ -1,0 +1,2293 @@
+{
+  "$defs": {
+    "BooleanAndRule": {
+      "additionalProperties": false,
+      "description": "Boolean AND combinator \u2014 all child rules must match.",
+      "properties": {
+        "And": {
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/DataTestRule"
+              },
+              {
+                "$ref": "#/$defs/BooleanAndRule"
+              },
+              {
+                "$ref": "#/$defs/BooleanOrRule"
+              },
+              {
+                "$ref": "#/$defs/BooleanNotRule"
+              },
+              {
+                "$ref": "#/$defs/ConditionRule"
+              }
+            ]
+          },
+          "title": "And",
+          "type": "array"
+        },
+        "Next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next"
+        }
+      },
+      "required": [
+        "And"
+      ],
+      "title": "BooleanAndRule",
+      "type": "object"
+    },
+    "BooleanNotRule": {
+      "additionalProperties": false,
+      "description": "Boolean NOT combinator \u2014 inverts child rule.",
+      "properties": {
+        "Not": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/DataTestRule"
+            },
+            {
+              "$ref": "#/$defs/BooleanAndRule"
+            },
+            {
+              "$ref": "#/$defs/BooleanOrRule"
+            },
+            {
+              "$ref": "#/$defs/BooleanNotRule"
+            },
+            {
+              "$ref": "#/$defs/ConditionRule"
+            }
+          ],
+          "title": "Not"
+        },
+        "Next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next"
+        }
+      },
+      "required": [
+        "Not"
+      ],
+      "title": "BooleanNotRule",
+      "type": "object"
+    },
+    "BooleanOrRule": {
+      "additionalProperties": false,
+      "description": "Boolean OR combinator \u2014 at least one child rule must match.",
+      "properties": {
+        "Or": {
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/DataTestRule"
+              },
+              {
+                "$ref": "#/$defs/BooleanAndRule"
+              },
+              {
+                "$ref": "#/$defs/BooleanOrRule"
+              },
+              {
+                "$ref": "#/$defs/BooleanNotRule"
+              },
+              {
+                "$ref": "#/$defs/ConditionRule"
+              }
+            ]
+          },
+          "title": "Or",
+          "type": "array"
+        },
+        "Next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next"
+        }
+      },
+      "required": [
+        "Or"
+      ],
+      "title": "BooleanOrRule",
+      "type": "object"
+    },
+    "BranchDefinition": {
+      "additionalProperties": false,
+      "description": "A sub-state machine used in Parallel branches and Map ItemProcessor.\n\nUses forward reference 'State' that gets resolved in dsl/__init__.py.",
+      "properties": {
+        "StartAt": {
+          "title": "Startat",
+          "type": "string"
+        },
+        "States": {
+          "additionalProperties": true,
+          "title": "States",
+          "type": "object"
+        },
+        "Comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "ProcessorConfig": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ProcessorConfig"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "QueryLanguage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QueryLanguage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "StartAt",
+        "States"
+      ],
+      "title": "BranchDefinition",
+      "type": "object"
+    },
+    "Catcher": {
+      "additionalProperties": false,
+      "description": "Error catcher that routes errors to a recovery state.",
+      "properties": {
+        "ErrorEquals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Errorequals",
+          "type": "array"
+        },
+        "Next": {
+          "title": "Next",
+          "type": "string"
+        },
+        "ResultPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resultpath"
+        },
+        "Comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        }
+      },
+      "required": [
+        "ErrorEquals",
+        "Next"
+      ],
+      "title": "Catcher",
+      "type": "object"
+    },
+    "ChoiceState": {
+      "additionalProperties": false,
+      "description": "Choice state \u2014 branches based on conditions.",
+      "properties": {
+        "Type": {
+          "const": "Choice",
+          "title": "Type",
+          "type": "string"
+        },
+        "Comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "Choices": {
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/DataTestRule"
+              },
+              {
+                "$ref": "#/$defs/BooleanAndRule"
+              },
+              {
+                "$ref": "#/$defs/BooleanOrRule"
+              },
+              {
+                "$ref": "#/$defs/BooleanNotRule"
+              },
+              {
+                "$ref": "#/$defs/ConditionRule"
+              }
+            ]
+          },
+          "title": "Choices",
+          "type": "array"
+        },
+        "Default": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Default"
+        },
+        "InputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputpath"
+        },
+        "OutputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outputpath"
+        },
+        "Assign": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assign"
+        },
+        "Output": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output"
+        },
+        "QueryLanguage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QueryLanguage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "Type",
+        "Choices"
+      ],
+      "title": "ChoiceState",
+      "type": "object"
+    },
+    "ConditionRule": {
+      "additionalProperties": false,
+      "description": "JSONata condition-based rule.",
+      "properties": {
+        "Condition": {
+          "title": "Condition",
+          "type": "string"
+        },
+        "Next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next"
+        }
+      },
+      "required": [
+        "Condition"
+      ],
+      "title": "ConditionRule",
+      "type": "object"
+    },
+    "DataTestRule": {
+      "additionalProperties": false,
+      "description": "A single comparison rule with a Variable and exactly one operator.",
+      "properties": {
+        "Variable": {
+          "title": "Variable",
+          "type": "string"
+        },
+        "Next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next"
+        },
+        "StringEquals": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stringequals"
+        },
+        "StringEqualsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stringequalspath"
+        },
+        "StringGreaterThan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stringgreaterthan"
+        },
+        "StringGreaterThanPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stringgreaterthanpath"
+        },
+        "StringGreaterThanEquals": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stringgreaterthanequals"
+        },
+        "StringGreaterThanEqualsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stringgreaterthanequalspath"
+        },
+        "StringLessThan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stringlessthan"
+        },
+        "StringLessThanPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stringlessthanpath"
+        },
+        "StringLessThanEquals": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stringlessthanequals"
+        },
+        "StringLessThanEqualsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stringlessthanequalspath"
+        },
+        "StringMatches": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stringmatches"
+        },
+        "StringMatchesPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Stringmatchespath"
+        },
+        "NumericEquals": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numericequals"
+        },
+        "NumericEqualsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numericequalspath"
+        },
+        "NumericGreaterThan": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numericgreaterthan"
+        },
+        "NumericGreaterThanPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numericgreaterthanpath"
+        },
+        "NumericGreaterThanEquals": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numericgreaterthanequals"
+        },
+        "NumericGreaterThanEqualsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numericgreaterthanequalspath"
+        },
+        "NumericLessThan": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numericlessthan"
+        },
+        "NumericLessThanPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numericlessthanpath"
+        },
+        "NumericLessThanEquals": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numericlessthanequals"
+        },
+        "NumericLessThanEqualsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Numericlessthanequalspath"
+        },
+        "BooleanEquals": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Booleanequals"
+        },
+        "BooleanEqualsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Booleanequalspath"
+        },
+        "TimestampEquals": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestampequals"
+        },
+        "TimestampEqualsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestampequalspath"
+        },
+        "TimestampGreaterThan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestampgreaterthan"
+        },
+        "TimestampGreaterThanPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestampgreaterthanpath"
+        },
+        "TimestampGreaterThanEquals": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestampgreaterthanequals"
+        },
+        "TimestampGreaterThanEqualsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestampgreaterthanequalspath"
+        },
+        "TimestampLessThan": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestamplessthan"
+        },
+        "TimestampLessThanPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestamplessthanpath"
+        },
+        "TimestampLessThanEquals": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestamplessthanequals"
+        },
+        "TimestampLessThanEqualsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestamplessthanequalspath"
+        },
+        "IsBoolean": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isboolean"
+        },
+        "IsNull": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isnull"
+        },
+        "IsNumeric": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isnumeric"
+        },
+        "IsPresent": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ispresent"
+        },
+        "IsString": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Isstring"
+        },
+        "IsTimestamp": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Istimestamp"
+        }
+      },
+      "required": [
+        "Variable"
+      ],
+      "title": "DataTestRule",
+      "type": "object"
+    },
+    "FailState": {
+      "additionalProperties": false,
+      "description": "Fail state \u2014 terminal failure.\n\nInherits from BaseModel directly (NOT _IOFields) because ASL spec says\nFail states do not process I/O.",
+      "properties": {
+        "Type": {
+          "const": "Fail",
+          "title": "Type",
+          "type": "string"
+        },
+        "Comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "Error": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Error"
+        },
+        "ErrorPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Errorpath"
+        },
+        "Cause": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cause"
+        },
+        "CausePath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Causepath"
+        },
+        "QueryLanguage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QueryLanguage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "Type"
+      ],
+      "title": "FailState",
+      "type": "object"
+    },
+    "JitterStrategy": {
+      "description": "Jitter strategies for retry backoff.",
+      "enum": [
+        "FULL",
+        "NONE"
+      ],
+      "title": "JitterStrategy",
+      "type": "string"
+    },
+    "MapState": {
+      "additionalProperties": false,
+      "description": "Map state \u2014 iterates over an array with a sub-state machine.",
+      "properties": {
+        "Assign": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assign"
+        },
+        "Output": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output"
+        },
+        "Next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next"
+        },
+        "End": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "InputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputpath"
+        },
+        "OutputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outputpath"
+        },
+        "Parameters": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parameters"
+        },
+        "ResultSelector": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resultselector"
+        },
+        "ResultPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resultpath"
+        },
+        "Type": {
+          "const": "Map",
+          "title": "Type",
+          "type": "string"
+        },
+        "Comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "ItemProcessor": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BranchDefinition"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "ItemsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Itemspath"
+        },
+        "MaxConcurrency": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maxconcurrency"
+        },
+        "ItemSelector": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Itemselector"
+        },
+        "Retry": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/RetryPolicy"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retry"
+        },
+        "Catch": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Catcher"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Catch"
+        },
+        "QueryLanguage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QueryLanguage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "Type"
+      ],
+      "title": "MapState",
+      "type": "object"
+    },
+    "ParallelState": {
+      "additionalProperties": false,
+      "description": "Parallel state \u2014 concurrent execution of branches.",
+      "properties": {
+        "Assign": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assign"
+        },
+        "Output": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output"
+        },
+        "Next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next"
+        },
+        "End": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "InputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputpath"
+        },
+        "OutputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outputpath"
+        },
+        "Parameters": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parameters"
+        },
+        "ResultSelector": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resultselector"
+        },
+        "ResultPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resultpath"
+        },
+        "Type": {
+          "const": "Parallel",
+          "title": "Type",
+          "type": "string"
+        },
+        "Comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "Branches": {
+          "items": {
+            "$ref": "#/$defs/BranchDefinition"
+          },
+          "title": "Branches",
+          "type": "array"
+        },
+        "Retry": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/RetryPolicy"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retry"
+        },
+        "Catch": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Catcher"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Catch"
+        },
+        "QueryLanguage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QueryLanguage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "Type",
+        "Branches"
+      ],
+      "title": "ParallelState",
+      "type": "object"
+    },
+    "PassState": {
+      "additionalProperties": false,
+      "description": "Pass state \u2014 passes input to output, optionally injecting a Result.",
+      "properties": {
+        "Assign": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assign"
+        },
+        "Output": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output"
+        },
+        "Next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next"
+        },
+        "End": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "InputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputpath"
+        },
+        "OutputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outputpath"
+        },
+        "Parameters": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parameters"
+        },
+        "ResultSelector": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resultselector"
+        },
+        "ResultPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resultpath"
+        },
+        "Type": {
+          "const": "Pass",
+          "title": "Type",
+          "type": "string"
+        },
+        "Comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "Result": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Result"
+        },
+        "QueryLanguage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QueryLanguage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "Type"
+      ],
+      "title": "PassState",
+      "type": "object"
+    },
+    "ProcessorConfig": {
+      "additionalProperties": false,
+      "description": "Configuration for Map state ItemProcessor.",
+      "properties": {
+        "Mode": {
+          "$ref": "#/$defs/ProcessorMode",
+          "default": "INLINE"
+        }
+      },
+      "title": "ProcessorConfig",
+      "type": "object"
+    },
+    "ProcessorMode": {
+      "description": "Map state processor modes.",
+      "enum": [
+        "INLINE",
+        "DISTRIBUTED"
+      ],
+      "title": "ProcessorMode",
+      "type": "string"
+    },
+    "QueryLanguage": {
+      "description": "Supported query languages.",
+      "enum": [
+        "JSONPath",
+        "JSONata"
+      ],
+      "title": "QueryLanguage",
+      "type": "string"
+    },
+    "RetryPolicy": {
+      "additionalProperties": false,
+      "description": "Retry policy with exponential backoff and optional jitter.",
+      "properties": {
+        "ErrorEquals": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Errorequals",
+          "type": "array"
+        },
+        "IntervalSeconds": {
+          "default": 1,
+          "minimum": 0,
+          "title": "Intervalseconds",
+          "type": "integer"
+        },
+        "MaxAttempts": {
+          "default": 3,
+          "minimum": 0,
+          "title": "Maxattempts",
+          "type": "integer"
+        },
+        "BackoffRate": {
+          "default": 2.0,
+          "minimum": 1.0,
+          "title": "Backoffrate",
+          "type": "number"
+        },
+        "MaxDelaySeconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Maxdelayseconds"
+        },
+        "JitterStrategy": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/JitterStrategy"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "ErrorEquals"
+      ],
+      "title": "RetryPolicy",
+      "type": "object"
+    },
+    "SucceedState": {
+      "additionalProperties": false,
+      "description": "Succeed state \u2014 terminal success.",
+      "properties": {
+        "Type": {
+          "const": "Succeed",
+          "title": "Type",
+          "type": "string"
+        },
+        "Comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "InputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputpath"
+        },
+        "OutputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outputpath"
+        },
+        "Assign": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assign"
+        },
+        "Output": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output"
+        },
+        "QueryLanguage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QueryLanguage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "Type"
+      ],
+      "title": "SucceedState",
+      "type": "object"
+    },
+    "TaskState": {
+      "additionalProperties": false,
+      "description": "Task state \u2014 executes a handler function.",
+      "properties": {
+        "Assign": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assign"
+        },
+        "Output": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output"
+        },
+        "Next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next"
+        },
+        "End": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "InputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputpath"
+        },
+        "OutputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outputpath"
+        },
+        "Parameters": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parameters"
+        },
+        "ResultSelector": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resultselector"
+        },
+        "ResultPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resultpath"
+        },
+        "Type": {
+          "const": "Task",
+          "title": "Type",
+          "type": "string"
+        },
+        "Comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "TimeoutSeconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeoutseconds"
+        },
+        "TimeoutSecondsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timeoutsecondspath"
+        },
+        "HeartbeatSeconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Heartbeatseconds"
+        },
+        "HeartbeatSecondsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Heartbeatsecondspath"
+        },
+        "Retry": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/RetryPolicy"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retry"
+        },
+        "Catch": {
+          "anyOf": [
+            {
+              "items": {
+                "$ref": "#/$defs/Catcher"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Catch"
+        },
+        "QueryLanguage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QueryLanguage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "Type"
+      ],
+      "title": "TaskState",
+      "type": "object"
+    },
+    "WaitState": {
+      "additionalProperties": false,
+      "description": "Wait state \u2014 delays execution.",
+      "properties": {
+        "Assign": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Assign"
+        },
+        "Output": {
+          "anyOf": [
+            {},
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Output"
+        },
+        "Next": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Next"
+        },
+        "End": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "End"
+        },
+        "InputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Inputpath"
+        },
+        "OutputPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Outputpath"
+        },
+        "Parameters": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Parameters"
+        },
+        "ResultSelector": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resultselector"
+        },
+        "ResultPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Resultpath"
+        },
+        "Type": {
+          "const": "Wait",
+          "title": "Type",
+          "type": "string"
+        },
+        "Comment": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Comment"
+        },
+        "Seconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Seconds"
+        },
+        "Timestamp": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestamp"
+        },
+        "SecondsPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Secondspath"
+        },
+        "TimestampPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Timestamppath"
+        },
+        "QueryLanguage": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/QueryLanguage"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "Type"
+      ],
+      "title": "WaitState",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Schema for RSF (Replacement for Step Functions) workflow definitions. Supports all 8 ASL state types with full feature parity.",
+  "properties": {
+    "rsf_version": {
+      "default": "1.0",
+      "title": "Rsf Version",
+      "type": "string"
+    },
+    "Comment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Comment"
+    },
+    "StartAt": {
+      "title": "Startat",
+      "type": "string"
+    },
+    "States": {
+      "additionalProperties": {
+        "discriminator": {
+          "mapping": {
+            "Choice": "#/$defs/ChoiceState",
+            "Fail": "#/$defs/FailState",
+            "Map": "#/$defs/MapState",
+            "Parallel": "#/$defs/ParallelState",
+            "Pass": "#/$defs/PassState",
+            "Succeed": "#/$defs/SucceedState",
+            "Task": "#/$defs/TaskState",
+            "Wait": "#/$defs/WaitState"
+          },
+          "propertyName": "Type"
+        },
+        "oneOf": [
+          {
+            "$ref": "#/$defs/TaskState"
+          },
+          {
+            "$ref": "#/$defs/PassState"
+          },
+          {
+            "$ref": "#/$defs/ChoiceState"
+          },
+          {
+            "$ref": "#/$defs/WaitState"
+          },
+          {
+            "$ref": "#/$defs/SucceedState"
+          },
+          {
+            "$ref": "#/$defs/FailState"
+          },
+          {
+            "$ref": "#/$defs/ParallelState"
+          },
+          {
+            "$ref": "#/$defs/MapState"
+          }
+        ]
+      },
+      "title": "States",
+      "type": "object"
+    },
+    "Version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Version"
+    },
+    "TimeoutSeconds": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Timeoutseconds"
+    },
+    "QueryLanguage": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/QueryLanguage"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "StartAt",
+    "States"
+  ],
+  "title": "RSF Workflow Definition",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema"
+}

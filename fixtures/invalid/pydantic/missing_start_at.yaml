@@ -1,0 +1,5 @@
+# Missing required StartAt field
+rsf_version: "1.0"
+States:
+  A:
+    Type: Succeed

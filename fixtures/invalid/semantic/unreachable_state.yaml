@@ -1,0 +1,8 @@
+# State 'Orphan' is not reachable from StartAt
+rsf_version: "1.0"
+StartAt: A
+States:
+  A:
+    Type: Succeed
+  Orphan:
+    Type: Succeed
