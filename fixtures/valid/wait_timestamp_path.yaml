@@ -1,0 +1,14 @@
+rsf_version: "1.0"
+Comment: "Wait state with TimestampPath"
+StartAt: GetSchedule
+States:
+  GetSchedule:
+    Type: Task
+    Next: WaitUntilScheduled
+  WaitUntilScheduled:
+    Type: Wait
+    TimestampPath: "$.scheduledTime"
+    Next: ExecuteScheduled
+  ExecuteScheduled:
+    Type: Task
+    End: true

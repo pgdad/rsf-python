@@ -1,0 +1,52 @@
+rsf_version: "1.0"
+Comment: "Choice with IsNull, IsPresent, IsBoolean, etc."
+StartAt: TypeCheck
+States:
+  TypeCheck:
+    Type: Choice
+    Choices:
+      - Variable: "$.data"
+        IsNull: true
+        Next: HandleNull
+      - Variable: "$.optionalField"
+        IsPresent: false
+        Next: HandleMissing
+      - Variable: "$.flag"
+        IsBoolean: true
+        Next: HandleBoolean
+      - Variable: "$.count"
+        IsNumeric: true
+        Next: HandleNumber
+      - Variable: "$.name"
+        IsString: true
+        Next: HandleString
+      - Variable: "$.eventTime"
+        IsTimestamp: true
+        Next: HandleTimestamp
+    Default: HandleUnknown
+  HandleNull:
+    Type: Pass
+    Result:
+      status: "null_value"
+    End: true
+  HandleMissing:
+    Type: Pass
+    Result:
+      status: "field_missing"
+    End: true
+  HandleBoolean:
+    Type: Pass
+    End: true
+  HandleNumber:
+    Type: Task
+    End: true
+  HandleString:
+    Type: Task
+    End: true
+  HandleTimestamp:
+    Type: Task
+    End: true
+  HandleUnknown:
+    Type: Fail
+    Error: "UnknownType"
+    Cause: "Could not determine the type of the input"

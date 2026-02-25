@@ -1,0 +1,39 @@
+rsf_version: "1.0"
+Comment: "Task with TimeoutSeconds and HeartbeatSeconds"
+StartAt: LongRunningTask
+States:
+  LongRunningTask:
+    Type: Task
+    TimeoutSeconds: 600
+    HeartbeatSeconds: 60
+    Retry:
+      - ErrorEquals: ["States.Timeout"]
+        MaxAttempts: 2
+        IntervalSeconds: 10
+      - ErrorEquals: ["States.HeartbeatTimeout"]
+        MaxAttempts: 3
+        IntervalSeconds: 5
+        BackoffRate: 1.5
+    Catch:
+      - ErrorEquals: ["States.Timeout", "States.HeartbeatTimeout"]
+        Next: TimeoutHandler
+        ResultPath: "$.timeoutError"
+      - ErrorEquals: ["States.ALL"]
+        Next: GeneralErrorHandler
+        ResultPath: "$.error"
+    Next: Done
+  TimeoutHandler:
+    Type: Pass
+    Result:
+      status: "timed_out"
+      action: "notify_operator"
+    Next: NotifyTimeout
+  NotifyTimeout:
+    Type: Task
+    End: true
+  GeneralErrorHandler:
+    Type: Fail
+    Error: "TaskFailed"
+    Cause: "The long-running task failed unexpectedly"
+  Done:
+    Type: Succeed

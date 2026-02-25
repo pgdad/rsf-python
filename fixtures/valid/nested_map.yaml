@@ -1,0 +1,40 @@
+rsf_version: "1.0"
+Comment: "Map with ItemProcessor containing multi-state workflow"
+StartAt: LoadItems
+States:
+  LoadItems:
+    Type: Task
+    Next: ProcessEachItem
+  ProcessEachItem:
+    Type: Map
+    ItemsPath: "$.items"
+    MaxConcurrency: 3
+    ItemProcessor:
+      StartAt: Validate
+      States:
+        Validate:
+          Type: Task
+          Next: CheckValid
+        CheckValid:
+          Type: Choice
+          Choices:
+            - Variable: "$.valid"
+              BooleanEquals: true
+              Next: Transform
+          Default: MarkInvalid
+        Transform:
+          Type: Task
+          Next: Store
+        Store:
+          Type: Task
+          End: true
+        MarkInvalid:
+          Type: Pass
+          Result:
+            status: "invalid"
+          End: true
+    ResultPath: "$.processedItems"
+    Next: Summarize
+  Summarize:
+    Type: Task
+    End: true

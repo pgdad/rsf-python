@@ -1,0 +1,34 @@
+rsf_version: "1.0"
+Comment: "Chain of Pass states with Result injection"
+StartAt: InjectDefaults
+States:
+  InjectDefaults:
+    Type: Pass
+    Result:
+      version: 1
+      region: "us-east-2"
+      retries: 3
+    ResultPath: "$.config"
+    Next: InjectMetadata
+  InjectMetadata:
+    Type: Pass
+    Result:
+      source: "pipeline"
+      createdAt: "2026-01-15T10:00:00Z"
+    ResultPath: "$.metadata"
+    Next: InjectFlags
+  InjectFlags:
+    Type: Pass
+    Result:
+      debug: false
+      dryRun: false
+      verbose: true
+    ResultPath: "$.flags"
+    Next: MergeAll
+  MergeAll:
+    Type: Pass
+    Parameters:
+      config.$: "$.config"
+      metadata.$: "$.metadata"
+      flags.$: "$.flags"
+    End: true

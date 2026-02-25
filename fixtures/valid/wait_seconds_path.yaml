@@ -1,0 +1,16 @@
+rsf_version: "1.0"
+Comment: "Wait state with SecondsPath"
+StartAt: ComputeDelay
+States:
+  ComputeDelay:
+    Type: Pass
+    Result:
+      delaySeconds: 10
+    Next: DynamicWait
+  DynamicWait:
+    Type: Wait
+    SecondsPath: "$.delaySeconds"
+    Next: Execute
+  Execute:
+    Type: Task
+    End: true

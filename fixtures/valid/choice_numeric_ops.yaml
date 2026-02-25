@@ -1,0 +1,46 @@
+rsf_version: "1.0"
+Comment: "Choice with various numeric operators"
+StartAt: EvaluateAmount
+States:
+  EvaluateAmount:
+    Type: Choice
+    Choices:
+      - Variable: "$.amount"
+        NumericEquals: 0
+        Next: ZeroAmount
+      - Variable: "$.amount"
+        NumericGreaterThan: 10000
+        Next: HighValue
+      - Variable: "$.amount"
+        NumericLessThan: 10
+        Next: LowValue
+      - Variable: "$.amount"
+        NumericGreaterThanEquals: 5000
+        Next: MediumHighValue
+      - Variable: "$.amount"
+        NumericLessThanEquals: 100
+        Next: SmallValue
+      - Variable: "$.score"
+        NumericEquals: 99.5
+        Next: PerfectScore
+    Default: NormalValue
+  ZeroAmount:
+    Type: Pass
+    End: true
+  HighValue:
+    Type: Task
+    End: true
+  LowValue:
+    Type: Pass
+    End: true
+  MediumHighValue:
+    Type: Task
+    End: true
+  SmallValue:
+    Type: Pass
+    End: true
+  PerfectScore:
+    Type: Succeed
+  NormalValue:
+    Type: Task
+    End: true

@@ -1,0 +1,14 @@
+rsf_version: "1.0"
+Comment: "Wait state with Seconds"
+StartAt: StartProcessing
+States:
+  StartProcessing:
+    Type: Task
+    Next: WaitForCompletion
+  WaitForCompletion:
+    Type: Wait
+    Seconds: 30
+    Next: CheckStatus
+  CheckStatus:
+    Type: Task
+    End: true

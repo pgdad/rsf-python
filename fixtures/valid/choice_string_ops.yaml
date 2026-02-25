@@ -1,0 +1,47 @@
+rsf_version: "1.0"
+Comment: "Choice with various string operators"
+StartAt: EvaluateString
+States:
+  EvaluateString:
+    Type: Choice
+    Choices:
+      - Variable: "$.name"
+        StringEquals: "admin"
+        Next: AdminPath
+      - Variable: "$.name"
+        StringGreaterThan: "m"
+        Next: LaterAlphabet
+      - Variable: "$.name"
+        StringLessThan: "a"
+        Next: BeforeA
+      - Variable: "$.name"
+        StringGreaterThanEquals: "z"
+        Next: AtOrAfterZ
+      - Variable: "$.name"
+        StringLessThanEquals: "b"
+        Next: AtOrBeforeB
+      - Variable: "$.email"
+        StringMatches: "*@example.com"
+        Next: InternalUser
+    Default: DefaultPath
+  AdminPath:
+    Type: Pass
+    End: true
+  LaterAlphabet:
+    Type: Pass
+    End: true
+  BeforeA:
+    Type: Pass
+    End: true
+  AtOrAfterZ:
+    Type: Pass
+    End: true
+  AtOrBeforeB:
+    Type: Pass
+    End: true
+  InternalUser:
+    Type: Pass
+    End: true
+  DefaultPath:
+    Type: Pass
+    End: true

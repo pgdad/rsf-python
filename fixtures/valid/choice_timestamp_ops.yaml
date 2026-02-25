@@ -1,0 +1,42 @@
+rsf_version: "1.0"
+Comment: "Choice with timestamp operators"
+StartAt: EvaluateTimestamp
+States:
+  EvaluateTimestamp:
+    Type: Choice
+    Choices:
+      - Variable: "$.createdAt"
+        TimestampEquals: "2026-01-01T00:00:00Z"
+        Next: NewYearEntry
+      - Variable: "$.createdAt"
+        TimestampGreaterThan: "2026-06-01T00:00:00Z"
+        Next: SecondHalf
+      - Variable: "$.createdAt"
+        TimestampLessThan: "2025-01-01T00:00:00Z"
+        Next: Archived
+      - Variable: "$.expiresAt"
+        TimestampGreaterThanEquals: "2027-01-01T00:00:00Z"
+        Next: LongLived
+      - Variable: "$.expiresAt"
+        TimestampLessThanEquals: "2025-06-01T00:00:00Z"
+        Next: Expired
+    Default: CurrentPeriod
+  NewYearEntry:
+    Type: Pass
+    End: true
+  SecondHalf:
+    Type: Pass
+    End: true
+  Archived:
+    Type: Task
+    End: true
+  LongLived:
+    Type: Pass
+    End: true
+  Expired:
+    Type: Fail
+    Error: "ExpiredEntry"
+    Cause: "The entry has expired"
+  CurrentPeriod:
+    Type: Task
+    End: true

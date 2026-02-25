@@ -1,0 +1,17 @@
+rsf_version: "1.0"
+Comment: "Fail state with ErrorPath and CausePath"
+StartAt: ProcessRequest
+States:
+  ProcessRequest:
+    Type: Task
+    Catch:
+      - ErrorEquals: ["States.ALL"]
+        Next: DynamicFailure
+        ResultPath: "$.errorInfo"
+    Next: Done
+  DynamicFailure:
+    Type: Fail
+    ErrorPath: "$.errorInfo.Error"
+    CausePath: "$.errorInfo.Cause"
+  Done:
+    Type: Succeed

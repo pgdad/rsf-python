@@ -1,0 +1,26 @@
+rsf_version: "1.0"
+Comment: "States using Assign and Output fields"
+StartAt: Initialize
+States:
+  Initialize:
+    Type: Pass
+    Result:
+      counter: 0
+      status: "starting"
+    Assign:
+      runId: "run-001"
+      environment: "production"
+    Next: ProcessData
+  ProcessData:
+    Type: Task
+    Assign:
+      lastProcessed: "batch-1"
+      counter: 1
+    Output:
+      result: "processed"
+    Next: Finalize
+  Finalize:
+    Type: Pass
+    Output:
+      summary: "complete"
+    End: true

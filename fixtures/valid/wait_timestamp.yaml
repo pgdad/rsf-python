@@ -1,0 +1,16 @@
+rsf_version: "1.0"
+Comment: "Wait state with Timestamp"
+StartAt: ScheduleJob
+States:
+  ScheduleJob:
+    Type: Pass
+    Result:
+      scheduled: true
+    Next: WaitUntilTime
+  WaitUntilTime:
+    Type: Wait
+    Timestamp: "2026-12-01T08:00:00Z"
+    Next: RunJob
+  RunJob:
+    Type: Task
+    End: true

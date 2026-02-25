@@ -1,0 +1,47 @@
+rsf_version: "1.0"
+Comment: "Choice with And/Or/Not combinators"
+StartAt: EvaluateConditions
+States:
+  EvaluateConditions:
+    Type: Choice
+    Choices:
+      - And:
+          - Variable: "$.age"
+            NumericGreaterThanEquals: 18
+          - Variable: "$.hasLicense"
+            BooleanEquals: true
+          - Variable: "$.country"
+            StringEquals: "US"
+        Next: Approved
+      - Or:
+          - Variable: "$.role"
+            StringEquals: "admin"
+          - Variable: "$.role"
+            StringEquals: "superadmin"
+        Next: AdminAccess
+      - Not:
+          Variable: "$.verified"
+          BooleanEquals: true
+        Next: RequireVerification
+      - And:
+          - Variable: "$.score"
+            NumericGreaterThan: 80
+          - Not:
+              Variable: "$.flagged"
+              BooleanEquals: true
+        Next: AutoApprove
+    Default: ManualReview
+  Approved:
+    Type: Succeed
+  AdminAccess:
+    Type: Pass
+    End: true
+  RequireVerification:
+    Type: Task
+    End: true
+  AutoApprove:
+    Type: Pass
+    End: true
+  ManualReview:
+    Type: Task
+    End: true

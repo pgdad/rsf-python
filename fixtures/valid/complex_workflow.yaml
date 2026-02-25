@@ -1,0 +1,103 @@
+rsf_version: "1.0"
+Comment: "Multi-state workflow combining Task, Choice, Parallel, Map, Pass, Wait"
+StartAt: ReceiveOrder
+States:
+  ReceiveOrder:
+    Type: Task
+    ResultPath: "$.order"
+    Next: ValidateOrder
+
+  ValidateOrder:
+    Type: Pass
+    Parameters:
+      orderId.$: "$.order.id"
+      items.$: "$.order.items"
+      total.$: "$.order.total"
+    ResultPath: "$.validated"
+    Next: CheckOrderType
+
+  CheckOrderType:
+    Type: Choice
+    Choices:
+      - Variable: "$.validated.total"
+        NumericGreaterThan: 5000
+        Next: HighValueApproval
+      - Variable: "$.validated.total"
+        NumericLessThanEquals: 0
+        Next: OrderRejected
+    Default: StandardProcessing
+
+  HighValueApproval:
+    Type: Task
+    TimeoutSeconds: 3600
+    HeartbeatSeconds: 300
+    Retry:
+      - ErrorEquals: ["States.Timeout"]
+        MaxAttempts: 2
+    Catch:
+      - ErrorEquals: ["States.ALL"]
+        Next: OrderRejected
+        ResultPath: "$.approvalError"
+    Next: WaitForConfirmation
+
+  WaitForConfirmation:
+    Type: Wait
+    Seconds: 10
+    Next: StandardProcessing
+
+  StandardProcessing:
+    Type: Parallel
+    Branches:
+      - StartAt: ProcessPayment
+        States:
+          ProcessPayment:
+            Type: Task
+            Retry:
+              - ErrorEquals: ["PaymentError"]
+                MaxAttempts: 3
+                BackoffRate: 2.0
+            End: true
+      - StartAt: ReserveInventory
+        States:
+          ReserveInventory:
+            Type: Task
+            End: true
+      - StartAt: SendConfirmation
+        States:
+          SendConfirmation:
+            Type: Task
+            End: true
+    ResultPath: "$.processingResults"
+    Catch:
+      - ErrorEquals: ["States.ALL"]
+        Next: OrderRejected
+        ResultPath: "$.processingError"
+    Next: ProcessLineItems
+
+  ProcessLineItems:
+    Type: Map
+    ItemsPath: "$.validated.items"
+    MaxConcurrency: 5
+    ItemProcessor:
+      StartAt: FulfillItem
+      States:
+        FulfillItem:
+          Type: Task
+          Next: VerifyFulfillment
+        VerifyFulfillment:
+          Type: Task
+          End: true
+    ResultPath: "$.fulfillmentResults"
+    Next: FinalizeOrder
+
+  FinalizeOrder:
+    Type: Task
+    Next: OrderComplete
+
+  OrderComplete:
+    Type: Succeed
+
+  OrderRejected:
+    Type: Fail
+    Error: "OrderRejected"
+    Cause: "The order could not be processed"

@@ -1,0 +1,28 @@
+rsf_version: "1.0"
+Comment: "States with InputPath, OutputPath, Parameters, ResultSelector, ResultPath"
+StartAt: FilterInput
+States:
+  FilterInput:
+    Type: Task
+    InputPath: "$.order"
+    Parameters:
+      orderId.$: "$.id"
+      customerId.$: "$.customer.id"
+      staticValue: "constant"
+    ResultSelector:
+      processedId.$: "$.result.id"
+      status.$: "$.result.status"
+    ResultPath: "$.processingResult"
+    Next: TransformOutput
+  TransformOutput:
+    Type: Pass
+    InputPath: "$.processingResult"
+    Result:
+      transformed: true
+    ResultPath: "$.transformed"
+    OutputPath: "$.transformed"
+    Next: FinalStep
+  FinalStep:
+    Type: Task
+    OutputPath: "$.summary"
+    End: true

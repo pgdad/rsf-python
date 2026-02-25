@@ -1,0 +1,45 @@
+rsf_version: "1.0"
+Comment: "Parallel state with multiple branches containing Tasks"
+StartAt: PrepareData
+States:
+  PrepareData:
+    Type: Pass
+    Result:
+      input: "ready"
+    Next: ProcessInParallel
+  ProcessInParallel:
+    Type: Parallel
+    Branches:
+      - StartAt: ValidateInput
+        States:
+          ValidateInput:
+            Type: Task
+            Next: TransformData
+          TransformData:
+            Type: Task
+            End: true
+      - StartAt: CheckPermissions
+        States:
+          CheckPermissions:
+            Type: Task
+            Next: AuditLog
+          AuditLog:
+            Type: Task
+            End: true
+      - StartAt: NotifyStart
+        States:
+          NotifyStart:
+            Type: Task
+            Next: WaitNotification
+          WaitNotification:
+            Type: Wait
+            Seconds: 5
+            Next: ConfirmNotification
+          ConfirmNotification:
+            Type: Task
+            End: true
+    ResultPath: "$.parallelResults"
+    Next: AggregateResults
+  AggregateResults:
+    Type: Task
+    End: true
