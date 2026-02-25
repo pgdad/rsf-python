@@ -28,7 +28,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 8: Inspector Backend** - FastAPI SSE server with Lambda polling, rate limiter, execution history endpoints
 - [x] **Phase 9: Inspector UI** - React inspector with time machine, structural diffs, live SSE updates, three-panel layout
 - [ ] **Phase 10: Testing** - Mock SDK, unit tests, integration tests, golden fixtures, React UI tests
-- [ ] **Phase 11: Documentation** - Tutorial, migration guide, DSL reference, README, MkDocs site
+- [x] **Phase 11: Documentation** - Tutorial, migration guide, DSL reference, README, MkDocs site
 
 ## Phase Details
 
@@ -222,10 +222,10 @@ Plans:
 **Plans**: TBD
 
 Plans:
-- [ ] 11-01: README and MkDocs site setup (Material theme, admonitions, code tabs, superfences)
-- [ ] 11-02: Tutorial (install through deploy + inspect)
-- [ ] 11-03: DSL reference (all state types, all fields)
-- [ ] 11-04: Migration guide (ASL import walkthrough)
+- [x] 11-01: README and MkDocs site setup (Material theme, admonitions, code tabs, superfences)
+- [x] 11-02: Tutorial (install through deploy + inspect)
+- [x] 11-03: DSL reference (all state types, all fields)
+- [x] 11-04: Migration guide (ASL import walkthrough)
 
 ## Progress
 
@@ -243,5 +243,5 @@ Phases execute in numeric order: 1 → 2 → 3 → 4 → 5 → 6 → 7 → 8 →
 | 7. Graph Editor UI | 5/5 | Complete | 2026-02-25 |
 | 8. Inspector Backend | 2/2 | Complete | 2026-02-25 |
 | 9. Inspector UI | 5/5 | Complete | 2026-02-25 |
-| 10. Testing | 0/9 | Not started | - |
-| 11. Documentation | 0/4 | Not started | - |
+| 10. Testing | 9/9 | Complete | 2026-02-25 |
+| 11. Documentation | 4/4 | Complete | 2026-02-25 |
