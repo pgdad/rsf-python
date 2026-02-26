@@ -1,0 +1,13 @@
+rsf_version: "1.0"
+Comment: "A minimal RSF workflow — edit to define your state machine"
+StartAt: HelloWorld
+
+States:
+  HelloWorld:
+    Type: Pass
+    Result:
+      message: "Hello from RSF!"
+    Next: Done
+
+  Done:
+    Type: Succeed
