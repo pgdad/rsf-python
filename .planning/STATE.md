@@ -23,16 +23,16 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 19 — Build and Deploy
-Plan: 1/3 complete
-Status: Plan 19-01 complete (rsf generate tutorial)
-Last activity: 2026-02-26 — Plan 19-01 complete: rsf generate tutorial (tutorials/03-code-generation.md)
+Plan: 2/3 complete
+Status: Plan 19-02 complete (rsf deploy tutorial)
+Last activity: 2026-02-26 — Plan 19-02 complete: rsf deploy tutorial (tutorials/04-deploy-to-aws.md)
 
-Progress: [########░░░░░░░░░░░░] 40%
+Progress: [############░░░░░░░░] 60%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 56 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 3)
+- Total plans completed: 57 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 4)
 
 **By Milestone:**
 
@@ -54,6 +54,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 **18-02:** rsf validate tutorial uses actual CLI output (not idealized); Stage 2 structural error (invalid Type) produces empty field-path — documented reality, not expectation. Learn-by-breaking pattern: full broken file + exact output + interpretation + fix.
 
 **19-01:** rsf generate tutorial uses actual codegen template output (from rsf.registry import state, input_data signature) for generated stubs while keeping rsf init example handler style as context from Tutorial 1. Multi-state workflow demonstrates handler-per-Task pattern.
+
+**19-02:** rsf deploy tutorial documents all 6 Terraform files with actual template output, IAM 3-statement policy structure, and AWS CLI verification. Cost warnings and teardown reminders included throughout.
 
 ### v1.3 Phase Structure
 
@@ -79,5 +81,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 19-01-PLAN.md (rsf generate tutorial) — Plan 1/3 in Phase 19
+Stopped at: Completed 19-02-PLAN.md (rsf deploy tutorial) — Plan 2/3 in Phase 19
 Resume file: None
