@@ -117,4 +117,4 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
 | 17. Cleanup and Documentation | v1.2 | 1/1 | Complete | 2026-02-26 |
 | 18. Getting Started | 2/2 | Complete    | 2026-02-26 | - |
 | 19. Build and Deploy | 3/3 | Complete    | 2026-02-26 | - |
-| 20. Advanced Tools | 3/3 | Complete   | 2026-02-26 | - |
+| 20. Advanced Tools | 3/3 | Complete    | 2026-02-26 | - |
