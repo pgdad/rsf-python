@@ -13,9 +13,9 @@ Requirements for CLI toolchain milestone. Each maps to roadmap phases.
 - [ ] **CLI-02**: User can run `rsf generate <workflow.yaml>` to parse DSL, validate, map states, render orchestrator, create handler stubs (if missing), maintain handlers/__init__.py
 - [ ] **CLI-03**: User can run `rsf validate <workflow.yaml>` to validate DSL (Pydantic + semantic) without generating code, with field-path error reporting
 - [x] **CLI-04**: User can run `rsf deploy [--code-only]` to generate Terraform + run terraform init/apply; --code-only re-packages and updates Lambda code only
-- [ ] **CLI-05**: User can run `rsf import <asl.json> [--output workflow.yaml]` to import Step Functions ASL JSON through full pipeline
-- [ ] **CLI-06**: User can run `rsf ui [workflow.yaml] [--port 8765]` to launch graph editor FastAPI server, serve React SPA, auto-open browser
-- [ ] **CLI-07**: User can run `rsf inspect [--arn <lambda-arn>] [--port 8766]` to launch inspector with ARN discovery (terraform output or --arn override)
+- [x] **CLI-05**: User can run `rsf import <asl.json> [--output workflow.yaml]` to import Step Functions ASL JSON through full pipeline
+- [x] **CLI-06**: User can run `rsf ui [workflow.yaml] [--port 8765]` to launch graph editor FastAPI server, serve React SPA, auto-open browser
+- [x] **CLI-07**: User can run `rsf inspect [--arn <lambda-arn>] [--port 8766]` to launch inspector with ARN discovery (terraform output or --arn override)
 - [x] **CLI-08**: Typer-based CLI with `--version` flag and subcommands
 
 ## v1.0 Requirements (Shipped)
@@ -133,9 +133,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CLI-02 | Phase 12 | Pending |
 | CLI-03 | Phase 12 | Pending |
 | CLI-04 | Phase 12 | Complete |
-| CLI-05 | Phase 12 | Pending |
-| CLI-06 | Phase 12 | Pending |
-| CLI-07 | Phase 12 | Pending |
+| CLI-05 | Phase 12 | Complete |
+| CLI-06 | Phase 12 | Complete |
+| CLI-07 | Phase 12 | Complete |
 | CLI-08 | Phase 12 | Complete |
 
 **Coverage:**
