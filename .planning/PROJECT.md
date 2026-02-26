@@ -41,7 +41,21 @@ v1.1 shipped (2026-02-26). Full CLI toolchain delivered. The complete RSF workfl
 
 <!-- Current scope. Building toward these. -->
 
-(None — planning next milestone)
+- [ ] Use-case based example workflows covering all 8 state types, 39 comparison operators, 18 intrinsic functions, error handling, I/O processing, variables, and context objects
+- [ ] Complete implementation for each example: DSL YAML, Python handlers, Terraform files
+- [ ] Automated test harness: deploy → invoke → verify (CloudWatch logs + Lambda return values) → teardown
+- [ ] 1-2 examples with real AWS service integration (e.g., DynamoDB)
+
+## Current Milestone: v1.2 Comprehensive Examples & Integration Testing
+
+**Goal:** Create use-case based examples that demonstrate all DSL features with automated AWS deployment testing and programmatic verification.
+
+**Target features:**
+- Real-world scenario examples (order processing, data pipeline, etc.) that naturally exercise the full feature surface
+- Each example: complete DSL YAML + Python handler code + Terraform infrastructure files
+- Automated test runner: single command to deploy, invoke, verify, and tear down each example
+- Dual verification: Lambda return values for workflow output + CloudWatch logs for intermediate state checks
+- Mostly self-contained compute handlers; 1-2 examples showcase real AWS service integration
 
 ### Out of Scope
 
@@ -94,4 +108,4 @@ v1.1 shipped (2026-02-26). Full CLI toolchain delivered. The complete RSF workfl
 | Mock SDK for testing | Enables local execution of generated code without AWS | ✓ Good |
 
 ---
-*Last updated: 2026-02-26 after v1.1 milestone*
+*Last updated: 2026-02-26 after v1.2 milestone started*
