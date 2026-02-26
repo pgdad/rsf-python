@@ -21,13 +21,13 @@ Requirements for the Comprehensive Tutorial milestone. Each maps to roadmap phas
 
 ### ASL Migration
 
-- [ ] **MIGR-01**: User can follow a tutorial to import an existing ASL JSON file with `rsf import` and get RSF YAML + handler stubs
+- [x] **MIGR-01**: User can follow a tutorial to import an existing ASL JSON file with `rsf import` and get RSF YAML + handler stubs
 
 ### Visual Tools
 
-- [ ] **VIS-01**: User can follow a tutorial to launch the graph editor with `rsf ui` and visually edit a workflow
-- [ ] **VIS-02**: User can follow a tutorial to deploy a dedicated inspection workflow to AWS with complete Terraform
-- [ ] **VIS-03**: User can follow a tutorial to inspect a running execution with `rsf inspect` using time machine scrubbing and live updates
+- [x] **VIS-01**: User can follow a tutorial to launch the graph editor with `rsf ui` and visually edit a workflow
+- [x] **VIS-02**: User can follow a tutorial to deploy a dedicated inspection workflow to AWS with complete Terraform
+- [x] **VIS-03**: User can follow a tutorial to inspect a running execution with `rsf inspect` using time machine scrubbing and live updates
 
 ## Future Requirements
 
@@ -54,10 +54,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DEPLOY-02 | Phase 19 | Complete |
 | DEPLOY-03 | Phase 19 | Complete |
 | DEPLOY-04 | Phase 19 | Complete |
-| MIGR-01 | Phase 20 | Pending |
-| VIS-01 | Phase 20 | Pending |
-| VIS-02 | Phase 20 | Pending |
-| VIS-03 | Phase 20 | Pending |
+| MIGR-01 | Phase 20 | Complete |
+| VIS-01 | Phase 20 | Complete |
+| VIS-02 | Phase 20 | Complete |
+| VIS-03 | Phase 20 | Complete |
 
 **Coverage:**
 - v1.3 requirements: 10 total
