@@ -8,19 +8,9 @@ RSF is a complete replacement for AWS Step Functions built on AWS Lambda Durable
 
 Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
-## Current Milestone: v1.1 CLI Toolchain
+## Current State
 
-**Goal:** Complete the Typer-based CLI that ties all existing RSF modules together into a single `rsf` command with init, generate, validate, deploy, import, ui, and inspect subcommands.
-
-**Target features:**
-- `rsf init <name>` — scaffold new RSF project
-- `rsf generate <yaml>` — parse, validate, generate orchestrator + handler stubs
-- `rsf validate <yaml>` — validate DSL without generating code
-- `rsf deploy [--code-only]` — generate Terraform + run terraform init/apply
-- `rsf import <asl.json>` — import ASL JSON to RSF YAML + stubs
-- `rsf ui [yaml]` — launch graph editor server
-- `rsf inspect [--arn]` — launch inspector server
-- `rsf --version` — show version info
+v1.1 shipped (2026-02-26). Full CLI toolchain delivered. The complete RSF workflow (init → generate → validate → deploy → import → ui → inspect) is available from a single `rsf` entry point.
 
 ## Requirements
 
@@ -45,11 +35,13 @@ Users can define, visualize, generate, deploy, and debug state machine workflows
 - ✓ Mock SDK for local testing of generated code — v1.0
 - ✓ Comprehensive test suite (unit tests, integration tests, golden fixtures) — v1.0
 
+- ✓ CLI toolchain: `rsf init`, `rsf generate`, `rsf validate`, `rsf deploy`, `rsf import`, `rsf ui`, `rsf inspect` — v1.1
+
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] CLI toolchain: `rsf init`, `rsf generate`, `rsf validate`, `rsf deploy`, `rsf import`, `rsf ui`, `rsf inspect`
+(None — planning next milestone)
 
 ### Out of Scope
 
@@ -90,16 +82,16 @@ Users can define, visualize, generate, deploy, and debug state machine workflows
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Pydantic v2 discriminated unions for state types | Type-safe parsing with clear error messages; circular import broken via late binding in `__init__.py` | — Pending |
-| BFS traversal for code generation | Ensures all reachable states (including Choice branches and loop targets) are included | — Pending |
-| AST-merge strategy for Graph→YAML sync | Preserves complex state data (Choice rules, Catch arrays, Parallel branches) that the graph view can't represent | — Pending |
-| Custom Jinja2 delimiters (`<< >>`, `<% %>`) for HCL | Avoids `${}` conflict with Terraform interpolation | — Pending |
-| syncSource flag for bidirectional sync | Prevents infinite YAML↔Graph update loops; set before mutation, cleared after microtask | — Pending |
-| Precomputed snapshots for time machine | O(1) scrubbing instead of O(n) recomputation per position | — Pending |
-| Generation Gap pattern (first-line marker) | Generated code always overwritten; user code never touched | — Pending |
-| Token bucket rate limiter (12 req/s) | Stays under 15 req/s Lambda control plane limit | — Pending |
-| Separate Zustand stores (Flow + Inspect) | No cross-contamination between editor and inspector concerns | — Pending |
-| Mock SDK for testing | Enables local execution of generated code without AWS | — Pending |
+| Pydantic v2 discriminated unions for state types | Type-safe parsing with clear error messages; circular import broken via late binding in `__init__.py` | ✓ Good |
+| BFS traversal for code generation | Ensures all reachable states (including Choice branches and loop targets) are included | ✓ Good |
+| AST-merge strategy for Graph→YAML sync | Preserves complex state data (Choice rules, Catch arrays, Parallel branches) that the graph view can't represent | ✓ Good |
+| Custom Jinja2 delimiters (`<< >>`, `<% %>`) for HCL | Avoids `${}` conflict with Terraform interpolation | ✓ Good |
+| syncSource flag for bidirectional sync | Prevents infinite YAML↔Graph update loops; set before mutation, cleared after microtask | ✓ Good |
+| Precomputed snapshots for time machine | O(1) scrubbing instead of O(n) recomputation per position | ✓ Good |
+| Generation Gap pattern (first-line marker) | Generated code always overwritten; user code never touched | ✓ Good |
+| Token bucket rate limiter (12 req/s) | Stays under 15 req/s Lambda control plane limit | ✓ Good |
+| Separate Zustand stores (Flow + Inspect) | No cross-contamination between editor and inspector concerns | ✓ Good |
+| Mock SDK for testing | Enables local execution of generated code without AWS | ✓ Good |
 
 ---
-*Last updated: 2026-02-26 after milestone v1.1 started*
+*Last updated: 2026-02-26 after v1.1 milestone*
