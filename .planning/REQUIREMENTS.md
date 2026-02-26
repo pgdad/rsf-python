@@ -9,7 +9,7 @@ Requirements for the Comprehensive Tutorial milestone. Each maps to roadmap phas
 
 ### Project Setup
 
-- [ ] **SETUP-01**: User can follow a tutorial to scaffold a new RSF project with `rsf init` and understand each generated file
+- [x] **SETUP-01**: User can follow a tutorial to scaffold a new RSF project with `rsf init` and understand each generated file
 - [ ] **SETUP-02**: User can follow a tutorial to validate workflow YAML with `rsf validate` and interpret 3-stage validation errors
 
 ### Code Generation & Deployment
@@ -48,7 +48,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SETUP-01 | Phase 18 | Pending |
+| SETUP-01 | Phase 18 | Complete |
 | SETUP-02 | Phase 18 | Pending |
 | DEPLOY-01 | Phase 19 | Pending |
 | DEPLOY-02 | Phase 19 | Pending |

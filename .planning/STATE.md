@@ -10,16 +10,16 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 18 — Getting Started
-Plan: —
-Status: Roadmap created, ready to plan
-Last activity: 2026-02-26 — v1.3 roadmap created (3 phases, 10 requirements)
+Plan: 1/2 complete
+Status: In progress — Plan 01 complete (rsf init tutorial), Plan 02 pending (rsf validate tutorial)
+Last activity: 2026-02-26 — Plan 18-01 complete: rsf init tutorial (tutorials/01-project-setup.md)
 
-Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
+Progress: [##░░░░░░░░░░░░░░░░░░] 5%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 53 (v1.0: 39, v1.1: 4, v1.2: 10)
+- Total plans completed: 54 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 1)
 
 **By Milestone:**
 
@@ -35,6 +35,8 @@ Progress: [░░░░░░░░░░░░░░░░░░░░] 0%
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table.
+
+**18-01:** Tutorial structure established — prerequisites, numbered steps, verbatim template content in fenced code blocks, blockquotes for tips, explicit forward pointer to next tutorial.
 
 ### v1.3 Phase Structure
 
@@ -60,5 +62,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: v1.3 roadmap created — ready to plan Phase 18
+Stopped at: Completed 18-01-PLAN.md (rsf init tutorial)
 Resume file: None
