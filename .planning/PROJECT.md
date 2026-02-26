@@ -8,35 +8,48 @@ RSF is a complete replacement for AWS Step Functions built on AWS Lambda Durable
 
 Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
+## Current Milestone: v1.1 CLI Toolchain
+
+**Goal:** Complete the Typer-based CLI that ties all existing RSF modules together into a single `rsf` command with init, generate, validate, deploy, import, ui, and inspect subcommands.
+
+**Target features:**
+- `rsf init <name>` — scaffold new RSF project
+- `rsf generate <yaml>` — parse, validate, generate orchestrator + handler stubs
+- `rsf validate <yaml>` — validate DSL without generating code
+- `rsf deploy [--code-only]` — generate Terraform + run terraform init/apply
+- `rsf import <asl.json>` — import ASL JSON to RSF YAML + stubs
+- `rsf ui [yaml]` — launch graph editor server
+- `rsf inspect [--arn]` — launch inspector server
+- `rsf --version` — show version info
+
 ## Requirements
 
 ### Validated
 
 <!-- Shipped and confirmed valuable. -->
 
-(None yet — ship to validate)
+- ✓ YAML/JSON DSL with full ASL feature parity (8 state types, 39 comparison operators, error handling, I/O processing, intrinsic functions, variables, context object) — v1.0
+- ✓ Pydantic v2 models for all DSL elements with semantic cross-state validation (BFS) — v1.0
+- ✓ Python code generator (Jinja2) producing Lambda Durable Functions SDK orchestrator code — v1.0
+- ✓ Handler registry with `@state` and `@startup` decorators and auto-discovery — v1.0
+- ✓ 5-stage I/O processing pipeline (InputPath → Parameters → ResultSelector → ResultPath → OutputPath) — v1.0
+- ✓ 18 intrinsic functions with recursive descent parser — v1.0
+- ✓ ASL Context Object model (`$$`) — v1.0
+- ✓ Terraform HCL generation with custom Jinja2 delimiters, IAM derivation, and Generation Gap pattern — v1.0
+- ✓ ASL JSON importer (parse → convert → emit YAML + handler stubs) — v1.0
+- ✓ FastAPI backend for graph editor (REST + WebSocket + static file serving) — v1.0
+- ✓ React graph editor with bidirectional YAML ↔ graph sync, per-state-type nodes, ELK.js auto-layout — v1.0
+- ✓ FastAPI backend for execution inspector (REST + SSE) — v1.0
+- ✓ React execution inspector with time machine scrubbing, live updates, structural data diffs — v1.0
+- ✓ JSON Schema generation from Pydantic models for Monaco editor validation — v1.0
+- ✓ Mock SDK for local testing of generated code — v1.0
+- ✓ Comprehensive test suite (unit tests, integration tests, golden fixtures) — v1.0
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] YAML/JSON DSL with full ASL feature parity (8 state types, 39 comparison operators, error handling, I/O processing, intrinsic functions, variables, context object)
-- [ ] Pydantic v2 models for all DSL elements with semantic cross-state validation (BFS)
-- [ ] Python code generator (Jinja2) producing Lambda Durable Functions SDK orchestrator code
-- [ ] Handler registry with `@state` and `@startup` decorators and auto-discovery
-- [ ] 5-stage I/O processing pipeline (InputPath → Parameters → ResultSelector → ResultPath → OutputPath)
-- [ ] 18 intrinsic functions with recursive descent parser
-- [ ] ASL Context Object model (`$$`)
-- [ ] Terraform HCL generation with custom Jinja2 delimiters, IAM derivation, and Generation Gap pattern
-- [ ] ASL JSON importer (parse → convert → emit YAML + handler stubs)
 - [ ] CLI toolchain: `rsf init`, `rsf generate`, `rsf validate`, `rsf deploy`, `rsf import`, `rsf ui`, `rsf inspect`
-- [ ] FastAPI backend for graph editor (REST + WebSocket + static file serving)
-- [ ] React graph editor with bidirectional YAML ↔ graph sync, per-state-type nodes, ELK.js auto-layout
-- [ ] FastAPI backend for execution inspector (REST + SSE)
-- [ ] React execution inspector with time machine scrubbing, live updates, structural data diffs
-- [ ] JSON Schema generation from Pydantic models for Monaco editor validation
-- [ ] Mock SDK for local testing of generated code
-- [ ] Comprehensive test suite (1000+ unit tests, integration tests, golden fixtures)
 
 ### Out of Scope
 
@@ -89,4 +102,4 @@ Users can define, visualize, generate, deploy, and debug state machine workflows
 | Mock SDK for testing | Enables local execution of generated code without AWS | — Pending |
 
 ---
-*Last updated: 2026-02-24 after initialization*
+*Last updated: 2026-02-26 after milestone v1.1 started*

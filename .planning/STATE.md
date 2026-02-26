@@ -5,16 +5,14 @@
 See: .planning/PROJECT.md (updated 2026-02-24)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** PROJECT COMPLETE
+**Current focus:** v1.1 CLI Toolchain
 
 ## Current Position
 
-Phase: 11 of 11 (Documentation) — COMPLETE
-Plan: 4 of 4 in current phase
-Status: All phases complete
-Last activity: 2026-02-25 — Phase 11 complete (documentation delivered)
-
-Progress: [██████████] 100%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-26 — Milestone v1.1 started
 
 ## Performance Metrics
 
