@@ -52,7 +52,7 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
 ### v1.3 Comprehensive Tutorial (Phases 18-20)
 
 - [x] **Phase 18: Getting Started** — Tutorials for project init and workflow validation (completed 2026-02-26)
-- [ ] **Phase 19: Build and Deploy** — Tutorials for code generation, Terraform deployment, and live AWS verification
+- [x] **Phase 19: Build and Deploy** — Tutorials for code generation, Terraform deployment, and live AWS verification (completed 2026-02-26)
 - [ ] **Phase 20: Advanced Tools** — Tutorials for ASL migration, visual graph editing, and execution inspection
 
 ## Phase Details
@@ -113,5 +113,5 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
 | 16. AWS Deployment and Verification | v1.2 | 1/1 | Complete | 2026-02-26 |
 | 17. Cleanup and Documentation | v1.2 | 1/1 | Complete | 2026-02-26 |
 | 18. Getting Started | 2/2 | Complete    | 2026-02-26 | - |
-| 19. Build and Deploy | 2/3 | In Progress|  | - |
+| 19. Build and Deploy | 3/3 | Complete   | 2026-02-26 | - |
 | 20. Advanced Tools | v1.3 | 0/? | Not started | - |
