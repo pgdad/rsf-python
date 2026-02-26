@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: Comprehensive Tutorial
-status: complete
+milestone: v1.4
+milestone_name: UI Screenshots
+status: defining_requirements
 last_updated: "2026-02-26"
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 8
-  completed_plans: 8
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** All milestones complete (v1.0-v1.3). Ready for next milestone.
+**Current focus:** v1.4 UI Screenshots — automated Playwright capture for graph editor and inspector
 
 ## Current Position
 
-Milestone v1.3: Comprehensive Tutorial — SHIPPED 2026-02-26
-All 3 phases complete, all 8 plans complete.
-
-Progress: [####################] 100%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-26 — Milestone v1.4 started
 
 ## Performance Metrics
 
@@ -58,5 +58,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Milestone v1.3 complete — all tutorials shipped
+Stopped at: Milestone v1.4 started — defining requirements
 Resume file: None

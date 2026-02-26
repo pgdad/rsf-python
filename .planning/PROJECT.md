@@ -8,13 +8,19 @@ RSF is a complete replacement for AWS Step Functions built on AWS Lambda Durable
 
 Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
+## Current Milestone: v1.4 UI Screenshots
+
+**Goal:** Add automated Playwright screenshots of the graph editor and execution inspector for each of the 5 example workflows, embedded in both example READMEs and tutorial docs.
+
+**Target features:**
+- Automated Playwright screenshot capture scripts
+- Graph editor screenshots for all 5 examples (including DSL editing view)
+- Execution inspector screenshots for all 5 examples
+- Screenshots embedded in example READMEs and tutorial documentation
+
 ## Current State
 
-v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI commands. 2,753 lines of tutorial documentation. Complete hands-on coverage from project setup through execution inspection with time machine debugging.
-
-## Current State
-
-v1.2 shipped (2026-02-26). Five real-world example workflows with automated deploy-invoke-verify-teardown testing on real AWS. All 8 ASL state types verified in production. 152 local tests + 13 integration tests + 20 harness tests passing.
+v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI commands. 2,753 lines of tutorial documentation. v1.2 shipped with five real-world example workflows and automated integration testing on real AWS. 152 local tests + 13 integration tests + 20 harness tests passing.
 
 ## Requirements
 
@@ -53,7 +59,10 @@ v1.2 shipped (2026-02-26). Five real-world example workflows with automated depl
 
 <!-- Current scope. Building toward these. -->
 
-(None — all milestones complete. Run `/gsd:new-milestone` to define next scope.)
+- [ ] Automated Playwright screenshot capture for graph editor and execution inspector
+- [ ] Screenshot assets for all 5 example workflows
+- [ ] Example READMEs updated with embedded screenshots
+- [ ] Tutorial docs (07-graph-editor, 08-execution-inspector) updated with screenshots
 
 ### Out of Scope
 
@@ -113,4 +122,4 @@ v1.2 shipped (2026-02-26). Five real-world example workflows with automated depl
 | Explicit delete_log_group after terraform destroy | Catches orphaned log groups that Terraform may miss | ✓ Good |
 
 ---
-*Last updated: 2026-02-26 after v1.3 milestone*
+*Last updated: 2026-02-26 after v1.4 milestone start*
