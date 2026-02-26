@@ -35,3 +35,23 @@
 
 ---
 
+
+## v1.3 Comprehensive Tutorial (Shipped: 2026-02-26)
+
+**Phases completed:** 3 phases (18-20), 8 plans
+**Tutorials:** 8 documents | **Lines:** 2,753 (Markdown)
+**Timeline:** 2026-02-26
+**Git range:** 1474b0e..40b83e3
+
+**Key accomplishments:**
+- 8 step-by-step tutorials covering all 7 RSF CLI commands (init, generate, validate, deploy, import, ui, inspect)
+- `rsf init` + `rsf validate` tutorials with learn-by-breaking pattern and 3-stage error interpretation
+- `rsf generate` tutorial with Generation Gap pattern, @state decorators, and multi-state workflow generation
+- `rsf deploy` tutorial with all 6 Terraform files documented, IAM policy walkthrough, and AWS verification
+- `--code-only` fast path, Lambda invocation testing both Choice branches, and zero-resource teardown
+- `rsf import` tutorial with ASL JSON conversion and all 5 conversion rules documented
+- `rsf ui` graph editor tutorial with bidirectional YAML↔graph sync and real-time validation
+- `rsf inspect` tutorial with dedicated inspection workflow deployment, time machine scrubbing, and live SSE streaming
+
+---
+

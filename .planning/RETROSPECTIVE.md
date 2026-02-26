@@ -38,6 +38,43 @@
 
 ---
 
+## Milestone: v1.3 — Comprehensive Tutorial
+
+**Shipped:** 2026-02-26
+**Phases:** 3 | **Plans:** 8
+
+### What Was Built
+- 8 step-by-step tutorials covering all 7 RSF CLI commands (init, generate, validate, deploy, import, ui, inspect)
+- 2,753 lines of tutorial documentation
+- Learn-by-breaking validation tutorial with 3-stage error interpretation
+- Full AWS deployment tutorials with Terraform walkthrough and teardown verification
+- ASL import tutorial with 5 conversion rules documented
+- Graph editor tutorial with bidirectional sync walkthrough
+- Execution inspector tutorial with time machine scrubbing and live SSE streaming
+
+### What Worked
+- Using actual CLI output (not idealized) in tutorials matches what users will actually see
+- Learn-by-breaking pattern (intentionally introduce errors, then fix) teaches validation deeply
+- Sequential tutorial chain (01→08) builds naturally — each tutorial picks up where the previous left off
+- All 3 Phase 20 plans ran in parallel (Wave 1) since tutorials are independent documents — fast execution
+
+### What Was Inefficient
+- Summary one-liner extraction returned null for all summaries — the field wasn't populated during execution
+- Phase 19 plans were forced sequential (3 waves) even though the tutorial documents could theoretically be written in parallel
+
+### Patterns Established
+- Tutorial format: prerequisites → numbered steps → verbatim CLI output → tips in blockquotes → forward pointer to next tutorial
+- Textual UI descriptions (no screenshots) for Markdown-only tutorials
+- Two test payloads per Choice branch to demonstrate both paths
+- Command reference tables at end of tool tutorials
+
+### Key Lessons
+1. Documentation phases execute faster than code phases — 8 plans completed in minutes
+2. Combining related requirements into single plans (DEPLOY-03 + DEPLOY-04 in one tutorial) produces more cohesive user experiences
+3. Tutorial quality depends heavily on reading actual source code for CLI output — templated/idealized output would mislead users
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -47,6 +84,7 @@
 | v1.0 Core | 10 | 39 | Initial build — DSL, codegen, UI, testing, docs |
 | v1.1 CLI | 1 | 4 | CLI toolchain unifying all commands |
 | v1.2 Examples | 5 | 10 | Real AWS verification with automated testing |
+| v1.3 Tutorial | 3 | 8 | 8 tutorials covering all CLI commands |
 
 ### Cumulative Quality
 
@@ -55,9 +93,11 @@
 | v1.0 | Full unit + integration suite | DSL feature parity |
 | v1.1 | 49 CLI tests | 7 subcommands |
 | v1.2 | 152 local + 13 integration + 20 harness | All 8 state types on real AWS |
+| v1.3 | 2,753 lines of tutorials | All 7 CLI commands documented |
 
 ### Top Lessons (Verified Across Milestones)
 
 1. Use-case-driven examples are more effective than synthetic test cases for feature coverage
 2. Explicit cleanup (delete_log_group) is needed beyond terraform destroy for AWS resources
 3. Propagation delays in AWS services (IAM, CloudWatch) require explicit wait buffers in automated tests
+4. Tutorials using actual CLI output (not idealized) build user trust and match reality

@@ -8,15 +8,9 @@ RSF is a complete replacement for AWS Step Functions built on AWS Lambda Durable
 
 Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
-## Current Milestone: v1.3 Comprehensive Tutorial
+## Current State
 
-**Goal:** Create comprehensive tutorials teaching users how to use every RSF CLI feature end-to-end, including real AWS deployment for the inspector tutorial.
-
-**Target features:**
-- Tutorials for all 7 CLI commands (init, generate, validate, deploy, import, ui, inspect)
-- Self-contained working code, Terraform, and scripts for each tutorial
-- Real AWS deployment tutorial for execution inspection
-- Step-by-step hands-on format (not reference docs)
+v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI commands. 2,753 lines of tutorial documentation. Complete hands-on coverage from project setup through execution inspection with time machine debugging.
 
 ## Current State
 
@@ -50,15 +44,16 @@ v1.2 shipped (2026-02-26). Five real-world example workflows with automated depl
 - ✓ Integration test harness: poll_execution, query_logs, terraform_teardown, UUID execution IDs — v1.2
 - ✓ Dual-channel AWS verification: Lambda return values + CloudWatch log assertions on real AWS — v1.2
 - ✓ Example documentation: per-example READMEs + top-level quick-start guide — v1.2
+- ✓ 8 step-by-step tutorials covering all 7 CLI commands (init, generate, validate, deploy, import, ui, inspect) — v1.3
+- ✓ Hands-on walkthroughs with working code users can follow step-by-step — v1.3
+- ✓ Real AWS deployment tutorials with complete Terraform and provisioning scripts — v1.3
+- ✓ Self-contained tutorial artifacts (handler code, YAML workflows, test scripts) — v1.3
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Comprehensive tutorials covering all RSF CLI commands end-to-end (init, generate, validate, deploy, import, ui, inspect)
-- [ ] Hands-on walkthroughs with working code users can follow step-by-step
-- [ ] Real AWS deployment tutorials with complete Terraform and provisioning scripts
-- [ ] Self-contained tutorial artifacts (handler code, YAML workflows, test scripts)
+(None — all milestones complete. Run `/gsd:new-milestone` to define next scope.)
 
 ### Out of Scope
 
@@ -83,6 +78,7 @@ v1.2 shipped (2026-02-26). Five real-world example workflows with automated depl
 - **Key SDK note:** `parallel()` and `map()` return `BatchResult` — call `.get_results()` for plain list
 - The DSL achieves full AWS Step Functions ASL feature parity
 - Shipped v1.2 with ~8,261 LOC in examples + test harness (Python, YAML, Terraform, Markdown)
+- Shipped v1.3 with 2,753 lines of tutorial documentation across 8 tutorials
 
 ## Constraints
 
@@ -117,4 +113,4 @@ v1.2 shipped (2026-02-26). Five real-world example workflows with automated depl
 | Explicit delete_log_group after terraform destroy | Catches orphaned log groups that Terraform may miss | ✓ Good |
 
 ---
-*Last updated: 2026-02-26 after v1.3 milestone started*
+*Last updated: 2026-02-26 after v1.3 milestone*
