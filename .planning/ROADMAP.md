@@ -90,7 +90,10 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
   2. User can follow the `rsf ui` tutorial, launch the graph editor, make a visual change to a workflow, and see the YAML update in the Monaco editor in real time
   3. User can follow the inspection workflow tutorial, deploy the dedicated inspection workflow to AWS using the provided Terraform, and have a running target for the inspector
   4. User can follow the `rsf inspect` tutorial, attach to a live execution, scrub through historical execution states with the time machine, and observe structural data diffs between steps
-**Plans**: TBD
+**Plans**: 3 plans
+- [ ] 20-01-PLAN.md — rsf import tutorial (Wave 1)
+- [ ] 20-02-PLAN.md — rsf ui graph editor tutorial (Wave 1)
+- [ ] 20-03-PLAN.md — inspection deployment + rsf inspect tutorial (Wave 1)
 
 ## Progress
 
