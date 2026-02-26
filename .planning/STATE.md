@@ -5,13 +5,13 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** Planning next milestone
+**Current focus:** Starting milestone v1.3 — Comprehensive Tutorial
 
 ## Current Position
 
-Phase: All phases complete through v1.2
-Status: Milestone v1.2 shipped — ready for next milestone
-Last activity: 2026-02-26 — v1.2 milestone archived
+Phase: Not started (defining requirements)
+Status: New milestone workflow in progress — MILESTONE-CONTEXT.md written, resume with /gsd:new-milestone
+Last activity: 2026-02-26 — v1.3 milestone context captured, context window full
 
 Progress: [████████████████████] 100% (v1.0+v1.1+v1.2 complete)
 
