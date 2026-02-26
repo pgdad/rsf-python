@@ -39,7 +39,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 
 **Milestone Goal:** Prove RSF works end-to-end against real AWS by delivering 5 real-world example workflows with automated deploy-invoke-verify-teardown testing.
 
-- [ ] **Phase 13: Example Foundation** — Five complete examples: DSL YAML, handler code, and local mock SDK tests for all examples
+- [x] **Phase 13: Example Foundation** — Five complete examples: DSL YAML, handler code, and local mock SDK tests for all examples
 - [ ] **Phase 14: Terraform Infrastructure** — Per-example Terraform files with isolated local state, durable_config, and DynamoDB resources
 - [ ] **Phase 15: Integration Test Harness** — Shared polling, log query, teardown helpers and single-command test runner
 - [ ] **Phase 16: AWS Deployment and Verification** — All 5 examples deployed, invoked, and verified via dual-channel assertions on real AWS
@@ -57,7 +57,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
   3. Each example's handler file emits structured JSON logs (via aws-lambda-powertools Logger) with step name and execution context fields
   4. The intrinsic-showcase example exercises 14+ intrinsic functions and all 5 I/O pipeline fields (InputPath, Parameters, ResultSelector, ResultPath, OutputPath) in its DSL
   5. The approval-workflow example uses Context Object ($$) references and Variables/Assign in its DSL YAML
-**Plans**: TBD
+**Plans**: 5 examples (order-processing, data-pipeline, approval-workflow, retry-and-recovery, intrinsic-showcase) — completed 2026-02-26
 
 ### Phase 14: Terraform Infrastructure
 **Goal**: Every example has a generated Terraform directory with isolated local state, durable_config with retention_period=1, correct runtime, pinned AWS provider, and DynamoDB resources where needed — and `terraform plan` succeeds for all examples
@@ -118,7 +118,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 | 10. Testing | v1.0 | 9/9 | Complete | 2026-02-25 |
 | 11. Documentation | v1.0 | 4/4 | Complete | 2026-02-25 |
 | 12. CLI Toolchain | v1.1 | 4/4 | Complete | 2026-02-26 |
-| 13. Example Foundation | v1.2 | 0/TBD | Not started | - |
+| 13. Example Foundation | v1.2 | 5/5 | Complete | 2026-02-26 |
 | 14. Terraform Infrastructure | v1.2 | 0/TBD | Not started | - |
 | 15. Integration Test Harness | v1.2 | 0/TBD | Not started | - |
 | 16. AWS Deployment and Verification | v1.2 | 0/TBD | Not started | - |
