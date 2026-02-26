@@ -16,3 +16,22 @@
 
 ---
 
+
+## v1.2 Comprehensive Examples & Integration Testing (Shipped: 2026-02-26)
+
+**Phases completed:** 5 phases (13-17), 9 plans
+**Examples:** 5 workflows | **Integration tests:** 13 | **Local tests:** 152
+**Lines of code:** ~8,261 (examples + test harness)
+**Timeline:** 2 days (2026-02-24 to 2026-02-26)
+**Git range:** 73c27ac..925e4a0
+
+**Key accomplishments:**
+- Five real-world example workflows covering all 8 ASL state types (order-processing, approval-workflow, data-pipeline, retry-and-recovery, intrinsic-showcase)
+- Per-example Terraform infrastructure with isolated state, durable_config, DynamoDB integration
+- Integration test harness: poll_execution, query_logs, terraform_teardown, UUID execution IDs, IAM propagation buffer
+- 13 integration tests with dual-channel assertions (Lambda return values + CloudWatch logs) on real AWS
+- 6 READMEs documenting DSL features, prerequisites, and quick-start guide
+- Zero-resource teardown: terraform destroy + explicit delete_log_group ensures no orphaned AWS resources
+
+---
+

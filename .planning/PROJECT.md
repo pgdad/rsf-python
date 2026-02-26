@@ -2,7 +2,7 @@
 
 ## What This Is
 
-RSF is a complete replacement for AWS Step Functions built on AWS Lambda Durable Functions (launched at re:Invent 2025). It provides a YAML/JSON-based DSL for defining state machines, a Python code generator that produces Lambda Durable Functions SDK code, a React-based visual graph editor, Terraform infrastructure generation, an ASL JSON importer, a CLI toolchain, and an execution inspector with time machine debugging. Users define workflows in the DSL, generate deployment-ready Lambda code, connect business logic via `@state` decorators, deploy via Terraform, and inspect execution state with a web-based debugger.
+RSF is a complete replacement for AWS Step Functions built on AWS Lambda Durable Functions (launched at re:Invent 2025). It provides a YAML/JSON-based DSL for defining state machines, a Python code generator that produces Lambda Durable Functions SDK code, a React-based visual graph editor, Terraform infrastructure generation, an ASL JSON importer, a CLI toolchain, and an execution inspector with time machine debugging. Users define workflows in the DSL, generate deployment-ready Lambda code, connect business logic via `@state` decorators, deploy via Terraform, and inspect execution state with a web-based debugger. Five real-world example workflows with automated integration testing prove end-to-end correctness on real AWS.
 
 ## Core Value
 
@@ -10,7 +10,7 @@ Users can define, visualize, generate, deploy, and debug state machine workflows
 
 ## Current State
 
-v1.1 shipped (2026-02-26). Full CLI toolchain delivered. The complete RSF workflow (init → generate → validate → deploy → import → ui → inspect) is available from a single `rsf` entry point.
+v1.2 shipped (2026-02-26). Five real-world example workflows with automated deploy-invoke-verify-teardown testing on real AWS. All 8 ASL state types verified in production. 152 local tests + 13 integration tests + 20 harness tests passing.
 
 ## Requirements
 
@@ -34,28 +34,18 @@ v1.1 shipped (2026-02-26). Full CLI toolchain delivered. The complete RSF workfl
 - ✓ JSON Schema generation from Pydantic models for Monaco editor validation — v1.0
 - ✓ Mock SDK for local testing of generated code — v1.0
 - ✓ Comprehensive test suite (unit tests, integration tests, golden fixtures) — v1.0
-
 - ✓ CLI toolchain: `rsf init`, `rsf generate`, `rsf validate`, `rsf deploy`, `rsf import`, `rsf ui`, `rsf inspect` — v1.1
+- ✓ Five example workflows covering all 8 state types with DSL YAML, Python handlers, and local tests — v1.2
+- ✓ Per-example Terraform infrastructure with isolated state, durable_config, and DynamoDB integration — v1.2
+- ✓ Integration test harness: poll_execution, query_logs, terraform_teardown, UUID execution IDs — v1.2
+- ✓ Dual-channel AWS verification: Lambda return values + CloudWatch log assertions on real AWS — v1.2
+- ✓ Example documentation: per-example READMEs + top-level quick-start guide — v1.2
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Use-case based example workflows covering all 8 state types, 39 comparison operators, 18 intrinsic functions, error handling, I/O processing, variables, and context objects
-- [ ] Complete implementation for each example: DSL YAML, Python handlers, Terraform files
-- [ ] Automated test harness: deploy → invoke → verify (CloudWatch logs + Lambda return values) → teardown
-- [ ] 1-2 examples with real AWS service integration (e.g., DynamoDB)
-
-## Current Milestone: v1.2 Comprehensive Examples & Integration Testing
-
-**Goal:** Create use-case based examples that demonstrate all DSL features with automated AWS deployment testing and programmatic verification.
-
-**Target features:**
-- Real-world scenario examples (order processing, data pipeline, etc.) that naturally exercise the full feature surface
-- Each example: complete DSL YAML + Python handler code + Terraform infrastructure files
-- Automated test runner: single command to deploy, invoke, verify, and tear down each example
-- Dual verification: Lambda return values for workflow output + CloudWatch logs for intermediate state checks
-- Mostly self-contained compute handlers; 1-2 examples showcase real AWS service integration
+(No active requirements — start next milestone with `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -67,6 +57,8 @@ v1.1 shipped (2026-02-26). Full CLI toolchain delivered. The complete RSF workfl
 - VS Code extension — CLI + web UI is the interface
 - Direct AWS Console integration — operates independently
 - Mobile app — desktop developer tool
+- LocalStack / moto mocking of durable functions — Lambda Durable Functions (re:Invent 2025) not supported by either framework
+- Parallel CI test execution — need cost and timing data from sequential runs first
 
 ## Context
 
@@ -77,7 +69,7 @@ v1.1 shipped (2026-02-26). Full CLI toolchain delivered. The complete RSF workfl
 - **Durable Lambda invocation:** Uses Event type (async), poll `list_durable_executions_by_function` for completion
 - **Key SDK note:** `parallel()` and `map()` return `BatchResult` — call `.get_results()` for plain list
 - The DSL achieves full AWS Step Functions ASL feature parity
-- This is a greenfield rebuild from a complete blueprint specification
+- Shipped v1.2 with ~8,261 LOC in examples + test harness (Python, YAML, Terraform, Markdown)
 
 ## Constraints
 
@@ -106,6 +98,10 @@ v1.1 shipped (2026-02-26). Full CLI toolchain delivered. The complete RSF workfl
 | Token bucket rate limiter (12 req/s) | Stays under 15 req/s Lambda control plane limit | ✓ Good |
 | Separate Zustand stores (Flow + Inspect) | No cross-contamination between editor and inspector concerns | ✓ Good |
 | Mock SDK for testing | Enables local execution of generated code without AWS | ✓ Good |
+| Custom polling helper over DurableFunctionCloudTestRunner | Simpler, fewer dependencies, polling `list_durable_executions_by_function` by DurableExecutionName | ✓ Good |
+| CloudWatch Logs Insights with 15s propagation buffer | Handles log delivery delays; retry loop ensures eventual consistency | ✓ Good |
+| UUID-suffixed execution IDs (test-{name}-{ts}-{uuid8}) | Prevents collision across parallel/sequential re-runs | ✓ Good |
+| Explicit delete_log_group after terraform destroy | Catches orphaned log groups that Terraform may miss | ✓ Good |
 
 ---
-*Last updated: 2026-02-26 after v1.2 milestone started*
+*Last updated: 2026-02-26 after v1.2 milestone*
