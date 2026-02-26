@@ -48,22 +48,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| SETUP-01 | TBD | Pending |
-| SETUP-02 | TBD | Pending |
-| DEPLOY-01 | TBD | Pending |
-| DEPLOY-02 | TBD | Pending |
-| DEPLOY-03 | TBD | Pending |
-| DEPLOY-04 | TBD | Pending |
-| MIGR-01 | TBD | Pending |
-| VIS-01 | TBD | Pending |
-| VIS-02 | TBD | Pending |
-| VIS-03 | TBD | Pending |
+| SETUP-01 | Phase 18 | Pending |
+| SETUP-02 | Phase 18 | Pending |
+| DEPLOY-01 | Phase 19 | Pending |
+| DEPLOY-02 | Phase 19 | Pending |
+| DEPLOY-03 | Phase 19 | Pending |
+| DEPLOY-04 | Phase 19 | Pending |
+| MIGR-01 | Phase 20 | Pending |
+| VIS-01 | Phase 20 | Pending |
+| VIS-02 | Phase 20 | Pending |
+| VIS-03 | Phase 20 | Pending |
 
 **Coverage:**
 - v1.3 requirements: 10 total
-- Mapped to phases: 0
-- Unmapped: 10 ⚠️
+- Mapped to phases: 10
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after initial definition*
+*Last updated: 2026-02-26 after roadmap creation (phases 18-20 assigned)*
