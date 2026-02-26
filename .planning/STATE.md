@@ -2,22 +2,24 @@
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-02-24)
+See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** v1.1 CLI Toolchain
+**Current focus:** v1.1 CLI Toolchain — Phase 12
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-26 — Milestone v1.1 started
+Phase: 12 of 12 (CLI Toolchain)
+Plan: 0 of 4 in current phase
+Status: Ready to plan
+Last activity: 2026-02-26 — v1.1 roadmap created, Phase 12 defined
+
+Progress: [##########] v1.0 complete — Phase 12 not started
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 39
+- Total plans completed: 39 (v1.0)
 - Average duration: ~2 min/plan
 - Total execution time: ~80 min
 
@@ -36,23 +38,18 @@ Last activity: 2026-02-26 — Milestone v1.1 started
 | 10. Testing | 9 | ~10 min | ~1 min |
 | 11. Documentation | 4 | ~5 min | ~1.25 min |
 
-## Deliverables Summary
-
-### Phase 11 Documentation
-- README.md — Project overview, quickstart, architecture
-- mkdocs.yml — MkDocs Material site config (admonitions, code tabs, superfences)
-- docs/index.md — Landing page
-- docs/tutorial.md — Step-by-step from install through deploy and inspect
-- docs/reference/dsl.md — Complete DSL field reference (all 8 state types, 39 operators, 18 intrinsic functions)
-- docs/reference/state-types.md — Detailed examples with YAML + Python code
-- docs/migration-guide.md — ASL import walkthrough
-- MkDocs builds successfully with no errors
+**Recent Trend:**
+- v1.0 complete: 39 plans across 10 phases
+- Trend: Stable
 
 ## Accumulated Context
 
 ### Decisions
 
 Decisions are logged in PROJECT.md Key Decisions table.
+Recent decisions affecting current work:
+
+- [v1.1]: Phase 12 is a single phase (4 plans) covering all 8 CLI requirements — CLI work is one coherent delivery with no internal dependency split
 
 ### Pending Todos
 
@@ -60,10 +57,10 @@ None.
 
 ### Blockers/Concerns
 
-None.
+None. All v1.0 modules (DSL, codegen, Terraform, importer, graph editor backend, inspector backend) exist and are tested. Phase 12 wires them together via Typer.
 
 ## Session Continuity
 
-Last session: 2026-02-25
-Stopped at: Project complete — all 11 phases delivered
+Last session: 2026-02-26
+Stopped at: v1.1 roadmap created — ready to plan Phase 12
 Resume file: None

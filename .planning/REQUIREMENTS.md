@@ -129,20 +129,20 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLI-01 | TBD | Pending |
-| CLI-02 | TBD | Pending |
-| CLI-03 | TBD | Pending |
-| CLI-04 | TBD | Pending |
-| CLI-05 | TBD | Pending |
-| CLI-06 | TBD | Pending |
-| CLI-07 | TBD | Pending |
-| CLI-08 | TBD | Pending |
+| CLI-01 | Phase 12 | Pending |
+| CLI-02 | Phase 12 | Pending |
+| CLI-03 | Phase 12 | Pending |
+| CLI-04 | Phase 12 | Pending |
+| CLI-05 | Phase 12 | Pending |
+| CLI-06 | Phase 12 | Pending |
+| CLI-07 | Phase 12 | Pending |
+| CLI-08 | Phase 12 | Pending |
 
 **Coverage:**
 - v1.1 requirements: 8 total (8 CLI)
-- Mapped to phases: 0
-- Unmapped: 8 (awaiting roadmap)
+- Mapped to phases: 8
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-24*
-*Last updated: 2026-02-26 after milestone v1.1 scoping*
+*Last updated: 2026-02-26 after v1.1 roadmap creation*
