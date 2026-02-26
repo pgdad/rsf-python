@@ -1,0 +1,100 @@
+rsf_version: "1.0"
+Comment: "Retry and recovery patterns demonstrating multi-Catch chains, JitterStrategy, BackoffRate, and MaxDelaySeconds"
+StartAt: CallPrimaryService
+States:
+  CallPrimaryService:
+    Type: Task
+    Retry:
+      - ErrorEquals: ["TransientError"]
+        IntervalSeconds: 1
+        MaxAttempts: 3
+        BackoffRate: 2.0
+        JitterStrategy: FULL
+      - ErrorEquals: ["RateLimitError"]
+        IntervalSeconds: 5
+        MaxAttempts: 5
+        BackoffRate: 1.5
+        MaxDelaySeconds: 30
+        JitterStrategy: NONE
+      - ErrorEquals: ["TimeoutError"]
+        IntervalSeconds: 10
+        MaxAttempts: 2
+        BackoffRate: 3.0
+        MaxDelaySeconds: 60
+    Catch:
+      - ErrorEquals: ["ServiceDownError"]
+        Next: TryFallbackService
+        ResultPath: "$.primaryError"
+      - ErrorEquals: ["RateLimitError"]
+        Next: HandleThrottle
+        ResultPath: "$.throttleError"
+      - ErrorEquals: ["DataValidationError"]
+        Next: HandleBadData
+        ResultPath: "$.validationError"
+      - ErrorEquals: ["States.ALL"]
+        Next: CriticalFailure
+        ResultPath: "$.error"
+    Next: VerifyResult
+
+  TryFallbackService:
+    Type: Task
+    Retry:
+      - ErrorEquals: ["TransientError"]
+        IntervalSeconds: 2
+        MaxAttempts: 5
+        BackoffRate: 1.5
+        JitterStrategy: FULL
+      - ErrorEquals: ["States.ALL"]
+        IntervalSeconds: 5
+        MaxAttempts: 2
+    Catch:
+      - ErrorEquals: ["States.ALL"]
+        Next: CriticalFailure
+        ResultPath: "$.error"
+    Next: VerifyResult
+
+  HandleThrottle:
+    Type: Pass
+    Parameters:
+      throttled: true
+      retryAfter: 30
+      originalError.$: "$.throttleError"
+    ResultPath: "$.recovery"
+    Next: RetryAfterThrottle
+
+  RetryAfterThrottle:
+    Type: Task
+    Retry:
+      - ErrorEquals: ["RateLimitError"]
+        IntervalSeconds: 30
+        MaxAttempts: 3
+        BackoffRate: 2.0
+        MaxDelaySeconds: 120
+        JitterStrategy: FULL
+    Catch:
+      - ErrorEquals: ["States.ALL"]
+        Next: CriticalFailure
+        ResultPath: "$.error"
+    Next: VerifyResult
+
+  HandleBadData:
+    Type: Task
+    ResultPath: "$.sanitized"
+    Catch:
+      - ErrorEquals: ["States.ALL"]
+        Next: CriticalFailure
+        ResultPath: "$.error"
+    Next: CallPrimaryService
+
+  VerifyResult:
+    Type: Task
+    ResultPath: "$.verification"
+    Next: ServiceComplete
+
+  ServiceComplete:
+    Type: Succeed
+
+  CriticalFailure:
+    Type: Fail
+    Error: "CriticalFailure"
+    Cause: "All recovery attempts exhausted"
