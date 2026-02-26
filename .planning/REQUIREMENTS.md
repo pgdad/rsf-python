@@ -70,32 +70,32 @@ Deferred to v1.2.x or v2+. Tracked but not in current roadmap.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EXAM-01 | — | Pending |
-| EXAM-02 | — | Pending |
-| EXAM-03 | — | Pending |
-| EXAM-04 | — | Pending |
-| EXAM-05 | — | Pending |
-| EXAM-06 | — | Pending |
-| EXAM-07 | — | Pending |
-| EXAM-08 | — | Pending |
-| HARN-01 | — | Pending |
-| HARN-02 | — | Pending |
-| HARN-03 | — | Pending |
-| HARN-04 | — | Pending |
-| HARN-05 | — | Pending |
-| HARN-06 | — | Pending |
-| HARN-07 | — | Pending |
-| VERF-01 | — | Pending |
-| VERF-02 | — | Pending |
-| VERF-03 | — | Pending |
-| DOCS-01 | — | Pending |
-| DOCS-02 | — | Pending |
+| EXAM-01 | Phase 13 | Pending |
+| EXAM-02 | Phase 13 | Pending |
+| EXAM-03 | Phase 13 | Pending |
+| EXAM-04 | Phase 13 | Pending |
+| EXAM-05 | Phase 13 | Pending |
+| EXAM-06 | Phase 14 | Pending |
+| EXAM-07 | Phase 13 | Pending |
+| EXAM-08 | Phase 13 | Pending |
+| HARN-01 | Phase 15 | Pending |
+| HARN-02 | Phase 15 | Pending |
+| HARN-03 | Phase 15 | Pending |
+| HARN-04 | Phase 15 | Pending |
+| HARN-05 | Phase 14 | Pending |
+| HARN-06 | Phase 15 | Pending |
+| HARN-07 | Phase 15 | Pending |
+| VERF-01 | Phase 16 | Pending |
+| VERF-02 | Phase 16 | Pending |
+| VERF-03 | Phase 16 | Pending |
+| DOCS-01 | Phase 17 | Pending |
+| DOCS-02 | Phase 17 | Pending |
 
 **Coverage:**
 - v1.2 requirements: 20 total
-- Mapped to phases: 0
-- Unmapped: 20 ⚠️
+- Mapped to phases: 20
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-26*
-*Last updated: 2026-02-26 after initial definition*
+*Last updated: 2026-02-26 after roadmap creation — all 20 requirements mapped to phases 13-17*
