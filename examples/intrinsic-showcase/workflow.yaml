@@ -1,0 +1,63 @@
+rsf_version: "1.0"
+Comment: "Intrinsic function showcase exercising 14+ intrinsic functions and all 5 I/O pipeline stages"
+StartAt: PrepareData
+States:
+  PrepareData:
+    Type: Pass
+    InputPath: "$.input"
+    Parameters:
+      greeting.$: "States.Format('Welcome, {}!', $.userName)"
+      requestId.$: "States.UUID()"
+      nameParts.$: "States.StringSplit($.userName, ' ')"
+      tagArray.$: "States.Array('demo', 'showcase', 'intrinsics')"
+      encoded.$: "States.Base64Encode($.userName)"
+    ResultPath: "$.prepared"
+    Next: StringOperations
+
+  StringOperations:
+    Type: Task
+    Parameters:
+      decoded.$: "States.Base64Decode($.prepared.encoded)"
+      hash.$: "States.Hash($.prepared.greeting, 'SHA-256')"
+      serialized.$: "States.JsonToString($.prepared.nameParts)"
+      formatted.$: "States.Format('{} has {} name parts', $.input.userName, States.ArrayLength($.prepared.nameParts))"
+    ResultSelector:
+      stringResults.$: "$"
+    ResultPath: "$.strings"
+    Next: ArrayOperations
+
+  ArrayOperations:
+    Type: Task
+    InputPath: "$"
+    Parameters:
+      range.$: "States.ArrayRange(1, 10, 2)"
+      partitioned.$: "States.ArrayPartition($.prepared.tagArray, 2)"
+      contains.$: "States.ArrayContains($.prepared.tagArray, 'demo')"
+      firstTag.$: "States.ArrayGetItem($.prepared.tagArray, 0)"
+      tagCount.$: "States.ArrayLength($.prepared.tagArray)"
+      uniqueTags.$: "States.ArrayUnique(States.Array('a', 'b', 'a', 'c', 'b'))"
+    ResultSelector:
+      arrayResults.$: "$"
+    ResultPath: "$.arrays"
+    Next: MathAndJsonOps
+
+  MathAndJsonOps:
+    Type: Task
+    Parameters:
+      sum.$: "States.MathAdd($.arrays.arrayResults.tagCount, 10)"
+      randomVal.$: "States.MathRandom(1, 100)"
+      parsed.$: "States.StringToJson($.strings.stringResults.serialized)"
+    ResultPath: "$.math"
+    OutputPath: "$"
+    Next: CheckResults
+
+  CheckResults:
+    Type: Choice
+    Choices:
+      - Variable: "$.arrays.arrayResults.contains"
+        BooleanEquals: true
+        Next: ShowcaseComplete
+    Default: ShowcaseComplete
+
+  ShowcaseComplete:
+    Type: Succeed
