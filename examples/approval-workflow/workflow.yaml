@@ -1,0 +1,89 @@
+rsf_version: "1.0"
+Comment: "Approval workflow demonstrating Task, Wait, Choice, Pass with Context Object ($$) and Variables/Assign"
+StartAt: SubmitRequest
+States:
+  SubmitRequest:
+    Type: Task
+    Parameters:
+      requestData.$: "$.request"
+      submittedBy.$: "$.userId"
+      executionId.$: "$$.Execution.Id"
+      stateMachine.$: "$$.StateMachine.Name"
+    Assign:
+      requestId.$: "$.requestId"
+      submitter.$: "$.userId"
+      attemptCount: 0
+    ResultPath: "$.submission"
+    Next: SetApprovalContext
+
+  SetApprovalContext:
+    Type: Pass
+    Parameters:
+      requestId.$: "$requestId"
+      submitter.$: "$submitter"
+      stateName.$: "$$.State.Name"
+      startTime.$: "$$.Execution.StartTime"
+    Assign:
+      approvalDeadline: "2024-12-31T23:59:59Z"
+      escalationLevel: 1
+    ResultPath: "$.approvalContext"
+    Next: WaitForReview
+
+  WaitForReview:
+    Type: Wait
+    Seconds: 5
+    Next: CheckApprovalStatus
+
+  CheckApprovalStatus:
+    Type: Task
+    Parameters:
+      requestId.$: "$requestId"
+      checkNumber.$: "$attemptCount"
+    Assign:
+      attemptCount.$: "States.MathAdd($attemptCount, 1)"
+    ResultPath: "$.approvalCheck"
+    Next: EvaluateDecision
+
+  EvaluateDecision:
+    Type: Choice
+    Choices:
+      - Variable: "$.approvalCheck.decision"
+        StringEquals: "approved"
+        Next: ProcessApproval
+      - Variable: "$.approvalCheck.decision"
+        StringEquals: "denied"
+        Next: RequestDenied
+      - Variable: "$attemptCount"
+        NumericGreaterThan: 3
+        Next: EscalateRequest
+    Default: WaitForReview
+
+  ProcessApproval:
+    Type: Task
+    Parameters:
+      requestId.$: "$requestId"
+      approvedBy.$: "$.approvalCheck.approver"
+      executionId.$: "$$.Execution.Id"
+    Output:
+      status: "approved"
+      requestId.$: "$requestId"
+      approver.$: "$.approvalCheck.approver"
+    Next: RequestApproved
+
+  EscalateRequest:
+    Type: Pass
+    Assign:
+      escalationLevel.$: "States.MathAdd($escalationLevel, 1)"
+    Output:
+      status: "escalated"
+      requestId.$: "$requestId"
+      level.$: "$escalationLevel"
+    Next: RequestApproved
+
+  RequestApproved:
+    Type: Succeed
+
+  RequestDenied:
+    Type: Fail
+    Error: "RequestDenied"
+    Cause: "The approval request was denied"
