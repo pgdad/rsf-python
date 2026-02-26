@@ -40,12 +40,15 @@ def main(
 
 
 # Import and register subcommands
-from rsf.cli import deploy_cmd, import_cmd, init_cmd, validate_cmd  # noqa: E402
+from rsf.cli import deploy_cmd, generate_cmd, import_cmd, init_cmd, inspect_cmd, ui_cmd, validate_cmd  # noqa: E402
 
 app.command(name="init")(init_cmd.init)
 app.command(name="deploy")(deploy_cmd.deploy)
 app.command(name="validate")(validate_cmd.validate)
+app.command(name="generate")(generate_cmd.generate)
 app.command(name="import")(import_cmd.import_asl)
+app.command(name="ui")(ui_cmd.ui)
+app.command(name="inspect")(inspect_cmd.inspect)
 
 
 if __name__ == "__main__":
