@@ -10,8 +10,8 @@ Requirements for CLI toolchain milestone. Each maps to roadmap phases.
 ### CLI
 
 - [x] **CLI-01**: User can run `rsf init <project-name>` to scaffold a project with directory structure, workflow.yaml, pyproject.toml, handler example, test example, .gitignore
-- [ ] **CLI-02**: User can run `rsf generate <workflow.yaml>` to parse DSL, validate, map states, render orchestrator, create handler stubs (if missing), maintain handlers/__init__.py
-- [ ] **CLI-03**: User can run `rsf validate <workflow.yaml>` to validate DSL (Pydantic + semantic) without generating code, with field-path error reporting
+- [x] **CLI-02**: User can run `rsf generate <workflow.yaml>` to parse DSL, validate, map states, render orchestrator, create handler stubs (if missing), maintain handlers/__init__.py
+- [x] **CLI-03**: User can run `rsf validate <workflow.yaml>` to validate DSL (Pydantic + semantic) without generating code, with field-path error reporting
 - [x] **CLI-04**: User can run `rsf deploy [--code-only]` to generate Terraform + run terraform init/apply; --code-only re-packages and updates Lambda code only
 - [x] **CLI-05**: User can run `rsf import <asl.json> [--output workflow.yaml]` to import Step Functions ASL JSON through full pipeline
 - [x] **CLI-06**: User can run `rsf ui [workflow.yaml] [--port 8765]` to launch graph editor FastAPI server, serve React SPA, auto-open browser
@@ -130,8 +130,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CLI-01 | Phase 12 | Complete |
-| CLI-02 | Phase 12 | Pending |
-| CLI-03 | Phase 12 | Pending |
+| CLI-02 | Phase 12 | Complete |
+| CLI-03 | Phase 12 | Complete |
 | CLI-04 | Phase 12 | Complete |
 | CLI-05 | Phase 12 | Complete |
 | CLI-06 | Phase 12 | Complete |

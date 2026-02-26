@@ -55,6 +55,9 @@ Recent decisions affecting current work:
 - [12-01]: Simplified CLI __init__.py to empty package marker to avoid circular import warnings
 - [12-01]: no_args_is_help=True uses Typer exit code 2; tests updated to accept both 0 and 2
 - [12-01]: Templates accessed via Path(__file__).parent / 'templates'; only pyproject.toml.j2 uses Jinja2
+- [12-02]: validate_cmd and generate_cmd each implement the validation pipeline inline (no shared helper) for self-contained readability
+- [12-02]: generate_cmd passes handlers_dir=output_dir/'handlers' explicitly to generator.generate() for predictable output structure
+- [12-02]: Field-path formatting: Pydantic errors via '.'.join(str(loc) for loc in err['loc']); semantic errors via ValidationError.path attribute
 - [12-03]: load_definition() handles both loading and Pydantic validation — no separate validate_definition() needed
 - [12-03]: Workflow name derived from definition.comment, falling back to workflow filename stem
 - [12-03]: Code-only mode checks tf_dir existence before proceeding; terraform init skipped in code-only path
