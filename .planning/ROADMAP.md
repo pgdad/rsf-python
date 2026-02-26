@@ -41,7 +41,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 
 - [x] **Phase 13: Example Foundation** — Five complete examples: DSL YAML, handler code, and local mock SDK tests for all examples
 - [x] **Phase 14: Terraform Infrastructure** — Per-example Terraform files with isolated local state, durable_config, and DynamoDB resources
-- [ ] **Phase 15: Integration Test Harness** — Shared polling, log query, teardown helpers and single-command test runner
+- [x] **Phase 15: Integration Test Harness** — Shared polling, log query, teardown helpers and single-command test runner
 - [ ] **Phase 16: AWS Deployment and Verification** — All 5 examples deployed, invoked, and verified via dual-channel assertions on real AWS
 - [ ] **Phase 17: Cleanup and Documentation** — End-to-end teardown validated, example READMEs and top-level quick-start guide written
 
@@ -80,7 +80,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
   3. User can call the teardown fixture and it runs `terraform destroy` followed by explicit `boto3 logs.delete_log_group()` — leaving no orphaned log groups after execution
   4. Every test invocation uses a UUID-suffixed execution ID (format: `test-<name>-<timestamp>-<uuid8>`) so parallel or sequential re-runs never collide
   5. User can run `pytest tests/test_examples/ -m integration` as a single command that executes the full integration suite
-**Plans**: TBD
+**Plans**: 1 plan (shared harness + test directory structure + 20 unit tests) — completed 2026-02-26
 
 ### Phase 16: AWS Deployment and Verification
 **Goal**: All 5 examples deploy to real AWS, execute successfully, and pass dual-channel assertions — Lambda return value verification and CloudWatch log intermediate-state verification
@@ -120,6 +120,6 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 | 12. CLI Toolchain | v1.1 | 4/4 | Complete | 2026-02-26 |
 | 13. Example Foundation | v1.2 | 5/5 | Complete | 2026-02-26 |
 | 14. Terraform Infrastructure | v1.2 | 1/1 | Complete | 2026-02-26 |
-| 15. Integration Test Harness | v1.2 | 0/TBD | Not started | - |
+| 15. Integration Test Harness | v1.2 | 1/1 | Complete | 2026-02-26 |
 | 16. AWS Deployment and Verification | v1.2 | 0/TBD | Not started | - |
 | 17. Cleanup and Documentation | v1.2 | 0/TBD | Not started | - |

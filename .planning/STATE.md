@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** Phase 14 — Terraform Infrastructure (v1.2)
+**Current focus:** Phase 16 — AWS Deployment and Verification (v1.2)
 
 ## Current Position
 
-Phase: 14 of 17 (Terraform Infrastructure)
+Phase: 16 of 17 (AWS Deployment and Verification)
 Plan: 0 of TBD in current phase
 Status: Ready to plan
-Last activity: 2026-02-26 — Phase 13 complete, 5 examples with 152 tests passing
+Last activity: 2026-02-26 — Phase 15 complete, integration test harness with 20 unit tests passing
 
-Progress: [█████████████░░░░░░░] 65% (v1.0+v1.1 complete, v1.2 phase 13 done)
+Progress: [██████████████░░░░░░] 70% (v1.0+v1.1 complete, v1.2 phases 13-15 done)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 49 (v1.0: 39, v1.1: 4, v1.2: 5)
+- Total plans completed: 51 (v1.0: 39, v1.1: 4, v1.2: 8)
 - Average duration: tracked per milestone
 - Total execution time: tracked per milestone
 
@@ -30,7 +30,9 @@ Progress: [█████████████░░░░░░░] 65% (v1
 | v1.0 phases 1-11 | 39 | — | — |
 | v1.1 phase 12 | 4 | — | — |
 | v1.2 phase 13 | 5 | — | — |
-| v1.2 phases 14-17 | 0 | — | — |
+| v1.2 phase 14 | 1 | — | — |
+| v1.2 phase 15 | 1 | — | — |
+| v1.2 phases 16-17 | 0 | — | — |
 
 *Updated after each plan completion*
 
@@ -41,9 +43,10 @@ Progress: [█████████████░░░░░░░] 65% (v1
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- [v1.2 research]: `GetDurableExecution` (public API) is the correct call for result retrieval — not `GetDurableExecutionState` (internal SDK API). Validate exact response shape (`Result`, `Status`, `Error` fields) with a boto3 test call before writing polling helper in Phase 15.
-- [v1.2 research]: `DurableFunctionCloudTestRunner` from `aws-durable-execution-sdk-python-testing` is MEDIUM confidence — validate PyPI status during Phase 15 planning before deciding whether to adopt or write custom polling helper.
-- [v1.2 research]: `AllowInvokeLatest = true` may be required for `$LATEST` invocation — verify RSF-generated `iam.tf` includes this permission during Phase 14 planning.
+- [Phase 15]: Polling strategy uses `list_durable_executions_by_function` filtered by `DurableExecutionName` — not `get_durable_execution` (which doesn't exist as a standalone API). Terminal states: SUCCEEDED, FAILED, TIMED_OUT, STOPPED.
+- [Phase 15]: CloudWatch log query uses Logs Insights API (`start_query` + `get_query_results`) with 15s propagation buffer.
+- [Phase 15]: `get_durable_execution_history(DurableExecutionArn)` API provides step-level event data with EventType enum — useful for Phase 16 verification of intermediate state transitions.
+- [Phase 15]: `DurableFunctionCloudTestRunner` not adopted — custom polling helper written instead (simpler, fewer dependencies).
 
 ### Pending Todos
 
@@ -51,11 +54,10 @@ None.
 
 ### Blockers/Concerns
 
-- [Phase 15]: `GetDurableExecution` response schema confirmed MEDIUM confidence — must validate field names before writing polling helper. Resolve at Phase 15 planning start.
 - [Phase 14]: DynamoDB IAM actions for data-pipeline example need confirmation — `dynamodb:PutItem`, `dynamodb:GetItem`, `dynamodb:Query` expected but not verified against actual access patterns.
 
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Phase 13 complete — 5 examples built with 152 tests, ready to plan Phase 14
+Stopped at: Phase 15 complete — integration test harness built with 20 unit tests, ready to plan Phase 16
 Resume file: None

@@ -36,3 +36,6 @@ packages = ["src/rsf"]
 [tool.pytest.ini_options]
 testpaths = ["tests"]
 pythonpath = ["src"]
+markers = [
+    "integration: AWS integration tests (require credentials and terraform)",
+]
