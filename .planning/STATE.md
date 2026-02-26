@@ -5,21 +5,21 @@
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** Phase 16 — AWS Deployment and Verification (v1.2)
+**Current focus:** Milestone v1.2 complete — all phases shipped
 
 ## Current Position
 
-Phase: 16 of 17 (AWS Deployment and Verification)
-Plan: 0 of TBD in current phase
-Status: Ready to plan
-Last activity: 2026-02-26 — Phase 15 complete, integration test harness with 20 unit tests passing
+Phase: 17 of 17 (Cleanup and Documentation) — COMPLETE
+Plan: 1 of 1 in current phase
+Status: Milestone v1.2 complete
+Last activity: 2026-02-26 — Phase 17 complete, 6 READMEs written, teardown validated
 
-Progress: [██████████████░░░░░░] 70% (v1.0+v1.1 complete, v1.2 phases 13-15 done)
+Progress: [████████████████████] 100% (v1.0+v1.1+v1.2 complete)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 51 (v1.0: 39, v1.1: 4, v1.2: 8)
+- Total plans completed: 53 (v1.0: 39, v1.1: 4, v1.2: 10)
 - Average duration: tracked per milestone
 - Total execution time: tracked per milestone
 
@@ -32,7 +32,8 @@ Progress: [██████████████░░░░░░] 70% (v1
 | v1.2 phase 13 | 5 | — | — |
 | v1.2 phase 14 | 1 | — | — |
 | v1.2 phase 15 | 1 | — | — |
-| v1.2 phases 16-17 | 0 | — | — |
+| v1.2 phase 16 | 1 | — | — |
+| v1.2 phase 17 | 1 | — | — |
 
 *Updated after each plan completion*
 
@@ -59,5 +60,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Phase 15 complete — integration test harness built with 20 unit tests, ready to plan Phase 16
+Stopped at: Milestone v1.2 complete — all 5 phases (13-17) shipped
 Resume file: None

@@ -4,7 +4,7 @@
 
 - ✅ **v1.0 Core** — Phases 1-11 (shipped 2026-02-25)
 - ✅ **v1.1 CLI Toolchain** — Phase 12 (shipped 2026-02-26)
-- 🚧 **v1.2 Comprehensive Examples & Integration Testing** — Phases 13-17 (in progress)
+- ✅ **v1.2 Comprehensive Examples & Integration Testing** — Phases 13-17 (shipped 2026-02-26)
 
 ## Phases
 
@@ -35,15 +35,15 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 
 </details>
 
-### 🚧 v1.2 Comprehensive Examples & Integration Testing (In Progress)
+### ✅ v1.2 Comprehensive Examples & Integration Testing (Shipped 2026-02-26)
 
 **Milestone Goal:** Prove RSF works end-to-end against real AWS by delivering 5 real-world example workflows with automated deploy-invoke-verify-teardown testing.
 
 - [x] **Phase 13: Example Foundation** — Five complete examples: DSL YAML, handler code, and local mock SDK tests for all examples
 - [x] **Phase 14: Terraform Infrastructure** — Per-example Terraform files with isolated local state, durable_config, and DynamoDB resources
 - [x] **Phase 15: Integration Test Harness** — Shared polling, log query, teardown helpers and single-command test runner
-- [ ] **Phase 16: AWS Deployment and Verification** — All 5 examples deployed, invoked, and verified via dual-channel assertions on real AWS
-- [ ] **Phase 17: Cleanup and Documentation** — End-to-end teardown validated, example READMEs and top-level quick-start guide written
+- [x] **Phase 16: AWS Deployment and Verification** — All 5 examples deployed, invoked, and verified via dual-channel assertions on real AWS
+- [x] **Phase 17: Cleanup and Documentation** — End-to-end teardown validated, example READMEs and top-level quick-start guide written
 
 ## Phase Details
 
@@ -91,7 +91,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
   2. Each of the 5 examples has at least one CloudWatch log assertion confirming intermediate state transitions match expected handler execution sequence
   3. All 8 state types are observed in real AWS execution across the combined example set (confirmed by log and return value evidence in test output)
   4. The data-pipeline example performs real DynamoDB reads and writes during execution and the test verifies the expected items exist in the table after the workflow completes
-**Plans**: TBD
+**Plans**: 1 plan (5 integration test files with dual-channel assertions) — completed 2026-02-26
 
 ### Phase 17: Cleanup and Documentation
 **Goal**: A developer with no prior context can clone the repo, run one command to execute the full integration suite, and have zero AWS resources remaining afterward — and each example has a README explaining what it demonstrates
@@ -101,7 +101,7 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
   1. Each example directory contains a README that names which DSL features it demonstrates and provides the exact command to run it standalone
   2. The top-level `examples/README.md` lists all prerequisites (AWS credentials, Terraform binary, Python 3.13+, boto3>=1.42.0) and a quick-start command sequence a developer can follow without reading any other file
   3. After a full integration test run completes (pass or fail), no Lambda functions, CloudWatch log groups, DynamoDB tables, or IAM roles from the test suite remain in the AWS account
-**Plans**: TBD
+**Plans**: 1 plan (5 example READMEs + top-level quick-start guide) — completed 2026-02-26
 
 ## Progress
 
@@ -121,5 +121,5 @@ Full details: `.planning/milestones/v1.1-ROADMAP.md`
 | 13. Example Foundation | v1.2 | 5/5 | Complete | 2026-02-26 |
 | 14. Terraform Infrastructure | v1.2 | 1/1 | Complete | 2026-02-26 |
 | 15. Integration Test Harness | v1.2 | 1/1 | Complete | 2026-02-26 |
-| 16. AWS Deployment and Verification | v1.2 | 0/TBD | Not started | - |
-| 17. Cleanup and Documentation | v1.2 | 0/TBD | Not started | - |
+| 16. AWS Deployment and Verification | v1.2 | 1/1 | Complete | 2026-02-26 |
+| 17. Cleanup and Documentation | v1.2 | 1/1 | Complete | 2026-02-26 |
