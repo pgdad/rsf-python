@@ -1,0 +1,79 @@
+rsf_version: "1.0"
+Comment: "Order processing workflow demonstrating Task, Choice, Parallel, Succeed, and Fail states with Retry/Catch"
+StartAt: ValidateOrder
+States:
+  ValidateOrder:
+    Type: Task
+    ResultPath: "$.validation"
+    Retry:
+      - ErrorEquals: ["ValidationTimeout"]
+        IntervalSeconds: 2
+        MaxAttempts: 3
+        BackoffRate: 2.0
+    Catch:
+      - ErrorEquals: ["InvalidOrderError"]
+        Next: OrderRejected
+        ResultPath: "$.error"
+    Next: CheckOrderValue
+
+  CheckOrderValue:
+    Type: Choice
+    Choices:
+      - Variable: "$.validation.total"
+        NumericGreaterThan: 1000
+        Next: RequireApproval
+      - Variable: "$.validation.itemCount"
+        NumericEquals: 0
+        Next: OrderRejected
+    Default: ProcessOrder
+
+  RequireApproval:
+    Type: Task
+    TimeoutSeconds: 3600
+    Catch:
+      - ErrorEquals: ["States.Timeout", "ApprovalDenied"]
+        Next: OrderRejected
+        ResultPath: "$.error"
+    ResultPath: "$.approval"
+    Next: ProcessOrder
+
+  ProcessOrder:
+    Type: Parallel
+    Branches:
+      - StartAt: ProcessPayment
+        States:
+          ProcessPayment:
+            Type: Task
+            Retry:
+              - ErrorEquals: ["PaymentGatewayError"]
+                IntervalSeconds: 1
+                MaxAttempts: 3
+                BackoffRate: 2.0
+            End: true
+      - StartAt: ReserveInventory
+        States:
+          ReserveInventory:
+            Type: Task
+            Retry:
+              - ErrorEquals: ["InventoryLockError"]
+                MaxAttempts: 2
+            End: true
+    ResultPath: "$.processing"
+    Catch:
+      - ErrorEquals: ["States.ALL"]
+        Next: OrderRejected
+        ResultPath: "$.error"
+    Next: SendConfirmation
+
+  SendConfirmation:
+    Type: Task
+    ResultPath: "$.confirmation"
+    Next: OrderComplete
+
+  OrderComplete:
+    Type: Succeed
+
+  OrderRejected:
+    Type: Fail
+    Error: "OrderRejected"
+    Cause: "Order could not be processed"
