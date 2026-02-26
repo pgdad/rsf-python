@@ -10,11 +10,11 @@ See: .planning/PROJECT.md (updated 2026-02-26)
 ## Current Position
 
 Phase: 12 of 12 (CLI Toolchain)
-Plan: 1 of 4 in current phase
+Plan: 3 of 4 in current phase
 Status: In progress
-Last activity: 2026-02-26 — Plan 12-01 complete (CLI skeleton + rsf init)
+Last activity: 2026-02-26 — Plan 12-03 complete (rsf deploy subcommand)
 
-Progress: [##########] v1.0 complete — Phase 12 plan 1/4 complete
+Progress: [##########] v1.0 complete — Phase 12 plan 3/4 complete
 
 ## Performance Metrics
 
@@ -37,7 +37,7 @@ Progress: [##########] v1.0 complete — Phase 12 plan 1/4 complete
 | 9. Inspector UI | 5 | ~7 min | ~1.5 min |
 | 10. Testing | 9 | ~10 min | ~1 min |
 | 11. Documentation | 4 | ~5 min | ~1.25 min |
-| 12. CLI Toolchain | 1/4 | ~3 min | ~3 min |
+| 12. CLI Toolchain | 3/4 | ~4 min | ~1.3 min |
 
 **Recent Trend:**
 - v1.0 complete: 39 plans across 10 phases
@@ -54,6 +54,9 @@ Recent decisions affecting current work:
 - [12-01]: Simplified CLI __init__.py to empty package marker to avoid circular import warnings
 - [12-01]: no_args_is_help=True uses Typer exit code 2; tests updated to accept both 0 and 2
 - [12-01]: Templates accessed via Path(__file__).parent / 'templates'; only pyproject.toml.j2 uses Jinja2
+- [12-03]: load_definition() handles both loading and Pydantic validation — no separate validate_definition() needed
+- [12-03]: Workflow name derived from definition.comment, falling back to workflow filename stem
+- [12-03]: Code-only mode checks tf_dir existence before proceeding; terraform init skipped in code-only path
 
 ### Pending Todos
 
@@ -66,5 +69,5 @@ None. All v1.0 modules (DSL, codegen, Terraform, importer, graph editor backend,
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 12-01-PLAN.md (CLI skeleton + rsf init scaffold)
+Stopped at: Completed 12-03-PLAN.md (rsf deploy subcommand)
 Resume file: None
