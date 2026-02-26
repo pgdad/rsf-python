@@ -65,7 +65,7 @@ Full details: `.planning/milestones/v1.3-ROADMAP.md`
 
 **Milestone Goal:** Automated Playwright screenshots of the graph editor and execution inspector for all 5 example workflows, embedded in example READMEs and tutorial docs.
 
-- [ ] **Phase 21: Playwright Setup** - Configure Playwright as dev dependency with browser automation support
+- [x] **Phase 21: Playwright Setup** - Configure Playwright as dev dependency with browser automation support
 - [ ] **Phase 22: Mock Fixtures and Server Automation** - Create mock execution data and server lifecycle management for all 5 examples
 - [ ] **Phase 23: Screenshot Capture** - Capture graph editor and inspector screenshots for all 5 examples via single npm script
 - [ ] **Phase 24: Documentation Integration** - Embed screenshots in example READMEs and tutorial docs
@@ -83,7 +83,7 @@ Full details: `.planning/milestones/v1.3-ROADMAP.md`
 **Plans**: 1 plan
 
 Plans:
-- [ ] 21-01-PLAN.md — Install Playwright devDependency and verify with smoke test script
+- [x] 21-01-PLAN.md — Install Playwright devDependency and verify with smoke test script
 
 ### Phase 22: Mock Fixtures and Server Automation
 **Goal**: Mock execution fixture data exists for all 5 workflows and scripts can start/stop the rsf ui and rsf inspect servers automatically so screenshots can be taken without real AWS
@@ -142,7 +142,7 @@ Plans:
 | 18. Getting Started | v1.3 | 2/2 | Complete | 2026-02-26 |
 | 19. Build and Deploy | v1.3 | 3/3 | Complete | 2026-02-26 |
 | 20. Advanced Tools | v1.3 | 3/3 | Complete | 2026-02-26 |
-| 21. Playwright Setup | v1.4 | 0/1 | Planning | - |
+| 21. Playwright Setup | v1.4 | 1/1 | Complete | 2026-02-26 |
 | 22. Mock Fixtures and Server Automation | v1.4 | 0/TBD | Not started | - |
 | 23. Screenshot Capture | v1.4 | 0/TBD | Not started | - |
 | 24. Documentation Integration | v1.4 | 0/TBD | Not started | - |
