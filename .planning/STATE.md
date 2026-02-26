@@ -18,21 +18,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** v1.3 Comprehensive Tutorial — Phase 18: Getting Started
+**Current focus:** v1.3 Comprehensive Tutorial — Phase 19: Build and Deploy
 
 ## Current Position
 
-Phase: 18 — Getting Started
-Plan: 2/2 complete
-Status: Phase 18 complete — Plan 01 (rsf init tutorial) and Plan 02 (rsf validate tutorial) done
-Last activity: 2026-02-26 — Plan 18-02 complete: rsf validate tutorial (tutorials/02-workflow-validation.md)
+Phase: 19 — Build and Deploy
+Plan: 1/3 complete
+Status: Plan 19-01 complete (rsf generate tutorial)
+Last activity: 2026-02-26 — Plan 19-01 complete: rsf generate tutorial (tutorials/03-code-generation.md)
 
-Progress: [####░░░░░░░░░░░░░░░░] 10%
+Progress: [########░░░░░░░░░░░░] 40%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 55 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 2)
+- Total plans completed: 56 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 3)
 
 **By Milestone:**
 
@@ -52,6 +52,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 **18-01:** Tutorial structure established — prerequisites, numbered steps, verbatim template content in fenced code blocks, blockquotes for tips, explicit forward pointer to next tutorial.
 
 **18-02:** rsf validate tutorial uses actual CLI output (not idealized); Stage 2 structural error (invalid Type) produces empty field-path — documented reality, not expectation. Learn-by-breaking pattern: full broken file + exact output + interpretation + fix.
+
+**19-01:** rsf generate tutorial uses actual codegen template output (from rsf.registry import state, input_data signature) for generated stubs while keeping rsf init example handler style as context from Tutorial 1. Multi-state workflow demonstrates handler-per-Task pattern.
 
 ### v1.3 Phase Structure
 
@@ -77,5 +79,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Completed 18-02-PLAN.md (rsf validate tutorial) — Phase 18 complete
+Stopped at: Completed 19-01-PLAN.md (rsf generate tutorial) — Plan 1/3 in Phase 19
 Resume file: None

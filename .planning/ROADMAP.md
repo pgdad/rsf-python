@@ -113,5 +113,5 @@ Full details: `.planning/milestones/v1.2-ROADMAP.md`
 | 16. AWS Deployment and Verification | v1.2 | 1/1 | Complete | 2026-02-26 |
 | 17. Cleanup and Documentation | v1.2 | 1/1 | Complete | 2026-02-26 |
 | 18. Getting Started | 2/2 | Complete    | 2026-02-26 | - |
-| 19. Build and Deploy | v1.3 | 0/3 | Not started | - |
+| 19. Build and Deploy | 1/3 | In Progress|  | - |
 | 20. Advanced Tools | v1.3 | 0/? | Not started | - |

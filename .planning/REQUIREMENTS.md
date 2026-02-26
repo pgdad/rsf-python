@@ -14,7 +14,7 @@ Requirements for the Comprehensive Tutorial milestone. Each maps to roadmap phas
 
 ### Code Generation & Deployment
 
-- [ ] **DEPLOY-01**: User can follow a tutorial to generate orchestrator code and handler stubs with `rsf generate`
+- [x] **DEPLOY-01**: User can follow a tutorial to generate orchestrator code and handler stubs with `rsf generate`
 - [ ] **DEPLOY-02**: User can follow a tutorial to deploy a workflow to AWS with `rsf deploy` using complete Terraform
 - [ ] **DEPLOY-03**: User can follow a tutorial to use `rsf deploy --code-only` fast path for iterating on handler logic
 - [ ] **DEPLOY-04**: User can invoke the deployed Lambda, verify output, and tear down infrastructure with provided scripts
@@ -50,7 +50,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 |-------------|-------|--------|
 | SETUP-01 | Phase 18 | Complete |
 | SETUP-02 | Phase 18 | Complete |
-| DEPLOY-01 | Phase 19 | Pending |
+| DEPLOY-01 | Phase 19 | Complete |
 | DEPLOY-02 | Phase 19 | Pending |
 | DEPLOY-03 | Phase 19 | Pending |
 | DEPLOY-04 | Phase 19 | Pending |
