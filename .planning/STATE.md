@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: UI Screenshots
-status: defining_requirements
+status: roadmap_created
 last_updated: "2026-02-26"
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,14 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** v1.4 UI Screenshots — automated Playwright capture for graph editor and inspector
+**Current focus:** v1.4 UI Screenshots — Phase 21: Playwright Setup
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-26 — Milestone v1.4 started
+Phase: 21 of 24 (Playwright Setup)
+Plan: — of — in current phase
+Status: Ready to plan
+Last activity: 2026-02-26 — Roadmap created for v1.4 (4 phases, 11 requirements)
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -47,6 +49,13 @@ Last activity: 2026-02-26 — Milestone v1.4 started
 
 All decisions logged in PROJECT.md Key Decisions table.
 
+Key context for v1.4:
+- Graph editor at #/editor, inspector at #/inspector
+- UI in ui/ directory (React + Vite)
+- Screenshots save to docs/images/
+- Mock execution fixtures replace real AWS (no cost, no dependency)
+- Playwright runs in ui/ as a devDependency
+
 ### Pending Todos
 
 None.
@@ -58,5 +67,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-26
-Stopped at: Milestone v1.4 started — defining requirements
+Stopped at: Roadmap created — 4 phases (21-24), ready to plan Phase 21
 Resume file: None

@@ -6,6 +6,7 @@
 - ✅ **v1.1 CLI Toolchain** — Phase 12 (shipped 2026-02-26)
 - ✅ **v1.2 Comprehensive Examples & Integration Testing** — Phases 13-17 (shipped 2026-02-26)
 - ✅ **v1.3 Comprehensive Tutorial** — Phases 18-20 (shipped 2026-02-26)
+- 🚧 **v1.4 UI Screenshots** — Phases 21-24 (in progress)
 
 ## Phases
 
@@ -60,6 +61,61 @@ Full details: `.planning/milestones/v1.3-ROADMAP.md`
 
 </details>
 
+### 🚧 v1.4 UI Screenshots (In Progress)
+
+**Milestone Goal:** Automated Playwright screenshots of the graph editor and execution inspector for all 5 example workflows, embedded in example READMEs and tutorial docs.
+
+- [ ] **Phase 21: Playwright Setup** - Configure Playwright as dev dependency with browser automation support
+- [ ] **Phase 22: Mock Fixtures and Server Automation** - Create mock execution data and server lifecycle management for all 5 examples
+- [ ] **Phase 23: Screenshot Capture** - Capture graph editor and inspector screenshots for all 5 examples via single npm script
+- [ ] **Phase 24: Documentation Integration** - Embed screenshots in example READMEs and tutorial docs
+
+## Phase Details
+
+### Phase 21: Playwright Setup
+**Goal**: Playwright is installed and runnable as a dev dependency so the screenshot automation scripts have a working browser automation foundation
+**Depends on**: Phase 20 (v1.3 complete)
+**Requirements**: CAPT-01
+**Success Criteria** (what must be TRUE):
+  1. Running `npm install` in the ui/ directory installs Playwright and its chromium browser
+  2. A developer can run a minimal Playwright script that opens a browser and navigates to a URL without errors
+  3. Playwright is listed as a devDependency in ui/package.json with a pinned version
+**Plans**: TBD
+
+### Phase 22: Mock Fixtures and Server Automation
+**Goal**: Mock execution fixture data exists for all 5 workflows and scripts can start/stop the rsf ui and rsf inspect servers automatically so screenshots can be taken without real AWS
+**Depends on**: Phase 21
+**Requirements**: CAPT-02, CAPT-03
+**Success Criteria** (what must be TRUE):
+  1. Each of the 5 examples (order-processing, approval-workflow, data-pipeline, retry-and-recovery, intrinsic-showcase) has a mock execution fixture file that the inspector can load
+  2. The inspector displays meaningful state when loaded with the mock fixture (states shown, event timeline populated)
+  3. A script starts rsf ui for a given example, confirms the server is ready, and stops it cleanly after use
+  4. A script starts rsf inspect with mock fixture data and stops it cleanly after use
+**Plans**: TBD
+
+### Phase 23: Screenshot Capture
+**Goal**: All 15 screenshots (graph editor full layout, graph editor DSL view, and execution inspector for each of 5 examples) are captured as PNG files in docs/images/ via a single npm script
+**Depends on**: Phase 22
+**Requirements**: CAPT-04, CAPT-05, CAPT-06, CAPT-07
+**Success Criteria** (what must be TRUE):
+  1. Running `npm run screenshots` (or equivalent) in ui/ generates all 15 PNG files in docs/images/ without manual intervention
+  2. Graph editor full-layout screenshots show the complete workflow graph with all nodes and edges visible for each of the 5 examples
+  3. Graph editor DSL-editing screenshots show the YAML editor panel open alongside the graph for each of the 5 examples
+  4. Execution inspector screenshots show a populated inspector view (state timeline, event data) for each of the 5 examples
+  5. Re-running the script overwrites existing files and completes without error
+**Plans**: TBD
+
+### Phase 24: Documentation Integration
+**Goal**: All 15 screenshots are embedded in example READMEs and the two relevant tutorial documents so users can see what the UI looks like without running the tool
+**Depends on**: Phase 23
+**Requirements**: DOCS-01, DOCS-02, DOCS-03, DOCS-04
+**Success Criteria** (what must be TRUE):
+  1. Each of the 5 example READMEs renders both graph editor screenshots (full graph + DSL view) when viewed on GitHub
+  2. Each of the 5 example READMEs renders the execution inspector screenshot when viewed on GitHub
+  3. Tutorial 07 (graph-editor) contains embedded graph editor screenshots that illustrate the workflow described in the text
+  4. Tutorial 08 (execution-inspector) contains embedded inspector screenshots that illustrate the time machine and state views described in the text
+**Plans**: TBD
+
 ## Progress
 
 | Phase | Milestone | Plans Complete | Status | Completed |
@@ -83,3 +139,7 @@ Full details: `.planning/milestones/v1.3-ROADMAP.md`
 | 18. Getting Started | v1.3 | 2/2 | Complete | 2026-02-26 |
 | 19. Build and Deploy | v1.3 | 3/3 | Complete | 2026-02-26 |
 | 20. Advanced Tools | v1.3 | 3/3 | Complete | 2026-02-26 |
+| 21. Playwright Setup | v1.4 | 0/TBD | Not started | - |
+| 22. Mock Fixtures and Server Automation | v1.4 | 0/TBD | Not started | - |
+| 23. Screenshot Capture | v1.4 | 0/TBD | Not started | - |
+| 24. Documentation Integration | v1.4 | 0/TBD | Not started | - |
