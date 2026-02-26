@@ -8,6 +8,16 @@ RSF is a complete replacement for AWS Step Functions built on AWS Lambda Durable
 
 Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
+## Current Milestone: v1.3 Comprehensive Tutorial
+
+**Goal:** Create comprehensive tutorials teaching users how to use every RSF CLI feature end-to-end, including real AWS deployment for the inspector tutorial.
+
+**Target features:**
+- Tutorials for all 7 CLI commands (init, generate, validate, deploy, import, ui, inspect)
+- Self-contained working code, Terraform, and scripts for each tutorial
+- Real AWS deployment tutorial for execution inspection
+- Step-by-step hands-on format (not reference docs)
+
 ## Current State
 
 v1.2 shipped (2026-02-26). Five real-world example workflows with automated deploy-invoke-verify-teardown testing on real AWS. All 8 ASL state types verified in production. 152 local tests + 13 integration tests + 20 harness tests passing.
@@ -45,7 +55,10 @@ v1.2 shipped (2026-02-26). Five real-world example workflows with automated depl
 
 <!-- Current scope. Building toward these. -->
 
-(No active requirements — start next milestone with `/gsd:new-milestone`)
+- [ ] Comprehensive tutorials covering all RSF CLI commands end-to-end (init, generate, validate, deploy, import, ui, inspect)
+- [ ] Hands-on walkthroughs with working code users can follow step-by-step
+- [ ] Real AWS deployment tutorials with complete Terraform and provisioning scripts
+- [ ] Self-contained tutorial artifacts (handler code, YAML workflows, test scripts)
 
 ### Out of Scope
 
@@ -104,4 +117,4 @@ v1.2 shipped (2026-02-26). Five real-world example workflows with automated depl
 | Explicit delete_log_group after terraform destroy | Catches orphaned log groups that Terraform may miss | ✓ Good |
 
 ---
-*Last updated: 2026-02-26 after v1.2 milestone*
+*Last updated: 2026-02-26 after v1.3 milestone started*
