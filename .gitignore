@@ -7,3 +7,10 @@ build/
 .pytest_cache/
 *.egg
 site/
+
+# Terraform runtime files
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.zip
+crash.log

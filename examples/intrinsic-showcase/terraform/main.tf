@@ -7,10 +7,10 @@ locals {
 data "archive_file" "lambda_zip" {
   type        = "zip"
   source_dir  = "${var.source_dir}/src"
-  output_path = "${path.module}/<< workflow_name >>.zip"
+  output_path = "${path.module}/intrinsic-showcase.zip"
 }
 
-resource "aws_lambda_function" "<< resource_id >>" {
+resource "aws_lambda_function" "intrinsic_showcase" {
   function_name    = local.function_name
   handler          = "generated.orchestrator.lambda_handler"
   runtime          = "python3.13"
