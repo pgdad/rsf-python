@@ -82,7 +82,7 @@ Each task was committed atomically:
 1. **Task 1: Typer CLI skeleton with --version flag and subcommand stubs** - `b18a511` (feat)
 2. **Task 2: rsf init scaffold command with templates and tests** - `45fd615` (feat)
 
-**Plan metadata:** (pending final commit)
+**Plan metadata:** `af2ba04` (docs: complete plan)
 
 ## Files Created/Modified
 - `src/rsf/cli/main.py` - Typer app with --version callback and init subcommand registration
