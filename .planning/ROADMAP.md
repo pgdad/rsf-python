@@ -94,7 +94,11 @@ Plans:
   2. The inspector displays meaningful state when loaded with the mock fixture (states shown, event timeline populated)
   3. A script starts rsf ui for a given example, confirms the server is ready, and stops it cleanly after use
   4. A script starts rsf inspect with mock fixture data and stops it cleanly after use
-**Plans**: TBD
+**Plans**: 2 plans
+
+Plans:
+- [ ] 22-01-PLAN.md — Create mock execution fixtures for all 5 examples and a mock inspect server
+- [ ] 22-02-PLAN.md — Create server lifecycle automation scripts for graph editor and inspector
 
 ### Phase 23: Screenshot Capture
 **Goal**: All 15 screenshots (graph editor full layout, graph editor DSL view, and execution inspector for each of 5 examples) are captured as PNG files in docs/images/ via a single npm script
@@ -143,6 +147,6 @@ Plans:
 | 19. Build and Deploy | v1.3 | 3/3 | Complete | 2026-02-26 |
 | 20. Advanced Tools | v1.3 | 3/3 | Complete | 2026-02-26 |
 | 21. Playwright Setup | v1.4 | 1/1 | Complete | 2026-02-26 |
-| 22. Mock Fixtures and Server Automation | v1.4 | 0/TBD | Not started | - |
+| 22. Mock Fixtures and Server Automation | v1.4 | 0/2 | Not started | - |
 | 23. Screenshot Capture | v1.4 | 0/TBD | Not started | - |
 | 24. Documentation Integration | v1.4 | 0/TBD | Not started | - |
