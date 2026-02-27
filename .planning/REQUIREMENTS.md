@@ -10,7 +10,7 @@ Requirements for v1.4 UI Screenshots milestone. Each maps to roadmap phases.
 ### Screenshot Capture
 
 - [x] **CAPT-01**: Playwright configured as dev dependency with browser automation support
-- [ ] **CAPT-02**: Scripts manage rsf ui/inspect server lifecycle (auto start/stop for each example)
+- [x] **CAPT-02**: Scripts manage rsf ui/inspect server lifecycle (auto start/stop for each example)
 - [x] **CAPT-03**: Mock execution fixture data created for all 5 example workflows
 - [ ] **CAPT-04**: Graph editor full-layout screenshot captured for each of 5 examples (saved to docs/images/)
 - [ ] **CAPT-05**: Graph editor DSL-editing screenshot captured for each of 5 examples (saved to docs/images/)
@@ -45,7 +45,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CAPT-01 | Phase 21 | Complete |
-| CAPT-02 | Phase 22 | Pending |
+| CAPT-02 | Phase 22 | Complete |
 | CAPT-03 | Phase 22 | Complete |
 | CAPT-04 | Phase 23 | Pending |
 | CAPT-05 | Phase 23 | Pending |
