@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: UI Screenshots
 status: unknown
-last_updated: "2026-02-27T10:47:55.533Z"
+last_updated: "2026-02-27T11:09:00.000Z"
 progress:
-  total_phases: 2
-  completed_phases: 2
-  total_plans: 3
-  completed_plans: 3
+  total_phases: 3
+  completed_phases: 3
+  total_plans: 4
+  completed_plans: 4
 ---
 
 # Project State
@@ -18,21 +18,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-26)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** v1.4 UI Screenshots — Phase 22: Screenshot Foundation
+**Current focus:** v1.4 UI Screenshots — Phase 23: Screenshot Capture
 
 ## Current Position
 
-Phase: 22 of 24 (Mock Fixtures and Server Automation) COMPLETE
-Plan: 2 of 2 completed in Phase 22
-Status: Phase 22 complete, ready for Phase 23
-Last activity: 2026-02-27 — Phase 22 Plan 02 complete: server lifecycle scripts
+Phase: 23 of 24 (Screenshot Capture) COMPLETE
+Plan: 1 of 1 completed in Phase 23
+Status: Phase 23 complete, ready for Phase 24
+Last activity: 2026-02-27 — Phase 23 Plan 01 complete: screenshot capture
 
-Progress: [█████░░░░░] 50%
+Progress: [███████░░░] 75%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 64 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 8, v1.4: 3)
+- Total plans completed: 65 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 8, v1.4: 4)
 
 **By Milestone:**
 
@@ -42,7 +42,7 @@ Progress: [█████░░░░░] 50%
 | v1.1 CLI Toolchain | 1 | 4 | 2026-02-26 |
 | v1.2 Examples & Integration | 5 | 10 | 2026-02-24 → 2026-02-26 |
 | v1.3 Comprehensive Tutorial | 3 | 8 | 2026-02-26 |
-| v1.4 UI Screenshots (in progress) | 2/4 | 3 | 2026-02-26 → 2026-02-27 |
+| v1.4 UI Screenshots (in progress) | 3/4 | 4 | 2026-02-26 → 2026-02-27 |
 
 **Phase 21 Metrics:**
 - Duration: ~2 min
@@ -58,6 +58,11 @@ Progress: [█████░░░░░] 50%
 - Duration: ~3 min
 - Tasks: 2
 - Files: 2
+
+**Phase 23-01 Metrics:**
+- Duration: ~12 min
+- Tasks: 2
+- Files: 17
 
 ## Accumulated Context
 
@@ -81,6 +86,10 @@ Key context for v1.4:
 - SERVER_READY/SERVER_STOPPED signal protocol for downstream screenshot automation
 - start-ui-server.ts: --example <name> --port <number> spawns rsf ui with health-check
 - start-inspect-server.ts: --example <name> --port <number> spawns mock-inspect-server.ts with health-check
+- websockets pip package required in venv for rsf ui WebSocket support
+- capture-screenshots.ts uses detached process groups for reliable npx/Vite cleanup
+- npm run screenshots captures all 15 PNGs idempotently
+- Screenshots in docs/images/: {example}-graph.png, {example}-dsl.png, {example}-inspector.png
 
 ### Pending Todos
 
@@ -93,5 +102,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-27
-Stopped at: Completed 22-02-PLAN.md — Server lifecycle scripts
+Stopped at: Completed 23-01-PLAN.md — Screenshot capture
 Resume file: None

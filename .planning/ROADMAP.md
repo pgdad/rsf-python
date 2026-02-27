@@ -67,7 +67,7 @@ Full details: `.planning/milestones/v1.3-ROADMAP.md`
 
 - [x] **Phase 21: Playwright Setup** - Configure Playwright as dev dependency with browser automation support
 - [x] **Phase 22: Mock Fixtures and Server Automation** - Create mock execution data and server lifecycle management for all 5 examples (completed 2026-02-27)
-- [ ] **Phase 23: Screenshot Capture** - Capture graph editor and inspector screenshots for all 5 examples via single npm script
+- [x] **Phase 23: Screenshot Capture** - Capture graph editor and inspector screenshots for all 5 examples via single npm script (completed 2026-02-27)
 - [ ] **Phase 24: Documentation Integration** - Embed screenshots in example READMEs and tutorial docs
 
 ## Phase Details
@@ -151,5 +151,5 @@ Plans:
 | 20. Advanced Tools | v1.3 | 3/3 | Complete | 2026-02-26 |
 | 21. Playwright Setup | v1.4 | 1/1 | Complete | 2026-02-26 |
 | 22. Mock Fixtures and Server Automation | 2/2 | Complete    | 2026-02-27 | - |
-| 23. Screenshot Capture | v1.4 | 0/1 | Not started | - |
+| 23. Screenshot Capture | 1/1 | Complete   | 2026-02-27 | - |
 | 24. Documentation Integration | v1.4 | 0/TBD | Not started | - |

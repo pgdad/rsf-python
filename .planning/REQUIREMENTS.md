@@ -12,10 +12,10 @@ Requirements for v1.4 UI Screenshots milestone. Each maps to roadmap phases.
 - [x] **CAPT-01**: Playwright configured as dev dependency with browser automation support
 - [x] **CAPT-02**: Scripts manage rsf ui/inspect server lifecycle (auto start/stop for each example)
 - [x] **CAPT-03**: Mock execution fixture data created for all 5 example workflows
-- [ ] **CAPT-04**: Graph editor full-layout screenshot captured for each of 5 examples (saved to docs/images/)
-- [ ] **CAPT-05**: Graph editor DSL-editing screenshot captured for each of 5 examples (saved to docs/images/)
-- [ ] **CAPT-06**: Execution inspector screenshot captured for each of 5 examples (saved to docs/images/)
-- [ ] **CAPT-07**: Single npm script regenerates all 15 screenshots in one command
+- [x] **CAPT-04**: Graph editor full-layout screenshot captured for each of 5 examples (saved to docs/images/)
+- [x] **CAPT-05**: Graph editor DSL-editing screenshot captured for each of 5 examples (saved to docs/images/)
+- [x] **CAPT-06**: Execution inspector screenshot captured for each of 5 examples (saved to docs/images/)
+- [x] **CAPT-07**: Single npm script regenerates all 15 screenshots in one command
 
 ### Documentation Integration
 
@@ -47,10 +47,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CAPT-01 | Phase 21 | Complete |
 | CAPT-02 | Phase 22 | Complete |
 | CAPT-03 | Phase 22 | Complete |
-| CAPT-04 | Phase 23 | Pending |
-| CAPT-05 | Phase 23 | Pending |
-| CAPT-06 | Phase 23 | Pending |
-| CAPT-07 | Phase 23 | Pending |
+| CAPT-04 | Phase 23 | Complete |
+| CAPT-05 | Phase 23 | Complete |
+| CAPT-06 | Phase 23 | Complete |
+| CAPT-07 | Phase 23 | Complete |
 | DOCS-01 | Phase 24 | Pending |
 | DOCS-02 | Phase 24 | Pending |
 | DOCS-03 | Phase 24 | Pending |
