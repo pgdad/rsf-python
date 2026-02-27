@@ -110,7 +110,10 @@ Plans:
   3. Graph editor DSL-editing screenshots show the YAML editor panel open alongside the graph for each of the 5 examples
   4. Execution inspector screenshots show a populated inspector view (state timeline, event data) for each of the 5 examples
   5. Re-running the script overwrites existing files and completes without error
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [ ] 23-01-PLAN.md — Capture all 15 screenshots via Playwright and wire up npm run screenshots
 
 ### Phase 24: Documentation Integration
 **Goal**: All 15 screenshots are embedded in example READMEs and the two relevant tutorial documents so users can see what the UI looks like without running the tool
@@ -148,5 +151,5 @@ Plans:
 | 20. Advanced Tools | v1.3 | 3/3 | Complete | 2026-02-26 |
 | 21. Playwright Setup | v1.4 | 1/1 | Complete | 2026-02-26 |
 | 22. Mock Fixtures and Server Automation | 2/2 | Complete    | 2026-02-27 | - |
-| 23. Screenshot Capture | v1.4 | 0/TBD | Not started | - |
+| 23. Screenshot Capture | v1.4 | 0/1 | Not started | - |
 | 24. Documentation Integration | v1.4 | 0/TBD | Not started | - |
