@@ -1,0 +1,213 @@
+{
+  "executions": [
+    {
+      "execution_id": "exec-approval-workflow-001",
+      "name": "Approval Workflow Run",
+      "status": "SUCCEEDED",
+      "function_name": "rsf-approval-workflow",
+      "start_time": "2026-01-15T10:00:00Z",
+      "end_time": "2026-01-15T10:00:08Z"
+    }
+  ],
+  "execution_detail": {
+    "execution_id": "exec-approval-workflow-001",
+    "name": "Approval Workflow Run",
+    "status": "SUCCEEDED",
+    "function_name": "rsf-approval-workflow",
+    "start_time": "2026-01-15T10:00:00Z",
+    "end_time": "2026-01-15T10:00:08Z",
+    "input_payload": {
+      "request": { "type": "purchase", "amount": 5000 },
+      "userId": "user-42"
+    },
+    "result": {
+      "status": "approved",
+      "requestId": "REQ-2026-100",
+      "approver": "manager-7"
+    },
+    "error": null,
+    "history": [
+      {
+        "event_id": 1,
+        "timestamp": "2026-01-15T10:00:00.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "SubmitRequest",
+          "input": {
+            "request": { "type": "purchase", "amount": 5000 },
+            "userId": "user-42"
+          }
+        }
+      },
+      {
+        "event_id": 2,
+        "timestamp": "2026-01-15T10:00:00.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "SubmitRequest",
+          "output": {
+            "requestId": "REQ-2026-100",
+            "submittedBy": "user-42",
+            "submission": { "status": "submitted", "requestId": "REQ-2026-100" }
+          }
+        }
+      },
+      {
+        "event_id": 3,
+        "timestamp": "2026-01-15T10:00:01.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "SetApprovalContext",
+          "input": {
+            "requestId": "REQ-2026-100",
+            "submitter": "user-42"
+          }
+        }
+      },
+      {
+        "event_id": 4,
+        "timestamp": "2026-01-15T10:00:01.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "SetApprovalContext",
+          "output": {
+            "requestId": "REQ-2026-100",
+            "submitter": "user-42",
+            "stateName": "SetApprovalContext",
+            "approvalDeadline": "2024-12-31T23:59:59Z",
+            "escalationLevel": 1
+          }
+        }
+      },
+      {
+        "event_id": 5,
+        "timestamp": "2026-01-15T10:00:02.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "WaitForReview",
+          "input": {}
+        }
+      },
+      {
+        "event_id": 6,
+        "timestamp": "2026-01-15T10:00:04.000Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "WaitForReview",
+          "output": { "waited": 5, "unit": "seconds" }
+        }
+      },
+      {
+        "event_id": 7,
+        "timestamp": "2026-01-15T10:00:04.500Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "CheckApprovalStatus",
+          "input": {
+            "requestId": "REQ-2026-100",
+            "checkNumber": 0
+          }
+        }
+      },
+      {
+        "event_id": 8,
+        "timestamp": "2026-01-15T10:00:05.000Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "CheckApprovalStatus",
+          "output": {
+            "decision": "approved",
+            "approver": "manager-7",
+            "approvedAt": "2026-01-15T10:00:04.800Z"
+          }
+        }
+      },
+      {
+        "event_id": 9,
+        "timestamp": "2026-01-15T10:00:05.500Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "EvaluateDecision",
+          "input": {
+            "approvalCheck": {
+              "decision": "approved",
+              "approver": "manager-7"
+            }
+          }
+        }
+      },
+      {
+        "event_id": 10,
+        "timestamp": "2026-01-15T10:00:06.000Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "EvaluateDecision",
+          "output": {
+            "matched": "approved",
+            "next": "ProcessApproval"
+          }
+        }
+      },
+      {
+        "event_id": 11,
+        "timestamp": "2026-01-15T10:00:06.500Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "ProcessApproval",
+          "input": {
+            "requestId": "REQ-2026-100",
+            "approvedBy": "manager-7"
+          }
+        }
+      },
+      {
+        "event_id": 12,
+        "timestamp": "2026-01-15T10:00:07.000Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "ProcessApproval",
+          "output": {
+            "status": "approved",
+            "requestId": "REQ-2026-100",
+            "approver": "manager-7"
+          }
+        }
+      },
+      {
+        "event_id": 13,
+        "timestamp": "2026-01-15T10:00:07.500Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "RequestApproved"
+        }
+      },
+      {
+        "event_id": 14,
+        "timestamp": "2026-01-15T10:00:08.000Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "RequestApproved",
+          "output": {
+            "status": "approved",
+            "requestId": "REQ-2026-100",
+            "approver": "manager-7"
+          }
+        }
+      }
+    ]
+  }
+}

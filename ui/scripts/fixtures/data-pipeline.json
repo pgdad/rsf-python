@@ -1,0 +1,220 @@
+{
+  "executions": [
+    {
+      "execution_id": "exec-data-pipeline-001",
+      "name": "Data Pipeline Run",
+      "status": "SUCCEEDED",
+      "function_name": "rsf-data-pipeline",
+      "start_time": "2026-01-15T10:00:00Z",
+      "end_time": "2026-01-15T10:00:07Z"
+    }
+  ],
+  "execution_detail": {
+    "execution_id": "exec-data-pipeline-001",
+    "name": "Data Pipeline Run",
+    "status": "SUCCEEDED",
+    "function_name": "rsf-data-pipeline",
+    "start_time": "2026-01-15T10:00:00Z",
+    "end_time": "2026-01-15T10:00:07Z",
+    "input_payload": {
+      "source": { "bucket": "data-lake", "prefix": "raw/2026-01" }
+    },
+    "result": {
+      "storedCount": 3,
+      "tableName": "pipeline-results",
+      "status": "complete"
+    },
+    "error": null,
+    "history": [
+      {
+        "event_id": 1,
+        "timestamp": "2026-01-15T10:00:00.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "InitPipeline",
+          "input": {
+            "source": { "bucket": "data-lake", "prefix": "raw/2026-01" }
+          }
+        }
+      },
+      {
+        "event_id": 2,
+        "timestamp": "2026-01-15T10:00:00.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "InitPipeline",
+          "output": {
+            "config": {
+              "batchSize": 10,
+              "tableName": "pipeline-results"
+            },
+            "pipeline": "etl-v1",
+            "stage": "initialized"
+          }
+        }
+      },
+      {
+        "event_id": 3,
+        "timestamp": "2026-01-15T10:00:01.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "FetchRecords",
+          "input": {
+            "bucket": "data-lake",
+            "prefix": "raw/2026-01",
+            "maxItems": 100
+          }
+        }
+      },
+      {
+        "event_id": 4,
+        "timestamp": "2026-01-15T10:00:01.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "FetchRecords",
+          "output": {
+            "records": [
+              { "id": "rec-001", "data": { "name": "Alice", "score": 95 } },
+              { "id": "rec-002", "data": { "name": "Bob", "score": 87 } },
+              { "id": "rec-003", "data": { "name": "Carol", "score": 91 } }
+            ],
+            "count": 3
+          }
+        }
+      },
+      {
+        "event_id": 5,
+        "timestamp": "2026-01-15T10:00:02.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "TransformRecords",
+          "input": {
+            "records": [
+              { "id": "rec-001", "data": { "name": "Alice", "score": 95 } },
+              { "id": "rec-002", "data": { "name": "Bob", "score": 87 } },
+              { "id": "rec-003", "data": { "name": "Carol", "score": 91 } }
+            ]
+          }
+        }
+      },
+      {
+        "event_id": 6,
+        "timestamp": "2026-01-15T10:00:02.200Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "ValidateRecord",
+          "input": { "id": "rec-001", "data": { "name": "Alice", "score": 95 } }
+        }
+      },
+      {
+        "event_id": 7,
+        "timestamp": "2026-01-15T10:00:02.700Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "ValidateRecord",
+          "output": { "id": "rec-001", "valid": true, "data": { "name": "Alice", "score": 95 } }
+        }
+      },
+      {
+        "event_id": 8,
+        "timestamp": "2026-01-15T10:00:03.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "EnrichRecord",
+          "input": { "id": "rec-001", "valid": true, "data": { "name": "Alice", "score": 95 } }
+        }
+      },
+      {
+        "event_id": 9,
+        "timestamp": "2026-01-15T10:00:03.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "EnrichRecord",
+          "output": { "id": "rec-001", "grade": "A", "percentile": 98, "enriched": true }
+        }
+      },
+      {
+        "event_id": 10,
+        "timestamp": "2026-01-15T10:00:04.000Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "TransformRecords",
+          "output": [
+            { "id": "rec-001", "grade": "A", "percentile": 98, "enriched": true },
+            { "id": "rec-002", "grade": "B", "percentile": 72, "enriched": true },
+            { "id": "rec-003", "grade": "A", "percentile": 93, "enriched": true }
+          ]
+        }
+      },
+      {
+        "event_id": 11,
+        "timestamp": "2026-01-15T10:00:04.500Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "StoreResults",
+          "input": {
+            "tableName": "pipeline-results",
+            "items": [
+              { "id": "rec-001", "grade": "A", "percentile": 98, "enriched": true },
+              { "id": "rec-002", "grade": "B", "percentile": 72, "enriched": true },
+              { "id": "rec-003", "grade": "A", "percentile": 93, "enriched": true }
+            ]
+          }
+        }
+      },
+      {
+        "event_id": 12,
+        "timestamp": "2026-01-15T10:00:05.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "StoreResults",
+          "output": {
+            "storedCount": 3,
+            "tableName": "pipeline-results",
+            "status": "complete"
+          }
+        }
+      },
+      {
+        "event_id": 13,
+        "timestamp": "2026-01-15T10:00:06.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "PipelineComplete",
+          "input": {
+            "storedCount": 3,
+            "tableName": "pipeline-results",
+            "status": "complete"
+          }
+        }
+      },
+      {
+        "event_id": 14,
+        "timestamp": "2026-01-15T10:00:07.000Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "PipelineComplete",
+          "output": {
+            "storedCount": 3,
+            "tableName": "pipeline-results",
+            "status": "complete"
+          }
+        }
+      }
+    ]
+  }
+}

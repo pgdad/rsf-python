@@ -1,0 +1,220 @@
+{
+  "executions": [
+    {
+      "execution_id": "exec-order-processing-001",
+      "name": "Order Processing Run",
+      "status": "SUCCEEDED",
+      "function_name": "rsf-order-processing",
+      "start_time": "2026-01-15T10:00:00Z",
+      "end_time": "2026-01-15T10:00:05Z"
+    }
+  ],
+  "execution_detail": {
+    "execution_id": "exec-order-processing-001",
+    "name": "Order Processing Run",
+    "status": "SUCCEEDED",
+    "function_name": "rsf-order-processing",
+    "start_time": "2026-01-15T10:00:00Z",
+    "end_time": "2026-01-15T10:00:05Z",
+    "input_payload": {
+      "orderId": "ORD-2026-001",
+      "items": [
+        { "sku": "WIDGET-A", "qty": 2, "price": 49.99 }
+      ]
+    },
+    "result": {
+      "orderId": "ORD-2026-001",
+      "status": "confirmed",
+      "confirmation": {
+        "confirmationId": "CONF-98765",
+        "sentTo": "customer@example.com"
+      }
+    },
+    "error": null,
+    "history": [
+      {
+        "event_id": 1,
+        "timestamp": "2026-01-15T10:00:00.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "ValidateOrder",
+          "input": {
+            "orderId": "ORD-2026-001",
+            "items": [{ "sku": "WIDGET-A", "qty": 2, "price": 49.99 }]
+          }
+        }
+      },
+      {
+        "event_id": 2,
+        "timestamp": "2026-01-15T10:00:00.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "ValidateOrder",
+          "output": {
+            "orderId": "ORD-2026-001",
+            "validation": { "total": 99.98, "itemCount": 1, "valid": true }
+          }
+        }
+      },
+      {
+        "event_id": 3,
+        "timestamp": "2026-01-15T10:00:01.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "CheckOrderValue",
+          "input": {
+            "orderId": "ORD-2026-001",
+            "validation": { "total": 99.98, "itemCount": 1, "valid": true }
+          }
+        }
+      },
+      {
+        "event_id": 4,
+        "timestamp": "2026-01-15T10:00:01.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "CheckOrderValue",
+          "output": {
+            "matched": "Default",
+            "next": "ProcessOrder"
+          }
+        }
+      },
+      {
+        "event_id": 5,
+        "timestamp": "2026-01-15T10:00:02.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "ProcessOrder",
+          "input": {
+            "orderId": "ORD-2026-001",
+            "validation": { "total": 99.98, "itemCount": 1, "valid": true }
+          }
+        }
+      },
+      {
+        "event_id": 6,
+        "timestamp": "2026-01-15T10:00:02.200Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "ProcessPayment",
+          "input": {
+            "orderId": "ORD-2026-001",
+            "amount": 99.98
+          }
+        }
+      },
+      {
+        "event_id": 7,
+        "timestamp": "2026-01-15T10:00:02.400Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "ReserveInventory",
+          "input": {
+            "orderId": "ORD-2026-001",
+            "items": [{ "sku": "WIDGET-A", "qty": 2 }]
+          }
+        }
+      },
+      {
+        "event_id": 8,
+        "timestamp": "2026-01-15T10:00:02.900Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "ProcessPayment",
+          "output": {
+            "transactionId": "TXN-44321",
+            "amount": 99.98,
+            "status": "charged"
+          }
+        }
+      },
+      {
+        "event_id": 9,
+        "timestamp": "2026-01-15T10:00:03.000Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "ReserveInventory",
+          "output": {
+            "reservationId": "RSV-77210",
+            "items": [{ "sku": "WIDGET-A", "qty": 2, "reserved": true }]
+          }
+        }
+      },
+      {
+        "event_id": 10,
+        "timestamp": "2026-01-15T10:00:03.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "ProcessOrder",
+          "output": [
+            { "transactionId": "TXN-44321", "amount": 99.98, "status": "charged" },
+            { "reservationId": "RSV-77210", "items": [{ "sku": "WIDGET-A", "qty": 2, "reserved": true }] }
+          ]
+        }
+      },
+      {
+        "event_id": 11,
+        "timestamp": "2026-01-15T10:00:04.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "SendConfirmation",
+          "input": {
+            "orderId": "ORD-2026-001",
+            "processing": [
+              { "transactionId": "TXN-44321" },
+              { "reservationId": "RSV-77210" }
+            ]
+          }
+        }
+      },
+      {
+        "event_id": 12,
+        "timestamp": "2026-01-15T10:00:04.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "SendConfirmation",
+          "output": {
+            "confirmationId": "CONF-98765",
+            "sentTo": "customer@example.com",
+            "timestamp": "2026-01-15T10:00:04.500Z"
+          }
+        }
+      },
+      {
+        "event_id": 13,
+        "timestamp": "2026-01-15T10:00:05.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "OrderComplete"
+        }
+      },
+      {
+        "event_id": 14,
+        "timestamp": "2026-01-15T10:00:05.000Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "OrderComplete",
+          "output": {
+            "orderId": "ORD-2026-001",
+            "status": "confirmed"
+          }
+        }
+      }
+    ]
+  }
+}

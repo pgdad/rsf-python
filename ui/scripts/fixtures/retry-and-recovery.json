@@ -1,0 +1,108 @@
+{
+  "executions": [
+    {
+      "execution_id": "exec-retry-and-recovery-001",
+      "name": "Retry and Recovery Run",
+      "status": "SUCCEEDED",
+      "function_name": "rsf-retry-and-recovery",
+      "start_time": "2026-01-15T10:00:00Z",
+      "end_time": "2026-01-15T10:00:04Z"
+    }
+  ],
+  "execution_detail": {
+    "execution_id": "exec-retry-and-recovery-001",
+    "name": "Retry and Recovery Run",
+    "status": "SUCCEEDED",
+    "function_name": "rsf-retry-and-recovery",
+    "start_time": "2026-01-15T10:00:00Z",
+    "end_time": "2026-01-15T10:00:04Z",
+    "input_payload": {
+      "serviceUrl": "https://api.example.com/process",
+      "payload": { "action": "transform" }
+    },
+    "result": {
+      "verified": true,
+      "checksum": "abc123def456",
+      "latencyMs": 245
+    },
+    "error": null,
+    "history": [
+      {
+        "event_id": 1,
+        "timestamp": "2026-01-15T10:00:00.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "CallPrimaryService",
+          "input": {
+            "serviceUrl": "https://api.example.com/process",
+            "payload": { "action": "transform" }
+          }
+        }
+      },
+      {
+        "event_id": 2,
+        "timestamp": "2026-01-15T10:00:01.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "CallPrimaryService",
+          "output": {
+            "responseCode": 200,
+            "body": { "result": "transformed", "checksum": "abc123def456" }
+          }
+        }
+      },
+      {
+        "event_id": 3,
+        "timestamp": "2026-01-15T10:00:02.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "VerifyResult",
+          "input": {
+            "responseCode": 200,
+            "body": { "result": "transformed", "checksum": "abc123def456" }
+          }
+        }
+      },
+      {
+        "event_id": 4,
+        "timestamp": "2026-01-15T10:00:03.000Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "VerifyResult",
+          "output": {
+            "verified": true,
+            "checksum": "abc123def456",
+            "latencyMs": 245
+          }
+        }
+      },
+      {
+        "event_id": 5,
+        "timestamp": "2026-01-15T10:00:03.500Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "ServiceComplete"
+        }
+      },
+      {
+        "event_id": 6,
+        "timestamp": "2026-01-15T10:00:04.000Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "ServiceComplete",
+          "output": {
+            "verified": true,
+            "checksum": "abc123def456",
+            "latencyMs": 245
+          }
+        }
+      }
+    ]
+  }
+}

@@ -1,0 +1,204 @@
+{
+  "executions": [
+    {
+      "execution_id": "exec-intrinsic-showcase-001",
+      "name": "Intrinsic Showcase Run",
+      "status": "SUCCEEDED",
+      "function_name": "rsf-intrinsic-showcase",
+      "start_time": "2026-01-15T10:00:00Z",
+      "end_time": "2026-01-15T10:00:06Z"
+    }
+  ],
+  "execution_detail": {
+    "execution_id": "exec-intrinsic-showcase-001",
+    "name": "Intrinsic Showcase Run",
+    "status": "SUCCEEDED",
+    "function_name": "rsf-intrinsic-showcase",
+    "start_time": "2026-01-15T10:00:00Z",
+    "end_time": "2026-01-15T10:00:06Z",
+    "input_payload": {
+      "input": { "userName": "Jane Doe" }
+    },
+    "result": {
+      "greeting": "Welcome, Jane Doe!",
+      "nameParts": ["Jane", "Doe"],
+      "sum": 13,
+      "uniqueTags": ["a", "b", "c"],
+      "contains": true
+    },
+    "error": null,
+    "history": [
+      {
+        "event_id": 1,
+        "timestamp": "2026-01-15T10:00:00.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "PrepareData",
+          "input": { "userName": "Jane Doe" }
+        }
+      },
+      {
+        "event_id": 2,
+        "timestamp": "2026-01-15T10:00:00.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "PrepareData",
+          "output": {
+            "prepared": {
+              "greeting": "Welcome, Jane Doe!",
+              "requestId": "550e8400-e29b-41d4-a716-446655440000",
+              "nameParts": ["Jane", "Doe"],
+              "tagArray": ["demo", "showcase", "intrinsics"],
+              "encoded": "SmFuZSBEb2U="
+            }
+          }
+        }
+      },
+      {
+        "event_id": 3,
+        "timestamp": "2026-01-15T10:00:01.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "StringOperations",
+          "input": {
+            "prepared": {
+              "greeting": "Welcome, Jane Doe!",
+              "encoded": "SmFuZSBEb2U=",
+              "nameParts": ["Jane", "Doe"]
+            }
+          }
+        }
+      },
+      {
+        "event_id": 4,
+        "timestamp": "2026-01-15T10:00:01.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "StringOperations",
+          "output": {
+            "stringResults": {
+              "decoded": "Jane Doe",
+              "hash": "a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2",
+              "serialized": "[\"Jane\",\"Doe\"]",
+              "formatted": "Jane Doe has 2 name parts"
+            }
+          }
+        }
+      },
+      {
+        "event_id": 5,
+        "timestamp": "2026-01-15T10:00:02.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "ArrayOperations",
+          "input": {
+            "prepared": { "tagArray": ["demo", "showcase", "intrinsics"] }
+          }
+        }
+      },
+      {
+        "event_id": 6,
+        "timestamp": "2026-01-15T10:00:02.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "ArrayOperations",
+          "output": {
+            "arrayResults": {
+              "range": [1, 3, 5, 7, 9],
+              "partitioned": [["demo", "showcase"], ["intrinsics"]],
+              "contains": true,
+              "firstTag": "demo",
+              "tagCount": 3,
+              "uniqueTags": ["a", "b", "c"]
+            }
+          }
+        }
+      },
+      {
+        "event_id": 7,
+        "timestamp": "2026-01-15T10:00:03.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "MathAndJsonOps",
+          "input": {
+            "arrays": { "arrayResults": { "tagCount": 3 } },
+            "strings": { "stringResults": { "serialized": "[\"Jane\",\"Doe\"]" } }
+          }
+        }
+      },
+      {
+        "event_id": 8,
+        "timestamp": "2026-01-15T10:00:03.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "MathAndJsonOps",
+          "output": {
+            "math": {
+              "sum": 13,
+              "randomVal": 42,
+              "parsed": ["Jane", "Doe"]
+            }
+          }
+        }
+      },
+      {
+        "event_id": 9,
+        "timestamp": "2026-01-15T10:00:04.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "CheckResults",
+          "input": {
+            "arrays": { "arrayResults": { "contains": true } }
+          }
+        }
+      },
+      {
+        "event_id": 10,
+        "timestamp": "2026-01-15T10:00:04.500Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "CheckResults",
+          "output": {
+            "matched": true,
+            "next": "ShowcaseComplete"
+          }
+        }
+      },
+      {
+        "event_id": 11,
+        "timestamp": "2026-01-15T10:00:05.000Z",
+        "event_type": "StateEntered",
+        "sub_type": null,
+        "details": {
+          "stateName": "ShowcaseComplete"
+        }
+      },
+      {
+        "event_id": 12,
+        "timestamp": "2026-01-15T10:00:06.000Z",
+        "event_type": "StateSucceeded",
+        "sub_type": null,
+        "details": {
+          "stateName": "ShowcaseComplete",
+          "output": {
+            "greeting": "Welcome, Jane Doe!",
+            "nameParts": ["Jane", "Doe"],
+            "sum": 13,
+            "uniqueTags": ["a", "b", "c"],
+            "contains": true
+          }
+        }
+      }
+    ]
+  }
+}
