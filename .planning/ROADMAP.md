@@ -6,7 +6,7 @@
 - ✅ **v1.1 CLI Toolchain** — Phase 12 (shipped 2026-02-26)
 - ✅ **v1.2 Comprehensive Examples & Integration Testing** — Phases 13-17 (shipped 2026-02-26)
 - ✅ **v1.3 Comprehensive Tutorial** — Phases 18-20 (shipped 2026-02-26)
-- 🚧 **v1.4 UI Screenshots** — Phases 21-24 (in progress)
+- ✅ **v1.4 UI Screenshots** — Phases 21-24 (shipped 2026-02-27)
 
 ## Phases
 
@@ -61,14 +61,14 @@ Full details: `.planning/milestones/v1.3-ROADMAP.md`
 
 </details>
 
-### 🚧 v1.4 UI Screenshots (In Progress)
+### ✅ v1.4 UI Screenshots (Shipped 2026-02-27)
 
 **Milestone Goal:** Automated Playwright screenshots of the graph editor and execution inspector for all 5 example workflows, embedded in example READMEs and tutorial docs.
 
 - [x] **Phase 21: Playwright Setup** - Configure Playwright as dev dependency with browser automation support
 - [x] **Phase 22: Mock Fixtures and Server Automation** - Create mock execution data and server lifecycle management for all 5 examples (completed 2026-02-27)
 - [x] **Phase 23: Screenshot Capture** - Capture graph editor and inspector screenshots for all 5 examples via single npm script (completed 2026-02-27)
-- [ ] **Phase 24: Documentation Integration** - Embed screenshots in example READMEs and tutorial docs
+- [x] **Phase 24: Documentation Integration** - Embed screenshots in example READMEs and tutorial docs (completed 2026-02-27)
 
 ## Phase Details
 
@@ -124,7 +124,10 @@ Plans:
   2. Each of the 5 example READMEs renders the execution inspector screenshot when viewed on GitHub
   3. Tutorial 07 (graph-editor) contains embedded graph editor screenshots that illustrate the workflow described in the text
   4. Tutorial 08 (execution-inspector) contains embedded inspector screenshots that illustrate the time machine and state views described in the text
-**Plans**: TBD
+**Plans**: 1 plan
+
+Plans:
+- [x] 24-01-PLAN.md — Embed screenshots in example READMEs and tutorial docs
 
 ## Progress
 
@@ -152,4 +155,4 @@ Plans:
 | 21. Playwright Setup | v1.4 | 1/1 | Complete | 2026-02-26 |
 | 22. Mock Fixtures and Server Automation | 2/2 | Complete    | 2026-02-27 | - |
 | 23. Screenshot Capture | 1/1 | Complete    | 2026-02-27 | - |
-| 24. Documentation Integration | v1.4 | 0/TBD | Not started | - |
+| 24. Documentation Integration | v1.4 | 1/1 | Complete | 2026-02-27 |
