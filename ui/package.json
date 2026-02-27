@@ -9,7 +9,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "smoke-test": "node --import tsx/esm scripts/smoke-test.ts"
+    "smoke-test": "node --import tsx/esm scripts/smoke-test.ts",
+    "screenshots": "node --import tsx/esm scripts/capture-screenshots.ts"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.7.0",
