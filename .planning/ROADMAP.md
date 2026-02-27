@@ -151,5 +151,5 @@ Plans:
 | 20. Advanced Tools | v1.3 | 3/3 | Complete | 2026-02-26 |
 | 21. Playwright Setup | v1.4 | 1/1 | Complete | 2026-02-26 |
 | 22. Mock Fixtures and Server Automation | 2/2 | Complete    | 2026-02-27 | - |
-| 23. Screenshot Capture | 1/1 | Complete   | 2026-02-27 | - |
+| 23. Screenshot Capture | 1/1 | Complete    | 2026-02-27 | - |
 | 24. Documentation Integration | v1.4 | 0/TBD | Not started | - |
