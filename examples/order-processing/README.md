@@ -27,6 +27,20 @@ ValidateOrder → CheckOrderValue
        └─ ReserveInventory┘→ SendConfirmation → OrderComplete
 ```
 
+## Screenshots
+
+### Graph Editor
+
+![Order Processing — Graph Editor](../../docs/images/order-processing-graph.png)
+
+### DSL Editor
+
+![Order Processing — DSL Editor](../../docs/images/order-processing-dsl.png)
+
+### Execution Inspector
+
+![Order Processing — Execution Inspector](../../docs/images/order-processing-inspector.png)
+
 ## Run Locally (No AWS)
 
 ```bash

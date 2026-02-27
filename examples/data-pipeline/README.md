@@ -28,6 +28,20 @@ InitPipeline (Pass) → FetchRecords
   → PipelineComplete (Pass)
 ```
 
+## Screenshots
+
+### Graph Editor
+
+![Data Pipeline — Graph Editor](../../docs/images/data-pipeline-graph.png)
+
+### DSL Editor
+
+![Data Pipeline — DSL Editor](../../docs/images/data-pipeline-dsl.png)
+
+### Execution Inspector
+
+![Data Pipeline — Execution Inspector](../../docs/images/data-pipeline-inspector.png)
+
 ## Run Locally (No AWS)
 
 ```bash

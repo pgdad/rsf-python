@@ -120,6 +120,10 @@ For the order processing workflow, you should see:
 - The Choice node has two outgoing edges: one for the numeric condition and one for the
   Default path.
 
+Here is what the graph editor looks like with the order processing workflow loaded:
+
+![Graph Editor — Order Processing](../docs/images/order-processing-graph.png)
+
 ---
 
 ## Step 3: Edit YAML and Watch the Graph Update
@@ -157,6 +161,10 @@ The editor validates YAML on every keystroke and updates the graph when the YAML
 structurally valid. If you introduce a syntax error mid-edit, the graph freezes at the last
 valid state and the editor highlights the error inline. Once you fix the syntax, the graph
 updates immediately.
+
+Here is the DSL editing view with the YAML editor panel open alongside the graph:
+
+![Graph Editor — DSL Editing View](../docs/images/order-processing-dsl.png)
 
 ---
 

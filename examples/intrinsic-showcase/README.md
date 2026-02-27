@@ -36,6 +36,20 @@ PrepareData (Pass — Format, UUID, StringSplit, Array, Base64Encode)
   → ShowcaseComplete
 ```
 
+## Screenshots
+
+### Graph Editor
+
+![Intrinsic Showcase — Graph Editor](../../docs/images/intrinsic-showcase-graph.png)
+
+### DSL Editor
+
+![Intrinsic Showcase — DSL Editor](../../docs/images/intrinsic-showcase-dsl.png)
+
+### Execution Inspector
+
+![Intrinsic Showcase — Execution Inspector](../../docs/images/intrinsic-showcase-inspector.png)
+
 ## Run Locally (No AWS)
 
 ```bash

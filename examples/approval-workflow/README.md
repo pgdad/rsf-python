@@ -31,6 +31,20 @@ SubmitRequest → SetApprovalContext (Pass)
       └─ default → WaitForReview (loop)
 ```
 
+## Screenshots
+
+### Graph Editor
+
+![Approval Workflow — Graph Editor](../../docs/images/approval-workflow-graph.png)
+
+### DSL Editor
+
+![Approval Workflow — DSL Editor](../../docs/images/approval-workflow-dsl.png)
+
+### Execution Inspector
+
+![Approval Workflow — Execution Inspector](../../docs/images/approval-workflow-inspector.png)
+
 ## Run Locally (No AWS)
 
 ```bash

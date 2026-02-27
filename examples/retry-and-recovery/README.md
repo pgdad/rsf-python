@@ -37,6 +37,20 @@ CallPrimaryService
   └─ States.ALL → CriticalFailure (Fail)
 ```
 
+## Screenshots
+
+### Graph Editor
+
+![Retry and Recovery — Graph Editor](../../docs/images/retry-and-recovery-graph.png)
+
+### DSL Editor
+
+![Retry and Recovery — DSL Editor](../../docs/images/retry-and-recovery-dsl.png)
+
+### Execution Inspector
+
+![Retry and Recovery — Execution Inspector](../../docs/images/retry-and-recovery-inspector.png)
+
 ## Run Locally (No AWS)
 
 ```bash

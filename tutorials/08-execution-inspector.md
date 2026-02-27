@@ -297,6 +297,10 @@ Execution statuses:
 
 Click an execution to view its detail.
 
+Here is what the execution inspector looks like with a completed execution:
+
+![Execution Inspector — Order Processing](../docs/images/order-processing-inspector.png)
+
 ---
 
 ## Step 7: Inspect an Execution with the Time Machine
