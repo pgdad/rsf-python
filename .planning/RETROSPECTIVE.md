@@ -75,6 +75,41 @@
 
 ---
 
+## Milestone: v1.4 — UI Screenshots
+
+**Shipped:** 2026-02-27
+**Phases:** 4 | **Plans:** 5
+
+### What Was Built
+- Playwright 1.58.2 browser automation as pinned devDependency with tsx runner
+- Mock execution fixtures and REST/SSE server for all 5 example workflows
+- Server lifecycle scripts (start-ui-server.ts, start-inspect-server.ts) with health-check
+- 15 PNG screenshots captured via single `npm run screenshots` command
+- Screenshots embedded in 5 example READMEs and 2 tutorial documents
+
+### What Worked
+- Mock fixtures eliminated AWS dependency entirely — screenshots are free, fast, and reproducible
+- Detached process groups in capture-screenshots.ts ensured reliable cleanup of spawned servers
+- Signal protocol (SERVER_READY/SERVER_STOPPED) made server lifecycle scripts composable
+- Phase 24 (documentation integration) was pure Markdown edits — completed in ~3 minutes
+
+### What Was Inefficient
+- Summary one-liner extraction still returned null — field format inconsistency across summaries
+- Phase 22/23 progress table rows in ROADMAP.md had column alignment issues (milestone column missing)
+
+### Patterns Established
+- Screenshot naming convention: `{example}-{type}.png` (type: graph, dsl, inspector)
+- Mock server pattern: Node built-in http module with fixture JSON files, matching production API contract
+- Server lifecycle pattern: spawn → health-check poll → ready signal → work → stop signal
+- Separate tsconfig.scripts.json for Node script execution (moduleResolution: node vs bundler)
+
+### Key Lessons
+1. Pinning exact versions (no caret) for tools with binary downloads prevents CI/CD surprises
+2. Process group cleanup (negative PID) is essential when spawning child processes that spawn grandchildren (npx → vite)
+3. Mock servers matching production API contracts enable offline testing without any infrastructure cost
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -85,6 +120,7 @@
 | v1.1 CLI | 1 | 4 | CLI toolchain unifying all commands |
 | v1.2 Examples | 5 | 10 | Real AWS verification with automated testing |
 | v1.3 Tutorial | 3 | 8 | 8 tutorials covering all CLI commands |
+| v1.4 Screenshots | 4 | 5 | 15 automated screenshots in docs |
 
 ### Cumulative Quality
 
@@ -94,6 +130,7 @@
 | v1.1 | 49 CLI tests | 7 subcommands |
 | v1.2 | 152 local + 13 integration + 20 harness | All 8 state types on real AWS |
 | v1.3 | 2,753 lines of tutorials | All 7 CLI commands documented |
+| v1.4 | 15 screenshots + 18 image refs | All 5 examples with UI visuals |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -101,3 +138,4 @@
 2. Explicit cleanup (delete_log_group) is needed beyond terraform destroy for AWS resources
 3. Propagation delays in AWS services (IAM, CloudWatch) require explicit wait buffers in automated tests
 4. Tutorials using actual CLI output (not idealized) build user trust and match reality
+5. Mock servers matching production API contracts enable offline tooling without infrastructure cost

@@ -55,3 +55,20 @@
 
 ---
 
+
+## v1.4 UI Screenshots (Shipped: 2026-02-27)
+
+**Phases completed:** 4 phases (21-24), 5 plans
+**Files changed:** 50 | **Insertions:** 4,820
+**Timeline:** 2026-02-24 → 2026-02-27
+**Git range:** ae0fe0c..fecee58
+
+**Key accomplishments:**
+- Playwright 1.58.2 installed as pinned devDependency with Chromium automation via tsx runner
+- Mock execution fixtures and REST/SSE server for all 5 example workflows (no AWS dependency)
+- Server lifecycle scripts (start-ui-server.ts, start-inspect-server.ts) with health-check and signal protocol
+- 15 PNG screenshots captured via single `npm run screenshots` (graph, DSL editor, inspector × 5 examples)
+- Screenshots embedded in all 5 example READMEs and 2 tutorial documents (07-graph-editor, 08-execution-inspector)
+
+---
+

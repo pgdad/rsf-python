@@ -8,15 +8,7 @@ RSF is a complete replacement for AWS Step Functions built on AWS Lambda Durable
 
 Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
-## Current Milestone: v1.4 UI Screenshots
-
-**Goal:** Add automated Playwright screenshots of the graph editor and execution inspector for each of the 5 example workflows, embedded in both example READMEs and tutorial docs.
-
-**Target features:**
-- Automated Playwright screenshot capture scripts
-- Graph editor screenshots for all 5 examples (including DSL editing view)
-- Execution inspector screenshots for all 5 examples
-- Screenshots embedded in example READMEs and tutorial documentation
+## Current Milestone: None (v1.4 complete, ready for next milestone)
 
 ## Current State
 
@@ -54,15 +46,16 @@ v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI comma
 - ✓ Hands-on walkthroughs with working code users can follow step-by-step — v1.3
 - ✓ Real AWS deployment tutorials with complete Terraform and provisioning scripts — v1.3
 - ✓ Self-contained tutorial artifacts (handler code, YAML workflows, test scripts) — v1.3
+- ✓ Automated Playwright screenshot capture for graph editor and execution inspector — v1.4
+- ✓ Screenshot assets for all 5 example workflows (15 PNGs via `npm run screenshots`) — v1.4
+- ✓ Example READMEs updated with embedded screenshots — v1.4
+- ✓ Tutorial docs (07-graph-editor, 08-execution-inspector) updated with screenshots — v1.4
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Automated Playwright screenshot capture for graph editor and execution inspector
-- [ ] Screenshot assets for all 5 example workflows
-- [ ] Example READMEs updated with embedded screenshots
-- [ ] Tutorial docs (07-graph-editor, 08-execution-inspector) updated with screenshots
+(None — ready for next milestone)
 
 ### Out of Scope
 
@@ -88,6 +81,7 @@ v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI comma
 - The DSL achieves full AWS Step Functions ASL feature parity
 - Shipped v1.2 with ~8,261 LOC in examples + test harness (Python, YAML, Terraform, Markdown)
 - Shipped v1.3 with 2,753 lines of tutorial documentation across 8 tutorials
+- Shipped v1.4 with 15 automated Playwright screenshots embedded in example READMEs and tutorials
 
 ## Constraints
 
@@ -122,4 +116,4 @@ v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI comma
 | Explicit delete_log_group after terraform destroy | Catches orphaned log groups that Terraform may miss | ✓ Good |
 
 ---
-*Last updated: 2026-02-26 after v1.4 milestone start*
+*Last updated: 2026-02-27 after v1.4 milestone complete*
