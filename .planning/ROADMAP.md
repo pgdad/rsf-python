@@ -120,7 +120,7 @@ Plans:
   4. The README renders without broken images, missing sections, or formatting errors on both the GitHub repository page and the PyPI project page
 **Plans**: 1 plan
 Plans:
-- [ ] 27-01-PLAN.md -- Polish README with badges, tightened quick-start, hero screenshots, and absolute URLs
+- [x] 27-01-PLAN.md -- Polish README with badges, tightened quick-start, hero screenshots, and absolute URLs
 
 ## Progress
 

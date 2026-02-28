@@ -18,21 +18,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** v1.5 PyPI Packaging & Distribution — Phase 26: CI/CD Pipeline
+**Current focus:** v1.5 PyPI Packaging & Distribution — Phase 27: README as Landing Page
 
 ## Current Position
 
-Phase: 26 of 27 (CI/CD Pipeline)
-Plan: 26-01 complete
-Status: Phase 26 execution complete
-Last activity: 2026-02-28 — Phase 26 CI/CD Pipeline executed (1/1 plans complete)
+Phase: 27 of 27 (README as Landing Page)
+Plan: 27-01 complete
+Status: Phase 27 execution complete
+Last activity: 2026-02-28 — Phase 27 README as Landing Page executed (1/1 plans complete)
 
-Progress: [██████░░░░] 66%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 68 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 8, v1.4: 5, v1.5: 2)
+- Total plans completed: 69 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 8, v1.4: 5, v1.5: 3)
 
 **By Milestone:**
 
@@ -43,7 +43,7 @@ Progress: [██████░░░░] 66%
 | v1.2 Examples & Integration | 5 | 10 | 2026-02-24 → 2026-02-26 |
 | v1.3 Comprehensive Tutorial | 3 | 8 | 2026-02-26 |
 | v1.4 UI Screenshots | 4 | 5 | 2026-02-26 → 2026-02-27 |
-| v1.5 PyPI Packaging | 2 | 2 | 2026-02-28 |
+| v1.5 PyPI Packaging | 3 | 3 | 2026-02-28 |
 
 ## Accumulated Context
 
@@ -62,5 +62,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Phase 26 CI/CD Pipeline complete. Phase 27 README as Landing Page next.
+Stopped at: Phase 27 README as Landing Page complete. v1.5 milestone complete.
 Resume file: None
