@@ -187,7 +187,7 @@ def _to_snake_case(name: str) -> str:
 def _ensure_handlers_init(handlers_dir: Path, task_mappings: list[StateMapping]) -> None:
     """Create or update handlers/__init__.py with imports for all task handlers."""
     init_path = handlers_dir / "__init__.py"
-    lines = [f'"""Auto-generated handler imports."""', ""]
+    lines = ['"""Auto-generated handler imports."""', ""]
     for m in task_mappings:
         module = _to_snake_case(m.state_name)
         lines.append(f"from handlers.{module} import {module}  # noqa: F401")

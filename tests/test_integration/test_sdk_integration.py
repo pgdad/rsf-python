@@ -123,7 +123,7 @@ class TestSimpleTaskWorkflow:
             captured.update(data)
             return {"done": True}
 
-        result = _build_and_exec(
+        _build_and_exec(
             sm,
             workflow,
             ctx,

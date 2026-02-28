@@ -237,18 +237,18 @@ class TestGenerate:
         content1 = result1.orchestrator_path.read_text()
 
         # Remove timestamp line for comparison
-        lines1 = [l for l in content1.split("\n") if "on 20" not in l]
+        lines1 = [line for line in content1.split("\n") if "on 20" not in line]
 
         result2 = generate(sm, dsl, output_dir)
         content2 = result2.orchestrator_path.read_text()
-        lines2 = [l for l in content2.split("\n") if "on 20" not in l]
+        lines2 = [line for line in content2.split("\n") if "on 20" not in line]
 
         assert lines1 == lines2
 
     def test_creates_handlers_init(self, workflow_dir):
         dsl = workflow_dir / "workflow.yaml"
         sm = load_definition(dsl)
-        result = generate(sm, dsl, workflow_dir / "output")
+        generate(sm, dsl, workflow_dir / "output")
         init_path = workflow_dir / "output" / "handlers" / "__init__.py"
         assert init_path.exists()
         assert "do_work" in init_path.read_text()

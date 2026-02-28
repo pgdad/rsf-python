@@ -4,8 +4,11 @@ Tests cover:
 1. Workflow YAML parsing via rsf.dsl.parser.load_definition
 2. Individual handler unit tests (valid and invalid inputs)
 3. Full workflow simulation using MockDurableContext:
-   - Standard order (total <= 1000): ValidateOrder -> CheckOrderValue -> ProcessOrder -> SendConfirmation -> OrderComplete
-   - High-value order (total > 1000): ValidateOrder -> CheckOrderValue -> RequireApproval -> ProcessOrder -> SendConfirmation -> OrderComplete
+   - Standard order (total <= 1000):
+     ValidateOrder -> CheckOrderValue -> ProcessOrder -> SendConfirmation -> OrderComplete
+   - High-value order (total > 1000):
+     ValidateOrder -> CheckOrderValue -> RequireApproval -> ProcessOrder ->
+     SendConfirmation -> OrderComplete
 """
 
 from pathlib import Path
@@ -132,14 +135,16 @@ class TestValidateOrderHandler:
         """A valid order should return valid=True with correct total and itemCount."""
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("ValidateOrder")
-        result = handler({
-            "orderId": "order-001",
-            "items": [
-                {"itemId": "item-1", "quantity": 2},
-                {"itemId": "item-2", "quantity": 1},
-            ],
-            "total": 150.00,
-        })
+        result = handler(
+            {
+                "orderId": "order-001",
+                "items": [
+                    {"itemId": "item-1", "quantity": 2},
+                    {"itemId": "item-2", "quantity": 1},
+                ],
+                "total": 150.00,
+            }
+        )
         assert result["valid"] is True
         assert result["total"] == 150.00
         assert result["itemCount"] == 2
@@ -177,11 +182,13 @@ class TestValidateOrderHandler:
         """A high-value order (total > 1000) should validate normally."""
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("ValidateOrder")
-        result = handler({
-            "orderId": "order-006",
-            "items": [{"itemId": "expensive", "quantity": 1}],
-            "total": 5000.00,
-        })
+        result = handler(
+            {
+                "orderId": "order-006",
+                "items": [{"itemId": "expensive", "quantity": 1}],
+                "total": 5000.00,
+            }
+        )
         assert result["valid"] is True
         assert result["total"] == 5000.00
 
@@ -193,10 +200,12 @@ class TestRequireApprovalHandler:
         """An order within limits should be approved."""
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("RequireApproval")
-        result = handler({
-            "orderId": "order-010",
-            "validation": {"total": 2000, "itemCount": 3},
-        })
+        result = handler(
+            {
+                "orderId": "order-010",
+                "validation": {"total": 2000, "itemCount": 3},
+            }
+        )
         assert result["approved"] is True
         assert "approver" in result
 
@@ -205,10 +214,12 @@ class TestRequireApprovalHandler:
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("RequireApproval")
         with pytest.raises(Exception, match="exceeds auto-approval limit"):
-            handler({
-                "orderId": "order-011",
-                "validation": {"total": 15000, "itemCount": 1},
-            })
+            handler(
+                {
+                    "orderId": "order-011",
+                    "validation": {"total": 15000, "itemCount": 1},
+                }
+            )
 
 
 class TestProcessPaymentHandler:
@@ -218,11 +229,13 @@ class TestProcessPaymentHandler:
         """Payment processing should return a transaction ID and completed status."""
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("ProcessPayment")
-        result = handler({
-            "orderId": "order-020",
-            "validation": {"total": 200, "itemCount": 2},
-            "paymentMethod": "credit_card",
-        })
+        result = handler(
+            {
+                "orderId": "order-020",
+                "validation": {"total": 200, "itemCount": 2},
+                "paymentMethod": "credit_card",
+            }
+        )
         assert result["status"] == "completed"
         assert "transactionId" in result
         assert result["amount"] == 200
@@ -236,13 +249,15 @@ class TestReserveInventoryHandler:
         """Inventory reservation should reserve all items."""
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("ReserveInventory")
-        result = handler({
-            "orderId": "order-030",
-            "items": [
-                {"itemId": "item-A", "quantity": 3},
-                {"itemId": "item-B", "quantity": 1},
-            ],
-        })
+        result = handler(
+            {
+                "orderId": "order-030",
+                "items": [
+                    {"itemId": "item-A", "quantity": 3},
+                    {"itemId": "item-B", "quantity": 1},
+                ],
+            }
+        )
         assert result["status"] == "reserved"
         assert "reservationId" in result
         assert len(result["items"]) == 2
@@ -264,10 +279,12 @@ class TestSendConfirmationHandler:
         """Confirmation should generate a number and flag email as sent."""
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("SendConfirmation")
-        result = handler({
-            "orderId": "order-040",
-            "customerEmail": "test@example.com",
-        })
+        result = handler(
+            {
+                "orderId": "order-040",
+                "customerEmail": "test@example.com",
+            }
+        )
         assert result["emailSent"] is True
         assert result["confirmationNumber"].startswith("ORD-")
         assert result["recipientEmail"] == "test@example.com"
@@ -314,7 +331,7 @@ class TestStandardOrderWorkflow:
         # Step 2: CheckOrderValue — total is 250, so default -> ProcessOrder
         # (Choice is evaluated by the orchestrator, not a handler; we simulate the decision)
         assert state_data["validation"]["total"] <= 1000
-        next_state = "ProcessOrder"  # Default path
+        # Choice selects "ProcessOrder" (default path)
 
         # Step 3: ProcessOrder (Parallel) — ProcessPayment + ReserveInventory
         payment_handler = get_handler("ProcessPayment")
@@ -384,7 +401,7 @@ class TestHighValueOrderWorkflow:
 
         # Step 2: CheckOrderValue — total is 3500, so -> RequireApproval
         assert state_data["validation"]["total"] > 1000
-        next_state = "RequireApproval"
+        # Choice selects "RequireApproval"
 
         # Step 3: RequireApproval
         approval_handler = get_handler("RequireApproval")
@@ -460,8 +477,10 @@ class TestRejectedOrderWorkflow:
 
         # Negative total triggers InvalidOrderError
         with pytest.raises(Exception, match="must not be negative"):
-            validate_handler({
-                "orderId": "order-301",
-                "items": [{"itemId": "x"}],
-                "total": -100,
-            })
+            validate_handler(
+                {
+                    "orderId": "order-301",
+                    "items": [{"itemId": "x"}],
+                    "total": -100,
+                }
+            )

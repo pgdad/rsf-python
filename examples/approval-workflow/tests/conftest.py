@@ -8,7 +8,8 @@ sys.path.insert(0, str(example_root))
 sys.path.insert(0, str(project_root / "src"))
 sys.path.insert(0, str(project_root / "tests"))
 
-from rsf.registry.registry import clear
+from rsf.registry.registry import clear  # noqa: E402
+
 
 @pytest.fixture(autouse=True)
 def clean_registry():

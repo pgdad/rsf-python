@@ -70,7 +70,7 @@ def _validate_states_dict(states: dict[str, Any]) -> dict[str, Any]:
 
 
 # Inject the validator hook into models so it runs during normal Pydantic parsing
-import rsf.dsl.models as _models
+import rsf.dsl.models as _models  # noqa: E402
 
 _models._state_validator = _validate_states_dict
 

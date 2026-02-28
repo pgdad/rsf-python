@@ -12,7 +12,7 @@ sys.path.insert(0, str(project_root / "src"))
 # Make mock_sdk importable
 sys.path.insert(0, str(project_root / "tests"))
 
-from rsf.registry.registry import clear
+from rsf.registry.registry import clear  # noqa: E402
 
 
 @pytest.fixture(autouse=True)
