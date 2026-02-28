@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.6
-milestone_name: Java Port Blueprint
-status: ready_to_plan
+milestone: v1.5
+milestone_name: PyPI Packaging & Distribution
+status: roadmap_complete
 last_updated: "2026-02-28"
 progress:
-  total_phases: 6
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** v1.6 Java Port Blueprint — Phase 28 ready to plan
+**Current focus:** v1.5 PyPI Packaging & Distribution — Phase 25: Package & Version
 
 ## Current Position
 
-Phase: 28 of 33 (Foundation and DSL Models)
-Plan: —
+Phase: 25 of 27 (Package & Version)
+Plan: — (not yet planned)
 Status: Ready to plan
-Last activity: 2026-02-28 — Roadmap created for v1.6 (6 phases, 44 requirements mapped)
+Last activity: 2026-02-28 — Roadmap created for v1.5 (3 phases, 16 requirements mapped)
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -50,24 +50,16 @@ Progress: [░░░░░░░░░░] 0%
 
 All decisions logged in PROJECT.md Key Decisions table.
 
-Key v1.6 constraints:
-- Output is a single document: RSF-BUILDPRINT-JAVA.md (not code)
-- Java SDK (Developer Preview): parallel/map/waitForCondition/waitForCallback not yet implemented — document UnsupportedOperationException stubs
-- Container-image-only Lambda deployment — Terraform must emit package_type="Image" + ECR, never runtime="java21"
-- FreeMarker square-bracket syntax for HCL templates avoids ${} conflicts (same problem Python solves with << >> delimiters)
-- Spring Boot belongs only in rsf-editor and rsf-inspector, never in rsf-runtime (cold start risk)
-
 ### Pending Todos
 
-- v1.5 PyPI Packaging paused — resume after v1.6
+None.
 
 ### Blockers/Concerns
 
-- Java SDK DurableContext exact method signatures must be verified from github.com/aws/aws-durable-execution-sdk-java before writing Phase 29 (Mock SDK section)
-- Java 21 vs. Java 25 ECR base image: verify recommended tag at Phase 31 authoring time
+None.
 
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Roadmap created. Ready to plan Phase 28 (Foundation and DSL Models).
+Stopped at: Roadmap created for v1.5. Phase 25 ready to plan.
 Resume file: None

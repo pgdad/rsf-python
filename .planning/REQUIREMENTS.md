@@ -1,104 +1,66 @@
-# Requirements: RSF Java Port Blueprint
+# Requirements: RSF
 
 **Defined:** 2026-02-28
-**Core Value:** Comprehensive blueprint enabling a developer to port all RSF functionality to Java using idiomatic patterns, the AWS Lambda Durable Execution SDK for Java, annotations, and Maven builds.
+**Core Value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
-## v1.6 Requirements
+## v1.5 Requirements
 
-Requirements for RSF-BUILDPRINT-JAVA.md. Each maps to roadmap phases.
+Requirements for PyPI Packaging & Distribution milestone. Each maps to roadmap phases.
 
-### Foundation
+### Package Structure
 
-- [ ] **FOUND-01**: Blueprint specifies Maven multi-module project structure with module names, parent POM, and dependency graph
-- [ ] **FOUND-02**: Blueprint maps all 8 ASL state types to Java sealed interfaces with Jackson @JsonTypeInfo/@JsonSubTypes annotations
-- [ ] **FOUND-03**: Blueprint documents AWS Lambda Durable Execution SDK for Java API surface (DurableHandler, DurableContext, DurableFuture, StepConfig, TypeToken) with version and Maven coordinates
-- [ ] **FOUND-04**: Blueprint specifies container-image deployment model (ECR, Dockerfile, base image) since Java SDK requires container-image-only deployment
-- [ ] **FOUND-05**: Blueprint documents SDK feature gap matrix (parallel, map, waitForCallback, waitForCondition marked as "in development") with workaround patterns using runInChildContextAsync
+- [ ] **PKG-01**: User can install RSF via `pip install rsf` and get the `rsf` CLI command
+- [ ] **PKG-02**: Package includes pre-built React UI static assets (graph editor + execution inspector)
+- [ ] **PKG-03**: `rsf ui` and `rsf inspect` serve bundled static assets without requiring npm/node
+- [ ] **PKG-04**: Package metadata includes authors, description, classifiers, project URLs, and license
+- [ ] **PKG-05**: Build process compiles React UIs and bundles output into the Python wheel
 
-### DSL Models
+### Version Management
 
-- [ ] **DSL-01**: Blueprint provides Java class/interface definitions for all 8 state type DTOs (Task, Pass, Choice, Wait, Succeed, Fail, Parallel, Map) using Jackson annotations
-- [ ] **DSL-02**: Blueprint documents Choice rule discriminated union (39 operators + 3 boolean combinators + Condition) as Java sealed interface hierarchy
-- [ ] **DSL-03**: Blueprint specifies RetryPolicy and Catcher models with exponential backoff, jitter strategy
-- [ ] **DSL-04**: Blueprint documents semantic cross-state BFS validation strategy (reachability, terminal states, reference resolution)
-- [ ] **DSL-05**: Blueprint specifies YAML/JSON parsing approach (Jackson YAML module or SnakeYAML) with thread-safety considerations
+- [ ] **VER-01**: Package version is derived from git tags (e.g., `v1.5.0` tag → `1.5.0` version)
+- [ ] **VER-02**: `rsf --version` displays the correct version from the installed package
+- [ ] **VER-03**: Development installs show dev version (e.g., `1.5.0.dev3+gabcdef`)
 
-### Runtime Core
+### CI/CD Pipeline
 
-- [ ] **RT-01**: Blueprint documents 5-stage I/O processing pipeline implementation using Jackson JsonNode with critical invariant (ResultPath merges into RAW input)
-- [ ] **RT-02**: Blueprint specifies all 18 intrinsic functions with Java method signatures and registry pattern
-- [ ] **RT-03**: Blueprint documents recursive descent parser for intrinsic function expressions (States.Format, nested calls, JSONPath refs)
-- [ ] **RT-04**: Blueprint specifies @State and @Startup annotation definitions with handler registration mechanism (compile-time APT recommended over runtime classpath scanning)
-- [ ] **RT-05**: Blueprint documents JSONPath evaluator implementation for ASL-subset (dot/bracket notation, array indexing, $$ context, $var references)
-- [ ] **RT-06**: Blueprint specifies variable store interface and context object model ($$)
-- [ ] **RT-07**: Blueprint documents Mock SDK implementation for local testing of generated code (implements DurableContext interface)
+- [ ] **CICD-01**: GitHub Actions runs lint and tests on every pull request
+- [ ] **CICD-02**: GitHub Actions builds wheel and publishes to PyPI on git tag push
+- [ ] **CICD-03**: CI builds React UIs as part of the wheel build process
+- [ ] **CICD-04**: PyPI publishing uses trusted publisher authentication (no API tokens)
 
-### Code Generation
+### README
 
-- [ ] **CODEGEN-01**: Blueprint specifies FreeMarker template strategy with square-bracket syntax to avoid Terraform ${} conflicts
-- [ ] **CODEGEN-02**: Blueprint documents BFS state traversal and StateMapping data structure for code generation ordering
-- [ ] **CODEGEN-03**: Blueprint provides FreeMarker template structure for generated DurableHandler<I,O> subclass with while-loop state machine
-- [ ] **CODEGEN-04**: Blueprint documents Generation Gap pattern for handler stubs (generated once, never overwritten)
-- [ ] **CODEGEN-05**: Blueprint specifies per-state-type code emission strategy (step, wait, conditional, parallel workaround, map workaround)
-
-### Terraform & Infrastructure
-
-- [ ] **TF-01**: Blueprint documents 6 generated Terraform files adapted for container-image deployment (main.tf with package_type="Image", ECR resources)
-- [ ] **TF-02**: Blueprint specifies IAM policy generation with durable execution permissions
-- [ ] **TF-03**: Blueprint documents Dockerfile template generation for Lambda container image (base image, fat JAR, entry point)
-- [ ] **TF-04**: Blueprint specifies FreeMarker HCL templates with square-bracket syntax avoiding ${} conflicts
-
-### ASL Importer
-
-- [ ] **IMP-01**: Blueprint documents ASL JSON to RSF YAML conversion rules (same 5 rules as Python + Java-specific handler stub generation)
-- [ ] **IMP-02**: Blueprint specifies handler stub generation producing @State-annotated Java classes
-
-### CLI
-
-- [ ] **CLI-01**: Blueprint documents all 7 CLI commands (init, generate, validate, deploy, import, ui, inspect) using Picocli @Command annotations
-- [ ] **CLI-02**: Blueprint specifies rsf init project scaffolding producing Maven project structure (pom.xml, src/main/java, handlers, Dockerfile)
-- [ ] **CLI-03**: Blueprint documents rsf deploy pipeline: Maven build → fat JAR → Docker build → ECR push → Terraform apply
-- [ ] **CLI-04**: Blueprint specifies rsf generate invoking FreeMarker code generation with Generation Gap preservation
-
-### Web Backends
-
-- [ ] **WEB-01**: Blueprint documents Spring Boot graph editor backend with REST + WebSocket endpoints (same API contract as Python FastAPI)
-- [ ] **WEB-02**: Blueprint specifies Spring Boot execution inspector backend with REST + SseEmitter (same API contract as Python FastAPI)
-- [ ] **WEB-03**: Blueprint documents React UI sharing strategy (same React source, different backend, Vite build targeting Spring Boot static resources)
-- [ ] **WEB-04**: Blueprint specifies Spring Boot module isolation (Spring Boot only in rsf-editor and rsf-inspector, never in rsf-runtime)
-
-### Testing Strategy
-
-- [ ] **TEST-01**: Blueprint documents JUnit 5 + Mockito + AssertJ test patterns for each module
-- [ ] **TEST-02**: Blueprint specifies golden-file testing strategy for FreeMarker code generation output
-- [ ] **TEST-03**: Blueprint documents integration test approach for real AWS container-image Lambda deployment
-- [ ] **TEST-04**: Blueprint specifies Maven Surefire (unit) and Failsafe (integration) plugin configuration
-
-### Document Structure
-
-- [ ] **DOC-01**: RSF-BUILDPRINT-JAVA.md is a single self-contained document with table of contents, component-by-component sections, and dependency graph
-- [ ] **DOC-02**: Blueprint includes complete Maven dependency specifications (groupId, artifactId, version) for all libraries
-- [ ] **DOC-03**: Blueprint includes Java code examples for key patterns (sealed interface, annotation, FreeMarker template, etc.)
-- [ ] **DOC-04**: Blueprint includes migration notes from Python patterns to Java equivalents
+- [ ] **README-01**: README includes install instructions (`pip install rsf`)
+- [ ] **README-02**: README includes quick start showing init → generate → deploy workflow
+- [ ] **README-03**: README includes PyPI badge, CI status badge, and license badge
+- [ ] **README-04**: README renders correctly on both GitHub and PyPI
 
 ## Future Requirements
 
-### Implementation
+Deferred to future release. Tracked but not in current roadmap.
 
-- **IMPL-01**: Actual Java code implementation of rsf-dsl module
-- **IMPL-02**: Actual Java code implementation of rsf-runtime module
-- **IMPL-03**: Actual Java code implementation of rsf-codegen module
-- **IMPL-04**: Full Java RSF project as separate repository
+### Distribution
+
+- **DIST-01**: Publish to conda-forge for Anaconda users
+- **DIST-02**: Docker image with RSF pre-installed
+- **DIST-03**: Homebrew formula for macOS users
+
+### Quality
+
+- **QUAL-01**: PEP 561 py.typed marker for downstream type checking
+- **QUAL-02**: Pre-commit hooks configuration
+- **QUAL-03**: Code coverage reporting in CI
 
 ## Out of Scope
 
+Explicitly excluded. Documented to prevent scope creep.
+
 | Feature | Reason |
 |---------|--------|
-| Actual Java code implementation | This milestone produces a blueprint document, not working code |
-| Gradle build system | User specified Maven for all builds |
-| Kotlin or Scala alternatives | User specified idiomatic Java |
-| GraalVM native-image support | Premature optimization; container image cold start is sufficient |
-| Java SDK GA features | SDK is in preview; blueprint documents current state + workarounds |
+| Monorepo split (rsf-core, rsf-cli, rsf-ui) | Single package is simpler for users; split if needed later |
+| TestPyPI staging | Trusted publisher to real PyPI is sufficient for v1.5 |
+| Automated changelog generation | Manual release notes are fine at this scale |
+| npm package for UI components | UI is bundled into Python package, not distributed separately |
 
 ## Traceability
 
@@ -106,56 +68,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | Phase 28 | Pending |
-| FOUND-02 | Phase 28 | Pending |
-| FOUND-03 | Phase 28 | Pending |
-| FOUND-04 | Phase 28 | Pending |
-| FOUND-05 | Phase 28 | Pending |
-| DSL-01 | Phase 28 | Pending |
-| DSL-02 | Phase 28 | Pending |
-| DSL-03 | Phase 28 | Pending |
-| DSL-04 | Phase 28 | Pending |
-| DSL-05 | Phase 28 | Pending |
-| RT-01 | Phase 29 | Pending |
-| RT-02 | Phase 29 | Pending |
-| RT-03 | Phase 29 | Pending |
-| RT-04 | Phase 29 | Pending |
-| RT-05 | Phase 29 | Pending |
-| RT-06 | Phase 29 | Pending |
-| RT-07 | Phase 29 | Pending |
-| CODEGEN-01 | Phase 30 | Pending |
-| CODEGEN-02 | Phase 30 | Pending |
-| CODEGEN-03 | Phase 30 | Pending |
-| CODEGEN-04 | Phase 30 | Pending |
-| CODEGEN-05 | Phase 30 | Pending |
-| TF-01 | Phase 31 | Pending |
-| TF-02 | Phase 31 | Pending |
-| TF-03 | Phase 31 | Pending |
-| TF-04 | Phase 31 | Pending |
-| IMP-01 | Phase 31 | Pending |
-| IMP-02 | Phase 31 | Pending |
-| CLI-01 | Phase 32 | Pending |
-| CLI-02 | Phase 32 | Pending |
-| CLI-03 | Phase 32 | Pending |
-| CLI-04 | Phase 32 | Pending |
-| WEB-01 | Phase 32 | Pending |
-| WEB-02 | Phase 32 | Pending |
-| WEB-03 | Phase 32 | Pending |
-| WEB-04 | Phase 32 | Pending |
-| TEST-01 | Phase 33 | Pending |
-| TEST-02 | Phase 33 | Pending |
-| TEST-03 | Phase 33 | Pending |
-| TEST-04 | Phase 33 | Pending |
-| DOC-01 | Phase 33 | Pending |
-| DOC-02 | Phase 33 | Pending |
-| DOC-03 | Phase 33 | Pending |
-| DOC-04 | Phase 33 | Pending |
+| PKG-01 | Phase 25 | Pending |
+| PKG-02 | Phase 25 | Pending |
+| PKG-03 | Phase 25 | Pending |
+| PKG-04 | Phase 25 | Pending |
+| PKG-05 | Phase 25 | Pending |
+| VER-01 | Phase 25 | Pending |
+| VER-02 | Phase 25 | Pending |
+| VER-03 | Phase 25 | Pending |
+| CICD-01 | Phase 26 | Pending |
+| CICD-02 | Phase 26 | Pending |
+| CICD-03 | Phase 26 | Pending |
+| CICD-04 | Phase 26 | Pending |
+| README-01 | Phase 27 | Pending |
+| README-02 | Phase 27 | Pending |
+| README-03 | Phase 27 | Pending |
+| README-04 | Phase 27 | Pending |
 
 **Coverage:**
-- v1.6 requirements: 44 total (note: initial count of 42 in REQUIREMENTS.md was incorrect — actual count is 44 across 9 categories: FOUND-05 + DSL-05 + RT-07 + CODEGEN-05 + TF-04 + IMP-02 + CLI-04 + WEB-04 + TEST-04 + DOC-04)
-- Mapped to phases: 44
-- Unmapped: 0
+- v1.5 requirements: 16 total
+- Mapped to phases: 16
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 — Traceability updated during roadmap creation (Phase 28-33)*
+*Last updated: 2026-02-28 after roadmap creation (v1.5 traceability complete)*
