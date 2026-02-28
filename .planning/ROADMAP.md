@@ -110,7 +110,7 @@ Full details: `.planning/milestones/v1.5-ROADMAP.md`
   3. `ruff check tests/` reports zero F401 violations
   4. `ruff check examples/` reports zero F401 violations
   5. F401 is removed from the `ignore` list in pyproject.toml
-**Plans:** 2 plans
+**Plans:** 1/2 plans executed
 Plans:
 - [ ] 28-01-PLAN.md — Fix all 61 F401 violations across src/, tests/, and examples/
 - [ ] 28-02-PLAN.md — Update pyproject.toml ruff config (remove examples exclusion, remove F401 from ignore)
@@ -177,7 +177,7 @@ Plans:
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 28. F401 Unused Imports | v1.6 | 0/2 | Planning complete | - |
+| 28. F401 Unused Imports | 1/2 | In Progress|  | - |
 | 29. F841 Unused Variables | v1.6 | 0/? | Not started | - |
 | 30. F541 f-string Without Placeholders | v1.6 | 0/? | Not started | - |
 | 31. E402 Import Not at Top of File | v1.6 | 0/? | Not started | - |

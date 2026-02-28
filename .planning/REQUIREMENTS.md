@@ -14,11 +14,11 @@ Requirements for ruff linting cleanup. Each maps to roadmap phases.
 
 ### F401 — Unused Imports
 
-- [ ] **F401-01**: All unused imports in `src/` are removed or justified with inline `# noqa: F401`
-- [ ] **F401-02**: All unused imports in `tests/` are removed
-- [ ] **F401-03**: All unused imports in `examples/` are removed
-- [ ] **F401-04**: Side-effect imports in `functions/__init__.py` use `__all__` or inline `# noqa: F401`
-- [ ] **F401-05**: Generated `handlers/__init__.py` code uses appropriate `# noqa: F401` for side-effect imports
+- [x] **F401-01**: All unused imports in `src/` are removed or justified with inline `# noqa: F401`
+- [x] **F401-02**: All unused imports in `tests/` are removed
+- [x] **F401-03**: All unused imports in `examples/` are removed
+- [x] **F401-04**: Side-effect imports in `functions/__init__.py` use `__all__` or inline `# noqa: F401`
+- [x] **F401-05**: Generated `handlers/__init__.py` code uses appropriate `# noqa: F401` for side-effect imports
 - [ ] **F401-06**: F401 is removed from the global `ignore` list
 
 ### F841 — Unused Variables
@@ -67,11 +67,11 @@ None — this is a self-contained code quality milestone.
 |-------------|-------|--------|
 | CONF-01 | Phase 28 | Pending |
 | CONF-02 | Phase 34 | Pending |
-| F401-01 | Phase 28 | Pending |
-| F401-02 | Phase 28 | Pending |
-| F401-03 | Phase 28 | Pending |
-| F401-04 | Phase 28 | Pending |
-| F401-05 | Phase 28 | Pending |
+| F401-01 | Phase 28 | Complete |
+| F401-02 | Phase 28 | Complete |
+| F401-03 | Phase 28 | Complete |
+| F401-04 | Phase 28 | Complete |
+| F401-05 | Phase 28 | Complete |
 | F401-06 | Phase 28 | Pending |
 | F841-01 | Phase 29 | Pending |
 | F841-02 | Phase 29 | Pending |
