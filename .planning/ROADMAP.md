@@ -118,7 +118,9 @@ Plans:
   2. The README contains a quick-start sequence (init -> generate -> deploy) showing the end-to-end workflow with commands and expected output
   3. The README displays a PyPI version badge, a CI status badge, and a license badge that all link to their respective targets
   4. The README renders without broken images, missing sections, or formatting errors on both the GitHub repository page and the PyPI project page
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 27-01-PLAN.md -- Polish README with badges, tightened quick-start, hero screenshots, and absolute URLs
 
 ## Progress
 
@@ -128,4 +130,4 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 25. Package & Version | v1.5 | 1/1 | Complete | 2026-02-28 |
 | 26. CI/CD Pipeline | v1.5 | 1/1 | Complete | 2026-02-28 |
-| 27. README as Landing Page | v1.5 | 0/TBD | Not started | - |
+| 27. README as Landing Page | v1.5 | 0/1 | Not started | - |
