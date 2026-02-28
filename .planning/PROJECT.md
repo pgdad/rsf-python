@@ -57,7 +57,20 @@ v1.5 shipped (2026-02-28). RSF is installable via `pip install rsf` with bundled
 
 <!-- Current scope. Building toward these. -->
 
-(None — start next milestone with `/gsd:new-milestone`)
+## Current Milestone: v1.6 Ruff Linting Cleanup
+
+**Goal:** Fix all ruff linting violations and remove all ignored rules and exclusions so the entire codebase passes strict ruff checks with zero suppressions.
+
+**Target features:**
+- Fix all F401 unused imports across source, tests, examples, and generated code
+- Fix all F841 unused variables
+- Fix F541 f-string without placeholders
+- Fix all E402 import-not-at-top-of-file violations
+- Fix all E741 ambiguous variable names
+- Fix all E501 line-too-long violations in examples/
+- Remove `exclude = ["examples"]` from ruff config
+- Remove all rules from `ignore` list in pyproject.toml
+- Ensure generated code (from Jinja2 templates) is also lint-clean
 
 ### Out of Scope
 
@@ -124,4 +137,4 @@ v1.5 shipped (2026-02-28). RSF is installable via `pip install rsf` with bundled
 | Absolute URLs in README for PyPI | PyPI does not resolve relative paths; raw.githubusercontent.com for images | ✓ Good |
 
 ---
-*Last updated: 2026-02-28 after v1.5 milestone*
+*Last updated: 2026-02-28 after v1.6 milestone started*

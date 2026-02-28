@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: PyPI Packaging & Distribution
-status: complete
+milestone: v1.6
+milestone_name: Ruff Linting Cleanup
+status: active
 last_updated: "2026-02-28"
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 3
-  completed_plans: 3
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** Planning next milestone
+**Current focus:** Ruff Linting Cleanup
 
 ## Current Position
 
-Milestone v1.5 PyPI Packaging & Distribution: SHIPPED 2026-02-28
-All phases complete (25-27). Ready for next milestone.
-
-Progress: [██████████] 100%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-28 — Milestone v1.6 started
 
 ## Performance Metrics
 
@@ -60,5 +60,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: v1.5 milestone archived. Ready for next milestone.
+Stopped at: Defining v1.6 requirements
 Resume file: None
