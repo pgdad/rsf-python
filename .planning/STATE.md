@@ -1,11 +1,11 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.5
-milestone_name: PyPI Packaging & Distribution
-status: roadmap_complete
+milestone: v1.6
+milestone_name: Java Port Blueprint
+status: defining_requirements
 last_updated: "2026-02-28"
 progress:
-  total_phases: 3
+  total_phases: 0
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,14 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** v1.5 PyPI Packaging & Distribution — Phase 25: Package & Version
+**Current focus:** v1.6 Java Port Blueprint — Defining requirements
 
 ## Current Position
 
-Phase: 25 of 27 (Package & Version)
-Plan: — (not yet planned)
-Status: Ready to plan
-Last activity: 2026-02-28 — Roadmap created for v1.5 (3 phases, 16 requirements mapped)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-02-28 — Milestone v1.6 started
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -52,7 +52,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ### Pending Todos
 
-None.
+- v1.5 PyPI Packaging paused — resume after v1.6
 
 ### Blockers/Concerns
 
@@ -61,5 +61,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Roadmap created for v1.5. Phase 25 ready to plan.
+Stopped at: Starting v1.6 Java Port Blueprint milestone.
 Resume file: None

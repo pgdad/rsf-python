@@ -8,15 +8,22 @@ RSF is a complete replacement for AWS Step Functions built on AWS Lambda Durable
 
 Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
-## Current Milestone: v1.5 PyPI Packaging & Distribution
+## Current Milestone: v1.6 Java Port Blueprint
 
-**Goal:** Make RSF installable via `pip install rsf` with bundled UIs, git-tag versioning, and CI/CD publishing to PyPI.
+**Goal:** Produce RSF-BUILDPRINT-JAVA.md — a comprehensive blueprint for porting all RSF functionality to Java using the AWS Lambda Durable Execution SDK for Java (preview), with idiomatic Java patterns, annotations, and Maven-based builds.
 
 **Target features:**
-- PyPI package with CLI + library + pre-built React UIs as static assets
-- Git tag-driven versioning (v1.5.0 tag → 1.5.0 package)
-- GitHub Actions CI/CD: test on PR, build + publish to PyPI on tag push
-- Updated README as PyPI landing page (badges, install instructions, quick start)
+- Complete Java port blueprint covering all 14+ RSF components
+- Java SDK mapping: DurableHandler<I,O>, DurableContext, DurableFuture, TypeToken
+- Idiomatic Java architecture: annotations (@State, @Startup), Jackson DTOs, sealed interfaces
+- Maven project structure with multi-module layout and dependency management
+- Code generation strategy using FreeMarker templates
+- CLI blueprint using Picocli, UI backends using Spring Boot (REST/WebSocket/SSE)
+- Testing strategy using JUnit 5, Mockito, and AssertJ
+
+## Paused: v1.5 PyPI Packaging & Distribution
+
+**Goal:** Make RSF installable via `pip install rsf` with bundled UIs, git-tag versioning, and CI/CD publishing to PyPI. *(Paused — resume after v1.6)*
 
 ## Current State
 
@@ -63,10 +70,11 @@ v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI comma
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] PyPI package structure with bundled React UI static assets
-- [ ] Git tag-driven version management
-- [ ] GitHub Actions CI/CD pipeline (test + publish)
-- [ ] README updated as PyPI landing page
+- [ ] RSF-BUILDPRINT-JAVA.md — comprehensive Java port blueprint
+- [ ] Java SDK mapping for all DSL primitives and code generation
+- [ ] Maven project structure and dependency specification
+- [ ] Java annotation design for handler registry (@State, @Startup)
+- [ ] Component-by-component porting strategy with Java equivalents
 
 ### Out of Scope
 
@@ -127,4 +135,4 @@ v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI comma
 | Explicit delete_log_group after terraform destroy | Catches orphaned log groups that Terraform may miss | ✓ Good |
 
 ---
-*Last updated: 2026-02-28 after v1.5 milestone started*
+*Last updated: 2026-02-28 after v1.6 milestone started*
