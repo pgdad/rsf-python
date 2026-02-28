@@ -22,6 +22,7 @@ WORKFLOW = Path(__file__).parent.parent / "workflow.yaml"
 # 1. Workflow parsing
 # ---------------------------------------------------------------------------
 
+
 class TestWorkflowParsing:
     """Verify workflow.yaml loads and parses without errors."""
 
@@ -58,6 +59,7 @@ class TestWorkflowParsing:
 # ---------------------------------------------------------------------------
 # 2. Retry policies
 # ---------------------------------------------------------------------------
+
 
 class TestRetryPolicies:
     """Check JitterStrategy FULL/NONE, BackoffRate values, and MaxDelaySeconds."""
@@ -139,6 +141,7 @@ class TestRetryPolicies:
 # 3. Multi-Catch chains
 # ---------------------------------------------------------------------------
 
+
 class TestMultiCatchChains:
     """Verify Catch configuration on states with multiple catchers."""
 
@@ -189,16 +192,19 @@ class TestMultiCatchChains:
 # 4. Individual handler tests
 # ---------------------------------------------------------------------------
 
+
 class TestCallPrimaryServiceHandler:
     """Test the CallPrimaryService handler in isolation."""
 
     def test_success(self):
         from handlers.call_primary_service import call_primary_service
 
-        result = call_primary_service({
-            "requestId": "req-1",
-            "payload": {"item": "widget"},
-        })
+        result = call_primary_service(
+            {
+                "requestId": "req-1",
+                "payload": {"item": "widget"},
+            }
+        )
         assert result["source"] == "primary"
         assert result["status"] == "ok"
         assert result["requestId"] == "req-1"
@@ -240,10 +246,12 @@ class TestTryFallbackServiceHandler:
     def test_success(self):
         from handlers.try_fallback_service import try_fallback_service
 
-        result = try_fallback_service({
-            "requestId": "req-2",
-            "primaryError": {"msg": "down"},
-        })
+        result = try_fallback_service(
+            {
+                "requestId": "req-2",
+                "primaryError": {"msg": "down"},
+            }
+        )
         assert result["source"] == "fallback"
         assert result["status"] == "ok"
 
@@ -266,10 +274,12 @@ class TestRetryAfterThrottleHandler:
     def test_success(self):
         from handlers.retry_after_throttle import retry_after_throttle
 
-        result = retry_after_throttle({
-            "requestId": "req-3",
-            "recovery": {"retryAfter": 30},
-        })
+        result = retry_after_throttle(
+            {
+                "requestId": "req-3",
+                "recovery": {"retryAfter": 30},
+            }
+        )
         assert result["source"] == "primary-retry"
         assert result["status"] == "ok"
         assert result["throttleRecovery"] is True
@@ -287,10 +297,12 @@ class TestHandleBadDataHandler:
     def test_success(self):
         from handlers.handle_bad_data import handle_bad_data
 
-        result = handle_bad_data({
-            "payload": {"field": "value"},
-            "validationError": {"msg": "schema mismatch"},
-        })
+        result = handle_bad_data(
+            {
+                "payload": {"field": "value"},
+                "validationError": {"msg": "schema mismatch"},
+            }
+        )
         assert result["cleaned"] is True
         assert "malformed_field" in result["removedFields"]
 
@@ -328,6 +340,7 @@ class TestVerifyResultHandler:
 # ---------------------------------------------------------------------------
 # 5. Happy path integration
 # ---------------------------------------------------------------------------
+
 
 class TestHappyPath:
     """CallPrimaryService -> VerifyResult -> ServiceComplete."""
@@ -399,6 +412,7 @@ class TestHappyPath:
 # ---------------------------------------------------------------------------
 # 6. Fallback path integration
 # ---------------------------------------------------------------------------
+
 
 class TestFallbackPath:
     """CallPrimaryService catches ServiceDownError -> TryFallbackService -> VerifyResult -> ServiceComplete."""

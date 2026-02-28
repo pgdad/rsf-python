@@ -43,11 +43,13 @@ def reserve_inventory(input_data: dict) -> dict:
     for item in items:
         item_id = item.get("itemId", "unknown")
         quantity = item.get("quantity", 1)
-        reserved_items.append({
-            "itemId": item_id,
-            "quantity": quantity,
-            "reserved": True,
-        })
+        reserved_items.append(
+            {
+                "itemId": item_id,
+                "quantity": quantity,
+                "reserved": True,
+            }
+        )
         _log(
             "ReserveInventory",
             "Item reserved",

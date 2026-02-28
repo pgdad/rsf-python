@@ -29,6 +29,7 @@ WORKFLOW_PATH = Path(__file__).parent.parent / "workflow.yaml"
 # 1. Workflow YAML parsing
 # ---------------------------------------------------------------------------
 
+
 class TestWorkflowParsing:
     """Verify the workflow.yaml file parses correctly."""
 
@@ -38,8 +39,7 @@ class TestWorkflowParsing:
 
     def test_all_states_present(self):
         sm = load_definition(WORKFLOW_PATH)
-        expected = {"InitPipeline", "FetchRecords", "TransformRecords",
-                    "StoreResults", "PipelineComplete"}
+        expected = {"InitPipeline", "FetchRecords", "TransformRecords", "StoreResults", "PipelineComplete"}
         assert set(sm.states.keys()) == expected
 
     def test_state_types(self):
@@ -73,6 +73,7 @@ class TestWorkflowParsing:
 # ---------------------------------------------------------------------------
 # 2. Individual handler unit tests
 # ---------------------------------------------------------------------------
+
 
 class TestFetchRecordsHandler:
     """Unit tests for the FetchRecords handler."""
@@ -216,6 +217,7 @@ class TestStoreResultsHandler:
 # 3. I/O processing features in YAML
 # ---------------------------------------------------------------------------
 
+
 class TestIOProcessingFeatures:
     """Verify that the workflow YAML uses I/O processing features."""
 
@@ -288,6 +290,7 @@ class TestIOProcessingFeatures:
 # ---------------------------------------------------------------------------
 # 4. Full pipeline simulation with MockDurableContext
 # ---------------------------------------------------------------------------
+
 
 class TestFullPipelineSimulation:
     """End-to-end pipeline simulation using MockDurableContext.
@@ -427,9 +430,7 @@ class TestFullPipelineSimulation:
         """Verify the Map state processes every fetched record."""
         ctx = MockDurableContext()
 
-        fetch_result = handlers["FetchRecords"](
-            {"bucket": "data-lake", "prefix": "incoming/", "maxItems": 100}
-        )
+        fetch_result = handlers["FetchRecords"]({"bucket": "data-lake", "prefix": "incoming/", "maxItems": 100})
         records = fetch_result["items"]
 
         def map_processor(item):
@@ -450,9 +451,7 @@ class TestFullPipelineSimulation:
         ctx = MockDurableContext()
 
         # Fetch
-        fetch_result = handlers["FetchRecords"](
-            {"bucket": "b", "prefix": "p/", "maxItems": 4}
-        )
+        fetch_result = handlers["FetchRecords"]({"bucket": "b", "prefix": "p/", "maxItems": 4})
         records = fetch_result["items"]
 
         # Transform

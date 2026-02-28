@@ -79,9 +79,7 @@ class TestIntrinsicCoverage:
             pattern = re.escape(func_name) + r"\s*\("
             if re.search(pattern, yaml_text):
                 found.add(func_name)
-        assert len(found) >= 14, (
-            f"Expected 14+ intrinsic functions, found {len(found)}: {sorted(found)}"
-        )
+        assert len(found) >= 14, f"Expected 14+ intrinsic functions, found {len(found)}: {sorted(found)}"
 
     def test_specific_functions_present(self):
         """Verify key intrinsic functions are used."""
@@ -112,9 +110,7 @@ class TestIOPipelineFields:
         io_fields = ["InputPath", "Parameters", "ResultSelector", "ResultPath", "OutputPath"]
         for field_name in io_fields:
             # Match field at start of a YAML key (with optional indentation)
-            assert field_name in yaml_text, (
-                f"I/O pipeline field '{field_name}' not found in workflow.yaml"
-            )
+            assert field_name in yaml_text, f"I/O pipeline field '{field_name}' not found in workflow.yaml"
 
 
 # ---------------------------------------------------------------------------
@@ -311,25 +307,34 @@ class TestWorkflowSimulation:
         ctx = MockDurableContext()
 
         # Override all handlers with canned results
-        ctx.override_step("StringOperations", {
-            "decoded": "Test User",
-            "hash": "deadbeef",
-            "serialized": '["Test","User"]',
-            "formatted": "Test User has 2 name parts",
-        })
-        ctx.override_step("ArrayOperations", {
-            "range": [1, 3, 5],
-            "partitioned": [["a", "b"]],
-            "contains": True,
-            "firstTag": "a",
-            "tagCount": 2,
-            "uniqueTags": ["a", "b"],
-        })
-        ctx.override_step("MathAndJsonOps", {
-            "sum": 12,
-            "randomVal": 77,
-            "parsed": ["Test", "User"],
-        })
+        ctx.override_step(
+            "StringOperations",
+            {
+                "decoded": "Test User",
+                "hash": "deadbeef",
+                "serialized": '["Test","User"]',
+                "formatted": "Test User has 2 name parts",
+            },
+        )
+        ctx.override_step(
+            "ArrayOperations",
+            {
+                "range": [1, 3, 5],
+                "partitioned": [["a", "b"]],
+                "contains": True,
+                "firstTag": "a",
+                "tagCount": 2,
+                "uniqueTags": ["a", "b"],
+            },
+        )
+        ctx.override_step(
+            "MathAndJsonOps",
+            {
+                "sum": 12,
+                "randomVal": 77,
+                "parsed": ["Test", "User"],
+            },
+        )
 
         # Execute steps using overrides
         string_handler = get_handler("StringOperations")
