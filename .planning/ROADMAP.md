@@ -74,7 +74,7 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
 
 </details>
 
-### 🚧 v1.5 PyPI Packaging & Distribution (In Progress)
+### v1.5 PyPI Packaging & Distribution (In Progress)
 
 **Milestone Goal:** Make RSF installable via `pip install rsf` with bundled UIs, git-tag versioning, and CI/CD publishing to PyPI.
 
@@ -105,7 +105,9 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
   2. Pushing a `v*` git tag triggers a separate GitHub Actions workflow that builds the wheel (including React UI compilation) and publishes it to PyPI
   3. The published package on PyPI is installable immediately after the tag workflow completes (`pip install rsf==<version>` works)
   4. PyPI publishing uses OIDC trusted publisher authentication — no API tokens stored in repository secrets
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 26-01-PLAN.md -- CI/CD workflows (ci.yml for PR checks + release.yml for tag-triggered PyPI publishing)
 
 ### Phase 27: README as Landing Page
 **Goal**: The README serves as a polished landing page on both GitHub and PyPI, with accurate install instructions, a working quick-start example, and status badges
@@ -113,17 +115,17 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
 **Requirements**: README-01, README-02, README-03, README-04
 **Success Criteria** (what must be TRUE):
   1. The README contains a `pip install rsf` install command that users can copy and run to get a working CLI
-  2. The README contains a quick-start sequence (init → generate → deploy) showing the end-to-end workflow with commands and expected output
+  2. The README contains a quick-start sequence (init -> generate -> deploy) showing the end-to-end workflow with commands and expected output
   3. The README displays a PyPI version badge, a CI status badge, and a license badge that all link to their respective targets
   4. The README renders without broken images, missing sections, or formatting errors on both the GitHub repository page and the PyPI project page
 **Plans**: TBD
 
 ## Progress
 
-**Execution Order:** 25 → 26 → 27
+**Execution Order:** 25 -> 26 -> 27
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 25. Package & Version | v1.5 | 1/1 | Complete | 2026-02-28 |
-| 26. CI/CD Pipeline | v1.5 | 0/TBD | Not started | - |
+| 26. CI/CD Pipeline | v1.5 | 0/1 | Planned | - |
 | 27. README as Landing Page | v1.5 | 0/TBD | Not started | - |
