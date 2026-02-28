@@ -18,7 +18,7 @@ RSF is a complete replacement for AWS Step Functions built on **AWS Lambda Durab
 6. A **CLI toolchain** (`rsf init`, `rsf generate`, `rsf validate`, `rsf deploy`, `rsf import`, `rsf ui`, `rsf inspect`)
 7. An **execution inspector** with time machine scrubbing, live updates, and structural data diffs
 
-Users define workflows in the DSL, generate deployment-ready Lambda code, connect business logic via `@state` decorators, deploy via Terraform, and inspect execution state with a web-based debugger.
+Users define workflows in the DSL, generate deployment-ready Lambda code, connect business logic via `@state` decorators, deploy via Terraform, and inspect execution state with a web-based debugger. Five real-world example workflows with integration tests prove end-to-end correctness on real AWS. Eight step-by-step tutorials cover all CLI commands. Automated Playwright screenshots provide visual documentation.
 
 ## Core Value
 
@@ -65,6 +65,8 @@ A developer can:
 | Build | Vite | Latest | React app bundling |
 | Test (Python) | pytest | Latest | Unit + integration tests |
 | Test (JS) | vitest | Latest | React component + logic tests |
+| Screenshot | @playwright/test | 1.58.2 | Browser automation for screenshot capture |
+| TS Runner | tsx | 4.19.4 | Node TypeScript execution for scripts |
 
 **Runtime Requirement:** Python 3.13+ (Lambda Durable Functions SDK requirement)
 
@@ -223,8 +225,47 @@ rsf/
 │   │   ├── sync/                # WebSocket, SSE, AST↔Flow converters
 │   │   ├── layout/              # ELK.js auto-layout
 │   │   └── types/               # TypeScript type definitions
+│   ├── scripts/                 # Screenshot automation (TypeScript)
+│   │   ├── capture-screenshots.ts   # Main orchestration: 15 PNGs via Playwright
+│   │   ├── start-ui-server.ts       # Graph editor server lifecycle
+│   │   ├── start-inspect-server.ts  # Mock inspect server lifecycle
+│   │   ├── mock-inspect-server.ts   # HTTP server emulating inspect API
+│   │   ├── smoke-test.ts            # Playwright connectivity check
+│   │   └── fixtures/                # Mock execution data (1 JSON per example)
+│   │       ├── order-processing.json
+│   │       ├── approval-workflow.json
+│   │       ├── data-pipeline.json
+│   │       ├── retry-and-recovery.json
+│   │       └── intrinsic-showcase.json
+│   ├── tsconfig.scripts.json    # Separate tsconfig for Node scripts (moduleResolution: node)
 │   ├── package.json
 │   └── vite.config.ts
+├── examples/                    # 5 real-world example workflows
+│   ├── README.md                # Quick-start guide with example summary table
+│   ├── order-processing/        # Core state types + error handling + parallel
+│   ├── approval-workflow/       # Context Object, Variables/Assign, Wait, looping
+│   ├── data-pipeline/           # Map state, full I/O pipeline, DynamoDB
+│   ├── retry-and-recovery/      # Multi-Retry, JitterStrategy, multi-Catch
+│   └── intrinsic-showcase/      # 14+ intrinsic functions, all I/O stages
+│   # Each example contains:
+│   # ├── workflow.yaml           # DSL definition
+│   # ├── handlers/               # Python handler functions (@state decorated)
+│   # ├── src/handlers/           # Same handlers for deployment packaging
+│   # ├── src/generated/          # Auto-generated orchestrator
+│   # ├── terraform/              # Per-example Terraform (Lambda, IAM, CloudWatch, DynamoDB)
+│   # ├── tests/
+│   # │   ├── conftest.py         # clean_registry fixture
+│   # │   └── test_local.py       # YAML parsing + handler unit + workflow simulation
+│   # └── README.md               # DSL features table + workflow diagram + screenshots
+├── tutorials/                   # 8 step-by-step tutorials (v1.3)
+│   ├── 01-project-setup.md          # rsf init
+│   ├── 02-workflow-validation.md     # rsf validate (learn-by-breaking)
+│   ├── 03-code-generation.md         # rsf generate
+│   ├── 04-deploy-to-aws.md           # rsf deploy (Terraform walkthrough)
+│   ├── 05-iterate-invoke-teardown.md # --code-only, invoke, teardown
+│   ├── 06-asl-import.md              # rsf import (ASL conversion rules)
+│   ├── 07-graph-editor.md            # rsf ui (bidirectional sync)
+│   └── 08-execution-inspector.md     # rsf inspect (time machine, SSE)
 ├── tests/                       # Python test suite
 │   ├── test_dsl/                # DSL model + parser + validator tests
 │   ├── test_codegen/            # Code generation tests
@@ -233,7 +274,13 @@ rsf/
 │   ├── test_functions/          # Intrinsic function tests
 │   ├── test_context/            # Context object tests
 │   ├── test_inspect/            # Inspector tests
-│   ├── test_aws/                # Real AWS integration tests
+│   ├── test_examples/           # Integration tests (real AWS deploy/invoke/teardown)
+│   │   ├── conftest.py          # Shared harness: poll_execution, query_logs, terraform helpers
+│   │   ├── test_order_processing.py
+│   │   ├── test_approval_workflow.py
+│   │   ├── test_data_pipeline.py
+│   │   ├── test_retry_recovery.py
+│   │   └── test_intrinsic_showcase.py
 │   └── mock_sdk/                # Mock durable execution SDK
 ├── fixtures/                    # Shared test fixtures
 │   ├── valid/                   # 22+ valid DSL YAML files
@@ -246,8 +293,12 @@ rsf/
 │   └── validation-rules.yaml    # Cross-field rules
 ├── docs/
 │   ├── index.md
-│   ├── tutorial.md
+│   ├── tutorial.md              # Quick-start overview (all 11 steps)
 │   ├── migration-guide.md
+│   ├── images/                  # Playwright screenshots (15 PNGs)
+│   │   ├── {example}-graph.png      # Graph editor full layout
+│   │   ├── {example}-dsl.png        # DSL editor + graph side by side
+│   │   └── {example}-inspector.png  # Execution inspector view
 │   └── reference/
 │       ├── dsl.md
 │       └── state-types.md
@@ -1408,17 +1459,26 @@ tests/
 ├── test_functions/    # Intrinsic function parsing + execution
 ├── test_context/      # Context object model
 ├── test_inspect/      # Inspector models, router, Lambda client
-├── test_aws/          # Real AWS deployment + invocation (slow, ~9 min)
+├── test_examples/     # Integration tests: deploy/invoke/teardown on real AWS
+│   ├── conftest.py    # Shared harness (poll_execution, query_logs, terraform helpers)
+│   ├── test_order_processing.py
+│   ├── test_approval_workflow.py
+│   ├── test_data_pipeline.py
+│   ├── test_retry_recovery.py
+│   └── test_intrinsic_showcase.py
 └── mock_sdk/          # Mock durable execution SDK
 ```
 
+Plus per-example local tests: `examples/{name}/tests/test_local.py`
+
 ### Test Patterns
 
-- **Unit tests:** pytest with fixtures, ~1000+ tests
-- **Integration tests:** Marked `@pytest.mark.aws`, deploy real Lambda
+- **Unit tests:** pytest with fixtures, 152+ local tests
+- **Integration tests:** Marked `@pytest.mark.integration`, deploy/invoke/teardown on real AWS
 - **Golden fixtures:** Generated code compared against known-good output
 - **Conformance fixtures:** 22+ valid + 8+ invalid DSL files
-- **Mock SDK tests:** Execute generated orchestrator code locally
+- **Mock SDK tests:** Execute generated orchestrator code locally via MockDurableContext
+- **Example local tests:** Per-example YAML parsing + handler unit tests + workflow simulation
 - **UI tests:** vitest, ~28 tests for React components and sync logic
 
 ### Key Test Categories
@@ -1434,6 +1494,8 @@ tests/
 9. **Importer Tests** — ASL conversion, Resource rejection, warning generation
 10. **Inspector Tests** — Model serialization, API endpoints, SSE streaming
 11. **SDK Integration Tests** — Generated code executes correctly via mock SDK
+12. **Example Local Tests** — Per-example YAML parsing, handler units, workflow simulation
+13. **AWS Integration Tests** — Deploy → Invoke → Assert Lambda result + CloudWatch logs → Teardown
 
 ### Fixture Naming Convention
 
@@ -1492,6 +1554,389 @@ Flow store (editor) and Inspect store (inspector) are completely independent. No
 
 ---
 
+## Example Workflows (5 Real-World Examples)
+
+### Overview
+
+Five example workflows demonstrate all 8 ASL state types, all DSL features, and all error handling patterns. Each example is self-contained with workflow YAML, handler implementations, local tests, per-example Terraform infrastructure, and integration tests on real AWS.
+
+### The 5 Examples
+
+| Example | State Types | Key Features |
+|---------|------------|--------------|
+| **order-processing** | Task, Choice, Parallel, Succeed, Fail | Retry/Catch, TimeoutSeconds, concurrent branches, ResultPath |
+| **approval-workflow** | Task, Wait, Choice, Pass, Succeed, Fail | Context Object (`$$`), Variables/Assign, intrinsics in Assign, looping |
+| **data-pipeline** | Task, Pass, Map | ItemProcessor, ItemsPath, MaxConcurrency, all 5 I/O pipeline stages, DynamoDB |
+| **retry-and-recovery** | Task, Pass, Succeed, Fail | Multi-Retry (3 policies), JitterStrategy (FULL/NONE), MaxDelaySeconds, multi-Catch (4 catchers) |
+| **intrinsic-showcase** | Task, Pass, Choice, Succeed | 14+ intrinsic functions across 4 categories, full I/O pipeline |
+
+**Combined coverage:** All 8 ASL state types, all 5 I/O pipeline stages, all error handling patterns, intrinsic functions, variables, context object.
+
+### Handler Implementation Pattern
+
+Every handler follows the same pattern:
+
+```python
+from rsf.registry import state
+import logging
+import json
+
+logger = logging.getLogger(__name__)
+
+def _log(step_name: str, message: str, **extra):
+    """Structured logging for CloudWatch Logs Insights queries."""
+    logger.info(json.dumps({"step_name": step_name, "message": message, **extra}))
+
+@state("StateName")
+def handler_function(input_data: dict) -> dict:
+    _log("StateName", "Starting operation", key=value)
+    # Business logic here
+    _log("StateName", "Operation complete", result=result)
+    return result_dict
+```
+
+Key characteristics:
+- **`@state("StateName")`** decorator registers in handler registry
+- **Pure functions** — deterministic, testable without AWS
+- **Custom exceptions** for error routing (match Catch ErrorEquals)
+- **Structured JSON logging** via `_log()` helper for CloudWatch Logs Insights queries
+- **Dict in, dict out** — keys match downstream state consumption
+
+### Per-Example Terraform Infrastructure
+
+Each example has a complete Terraform module:
+
+| File | Contents |
+|------|----------|
+| `main.tf` | Lambda function with `durable_config` block, archive_file data source |
+| `iam.tf` | IAM role + policy (CloudWatch, Lambda self-invoke, durable execution APIs) |
+| `cloudwatch.tf` | CloudWatch Log Group with configurable retention |
+| `variables.tf` | aws_region, name_prefix, workflow_name, timeout, memory_size, execution_timeout, retention_period |
+| `outputs.tf` | function_arn, function_name, role_arn, log_group_name |
+| `backend.tf` | S3/DynamoDB remote state config |
+| `versions.tf` | Terraform >= 1.0, AWS provider >= 6.25.0 |
+| `dynamodb.tf` | (data-pipeline only) DynamoDB table for pipeline results |
+
+Lambda packaging: `data.archive_file` zips `src/` directory → handler path is `generated.orchestrator.lambda_handler`.
+
+### Local Test Pattern (3 sections per example)
+
+```python
+# Section 1: Workflow YAML Parsing Tests
+class TestWorkflowParsing:
+    # Verify StartAt, all states present, state types, retry/catch config,
+    # choice rules, parallel branches — proves DSL parses correctly
+
+# Section 2: Individual Handler Unit Tests
+class TestValidateOrderHandler:
+    # Discover handlers, get handler by name, call with test data,
+    # verify return values, verify custom exceptions raised
+
+# Section 3: Full Workflow Simulation (MockDurableContext)
+class TestStandardOrderWorkflow:
+    # Step through states sequentially using MockDurableContext
+    # ctx.step(), ctx.parallel(), ctx.map() with real handlers
+    # Verify SDK call sequence via ctx.calls list
+```
+
+### Integration Test Pattern (Real AWS)
+
+Each example has an integration test in `tests/test_examples/` that:
+
+1. **Deploy** — `terraform_deploy(example_dir)` → returns outputs dict
+2. **Wait** — `iam_propagation_wait(15s)` for IAM role propagation
+3. **Invoke** — `lambda_client.invoke(InvocationType="Event", DurableExecutionName=unique_id)`
+4. **Poll** — `poll_execution(lambda_client, fn, exec_id, timeout=300)` with exponential backoff
+5. **Assert Lambda result** — Verify terminal status is SUCCEEDED or FAILED as expected
+6. **Assert CloudWatch logs** — `query_logs()` with Insights query verifying handler step names
+7. **Teardown** — `terraform_teardown()` + explicit `delete_log_group()` for orphan cleanup
+
+```python
+@pytest.mark.integration
+class TestOrderProcessingIntegration:
+    @pytest.fixture(scope="class")
+    def deployment(self, lambda_client, logs_client):
+        outputs = terraform_deploy(self.EXAMPLE_DIR)
+        iam_propagation_wait()
+        exec_id = make_execution_id("order-processing")  # test-order-processing-{ts}-{uuid8}
+        lambda_client.invoke(FunctionName=outputs["function_name"],
+                             InvocationType="Event",
+                             Payload=json.dumps(self.HAPPY_EVENT),
+                             DurableExecutionName=exec_id)
+        execution = poll_execution(lambda_client, outputs["function_name"], exec_id)
+        yield {"execution": execution, "outputs": outputs, ...}
+        terraform_teardown(self.EXAMPLE_DIR, logs_client, outputs["log_group_name"])
+
+    def test_execution_succeeds(self, deployment):
+        assert deployment["execution"]["Status"] == "SUCCEEDED"
+
+    def test_handler_log_entries(self, deployment, logs_client):
+        results = query_logs(logs_client, log_group, query, start_time)
+        for step in ("ValidateOrder", "ProcessPayment", "ReserveInventory", "SendConfirmation"):
+            assert step in messages
+```
+
+### Integration Test Harness Utilities
+
+Located in `tests/test_examples/conftest.py`:
+
+| Utility | Purpose |
+|---------|---------|
+| `make_execution_id(name)` | `test-{name}-{YYYYMMDD}T{HHMMSS}-{uuid8}` — unique, collision-free |
+| `poll_execution(client, fn, exec_id, timeout=300)` | Poll `list_durable_executions_by_function` every 5s, exponential backoff on throttle |
+| `query_logs(client, group, query, start_time)` | 15s propagation wait, retry until results non-empty (max 5 retries) |
+| `terraform_deploy(example_dir)` | `terraform init` + `terraform apply`, returns outputs dict |
+| `terraform_teardown(example_dir, logs_client, log_group)` | `terraform destroy` + explicit `delete_log_group()` for orphan cleanup |
+| `iam_propagation_wait(seconds=15)` | Sleep for IAM role/policy propagation after deploy |
+
+Shared session fixtures: `aws_region` (us-east-2), `lambda_client`, `logs_client`.
+
+### Example README Format
+
+Each example README follows a consistent structure:
+
+1. **Title + description** — One-line summary of what the example demonstrates
+2. **DSL Features Demonstrated** — Table of features with usage descriptions
+3. **Workflow Path** — ASCII flowchart showing state transitions
+4. **Screenshots** — Graph editor, DSL editor, execution inspector (3 images)
+5. **Run Locally (No AWS)** — `pytest examples/{name}/tests/test_local.py -v`
+6. **Run Integration Test (AWS)** — `pytest tests/test_examples/test_{name}.py -m integration -v`
+
+---
+
+## Tutorial Documentation (8 Tutorials)
+
+### Overview
+
+8 step-by-step tutorials cover all 7 RSF CLI commands. Each tutorial builds on the previous, using the same "Order Processing" workflow as the running example (tutorials 1-7). Tutorial 8 uses a dedicated "Inspection Demo" workflow.
+
+### Tutorial Index
+
+| # | Title | Command | Key Learning |
+|---|-------|---------|-------------|
+| 01 | Project Setup | `rsf init` | Scaffold project, understand file structure |
+| 02 | Workflow Validation | `rsf validate` | 3-stage validation pipeline, learn-by-breaking |
+| 03 | Code Generation | `rsf generate` | Orchestrator + handler stubs, Generation Gap pattern |
+| 04 | Deploy to AWS | `rsf deploy` | Terraform walkthrough (6 files), IAM policy, verification |
+| 05 | Iterate, Invoke, Teardown | `rsf deploy --code-only` | Fast path, Lambda invocation, Choice branch testing, cleanup |
+| 06 | ASL Import | `rsf import` | ASL JSON → RSF YAML, 5 conversion rules |
+| 07 | Visual Editing | `rsf ui` | Graph editor, bidirectional YAML↔graph sync, validation |
+| 08 | Execution Inspection | `rsf inspect` | Deploy demo workflow, time machine, data diffs, live SSE |
+
+### Tutorial Format (Consistent Across All 8)
+
+Every tutorial follows this structure:
+
+1. **"What You'll Learn"** — Bullet-point learning objectives
+2. **"Prerequisites"** — Required tools, prior tutorials, AWS account if needed
+3. **Numbered Steps** — Each step has:
+   - Exact command to run (copy-pasteable)
+   - Expected output (code blocks with sample output)
+   - Explanation of what happened and why
+   - Tips/notes in blockquote callouts
+4. **"What's Next"** — Forward pointer to next tutorial
+5. **Footer** — "Tutorial N of 8 — RSF Comprehensive Tutorial Series"
+
+### Tutorial Dependency Chain
+
+```
+Tutorial 1 (Init) → 2 (Validate) → 3 (Generate) → 4 (Deploy) → 5 (Iterate)
+                                                                  ├→ 6 (Import)
+                                                                  ├→ 7 (Graph Editor, no AWS needed)
+                                                                  └→ 8 (Inspect, requires Tutorials 1-5)
+```
+
+Tutorials 1-5 are strictly sequential. Tutorials 6-8 can be done in any order after Tutorial 5 (though 7 and 8 only need Tutorial 1 for basic use).
+
+### Key Pedagogical Patterns
+
+- **Learn-by-breaking** (Tutorial 2): Intentionally introduce 3 types of errors (YAML syntax, Pydantic structural, semantic) to teach the validation pipeline
+- **Progressive complexity**: Offline-only (1-3) → AWS deployment (4-5) → Advanced tools (6-8)
+- **Consistent running example**: Same "Order Processing" workflow builds up across tutorials 1-7
+- **Two test payloads per Choice branch** (Tutorial 5): Invoke with different data to exercise both paths
+- **Complete development lifecycle** (Tutorial 8 summary): init → validate → generate → deploy → iterate → invoke → inspect → edit → teardown
+
+### Tutorial Artifacts (All Inline)
+
+All code examples are embedded inline in Markdown (no separate files):
+- YAML workflow definitions
+- Python handler implementations with `@state` decorators
+- Terraform HCL (6 generated files explained)
+- ASL JSON (1 example for import)
+- Bash commands (100+ CLI examples across all tutorials)
+- Command reference tables (Tutorial 7)
+- Error reference table (Tutorial 2)
+
+---
+
+## Screenshot Automation (Playwright)
+
+### Overview
+
+Automated Playwright-based screenshot capture produces 15 PNG files (3 per example × 5 examples) via a single `npm run screenshots` command. Screenshots are embedded in example READMEs and tutorial documents.
+
+### Technical Stack
+
+| Component | Technology | Version |
+|-----------|-----------|---------|
+| Browser automation | @playwright/test | 1.58.2 (pinned exact, no caret) |
+| TypeScript runner | tsx | 4.19.4 |
+| Browser | Chromium (installed via `npx playwright install chromium`) |
+| Viewport | 1440×900 pixels |
+
+### Screenshot Types (3 per example)
+
+| Type | Filename Pattern | What It Shows |
+|------|-----------------|--------------|
+| Graph | `{example}-graph.png` | Graph editor full layout (graph only, editor/palette hidden) |
+| DSL | `{example}-dsl.png` | YAML editor panel alongside graph (full editor view) |
+| Inspector | `{example}-inspector.png` | Execution inspector with timeline and state data |
+
+### Capture Process (`capture-screenshots.ts`)
+
+For each of 5 examples:
+
+**Graph + DSL screenshots:**
+1. Spawn `rsf ui {workflow.yaml} --port 8765 --no-browser`
+2. Health-check `http://127.0.0.1:8765/` (30 attempts, 500ms intervals)
+3. Navigate Playwright to URL, wait for `.react-flow__node` selector (15s timeout)
+4. Wait 2s for ELK layout stabilization
+5. Capture full page → `{example}-dsl.png` (includes editor, palette, graph)
+6. Hide `.editor-pane`, `.palette`, `.inspector-panel` via JavaScript injection
+7. Wait 1s for reflow, capture → `{example}-graph.png`
+8. Kill rsf ui server
+
+**Inspector screenshots:**
+1. Spawn mock inspect server on port 8766 (loads fixture JSON)
+2. Spawn Vite dev server on port 5199
+3. Navigate to `http://127.0.0.1:5199/#/inspector`
+4. Wait for `.execution-list-item` selector (15s), click first execution
+5. Wait for `.inspector-center .react-flow__node` (15s)
+6. Wait for `.timeline-event` (10s, non-blocking on failure)
+7. Wait 2s for layout/SSE completion, capture → `{example}-inspector.png`
+8. Kill servers
+
+**Validation:** All 15 files must exist and be > 10 KB (prevents blank screenshots).
+
+### Mock Inspect Server (`mock-inspect-server.ts`)
+
+HTTP server emulating the RSF inspect API using Node built-in `http` module (zero external dependencies):
+
+```
+GET  /api/inspect/executions              → { executions, next_token }
+GET  /api/inspect/execution/:id           → execution_detail object
+GET  /api/inspect/execution/:id/history   → { execution_id, events }
+GET  /api/inspect/execution/:id/stream    → SSE stream (text/event-stream)
+OPTIONS *                                  → CORS preflight (204)
+```
+
+SSE stream sends two events then closes: `execution_info` (detail without history), `history` (array of events).
+
+### Mock Fixture Schema
+
+Each fixture JSON file (`ui/scripts/fixtures/{example}.json`) contains:
+
+```json
+{
+  "executions": [{
+    "execution_id": "string",
+    "name": "string",
+    "status": "SUCCEEDED",
+    "function_name": "string",
+    "start_time": "ISO-8601",
+    "end_time": "ISO-8601"
+  }],
+  "execution_detail": {
+    "execution_id": "string",
+    "name": "string",
+    "status": "SUCCEEDED",
+    "function_name": "string",
+    "start_time": "ISO-8601",
+    "end_time": "ISO-8601",
+    "input_payload": { ... },
+    "result": { ... },
+    "error": null,
+    "history": [{
+      "event_id": 1,
+      "timestamp": "ISO-8601",
+      "event_type": "StateEntered|StateSucceeded|StateFailed",
+      "sub_type": null,
+      "details": {
+        "stateName": "string",
+        "input": { ... },
+        "output": { ... }
+      }
+    }]
+  }
+}
+```
+
+History events contain full state input/output payloads for timeline rendering.
+
+### Server Lifecycle Scripts
+
+**`start-ui-server.ts`** — Spawns `rsf ui`, health-checks, outputs `SERVER_READY`/`SERVER_STOPPED` signals.
+
+**`start-inspect-server.ts`** — Spawns mock inspect server, health-checks `/api/inspect/executions`, outputs `SERVER_READY`/`SERVER_STOPPED` signals.
+
+Both use the same pattern: CLI args (`--example`, `--port`), spawn child process, poll health endpoint, signal protocol for downstream automation.
+
+### Process Management
+
+- Child processes tracked in `Set<ChildProcess>`
+- Detached process groups for reliable cleanup (kills grandchildren like npx → vite)
+- SIGINT/SIGTERM handlers kill all children
+- Graceful shutdown: SIGTERM with 3s timeout → SIGKILL fallback
+- Port availability checked with `lsof` before launch
+
+### rsf CLI Resolution
+
+Multi-stage fallback for finding the `rsf` binary:
+1. `.venv/bin/rsf` (venv in project root)
+2. PATH lookup
+3. `.venv/bin/python -m rsf` (venv Python fallback)
+
+### TypeScript Configuration
+
+Separate `tsconfig.scripts.json` for Node scripts (vs bundler-mode app tsconfig):
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "types": ["node"],
+    "strict": true,
+    "esModuleInterop": true
+  },
+  "include": ["scripts"]
+}
+```
+
+### Documentation Embedding
+
+**Example READMEs** (`examples/{name}/README.md`):
+
+```markdown
+## Screenshots
+
+### Graph Editor
+![{Name} — Graph Editor](../../docs/images/{example}-graph.png)
+
+### DSL Editor
+![{Name} — DSL Editor](../../docs/images/{example}-dsl.png)
+
+### Execution Inspector
+![{Name} — Execution Inspector](../../docs/images/{example}-inspector.png)
+```
+
+**Tutorial 07** (`tutorials/07-graph-editor.md`): Graph + DSL screenshots inline at contextual points (after Step 2 and Step 3).
+
+**Tutorial 08** (`tutorials/08-execution-inspector.md`): Inspector screenshot inline after Step 6.
+
+---
+
 ## Known Gaps (Optional Future Work)
 
 - `context.parallel()` / `context.map()` return `BatchResult` in real SDK but mock returns plain list
@@ -1524,12 +1969,32 @@ Flow store (editor) and Inspect store (inspector) are completely independent. No
 
 ## Documentation
 
-- **Tutorial:** Step-by-step guide from install through deploy+inspect
-- **Migration Guide:** How to import existing Step Functions workflows
-- **DSL Reference:** Complete field reference for all state types
-- **State Types Guide:** Detailed examples with YAML + generated Python code
-- **README:** Project overview, quickstart, architecture, contributing guide
-- **LICENSE:** Apache-2.0
+### Documentation Files
+
+| File | Contents |
+|------|----------|
+| `docs/tutorial.md` | Quick-start overview (11 steps: install through graph editor) |
+| `docs/migration-guide.md` | How to import existing Step Functions workflows |
+| `docs/reference/dsl.md` | Complete field reference for all state types |
+| `docs/reference/state-types.md` | Detailed examples with YAML + generated Python code |
+| `docs/index.md` | Documentation home page |
+| `tutorials/01-08` | 8 step-by-step tutorials covering all 7 CLI commands |
+| `examples/README.md` | Quick-start guide with example summary table and prerequisites |
+| `examples/{name}/README.md` | Per-example READMEs with feature tables, workflow diagrams, screenshots |
+| `README.md` | Project overview, quickstart, architecture, contributing guide |
+| `LICENSE` | Apache-2.0 |
+
+### Screenshots (15 PNGs)
+
+Automated Playwright screenshots in `docs/images/`:
+- `{example}-graph.png` — Graph editor full layout (graph nodes + edges only)
+- `{example}-dsl.png` — YAML editor panel alongside graph
+- `{example}-inspector.png` — Execution inspector with timeline and state data
+
+Generated via `npm run screenshots` in `ui/` directory. Embedded in:
+- All 5 example READMEs (3 screenshots each)
+- Tutorial 07 (2 graph editor screenshots)
+- Tutorial 08 (1 inspector screenshot)
 
 Build docs with MkDocs Material theme (admonition, code tabs, superfences, syntax highlighting).
 
