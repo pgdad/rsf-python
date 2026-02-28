@@ -55,7 +55,7 @@ function formatDuration(ms: number | null): string {
 }
 
 export function InspectorNode(props: NodeProps<InspectNode>) {
-  const { id, data, selected } = props;
+  const { data, selected } = props;
   const stateType = data.stateType || 'Task';
   const color = STATE_COLORS[stateType] || '#4a90d9';
   const icon = STATE_ICONS[stateType] || '?';

@@ -11,7 +11,6 @@ import type { Node, Edge } from '@xyflow/react';
 import type {
   ExecutionSummary,
   ExecutionDetail,
-  ExecutionStatus,
   HistoryEvent,
   NodeOverlay,
   EdgeOverlay,

@@ -253,6 +253,10 @@ def test_deploy_help_shows_all_options(monkeypatch: pytest.MonkeyPatch) -> None:
     result = runner.invoke(app, ["deploy", "--help"])
 
     assert result.exit_code == 0, f"Unexpected exit: {result.output}"
-    assert "--code-only" in result.output
-    assert "--auto-approve" in result.output
-    assert "--tf-dir" in result.output
+    # Strip ANSI escape codes — Typer/Rich inserts them in CI
+    import re
+
+    plain = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
+    assert "--code-only" in plain
+    assert "--auto-approve" in plain
+    assert "--tf-dir" in plain
