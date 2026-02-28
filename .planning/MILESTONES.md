@@ -1,5 +1,22 @@
 # Milestones
 
+## v1.5 PyPI Packaging & Distribution (Shipped: 2026-02-28)
+
+**Phases completed:** 3 phases (25-27), 3 plans
+**Files changed:** 25 | **Insertions:** 2,034
+**Timeline:** 2026-02-28
+**Git range:** 3f41271..3bb9b15
+
+**Key accomplishments:**
+- Installable Python package via `pip install rsf` with bundled React UI static assets and hatch-vcs git-tag versioning
+- GitHub Actions CI workflow (ci.yml): ruff lint + pytest matrix (Python 3.12, 3.13) on every PR and push to main
+- GitHub Actions release workflow (release.yml): React UI compile + wheel build + PyPI publish on v* tag push
+- OIDC trusted publisher authentication for zero-secret PyPI publishing (no API tokens stored)
+- Polished README landing page with PyPI/CI/License badges, quick-start guide, hero screenshots, and absolute URLs for PyPI compatibility
+- `twine check` validation ensuring README renders correctly on both GitHub and PyPI
+
+---
+
 ## v1.1 CLI Toolchain (Shipped: 2026-02-26)
 
 **Phases completed:** 1 phase (12), 4 plans, 7 tasks

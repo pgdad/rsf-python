@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.5
 milestone_name: PyPI Packaging & Distribution
-status: unknown
-last_updated: "2026-02-28T22:18:27.935Z"
+status: complete
+last_updated: "2026-02-28"
 progress:
   total_phases: 3
   completed_phases: 3
@@ -18,14 +18,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** v1.5 PyPI Packaging & Distribution — Phase 27: README as Landing Page
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 27 of 27 (README as Landing Page)
-Plan: 27-01 complete
-Status: Phase 27 execution complete
-Last activity: 2026-02-28 — Phase 27 README as Landing Page executed (1/1 plans complete)
+Milestone v1.5 PyPI Packaging & Distribution: SHIPPED 2026-02-28
+All phases complete (25-27). Ready for next milestone.
 
 Progress: [██████████] 100%
 
@@ -62,5 +60,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Phase 27 README as Landing Page complete. v1.5 milestone complete.
+Stopped at: v1.5 milestone archived. Ready for next milestone.
 Resume file: None

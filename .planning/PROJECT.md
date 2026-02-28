@@ -8,19 +8,9 @@ RSF is a complete replacement for AWS Step Functions built on AWS Lambda Durable
 
 Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
-## Current Milestone: v1.5 PyPI Packaging & Distribution
-
-**Goal:** Make RSF installable via `pip install rsf` with bundled UIs, git-tag versioning, and CI/CD publishing to PyPI.
-
-**Target features:**
-- PyPI package with CLI + library + pre-built React UIs as static assets
-- Git tag-driven versioning (v1.5.0 tag → 1.5.0 package)
-- GitHub Actions CI/CD: test on PR, build + publish to PyPI on tag push
-- Updated README as PyPI landing page (badges, install instructions, quick start)
-
 ## Current State
 
-v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI commands. 2,753 lines of tutorial documentation. v1.2 shipped with five real-world example workflows and automated integration testing on real AWS. 152 local tests + 13 integration tests + 20 harness tests passing.
+v1.5 shipped (2026-02-28). RSF is installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. GitHub Actions CI runs lint + tests on PRs; release workflow builds wheel with React UIs and publishes to PyPI on v* tag push using OIDC trusted publisher (no API tokens). README serves as polished landing page on both GitHub and PyPI with badges, quick-start guide, and hero screenshots. 18,696 LOC Python. 152 local tests + 13 integration tests + 20 harness tests passing.
 
 ## Requirements
 
@@ -58,15 +48,16 @@ v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI comma
 - ✓ Screenshot assets for all 5 example workflows (15 PNGs via `npm run screenshots`) — v1.4
 - ✓ Example READMEs updated with embedded screenshots — v1.4
 - ✓ Tutorial docs (07-graph-editor, 08-execution-inspector) updated with screenshots — v1.4
+- ✓ PyPI package with bundled React UI static assets and hatch-vcs git-tag versioning — v1.5
+- ✓ GitHub Actions CI/CD pipeline (lint + test on PR, build + publish on tag push) — v1.5
+- ✓ OIDC trusted publisher for zero-secret PyPI publishing — v1.5
+- ✓ README as polished landing page with badges, quick-start, and hero screenshots — v1.5
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] PyPI package structure with bundled React UI static assets
-- [ ] Git tag-driven version management
-- [ ] GitHub Actions CI/CD pipeline (test + publish)
-- [ ] README updated as PyPI landing page
+(None — start next milestone with `/gsd:new-milestone`)
 
 ### Out of Scope
 
@@ -80,6 +71,7 @@ v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI comma
 - Mobile app — desktop developer tool
 - LocalStack / moto mocking of durable functions — Lambda Durable Functions (re:Invent 2025) not supported by either framework
 - Parallel CI test execution — need cost and timing data from sequential runs first
+- Java port — moved to separate rsf-java repo
 
 ## Context
 
@@ -93,6 +85,7 @@ v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI comma
 - Shipped v1.2 with ~8,261 LOC in examples + test harness (Python, YAML, Terraform, Markdown)
 - Shipped v1.3 with 2,753 lines of tutorial documentation across 8 tutorials
 - Shipped v1.4 with 15 automated Playwright screenshots embedded in example READMEs and tutorials
+- Shipped v1.5 with PyPI packaging, CI/CD, and README landing page
 
 ## Constraints
 
@@ -125,6 +118,10 @@ v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI comma
 | CloudWatch Logs Insights with 15s propagation buffer | Handles log delivery delays; retry loop ensures eventual consistency | ✓ Good |
 | UUID-suffixed execution IDs (test-{name}-{ts}-{uuid8}) | Prevents collision across parallel/sequential re-runs | ✓ Good |
 | Explicit delete_log_group after terraform destroy | Catches orphaned log groups that Terraform may miss | ✓ Good |
+| hatchling + hatch-vcs for packaging | Git-tag-derived versioning, simple config, standard PEP 517 build | ✓ Good |
+| Separate ci.yml and release.yml workflows | Different triggers, different permission scopes (id-token: write only on publish) | ✓ Good |
+| OIDC trusted publisher for PyPI | Zero secrets stored in repo; PyPI and GitHub exchange OIDC token at publish time | ✓ Good |
+| Absolute URLs in README for PyPI | PyPI does not resolve relative paths; raw.githubusercontent.com for images | ✓ Good |
 
 ---
-*Last updated: 2026-02-28 after v1.5 milestone started*
+*Last updated: 2026-02-28 after v1.5 milestone*

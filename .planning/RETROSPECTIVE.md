@@ -110,6 +110,45 @@
 
 ---
 
+## Milestone: v1.5 — PyPI Packaging & Distribution
+
+**Shipped:** 2026-02-28
+**Phases:** 3 | **Plans:** 3
+
+### What Was Built
+- Installable Python package via `pip install rsf` with bundled React UI static assets
+- hatch-vcs git-tag versioning (v1.5.0 tag → 1.5.0 version, dev versions for untagged commits)
+- GitHub Actions CI workflow: ruff lint + pytest matrix (Python 3.12, 3.13) on PRs and pushes to main
+- GitHub Actions release workflow: React UI compile + wheel build + PyPI publish on v* tag push
+- OIDC trusted publisher for zero-secret PyPI publishing
+- Polished README landing page with three status badges, condensed quick-start, and hero screenshots
+
+### What Worked
+- Phase 25 (Package & Version) was completed as a direct implementation commit before GSD planning — simple enough for direct work
+- Two-workflow architecture (ci.yml vs release.yml) cleanly separates concerns and permission scopes
+- OIDC trusted publisher eliminates all secret management for PyPI — no API tokens to rotate or store
+- `twine check` as a verification step caught rendering issues before PyPI upload
+- Absolute URLs for all README images/links ensured PyPI compatibility from the start
+
+### What Was Inefficient
+- Phase 25 done outside GSD left no SUMMARY.md — milestone completion had to handle missing artifacts
+- summary-extract one_liner field still returns null — this has been a recurring issue across v1.3, v1.4, and v1.5
+- Research agent hallucinated actions/checkout@v6 version — plan checker flagged but deferred (research was self-consistent)
+
+### Patterns Established
+- PyPI OIDC trusted publisher pattern: `id-token: write` scoped to publish job only, `pypi` environment configured
+- Two-job release workflow: build job (checkout + React + wheel) → publish job (download artifact + publish)
+- Badge row pattern: shields.io for PyPI version + GitHub native for CI + shields.io static for license
+- `raw.githubusercontent.com` absolute URLs for README images (PyPI requirement)
+
+### Key Lessons
+1. Simple packaging phases may be faster as direct implementation than GSD planning/research/execution
+2. PyPI does not resolve relative paths — all images and links in README must use absolute URLs
+3. `fetch-depth: 0` is mandatory when using hatch-vcs in CI — shallow checkout produces wrong versions
+4. OIDC trusted publisher must be configured on PyPI.org before the first tag push (manual one-time step)
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -121,6 +160,7 @@
 | v1.2 Examples | 5 | 10 | Real AWS verification with automated testing |
 | v1.3 Tutorial | 3 | 8 | 8 tutorials covering all CLI commands |
 | v1.4 Screenshots | 4 | 5 | 15 automated screenshots in docs |
+| v1.5 PyPI Packaging | 3 | 3 | pip install + CI/CD + README landing page |
 
 ### Cumulative Quality
 
@@ -131,6 +171,7 @@
 | v1.2 | 152 local + 13 integration + 20 harness | All 8 state types on real AWS |
 | v1.3 | 2,753 lines of tutorials | All 7 CLI commands documented |
 | v1.4 | 15 screenshots + 18 image refs | All 5 examples with UI visuals |
+| v1.5 | CI lint + test matrix | pip installable + PyPI publishing |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -139,3 +180,5 @@
 3. Propagation delays in AWS services (IAM, CloudWatch) require explicit wait buffers in automated tests
 4. Tutorials using actual CLI output (not idealized) build user trust and match reality
 5. Mock servers matching production API contracts enable offline tooling without infrastructure cost
+6. PyPI requires absolute URLs for all README images/links — relative paths break on the project page
+7. OIDC trusted publisher eliminates secret management entirely for PyPI publishing
