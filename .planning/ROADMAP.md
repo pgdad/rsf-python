@@ -8,7 +8,7 @@
 - ✅ **v1.3 Comprehensive Tutorial** — Phases 18-20 (shipped 2026-02-26)
 - ✅ **v1.4 UI Screenshots** — Phases 21-24 (shipped 2026-02-27)
 - ✅ **v1.5 PyPI Packaging & Distribution** — Phases 25-27 (shipped 2026-02-28)
-- 🚧 **v1.6 Ruff Linting Cleanup** — Phases 28-34 (in progress)
+- ✅ **v1.6 Ruff Linting Cleanup** — Phases 28-34 (shipped 2026-02-28)
 
 ## Phases
 
@@ -90,13 +90,13 @@ Full details: `.planning/milestones/v1.5-ROADMAP.md`
 
 **Milestone Goal:** Fix all ruff linting violations and remove all ignored rules and exclusions so the entire codebase passes strict ruff checks with zero suppressions.
 
-- [ ] **Phase 28: F401 Unused Imports** — Remove examples/ exclusion from ruff config; fix all unused imports across src/, tests/, examples/, and generated code (~61 violations)
-- [ ] **Phase 29: F841 Unused Variables** — Fix all unused variable assignments across src/, tests/, and examples/ (6 violations)
-- [ ] **Phase 30: F541 f-string Without Placeholders** — Convert all bare f-strings to regular strings (1 violation)
-- [ ] **Phase 31: E402 Import Not at Top of File** — Fix or justify all out-of-order imports; clean up redundant noqa comments (6 violations)
-- [ ] **Phase 32: E741 Ambiguous Variable Names** — Rename all ambiguous single-letter variables (2 violations)
-- [ ] **Phase 33: E501 Line Too Long** — Shorten all lines exceeding 120 characters in examples/ (2 violations)
-- [ ] **Phase 34: Config Cleanup** — Remove any remaining ignore entries, verify zero violations across the whole codebase
+- [x] **Phase 28: F401 Unused Imports** — Remove examples/ exclusion from ruff config; fix all unused imports across src/, tests/, examples/, and generated code (~61 violations) ✓
+- [x] **Phase 29: F841 Unused Variables** — Fix all unused variable assignments across src/, tests/, and examples/ (6 violations) ✓
+- [x] **Phase 30: F541 f-string Without Placeholders** — Convert all bare f-strings to regular strings (1 violation) ✓
+- [x] **Phase 31: E402 Import Not at Top of File** — Fix or justify all out-of-order imports; clean up redundant noqa comments (6 violations) ✓
+- [x] **Phase 32: E741 Ambiguous Variable Names** — Rename all ambiguous single-letter variables (2 violations) ✓
+- [x] **Phase 33: E501 Line Too Long** — Shorten all lines exceeding 120 characters in examples/ (2 violations) ✓
+- [x] **Phase 34: Config Cleanup** — Remove all ignore entries, verify zero violations across the whole codebase ✓
 
 ## Phase Details
 
@@ -110,10 +110,10 @@ Full details: `.planning/milestones/v1.5-ROADMAP.md`
   3. `ruff check tests/` reports zero F401 violations
   4. `ruff check examples/` reports zero F401 violations
   5. F401 is removed from the `ignore` list in pyproject.toml
-**Plans:** 1/2 plans executed
+**Plans:** 2/2 plans executed ✓
 Plans:
-- [ ] 28-01-PLAN.md — Fix all 61 F401 violations across src/, tests/, and examples/
-- [ ] 28-02-PLAN.md — Update pyproject.toml ruff config (remove examples exclusion, remove F401 from ignore)
+- [x] 28-01-PLAN.md — Fix all 61 F401 violations across src/, tests/, and examples/
+- [x] 28-02-PLAN.md — Update pyproject.toml ruff config (remove examples exclusion, remove F401 from ignore)
 
 ### Phase 29: F841 Unused Variables
 **Goal**: All unused variable assignments are eliminated across the whole codebase
