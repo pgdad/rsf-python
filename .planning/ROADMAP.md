@@ -86,7 +86,7 @@ Full details: `.planning/milestones/v1.5-ROADMAP.md`
 
 </details>
 
-### 🚧 v1.6 Ruff Linting Cleanup (In Progress)
+### v1.6 Ruff Linting Cleanup (In Progress)
 
 **Milestone Goal:** Fix all ruff linting violations and remove all ignored rules and exclusions so the entire codebase passes strict ruff checks with zero suppressions.
 
@@ -110,7 +110,10 @@ Full details: `.planning/milestones/v1.5-ROADMAP.md`
   3. `ruff check tests/` reports zero F401 violations
   4. `ruff check examples/` reports zero F401 violations
   5. F401 is removed from the `ignore` list in pyproject.toml
-**Plans**: TBD
+**Plans:** 2 plans
+Plans:
+- [ ] 28-01-PLAN.md — Fix all 61 F401 violations across src/, tests/, and examples/
+- [ ] 28-02-PLAN.md — Update pyproject.toml ruff config (remove examples exclusion, remove F401 from ignore)
 
 ### Phase 29: F841 Unused Variables
 **Goal**: All unused variable assignments are eliminated across the whole codebase
@@ -174,7 +177,7 @@ Full details: `.planning/milestones/v1.5-ROADMAP.md`
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 28. F401 Unused Imports | v1.6 | 0/? | Not started | - |
+| 28. F401 Unused Imports | v1.6 | 0/2 | Planning complete | - |
 | 29. F841 Unused Variables | v1.6 | 0/? | Not started | - |
 | 30. F541 f-string Without Placeholders | v1.6 | 0/? | Not started | - |
 | 31. E402 Import Not at Top of File | v1.6 | 0/? | Not started | - |
