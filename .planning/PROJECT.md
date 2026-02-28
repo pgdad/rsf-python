@@ -8,7 +8,15 @@ RSF is a complete replacement for AWS Step Functions built on AWS Lambda Durable
 
 Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
-## Current Milestone: None (v1.4 complete, ready for next milestone)
+## Current Milestone: v1.5 PyPI Packaging & Distribution
+
+**Goal:** Make RSF installable via `pip install rsf` with bundled UIs, git-tag versioning, and CI/CD publishing to PyPI.
+
+**Target features:**
+- PyPI package with CLI + library + pre-built React UIs as static assets
+- Git tag-driven versioning (v1.5.0 tag → 1.5.0 package)
+- GitHub Actions CI/CD: test on PR, build + publish to PyPI on tag push
+- Updated README as PyPI landing page (badges, install instructions, quick start)
 
 ## Current State
 
@@ -55,7 +63,10 @@ v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI comma
 
 <!-- Current scope. Building toward these. -->
 
-(None — ready for next milestone)
+- [ ] PyPI package structure with bundled React UI static assets
+- [ ] Git tag-driven version management
+- [ ] GitHub Actions CI/CD pipeline (test + publish)
+- [ ] README updated as PyPI landing page
 
 ### Out of Scope
 
@@ -116,4 +127,4 @@ v1.3 shipped (2026-02-26). 8 step-by-step tutorials covering all 7 RSF CLI comma
 | Explicit delete_log_group after terraform destroy | Catches orphaned log groups that Terraform may miss | ✓ Good |
 
 ---
-*Last updated: 2026-02-27 after v1.4 milestone complete*
+*Last updated: 2026-02-28 after v1.5 milestone started*
