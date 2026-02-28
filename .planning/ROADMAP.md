@@ -78,7 +78,7 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
 
 **Milestone Goal:** Make RSF installable via `pip install rsf` with bundled UIs, git-tag versioning, and CI/CD publishing to PyPI.
 
-- [ ] **Phase 25: Package & Version** - Installable Python package with bundled React UIs and git-tag-derived versioning
+- [x] **Phase 25: Package & Version** - Installable Python package with bundled React UIs and git-tag-derived versioning
 - [ ] **Phase 26: CI/CD Pipeline** - GitHub Actions automated testing on PRs and publishing to PyPI on tag push
 - [ ] **Phase 27: README as Landing Page** - README updated as polished PyPI and GitHub landing page with badges and quick start
 
@@ -94,7 +94,7 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
   3. Running `rsf --version` displays the version string derived from the current git tag (e.g., `1.5.0`)
   4. On a repo with no release tag, `rsf --version` displays a dev version (e.g., `1.5.0.dev3+gabcdef`)
   5. The built wheel contains correct package metadata: authors, description, classifiers, project URLs, and Apache-2.0 license
-**Plans**: TBD
+**Plans**: 1/1 (direct implementation)
 
 ### Phase 26: CI/CD Pipeline
 **Goal**: GitHub Actions automatically runs tests on every pull request and publishes a new wheel to PyPI on every git tag push, with React UIs compiled as part of the build
@@ -124,6 +124,6 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
-| 25. Package & Version | v1.5 | 0/TBD | Not started | - |
+| 25. Package & Version | v1.5 | 1/1 | Complete | 2026-02-28 |
 | 26. CI/CD Pipeline | v1.5 | 0/TBD | Not started | - |
 | 27. README as Landing Page | v1.5 | 0/TBD | Not started | - |
