@@ -80,7 +80,7 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
 
 - [x] **Phase 25: Package & Version** - Installable Python package with bundled React UIs and git-tag-derived versioning
 - [x] **Phase 26: CI/CD Pipeline** - GitHub Actions automated testing on PRs and publishing to PyPI on tag push (completed 2026-02-28)
-- [ ] **Phase 27: README as Landing Page** - README updated as polished PyPI and GitHub landing page with badges and quick start
+- [x] **Phase 27: README as Landing Page** - README updated as polished PyPI and GitHub landing page with badges and quick start (completed 2026-02-28)
 
 ## Phase Details
 
@@ -130,4 +130,4 @@ Plans:
 |-------|-----------|----------------|--------|-----------|
 | 25. Package & Version | v1.5 | 1/1 | Complete | 2026-02-28 |
 | 26. CI/CD Pipeline | v1.5 | 1/1 | Complete | 2026-02-28 |
-| 27. README as Landing Page | v1.5 | 0/1 | Not started | - |
+| 27. README as Landing Page | v1.5 | 1/1 | Complete | 2026-02-28 |

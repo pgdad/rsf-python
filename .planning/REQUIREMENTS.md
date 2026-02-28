@@ -30,10 +30,10 @@ Requirements for PyPI Packaging & Distribution milestone. Each maps to roadmap p
 
 ### README
 
-- [ ] **README-01**: README includes install instructions (`pip install rsf`)
-- [ ] **README-02**: README includes quick start showing init → generate → deploy workflow
-- [ ] **README-03**: README includes PyPI badge, CI status badge, and license badge
-- [ ] **README-04**: README renders correctly on both GitHub and PyPI
+- [x] **README-01**: README includes install instructions (`pip install rsf`)
+- [x] **README-02**: README includes quick start showing init → generate → deploy workflow
+- [x] **README-03**: README includes PyPI badge, CI status badge, and license badge
+- [x] **README-04**: README renders correctly on both GitHub and PyPI
 
 ## Future Requirements
 
@@ -80,10 +80,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CICD-02 | Phase 26 | Complete |
 | CICD-03 | Phase 26 | Complete |
 | CICD-04 | Phase 26 | Complete |
-| README-01 | Phase 27 | Pending |
-| README-02 | Phase 27 | Pending |
-| README-03 | Phase 27 | Pending |
-| README-04 | Phase 27 | Pending |
+| README-01 | Phase 27 | Complete |
+| README-02 | Phase 27 | Complete |
+| README-03 | Phase 27 | Complete |
+| README-04 | Phase 27 | Complete |
 
 **Coverage:**
 - v1.5 requirements: 16 total
