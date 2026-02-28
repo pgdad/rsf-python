@@ -156,7 +156,9 @@ def _build_data_test_condition(rule: dict[str, Any]) -> str:
         return f"{accessor} > _resolve_path(input_data, {topyrepr(val)})"
     elif op in ("string_greater_than_equals", "numeric_greater_than_equals", "timestamp_greater_than_equals"):
         return f"{accessor} >= {topyrepr(val)}"
-    elif op in ("string_greater_than_equals_path", "numeric_greater_than_equals_path", "timestamp_greater_than_equals_path"):
+    elif op in (
+        "string_greater_than_equals_path", "numeric_greater_than_equals_path", "timestamp_greater_than_equals_path"
+    ):
         return f"{accessor} >= _resolve_path(input_data, {topyrepr(val)})"
     elif op in ("string_less_than", "numeric_less_than", "timestamp_less_than"):
         return f"{accessor} < {topyrepr(val)}"
@@ -310,9 +312,8 @@ def _emit_map(mapping: StateMapping) -> list[str]:
             lines.append(f"    _items = _resolve_path(input_data, {topyrepr(p['items_path'])})")
         else:
             lines.append("    _items = input_data")
-        lines.append(
-            f"    _result = context.map({name}, lambda _item: _run_map_{state_name_lower}(context, _item), _items{max_conc})"
-        )
+        _map_call = f"context.map({name}, lambda _item: _run_map_{state_name_lower}(context, _item), _items{max_conc})"
+        lines.append(f"    _result = {_map_call}")
         lines.append("    input_data = _result.get_results()")
         lines.append(f"    {_transition(p)}")
         lines.append("except Exception as _err:")
@@ -334,9 +335,8 @@ def _emit_map(mapping: StateMapping) -> list[str]:
             lines.append(f"_items = _resolve_path(input_data, {topyrepr(p['items_path'])})")
         else:
             lines.append("_items = input_data")
-        lines.append(
-            f"_result = context.map({name}, lambda _item: _run_map_{state_name_lower}(context, _item), _items{max_conc})"
-        )
+        _map_call = f"context.map({name}, lambda _item: _run_map_{state_name_lower}(context, _item), _items{max_conc})"
+        lines.append(f"_result = {_map_call}")
         lines.append("input_data = _result.get_results()")
         lines.append(_transition(p))
 

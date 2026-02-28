@@ -35,7 +35,8 @@ class StateMapping:
 
     state_name: str
     state_type: str  # Task, Pass, Choice, Wait, Succeed, Fail, Parallel, Map
-    sdk_primitive: str  # context.step, context.wait, conditional, passthrough, return, raise, context.parallel, context.map
+    # context.step, context.wait, conditional, passthrough, return, raise, context.parallel, context.map
+    sdk_primitive: str
     params: dict[str, Any] = field(default_factory=dict)
 
 
