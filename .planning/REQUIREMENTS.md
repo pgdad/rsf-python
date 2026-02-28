@@ -106,56 +106,56 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 | TBD | Pending |
-| FOUND-02 | TBD | Pending |
-| FOUND-03 | TBD | Pending |
-| FOUND-04 | TBD | Pending |
-| FOUND-05 | TBD | Pending |
-| DSL-01 | TBD | Pending |
-| DSL-02 | TBD | Pending |
-| DSL-03 | TBD | Pending |
-| DSL-04 | TBD | Pending |
-| DSL-05 | TBD | Pending |
-| RT-01 | TBD | Pending |
-| RT-02 | TBD | Pending |
-| RT-03 | TBD | Pending |
-| RT-04 | TBD | Pending |
-| RT-05 | TBD | Pending |
-| RT-06 | TBD | Pending |
-| RT-07 | TBD | Pending |
-| CODEGEN-01 | TBD | Pending |
-| CODEGEN-02 | TBD | Pending |
-| CODEGEN-03 | TBD | Pending |
-| CODEGEN-04 | TBD | Pending |
-| CODEGEN-05 | TBD | Pending |
-| TF-01 | TBD | Pending |
-| TF-02 | TBD | Pending |
-| TF-03 | TBD | Pending |
-| TF-04 | TBD | Pending |
-| IMP-01 | TBD | Pending |
-| IMP-02 | TBD | Pending |
-| CLI-01 | TBD | Pending |
-| CLI-02 | TBD | Pending |
-| CLI-03 | TBD | Pending |
-| CLI-04 | TBD | Pending |
-| WEB-01 | TBD | Pending |
-| WEB-02 | TBD | Pending |
-| WEB-03 | TBD | Pending |
-| WEB-04 | TBD | Pending |
-| TEST-01 | TBD | Pending |
-| TEST-02 | TBD | Pending |
-| TEST-03 | TBD | Pending |
-| TEST-04 | TBD | Pending |
-| DOC-01 | TBD | Pending |
-| DOC-02 | TBD | Pending |
-| DOC-03 | TBD | Pending |
-| DOC-04 | TBD | Pending |
+| FOUND-01 | Phase 28 | Pending |
+| FOUND-02 | Phase 28 | Pending |
+| FOUND-03 | Phase 28 | Pending |
+| FOUND-04 | Phase 28 | Pending |
+| FOUND-05 | Phase 28 | Pending |
+| DSL-01 | Phase 28 | Pending |
+| DSL-02 | Phase 28 | Pending |
+| DSL-03 | Phase 28 | Pending |
+| DSL-04 | Phase 28 | Pending |
+| DSL-05 | Phase 28 | Pending |
+| RT-01 | Phase 29 | Pending |
+| RT-02 | Phase 29 | Pending |
+| RT-03 | Phase 29 | Pending |
+| RT-04 | Phase 29 | Pending |
+| RT-05 | Phase 29 | Pending |
+| RT-06 | Phase 29 | Pending |
+| RT-07 | Phase 29 | Pending |
+| CODEGEN-01 | Phase 30 | Pending |
+| CODEGEN-02 | Phase 30 | Pending |
+| CODEGEN-03 | Phase 30 | Pending |
+| CODEGEN-04 | Phase 30 | Pending |
+| CODEGEN-05 | Phase 30 | Pending |
+| TF-01 | Phase 31 | Pending |
+| TF-02 | Phase 31 | Pending |
+| TF-03 | Phase 31 | Pending |
+| TF-04 | Phase 31 | Pending |
+| IMP-01 | Phase 31 | Pending |
+| IMP-02 | Phase 31 | Pending |
+| CLI-01 | Phase 32 | Pending |
+| CLI-02 | Phase 32 | Pending |
+| CLI-03 | Phase 32 | Pending |
+| CLI-04 | Phase 32 | Pending |
+| WEB-01 | Phase 32 | Pending |
+| WEB-02 | Phase 32 | Pending |
+| WEB-03 | Phase 32 | Pending |
+| WEB-04 | Phase 32 | Pending |
+| TEST-01 | Phase 33 | Pending |
+| TEST-02 | Phase 33 | Pending |
+| TEST-03 | Phase 33 | Pending |
+| TEST-04 | Phase 33 | Pending |
+| DOC-01 | Phase 33 | Pending |
+| DOC-02 | Phase 33 | Pending |
+| DOC-03 | Phase 33 | Pending |
+| DOC-04 | Phase 33 | Pending |
 
 **Coverage:**
-- v1.6 requirements: 42 total
-- Mapped to phases: 0
-- Unmapped: 42 (awaiting roadmap)
+- v1.6 requirements: 44 total (note: initial count of 42 in REQUIREMENTS.md was incorrect — actual count is 44 across 9 categories: FOUND-05 + DSL-05 + RT-07 + CODEGEN-05 + TF-04 + IMP-02 + CLI-04 + WEB-04 + TEST-04 + DOC-04)
+- Mapped to phases: 44
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 after initial definition*
+*Last updated: 2026-02-28 — Traceability updated during roadmap creation (Phase 28-33)*
