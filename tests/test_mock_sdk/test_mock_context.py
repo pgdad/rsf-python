@@ -2,7 +2,7 @@
 
 import pytest
 
-from tests.mock_sdk import BranchResult, Duration, MockDurableContext, StepRecord
+from tests.mock_sdk import BranchResult, Duration, MockDurableContext
 
 
 class TestDuration:

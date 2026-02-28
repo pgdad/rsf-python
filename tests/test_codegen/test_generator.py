@@ -15,7 +15,7 @@ from rsf.codegen.generator import (
     render_orchestrator,
 )
 from rsf.codegen.state_mappers import map_states
-from rsf.dsl.parser import load_definition, parse_definition
+from rsf.dsl.parser import load_definition
 
 
 class TestTopyrepr:

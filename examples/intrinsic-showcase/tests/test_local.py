@@ -11,8 +11,6 @@ Verifies:
 import re
 from pathlib import Path
 
-import pytest
-
 from rsf.dsl.parser import load_definition
 
 # ---------------------------------------------------------------------------

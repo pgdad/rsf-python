@@ -1,9 +1,7 @@
 """Tests for the BFS state mapper."""
 
-import pytest
-
 from rsf.dsl.parser import parse_definition
-from rsf.codegen.state_mappers import StateMapping, map_states
+from rsf.codegen.state_mappers import map_states
 
 
 def _parse(data):

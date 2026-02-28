@@ -8,14 +8,11 @@ end-to-end happy/fallback paths using MockDurableContext.
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
 
 import pytest
 
 from rsf.dsl.parser import load_definition
 from rsf.dsl.types import JitterStrategy
-from rsf.registry import state, get_handler
-
 from mock_sdk import MockDurableContext
 
 WORKFLOW = Path(__file__).parent.parent / "workflow.yaml"

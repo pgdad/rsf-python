@@ -1,7 +1,5 @@
 """Tests for Terraform generation."""
 
-from pathlib import Path
-
 import pytest
 
 from rsf.terraform.engine import create_hcl_environment, render_hcl_template
@@ -251,8 +249,6 @@ class TestGenerateTerraform:
 
     def test_resource_id_is_valid_terraform_identifier(self, tmp_path):
         """Resource IDs derived from workflow names are valid Terraform identifiers."""
-        import re
-
         test_cases = [
             ("my-workflow", "my_workflow"),
             ("MyWorkflow", "my_workflow"),

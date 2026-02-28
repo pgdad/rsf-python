@@ -14,10 +14,10 @@ import pytest
 
 from rsf.codegen.generator import generate, render_orchestrator
 from rsf.codegen.state_mappers import map_states
-from rsf.dsl.parser import load_definition, parse_definition
+from rsf.dsl.parser import load_definition
 from rsf.registry import clear, clear_startup_hooks, state
 
-from tests.mock_sdk import MockDurableContext, Duration, BranchResult
+from tests.mock_sdk import MockDurableContext, Duration
 
 
 FIXTURES_DIR = Path(__file__).parent.parent.parent / "fixtures"

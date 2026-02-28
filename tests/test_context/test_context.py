@@ -2,7 +2,7 @@
 
 import pytest
 
-from rsf.context.model import ContextObject, ExecutionContext, StateContext
+from rsf.context.model import ContextObject
 from rsf.variables.store import VariableStore
 from rsf.variables.resolver import is_variable_reference, extract_variable_name
 from rsf.io.jsonpath import evaluate_jsonpath

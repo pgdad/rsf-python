@@ -1,7 +1,5 @@
 """Tests for semantic cross-state validation (BFS)."""
 
-import pytest
-
 from rsf.dsl import StateMachineDefinition
 from rsf.dsl.validator import validate_definition
 

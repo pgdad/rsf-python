@@ -1,13 +1,9 @@
 """Tests for YAML/JSON parsing and schema generation."""
 
 import json
-import tempfile
-from pathlib import Path
 
-import pytest
 import yaml
 
-from rsf.dsl import StateMachineDefinition
 from rsf.dsl.parser import load_definition, parse_definition, parse_yaml
 from rsf.schema.generate import generate_json_schema, write_json_schema
 

@@ -8,14 +8,12 @@ from rsf.dsl import (
     TaskState,
     PassState,
     ChoiceState,
-    WaitState,
     SucceedState,
     FailState,
     ParallelState,
     MapState,
     DataTestRule,
     BooleanAndRule,
-    BooleanOrRule,
     BooleanNotRule,
 )
 

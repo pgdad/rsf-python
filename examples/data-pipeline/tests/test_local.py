@@ -19,8 +19,6 @@ from rsf.dsl import (
     PassState,
     TaskState,
 )
-from rsf.registry import state, get_handler
-
 from mock_sdk import MockDurableContext
 
 

@@ -6,7 +6,6 @@ Tests harness helpers with mocked boto3 clients — no AWS credentials needed.
 from __future__ import annotations
 
 import re
-import time
 from datetime import datetime, timezone
 from unittest.mock import MagicMock, patch
 
