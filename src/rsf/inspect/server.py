@@ -16,7 +16,9 @@ from fastapi import FastAPI
 from rsf.inspect.client import LambdaInspectClient
 from rsf.inspect.router import router
 
-_STATIC_DIR = Path(__file__).parent / "static"
+# Both editor and inspector share the same React SPA build (hash routing).
+# The Vite build outputs to editor/static/, so we reference it from there.
+_STATIC_DIR = Path(__file__).resolve().parent.parent / "editor" / "static"
 
 
 def create_app(

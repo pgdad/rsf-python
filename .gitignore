@@ -1,6 +1,7 @@
 __pycache__/
 *.py[cod]
 *.egg-info/
+src/rsf/_version.py
 .venv/
 dist/
 build/
