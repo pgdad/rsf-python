@@ -1,5 +1,9 @@
 # RSF — Replacement for Step Functions
 
+[![PyPI version](https://img.shields.io/pypi/v/rsf)](https://pypi.org/project/rsf/)
+[![CI](https://github.com/pgdad/rsf-python/actions/workflows/ci.yml/badge.svg)](https://github.com/pgdad/rsf-python/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+
 A complete Python toolkit for defining, visualizing, generating, deploying, and debugging AWS Lambda Durable Functions workflows — with full AWS Step Functions feature parity.
 
 ## What is RSF?
@@ -28,6 +32,12 @@ States:
 - **Execution Inspector** — Time machine scrubbing, live SSE updates, structural JSON diffs
 - **CLI Toolchain** — `rsf init`, `rsf generate`, `rsf validate`, `rsf deploy`, `rsf import`, `rsf ui`, `rsf inspect`
 
+## Screenshots
+
+| Graph Editor | Execution Inspector |
+|:---:|:---:|
+| ![Graph Editor](https://raw.githubusercontent.com/pgdad/rsf-python/main/docs/images/order-processing-graph.png) | ![Execution Inspector](https://raw.githubusercontent.com/pgdad/rsf-python/main/docs/images/order-processing-inspector.png) |
+
 ## Quickstart
 
 ### Install
@@ -43,38 +53,19 @@ rsf init my-workflow
 cd my-workflow
 ```
 
-This creates a `workflow.yaml` and project scaffolding.
-
-### Define your workflow
-
-Edit `workflow.yaml`:
-
-```yaml
-rsf_version: "1.0"
-Comment: "Order processing workflow"
-StartAt: ValidateOrder
-States:
-  ValidateOrder:
-    Type: Task
-    Next: ProcessPayment
-  ProcessPayment:
-    Type: Task
-    Retry:
-      - ErrorEquals: ["PaymentError"]
-        MaxAttempts: 3
-        BackoffRate: 2.0
-    Catch:
-      - ErrorEquals: ["States.ALL"]
-        Next: HandleFailure
-    Next: SendConfirmation
-  SendConfirmation:
-    Type: Task
-    End: true
-  HandleFailure:
-    Type: Fail
-    Error: "PaymentFailed"
-    Cause: "Payment processing failed"
 ```
+Created project: my-workflow/
+
+  + my-workflow/workflow.yaml
+  + my-workflow/handlers/__init__.py
+  + my-workflow/handlers/example_handler.py
+  + my-workflow/pyproject.toml
+  + my-workflow/.gitignore
+  + my-workflow/tests/__init__.py
+  + my-workflow/tests/test_example.py
+```
+
+Edit `workflow.yaml` to define your states, then generate code.
 
 ### Generate code
 
@@ -82,38 +73,29 @@ States:
 rsf generate
 ```
 
-This produces:
-- `orchestrator.py` — Lambda Durable Functions orchestrator (regenerated on each run)
-- `handlers/validate_order.py` — Handler stub (created once, never overwritten)
-- `handlers/process_payment.py` — Handler stub
-- `handlers/send_confirmation.py` — Handler stub
-
-### Add business logic
-
-```python
-# handlers/validate_order.py
-from rsf.registry import state
-
-@state("ValidateOrder")
-def handle(event, context):
-    order = event["order"]
-    if order["total"] <= 0:
-        raise ValueError("Invalid order total")
-    return {"validated": True, "orderId": order["id"]}
 ```
+Generated: orchestrator.py
+  Created: handlers/validate_order.py
+  Created: handlers/process_payment.py
+  Created: handlers/send_confirmation.py
 
-### Generate Terraform
-
-```bash
-rsf generate --terraform
+Summary: orchestrator written, 3 handler(s) created, 0 skipped.
 ```
-
-Produces a complete Terraform module: `main.tf`, `variables.tf`, `iam.tf`, `outputs.tf`, `cloudwatch.tf`, `backend.tf`.
 
 ### Deploy
 
 ```bash
 rsf deploy
+```
+
+```
+Code generated: orchestrator.py + 3 handler(s) (0 skipped)
+Terraform generated: 6 file(s) in terraform (0 skipped)
+
+Running terraform init...
+Running terraform apply...
+
+Deploy complete
 ```
 
 ### Inspect executions
@@ -122,7 +104,7 @@ rsf deploy
 rsf inspect
 ```
 
-Opens the web-based execution inspector with time machine scrubbing.
+Opens the execution inspector at http://localhost:8001
 
 ## Architecture
 
@@ -151,12 +133,12 @@ Opens the web-based execution inspector with time machine scrubbing.
 
 ## Documentation
 
-Full documentation is available at the [docs site](docs/):
+Full documentation is available at the [docs site](https://github.com/pgdad/rsf-python/tree/main/docs):
 
-- [Tutorial](docs/tutorial.md) — From install through deploy and inspect
-- [DSL Reference](docs/reference/dsl.md) — Complete field reference for all state types
-- [State Types Guide](docs/reference/state-types.md) — Detailed examples with YAML + Python
-- [Migration Guide](docs/migration-guide.md) — Import existing Step Functions workflows
+- [Tutorial](https://github.com/pgdad/rsf-python/blob/main/docs/tutorial.md) — From install through deploy and inspect
+- [DSL Reference](https://github.com/pgdad/rsf-python/blob/main/docs/reference/dsl.md) — Complete field reference for all state types
+- [State Types Guide](https://github.com/pgdad/rsf-python/blob/main/docs/reference/state-types.md) — Detailed examples with YAML + Python
+- [Migration Guide](https://github.com/pgdad/rsf-python/blob/main/docs/migration-guide.md) — Import existing Step Functions workflows
 
 ## Technical Stack
 
@@ -181,7 +163,7 @@ Full documentation is available at the [docs site](docs/):
 
 ```bash
 # Clone and install
-git clone https://github.com/your-org/rsf-python.git
+git clone https://github.com/pgdad/rsf-python.git
 cd rsf-python
 pip install -e ".[dev]"
 
