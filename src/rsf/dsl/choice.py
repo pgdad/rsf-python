@@ -2,11 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Annotated, Any, Literal, Union
+from typing import Annotated, Any, Union
 
 from pydantic import BaseModel, Discriminator, Field, Tag, model_validator
-
-from rsf.dsl.types import COMPARISON_OPERATORS
 
 
 class DataTestRule(BaseModel):

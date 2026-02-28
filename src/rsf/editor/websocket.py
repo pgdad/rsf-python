@@ -23,7 +23,6 @@ from pydantic import ValidationError
 
 from rsf.dsl.parser import parse_definition, parse_yaml
 from rsf.dsl.validator import validate_definition
-from rsf.schema.generate import generate_json_schema
 
 logger = logging.getLogger(__name__)
 

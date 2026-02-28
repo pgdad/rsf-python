@@ -1,7 +1,7 @@
 """Intrinsic functions package — auto-registers all 18 functions on import."""
 
 # Import all function modules to trigger @intrinsic decorator registration
-from rsf.functions import array, encoding, json_funcs, math, string, utility
+from rsf.functions import array, encoding, json_funcs, math, string, utility  # noqa: F401
 from rsf.functions.parser import IntrinsicParseError, evaluate_intrinsic
 from rsf.functions.registry import (
     call_intrinsic,

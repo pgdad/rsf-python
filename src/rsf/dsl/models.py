@@ -1,6 +1,6 @@
 """Pydantic v2 models for all 8 ASL state types and the root StateMachineDefinition."""
 
-from typing import Annotated, Any, Literal, Optional, Union
+from typing import Any, Literal
 
 from pydantic import BaseModel, Field, model_validator
 

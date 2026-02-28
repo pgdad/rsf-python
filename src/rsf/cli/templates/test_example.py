@@ -1,7 +1,5 @@
 """Example tests for RSF handlers."""
 
-import pytest
-
 from handlers.example_handler import hello_world
 
 

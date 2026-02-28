@@ -11,28 +11,22 @@ Performs validations that Pydantic field-level validators cannot:
 from __future__ import annotations
 
 from collections import deque
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from rsf.dsl.models import (
-    BranchDefinition,
     ChoiceState,
     FailState,
     MapState,
     ParallelState,
-    PassState,
     StateMachineDefinition,
     SucceedState,
-    TaskState,
-    WaitState,
 )
 from rsf.dsl.choice import (
     BooleanAndRule,
     BooleanNotRule,
     BooleanOrRule,
-    DataTestRule,
 )
-from rsf.dsl.errors import Catcher, RetryPolicy
 
 
 @dataclass

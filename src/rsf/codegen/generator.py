@@ -14,8 +14,6 @@ import re
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Any
-
 from rsf.codegen.emitter import emit_state_block
 from rsf.codegen.engine import render_template
 from rsf.codegen.state_mappers import StateMapping, map_states
