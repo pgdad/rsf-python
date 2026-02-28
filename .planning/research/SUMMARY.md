@@ -1,232 +1,277 @@
 # Project Research Summary
 
-**Project:** RSF v1.2 — Comprehensive Examples and Integration Testing
-**Domain:** Automated AWS integration testing for Lambda Durable Functions workflows
-**Researched:** 2026-02-26
-**Confidence:** HIGH
+**Project:** RSF v1.6 — Java Port Blueprint (RSF-BUILDPRINT-JAVA.md)
+**Domain:** Python-to-Java port of RSF (Replacement for Step Functions) — Lambda Durable Execution toolchain
+**Researched:** 2026-02-28
+**Confidence:** HIGH (stack and architecture); MEDIUM (Java SDK Preview features)
 
 ## Executive Summary
 
-RSF v1.2 is a mature second milestone built on top of a complete v1.1 CLI toolchain. The goal is to prove the framework works end-to-end against real AWS by building a library of 5 real-world use-case example workflows and an automated test harness that deploys, invokes, verifies, and tears down each example. The research is unusually high-confidence because the existing codebase was inspected directly, all relevant AWS APIs (Lambda Durable Functions, CloudWatch Logs Insights) are documented at official sources, and the library versions were verified against PyPI as of the research date. The recommended approach: author examples as self-contained RSF projects, generate and deploy each independently via Terraform with local state, invoke asynchronously via `InvocationType=Event`, and verify workflow correctness through two independent channels — the Lambda return value (via `GetDurableExecution`) and intermediate state via structured CloudWatch log queries.
+RSF v1.6 is a blueprint milestone, not a code milestone. The deliverable is RSF-BUILDPRINT-JAVA.md — a comprehensive document that maps all 14 Python RSF components to idiomatic Java equivalents, enabling a future Java implementation team to build without re-researching decisions. The Python v1.0–v1.4 implementation is frozen as the reference; this milestone documents exactly how each Python construct (Pydantic models, Jinja2 templates, Typer CLI, FastAPI backends, pytest) maps to its Java equivalent (Jackson sealed interfaces, FreeMarker templates, Picocli, Spring Boot, JUnit 5 + Mockito + AssertJ). The recommended approach is a Maven multi-module project (8 modules) with clear dependency boundaries, Java 17+ sealed interfaces as the type-safe DSL model foundation, and FreeMarker with square-bracket syntax as the template engine that avoids HCL interpolation conflicts — the same problem the Python version solves with custom `<< >>` Jinja2 delimiters.
 
-The core complexity of this milestone is not in the application logic but in the test harness plumbing. Lambda Durable Functions are a re:Invent 2025 feature; many common testing patterns from standard Lambda do not apply. Synchronous invocation (`RequestResponse`) does not work. Mocking tools (moto, LocalStack) do not support the durable execution checkpoint/replay mechanism. Log verification requires accounting for 5-30 second propagation delays. IAM policies require a 15-second propagation window after `terraform apply` before the first invocation. Each of these is a well-documented pitfall that, if not addressed in the test harness design upfront, will cause flaky CI and false-positive tests. The research identified 10 critical pitfalls — all preventable by building the polling helper, log query helper, and teardown helper correctly the first time.
+The single largest risk is the AWS Lambda Durable Execution SDK for Java's Developer Preview status as of February 2026. The Java SDK does not yet implement `parallel()`, `map()`, `waitForCondition()`, or `waitForCallback()` — four primitives that directly correspond to two of the eight ASL state types (Parallel and Map). The blueprint must explicitly scope what can be fully specified now (Task, Choice, Wait, Pass, Succeed, Fail states plus all infrastructure) versus what must be flagged as pending SDK GA (Parallel and Map state code generation). Additionally, the Java SDK requires container-image-only Lambda deployment during Preview — the Terraform generator cannot emit a `runtime = "java21"` managed-runtime resource; it must emit `package_type = "Image"` with ECR repository creation and a Dockerfile template.
 
-The recommended stack is minimal: the existing `boto3`, `pytest`, `subprocess`, and Terraform binary cover 90% of the harness. The only net-new dependencies are `aws-lambda-powertools>=3.24.0` (structured JSON logging in example handlers) and `pytest-timeout>=2.4.0` (prevents CI hangs on network-bound tests). The milestone does not require modifying any existing `src/rsf/` source code — all new components live in `examples/`, `tests/test_examples/`, and `scripts/`.
+Beyond the SDK gaps, the critical implementation risks are type-erasure gotchas with Jackson generics, FreeMarker's strict null handling (opposite of Jinja2's permissive behavior), and the cold-start danger of using Spring Boot or runtime classpath scanning inside the Lambda DurableHandler. All three are documented with explicit prevention strategies. The Maven multi-module structure is itself a mitigation — isolating the Lambda runtime module (`rsf-runtime`) from Spring Boot dependencies prevents Spring Boot's classpath scanning from leaking into Lambda deployment artifacts and imposing 3–8 second cold starts.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The existing RSF stack already provides everything needed for the test harness infrastructure: `boto3>=1.28` for AWS API calls, `pytest>=7.0` for test organization, and `subprocess.run` for Terraform lifecycle management. The version floor for `boto3` must be bumped to `>=1.42.0` to guarantee access to `ListDurableExecutionsByFunction` and `GetDurableExecution` APIs added after re:Invent 2025. Two new additions are needed: `aws-lambda-powertools>=3.24.0` installs into each Lambda deployment package to emit structured JSON logs that CloudWatch Logs Insights can query by key, and `pytest-timeout>=2.4.0` provides per-test and global timeout enforcement that works at the process level and can interrupt hanging Terraform or boto3 network calls. The `pytest-asyncio` floor is bumped to `>=1.3.0` for `asyncio_mode = "auto"` stability, but the integration test polling loops should remain synchronous (`time.sleep`) — there is no benefit to async when calling synchronous boto3 APIs.
+The Java stack is a direct mapping of the Python stack with no technology choices left ambiguous. The parent POM uses Spring Boot 3.5.9 as its parent (for dependency management), Java 17 as the minimum runtime target (Java 21 recommended for production builds), and Jackson 2.18.5 as the sole JSON/YAML serialization library across all modules.
 
 **Core technologies:**
-- `boto3>=1.42.0`: Lambda and CloudWatch Logs API access — the only client library needed for the test harness; polling helpers use `list_durable_executions_by_function`, `get_durable_execution`, and `logs.start_query` / `logs.get_query_results`
-- `aws-lambda-powertools>=3.24.0`: Structured JSON logging in example Lambda handlers — auto-injects Lambda context fields; produces JSON directly queryable by CloudWatch Logs Insights without custom parsing
-- `pytest-timeout>=2.4.0`: Per-test and global timeout for integration tests — works at process level, catches hanging subprocess (terraform) and network calls that `asyncio.wait_for` cannot reach
-- `terraform` binary (existing): Invoked via `subprocess.run` using the identical pattern established by `rsf deploy` — no Python wrapper library needed or recommended
-- `subprocess.run` (existing): Terraform init, apply, output, destroy — the pattern already in `deploy_cmd.py` is correct and sufficient
+- **Java 17 (minimum) / Java 21 (recommended):** Required by the AWS Lambda Durable Execution SDK for Java; Java 21 LTS is the target for ECR container base images (`public.ecr.aws/lambda/java:21`).
+- **AWS Lambda Durable Execution SDK for Java (Preview):** The only SDK implementing checkpoint/replay semantics for Java Lambda durable functions. Developer Preview as of February 2026. Container-image deployment only. Maven coordinates: `software.amazon.lambda.durable:aws-durable-execution-sdk-java`.
+- **Jackson Databind 2.18.5 + jackson-dataformat-yaml 2.18.5:** Replaces Pydantic v2 (models) and PyYAML (parsing). Uses `@JsonTypeInfo` + `@JsonSubTypes` on sealed interfaces to replicate Pydantic discriminated unions. One `ObjectMapper` handles both JSON and YAML via different mappers — no duplicate model code.
+- **FreeMarker 2.3.34:** Replaces Jinja2 for code generation. `SQUARE_BRACKET_TAG_SYNTAX` mode uses `[#if x]` and `[= variable]` syntax, eliminating the `${...}` conflict with Terraform HCL interpolation. Two separate `Configuration` instances: one for Java orchestrator templates (angle-bracket or auto-detect), one for HCL Terraform templates (square-bracket).
+- **Picocli 4.7.7:** Replaces Typer. Annotation-driven, typed subcommands, colored help, zero Spring context overhead. Handles all 7 RSF commands (init, generate, validate, deploy, import, ui, inspect). `picocli-codegen` goes in `<annotationProcessorPaths>` only — never as a runtime `<dependency>`.
+- **Spring Boot 3.5.9:** Replaces FastAPI + uvicorn for the two web backends (graph editor, inspector). Provides `SseEmitter` (inspector live updates), raw `TextWebSocketHandler` (graph editor YAML-graph sync), `@RestController`, and static SPA file serving. Used ONLY in `rsf-editor` and `rsf-inspector` modules — never in the Lambda handler.
+- **JUnit Jupiter 5.11.4 + Mockito 5.14.2 + AssertJ 3.27.7:** Replaces pytest. JUnit 6 (released September 2025) is explicitly rejected — Spring Boot Test 3.5.x, Mockito, and AssertJ have not migrated.
+- **Maven 3.9+ with multi-module POM:** Replaces Python packaging. Eight modules with an explicit dependency graph that enforces architectural boundaries.
 
-**Critical version requirements:**
-- `boto3>=1.42.0` — `ListDurableExecutionsByFunction` and `GetDurableExecution` require a post-re:Invent 2025 build
-- `pytest-asyncio>=1.3.0` — v1.x changed `asyncio_mode` default; add `asyncio_mode = "auto"` to `pyproject.toml`
-- AWS Terraform provider `>=6.25.0` — required for `durable_config` block support in `aws_lambda_function`
-- Python 3.13+ runtime in Lambda — only supported runtime for Lambda Durable Functions
+**Critical version constraints:**
+- Do not use Jackson 3.0.x (RC) — Spring Boot, Hibernate Validator, and networknt json-schema-validator have not migrated.
+- Do not use JUnit 6.0.x — Spring Boot Test has not migrated.
+- Do not use AWS SDK for Java 1.x (`com.amazonaws`) — end-of-life December 31, 2025.
+- Do not use `javax.*` namespace — Spring Boot 3.x requires `jakarta.*` throughout.
+- Do not add `picocli-codegen` as a `<dependency>` — only valid in `<annotationProcessorPaths>`.
 
 ### Expected Features
 
-5 real-world use-case examples must be delivered: `order-processing` (Task, Choice, Parallel, Succeed, Fail with Retry/Catch and DynamoDB), `data-pipeline` (Task, Pass, Map with DynamoDB service integration), `approval-workflow` (Task, Wait, Choice, Pass with Context Object `$$` coverage), `retry-and-recovery` (Task, Choice, Pass with multi-Catch and JitterStrategy), and `intrinsic-showcase` (Pass, Task — exercises 14 of 18 intrinsic functions and all 5 I/O pipeline fields). These 5 examples together cover all 8 state types, all 6 comparison operator families, ~14 intrinsic functions in real execution (remaining 4 are covered by v1.0 unit tests), the complete I/O pipeline, Variables/Assign/Output, and the Context Object. The test harness must execute each example end-to-end with a single command: `pytest tests/test_examples/ -m integration`.
+All 14 RSF Python components must be documented in the blueprint. The deliverable is documentation, not code, so every component is P1 for the blueprint document.
 
-**Must have (table stakes):**
-- 5 complete example workflows with DSL YAML + real handler code + Terraform files — without all three an example cannot be deployed
-- Coverage of all 8 state types across the example set — the DSL supports all 8; any gap signals an untested code path
-- Error handling coverage (Retry with BackoffRate/JitterStrategy + multi-Catch) — most-used production feature; must fire real exceptions
-- I/O processing pipeline coverage (InputPath, Parameters, ResultSelector, ResultPath, OutputPath) — non-trivial generated code; must be verified via real execution
-- Automated deploy-invoke-verify-teardown cycle — core value proposition of the milestone; manual steps disqualify it
-- Dual verification per example: Lambda return value assertion AND CloudWatch log assertion — return value proves output; logs prove intermediate state
-- Single-command test runner: `pytest tests/test_examples/ -m integration`
-- Real AWS execution with real teardown — local mock tests already exist; v1.2 is the real-AWS tier
-- Structured JSON logging in all handler files — required for reliable log assertions; unstructured logs are unparseable
+**Must have (table stakes — blueprint must cover all):**
+- DSL Models: Jackson sealed interface `State` with 8 subtypes via `@JsonTypeInfo`/`@JsonSubTypes`; Java records for sub-models (RetryPolicy, Catcher, ChoiceRule subtypes); round-trip tests asserting concrete class, not interface
+- Code Generator: FreeMarker 2.3.34 templates producing `DurableHandler` Java subclasses; `Orchestrator.java.ftl` + `HandlerStub.java.ftl`; Generation Gap pattern (first-line `// DO NOT EDIT` marker); golden-file tests
+- Handler Registry: `@State`/`@Startup` custom annotations; classpath scanning via Reflections library; APT compile-time alternative documented as optimization path
+- 5-Stage I/O Pipeline: InputPath, Parameters, ResultSelector, ResultPath, OutputPath using Jayway JsonPath 2.9.0 with `JacksonJsonNodeJsonProvider`; `JsonNode.path()` for all chained access (never `.get()`)
+- 18 Intrinsic Functions: Hand-written recursive descent `IntrinsicParser`; `@FunctionalInterface IntrinsicFunction`; same 6-file split as Python (`ArrayFunctions`, `StringFunctions`, `MathFunctions`, etc.)
+- CLI: Picocli `@Command` with 7 subcommands implementing `Callable<Integer>`; fat JAR via maven-shade-plugin
+- ASL Importer: Jackson `ObjectMapper.readTree()` + `JsonNode` tree manipulation + SnakeYAML/YAMLMapper emission; all 6 ASL-to-RSF conversion rules
+- Terraform HCL Generator: FreeMarker with square-bracket syntax; 6 template files; container-image deployment model (`package_type = "Image"`, ECR, Dockerfile template) — no managed runtime
+- UI Backends: Spring Boot with `TextWebSocketHandler` (graph editor), `SseEmitter` (inspector), `@RestController`, static SPA file serving via `ResourceHttpRequestHandler`
+- Mock SDK: `MockDurableContext` implementing the Java `DurableContext` interface; step/wait stubs execute immediately; Parallel/Map stubs emit `UnsupportedOperationException` pending SDK GA
+- Semantic Validator: Jakarta Bean Validation 3.1 for field-level; `ArrayDeque<String>` BFS for cross-state rules (all 6 Python rules map directly); pattern-matching `switch` over sealed `State`
+- JSON Schema Generation: victools jsonschema-generator 4.35.0 with `jsonschema-module-jackson`; replaces `pydantic.model_json_schema()`; Draft 2020-12
+- Maven multi-module structure: 8-module layout with dependency graph; Jackson BOM in root `<dependencyManagement>`
+- Testing strategy: JUnit 5 + Mockito 5 + AssertJ 3; minimal-fixture tests alongside fully-populated fixtures for all FreeMarker templates
 
-**Should have (differentiators):**
-- Real-world scenario naming (order-processing, data-pipeline) over abstract names — readers understand why each state type exists
-- DynamoDB integration in one example — proves RSF works with real stateful AWS services inside handlers
-- Context Object (`$$`) coverage in deployed execution — real execution provides real `$$.Execution.Id` values that expose bugs mocks cannot
-- Variables/Assign/Output coverage in a deployed workflow — Assign generates Python dict mutation; real execution verifies the generated code path
+**Should have (idiomatic Java differentiators — mention in blueprint):**
+- Java sealed interface exhaustive `switch` pattern matching (compiler-enforced, better than Python's runtime `isinstance`)
+- Java records for all immutable sub-models (auto-generates equals/hashCode/toString)
+- Spring Boot Actuator health/metrics for UI backends (`spring-boot-starter-actuator`, zero configuration)
+- APT compile-time handler registry as documented optimization path (zero-reflection cold start)
 
-**Defer to v1.2.x or v2+:**
-- CI/CD GitHub Actions workflow — add after examples are stable and cost is understood
-- Second AWS service example (SQS/S3) — add after DynamoDB example is validated
-- LocalStack support — defer until LocalStack confirms durable execution compatibility
-- Parallel CI execution of integration tests — defer until per-example cost and timing is understood
+**Defer (post-blueprint, implementation-time decisions):**
+- GraalVM native-image profile for CLI (requires APT registry; defer until Java implementation begins)
+- Kotlin port (separate blueprint required; not in scope)
+- Java integration test harness against real AWS (reuse Python harness patterns when Java implementation ships)
+- Parallel and Map state code generation (blocked on Java SDK GA; emit `UnsupportedOperationException` stubs)
+
+**Explicit anti-features (document as "do not do" in blueprint):**
+- Spring Boot inside the Lambda DurableHandler (3–8s cold start; 20MB+ JAR)
+- Runtime classpath scanning in production Lambda (500ms–2s cold start overhead)
+- `CompletableFuture.allOf()` as Parallel state substitute (breaks checkpoint/replay semantics)
+- `javax.*` namespace (superseded by `jakarta.*` in Spring Boot 3.x)
+- `runtime = "java21"` in Terraform for durable functions (managed runtime not supported; must use container image)
 
 ### Architecture Approach
 
-The architecture is additive: zero changes to the existing `src/rsf/` source tree. New components live exclusively in `examples/`, `tests/test_examples/`, and `scripts/`. Each example is a self-contained RSF project — a complete `workflow.yaml`, `handlers/`, `src/` layout (for Lambda packaging), `terraform/` (generated by `rsf deploy` with local state), and `tests/test_local.py` (mock SDK). This mirrors exactly what a user would create with `rsf init`, so examples serve as both test fixtures and documentation. The AWS integration tests live in the project-level `tests/test_examples/` and share a `conftest.py` with polling helpers, log query helpers, and boto3 fixtures. A `scripts/run_integration_tests.sh` shell script manages the deploy-test-teardown lifecycle and CI invocation. Terraform state is per-example and local (no S3 backend), which prevents cross-example state collisions and avoids the need for shared infrastructure to run the test suite.
+The architecture is an 8-module Maven multi-module project with a clean dependency hierarchy. `rsf-dsl` has no upstream RSF dependencies and is the build-order root; `rsf-runtime` (I/O pipeline, annotations, registry) and `rsf-codegen` (FreeMarker code generation) both depend only on `rsf-dsl`; `rsf-terraform` and `rsf-importer` are sibling modules at the same layer; `rsf-editor` and `rsf-inspector` are Spring Boot applications depending on `rsf-dsl` and `rsf-runtime`; `rsf-cli` (Picocli) is the integration layer depending on all other modules and producing the fat JAR. The Lambda runtime module (`rsf-runtime`) is intentionally kept free of Spring Boot — it ships inside user Lambda deployment artifacts and must not carry Spring's classpath scanning overhead.
 
 **Major components:**
-1. `examples/<name>/` — Self-contained RSF project per example; contains DSL YAML, handler implementations with structured logging, Terraform files with local state, and a local mock test
-2. `tests/test_examples/conftest.py` — Shared AWS test infrastructure: `poll_execution()` helper with 3-5s interval and exponential backoff on 429, `query_logs()` helper with 15s propagation buffer and retry loop, `get_tf_outputs()` helper reading resource names from `terraform output -json`, invocation helper generating UUID-suffixed execution IDs
-3. `tests/test_examples/test_<name>.py` — Per-example pytest files with dual-channel verification (return value + logs)
-4. `scripts/run_integration_tests.sh` — Lifecycle orchestration: per-example `terraform apply`, pytest, `terraform destroy`, followed by explicit `delete_log_group()` boto3 cleanup
+1. `rsf-dsl` — Jackson `YAMLMapper` + `ObjectMapper`; sealed `State` interface with 8 subtypes; `StateMachineDefinition` root model; BFS semantic validator; victools JSON Schema generator
+2. `rsf-codegen` — FreeMarker 2.3.34; BFS state traversal; `Orchestrator.java.ftl` + `HandlerStub.java.ftl`; Generation Gap pattern; golden-file test infrastructure
+3. `rsf-terraform` — FreeMarker with `SQUARE_BRACKET_TAG_SYNTAX`; 6 HCL template files; container-image deployment model (ECR, Dockerfile template, `package_type = "Image"`)
+4. `rsf-runtime` — `@State`/`@Startup` annotations; `HandlerRegistry` with classpath scanning; `IOPipeline` 5-stage; `IntrinsicRegistry` with 18 functions; `MockDurableContext`
+5. `rsf-importer` — Jackson `readTree()` + 6 ASL-to-RSF conversion rules; SnakeYAML/YAMLMapper emission
+6. `rsf-editor` — Spring Boot with `TextWebSocketHandler`; `SchemaController` serving victools-generated schema; React SPA in `resources/static/`
+7. `rsf-inspector` — Spring Boot with `SseEmitter`; AWS SDK v2 `LambdaClient`; rate-limited polling (Guava `RateLimiter`); React SPA in `resources/static/`
+8. `rsf-cli` — Picocli `@Command(subcommands={...})`; 7 subcommand classes implementing `Callable<Integer>`; maven-shade-plugin fat JAR
+
+**Key patterns to follow:**
+- Jackson Polymorphic Deserialization with Sealed Interface: `@JsonTypeInfo(use=NAME, property="Type")` + `@JsonSubTypes` listing all permitted subtypes on every discriminated union; never rely on auto-detection in Jackson 2.x
+- DurableHandler Subclass with While-Loop State Machine: generated orchestrator is a while-loop over state names calling `context.step()`, `context.wait()`, etc.; Parallel and Map states emit `UnsupportedOperationException` stubs
+- Generation Gap: first-line `// DO NOT EDIT — Generated by RSF` marker; check before overwriting; user handler stubs without marker are never touched
+- FreeMarker Null Safety: `${(optional)!""}` for strings, `<#list (optionalList)![] as item>` for collections, `<#if field??>` for blocks — Jinja2 silently renders None as empty; FreeMarker throws `InvalidReferenceException` without these guards
+- ObjectMapper as `static final`: configure once at class load time; never call `registerModule()` or `configure()` inside `handleRequest`
+- Use `JsonNode.path()` not `.get()` for all chained JSON access — `.get()` returns Java `null`; `.path()` returns `MissingNode`, preventing `NullPointerException` chains
 
 ### Critical Pitfalls
 
-1. **No polling after async invocation** — `InvocationType=Event` returns HTTP 202 with an empty body. Tests that read the invoke response directly get false positives. Build the polling helper first and validate it before writing any example tests. Poll for all four terminal states: SUCCEEDED, FAILED, TIMED_OUT, STOPPED.
+1. **Java SDK Preview — `parallel`, `map`, `waitForCondition`, `waitForCallback` not implemented** — Generate `UnsupportedOperationException` stubs for Parallel and Map states; never use `CompletableFuture.allOf()` as a substitute (it bypasses checkpoint/replay, causing duplicate side effects on retry); monitor `aws/aws-durable-execution-sdk-java` releases for GA.
 
-2. **CloudWatch log propagation delay** — Logs are not queryable for 5-30 seconds after execution completes. Tests that call `filter_log_events` or `get_query_results` immediately after SUCCEEDED detection return empty results and fail intermittently. Always assert the Lambda return value first (available immediately on SUCCEEDED), then wait a fixed 15-second propagation buffer before querying logs.
+2. **Container-image-only deployment (no managed runtime)** — Terraform templates must emit `package_type = "Image"` + ECR repository + Dockerfile template; setting `runtime = "java21"` in `aws_lambda_function` for a durable function is an AWS API error during Preview.
 
-3. **IAM propagation race after `terraform apply`** — IAM policies take up to 15 seconds to propagate globally after `terraform apply` returns. Invoking the Lambda immediately produces `AccessDeniedException` in the first execution. Always add a 15-second sleep (or retry on AccessDeniedException) between `terraform apply` and the first test invocation.
+3. **Type erasure breaks generic step result deserialization** — Never pass `List.class` to `ctx.step()`; use `TypeToken<List<Order>>(){}` for all parameterized types; FreeMarker templates must emit `TypeToken` form for collection-returning states.
 
-4. **Shared Terraform state across examples** — A single `terraform.tfstate` ties all examples together. One failed example blocks teardown of all others. Use per-example isolated local state: each example has its own `terraform/` directory with its own `terraform.tfstate`. Never run `terraform apply` from a shared root.
+4. **Jackson `@JsonSubTypes` missing causes silent `LinkedHashMap` deserialization** — Always pair `@JsonTypeInfo` with a complete `@JsonSubTypes` list; write round-trip tests for every state type asserting the exact concrete class (not just the sealed interface).
 
-5. **Lambda control plane rate limit throttling** — The Lambda control plane enforces 15 req/s account-wide. Polling multiple concurrent examples at 1-second intervals hits this limit, causing 429 ThrottlingException that manifests as flaky failures. Set minimum polling interval to 3-5 seconds. Run examples sequentially. Add exponential backoff on `TooManyRequestsException`.
+5. **FreeMarker strict null crashes on optional DSL fields** — Every optional field access in templates needs `!` or `??` guards; every template must have a "minimal required fields" test fixture, not only a fully-populated one.
 
-6. **Orphaned CloudWatch log groups blocking re-deploy** — Lambda auto-creates `/aws/lambda/<name>` log groups. `terraform destroy` may not remove them if Lambda flushed late buffers during teardown. `terraform apply` on the next run fails with `LogGroupAlreadyExistsException`. Follow every `terraform destroy` with explicit `boto3 logs.delete_log_group()` in the test harness teardown step.
+6. **Spring Boot in Lambda DurableHandler adds 3–8s cold start** — The `rsf-runtime` Maven module must never have a Spring Boot dependency; Spring Boot belongs only in `rsf-editor` and `rsf-inspector`; enforce via Maven dependency graph.
 
-7. **Checkpoint storage cost accumulation** — Each durable execution generates checkpoint data retained for the default 14-day period. Running the test suite daily accumulates 14x the data. Set `retention_period = 1` in `durable_config` for all test examples.
+7. **Runtime classpath scanning adds 500ms–2s Lambda cold start** — Classpath scanning with `Reflections` is acceptable for early development; blueprint must document APT compile-time registry as the production-grade replacement.
 
-8. **Execution ID collisions** — Fixed execution names collide with prior runs within the retention window, producing `ResourceConflictException`. Always generate execution IDs with a timestamp + UUID suffix: `f"test-{example_name}-{int(time.time())}-{uuid4().hex[:8]}"`.
+8. **Jackson version conflicts in multi-module Maven** — Root POM must import the Jackson BOM in `<dependencyManagement>` before any module declares Jackson; run `mvn dependency:tree -Dincludes=com.fasterxml.jackson` after every dependency addition.
 
 ## Implications for Roadmap
 
-Based on combined research, the build ordering is dictated by two rules:
-- Local (mock SDK) tests must pass before any AWS deployment — local tests are the gate to the real-AWS tier
-- Test harness helpers (polling, log query, teardown) must be built and validated before example-specific tests can use them
+The blueprint document (RSF-BUILDPRINT-JAVA.md) should be authored in dependency order — each section builds on the previous, mirroring the Maven module dependency graph. The roadmap for this milestone is: "author each blueprint section in the order determined by component dependencies."
 
-### Phase 1: Example Foundation — DSL, Handlers, Local Tests
+### Phase 1: Project Foundation and SDK Assessment
 
-**Rationale:** Examples must be authorable and locally testable before any AWS infrastructure is created. This phase has no AWS dependency and can be validated entirely with the existing `MockDurableContext`. It also forces all DSL authoring to be complete before Terraform files are generated, ensuring the generated code is stable. Starting here avoids the cost and latency of deploying broken examples.
+**Rationale:** Two foundational questions must be answered before any component section can be written: (1) What can the Java SDK actually do today, and (2) What is the Maven module structure that enforces all architectural constraints? Getting the SDK scope wrong would require rewriting all code generation sections. Getting the module structure wrong would require restructuring all component sections.
 
-**Delivers:** Complete `workflow.yaml` + handler implementations + `test_local.py` for each of the 5 examples. All local tests passing. DSL exercises all 8 state types, all 5 I/O pipeline fields, Variables/Assign, Context Object references, and error handling constructs.
+**Delivers:**
+- SDK capability matrix: which primitives are available (step, wait, invoke, runInChildContext, createCallback) vs. blocked (parallel, map, waitForCondition, waitForCallback)
+- Maven 8-module parent POM with Jackson BOM in `<dependencyManagement>`, Spring Boot parent, plugin management
+- `rsf-dsl` blueprint: sealed `State` interface, all 8 subtypes as Java records, `@JsonTypeInfo`/`@JsonSubTypes` configuration, `YAMLMapper` setup, round-trip test patterns
+- Container-image deployment model: Dockerfile template, ECR resource in Terraform, `package_type = "Image"` everywhere
 
-**Addresses from FEATURES.md:** Complete example artifacts (DSL + handlers), all 8 state types, error handling, I/O pipeline, Variables/Assign, Context Object, structured JSON logging convention in handlers.
+**Addresses:** DSL Models (P1), Maven multi-module layout (P1)
+**Avoids:** SDK parity assumption pitfall (#1), container deployment pitfall (#2), Jackson version conflict pitfall (#8), `@JsonSubTypes` silent LinkedHashMap pitfall (#4)
 
-**Avoids from PITFALLS.md:** Generating handler stubs over user-authored handlers (keep `src/generated/` and `handlers/` directories separate from the start); `durable_config` missing from initial deploy (template structure decided here).
+### Phase 2: Runtime Core — I/O Pipeline, Intrinsics, Registry
 
-**Research flag:** Standard patterns — example DSL authoring uses the existing RSF DSL which is fully documented; no additional research needed.
+**Rationale:** The I/O pipeline and intrinsic functions are prerequisites for the code generator — the generated orchestrator code calls these at runtime. The handler registry is also called by generated code. All three must be blueprinted before the code generation section. These components have no dependency on Spring Boot or FreeMarker.
 
----
+**Delivers:**
+- `rsf-runtime` module blueprint: `@State`/`@Startup` annotation definitions, `HandlerRegistry` with classpath scanning + APT alternative documented, `HandlerFunction` functional interface
+- I/O Pipeline blueprint: 5-stage pipeline with Jayway JsonPath + `JacksonJsonNodeJsonProvider`; `JsonNode.path()` null-safety pattern; `VariableStore` interface
+- Intrinsic Functions blueprint: `IntrinsicParser` recursive descent class skeleton; `@FunctionalInterface IntrinsicFunction`; all 18 functions mapped to Java from Python
+- Mock SDK blueprint: `MockDurableContext` implementing `DurableContext`; step/wait immediate execution; Parallel/Map `UnsupportedOperationException` stubs
 
-### Phase 2: Terraform Infrastructure Per Example
+**Uses:** Jackson 2.18.5, Jayway JsonPath 2.9.0, AWS Durable Execution SDK Java (Preview)
+**Implements:** rsf-runtime component
+**Avoids:** Type erasure pitfall (#3), JSONPath null safety (`JsonNode.path()` over `.get()`), classpath scanning cold start pitfall (#7)
 
-**Rationale:** Once examples have valid DSL, `rsf deploy` can generate Terraform files. This phase establishes the per-example Terraform directory structure, configures `durable_config` with `retention_period = 1`, sets `runtime = python3.13`, pins the AWS provider to `>=6.25.0`, and adds DynamoDB IAM/resources for the `data-pipeline` example. This phase does not run `terraform apply` — it validates that `terraform plan` succeeds and that the state isolation structure is correct.
+### Phase 3: Code Generation — FreeMarker Templates
 
-**Delivers:** Per-example `terraform/` directories with generated Terraform files. `durable_config` present in all examples from the first commit. `retention_period = 1` set in all examples. AWS provider version pinned. DynamoDB resources in `data-pipeline` and `order-processing`. `.gitignore` updated for `terraform.tfstate`, `src/generated/`, `.terraform/`.
+**Rationale:** Code generation is the primary user-facing output of RSF. It depends on DSL models (Phase 1) and the runtime types the generated code must call (Phase 2). FreeMarker's null-handling and whitespace behavior — both inverted from Jinja2 — are the highest-risk translation surface in the entire port.
 
-**Addresses from FEATURES.md:** Per-example independent Terraform state, DynamoDB integration example, Terraform lifecycle automation.
+**Delivers:**
+- `rsf-codegen` blueprint: `CodeGenerator` class, `StateMapper` BFS traversal, `StateMapping` record
+- `Orchestrator.java.ftl` template with null guards, Parallel/Map `UnsupportedOperationException` stubs, and TypeToken usage for generic results
+- `HandlerStub.java.ftl` template
+- FreeMarker `Configuration` setup: angle-bracket syntax for Java templates, square-bracket syntax for HCL templates (two separate `Configuration` instances)
+- Golden-file testing strategy for generated code
+- Generation Gap implementation in Java
 
-**Avoids from PITFALLS.md:** Shared Terraform state collisions, `durable_config` missing on initial deploy (can never be added to an existing function — it must be present from v1), checkpoint storage accumulation (`retention_period = 1` from day one), orphaned log groups (Terraform `depends_on` for log group before Lambda creation).
+**Uses:** FreeMarker 2.3.34
+**Implements:** rsf-codegen component
+**Avoids:** FreeMarker null crash pitfall (#5), FreeMarker whitespace pitfall, FreeMarker list-null pitfall — all prevented by mandatory minimal-fixture tests
 
-**Research flag:** Standard patterns — RSF's existing Terraform generator and the `main.tf.j2` template are the source of truth; no additional research needed.
+### Phase 4: Terraform Generator and ASL Importer
 
----
+**Rationale:** The Terraform generator and ASL importer are parallel concerns — neither depends on the other. Both depend on DSL models (Phase 1). The Java Terraform generator is substantially different from the Python version: it must emit container-image deployment resources, not ZIP-based managed runtime resources. This is a significant architectural change requiring careful documentation.
 
-### Phase 3: Integration Test Harness Infrastructure
+**Delivers:**
+- `rsf-terraform` blueprint: FreeMarker square-bracket syntax setup; all 6 HCL template files; IAM derivation logic; Dockerfile template for Java Lambda container; ECR `aws_ecr_repository` resource; `package_type = "Image"` Lambda configuration; Maven shade plugin fat JAR build and ECR push workflow
+- `rsf-importer` blueprint: Jackson `readTree()` + `ObjectNode` manipulation; all 6 ASL-to-RSF conversion rules; `ImportWarning` record; YAML emission via `YAMLMapper`
+- Container image build workflow documentation (Maven shade → fat JAR → Docker build → ECR push)
 
-**Rationale:** The test harness shared helpers must exist and be independently validated before any example-specific tests are written. This is the highest-risk phase because the polling, log query, and teardown patterns are where most integration test pitfalls occur. Building and testing these helpers in isolation (against a single deployed example) validates the entire harness before the other four examples exercise it.
+**Uses:** FreeMarker 2.3.34 (square-bracket mode), Jackson 2.18.5
+**Implements:** rsf-terraform, rsf-importer components
+**Avoids:** Container deployment pitfall (#2), HCL `${...}` conflict (solved by square-bracket syntax)
 
-**Delivers:** `tests/test_examples/conftest.py` with: `poll_execution()` (3-5s interval, exponential backoff on 429, handles all 4 terminal states), `query_logs()` (15s propagation buffer, retry loop, `startTime` set to invocation timestamp), `get_tf_outputs()` (reads resource names from `terraform output -json`), invocation helper (UUID-suffixed execution IDs), IAM propagation buffer (15s sleep after apply). `scripts/run_integration_tests.sh` skeleton. `pyproject.toml` updated with `integration` extras group and `-m integration` marker.
+### Phase 5: CLI and Web Backends
 
-**Addresses from FEATURES.md:** Automated deploy-invoke-verify-teardown cycle, single-command test runner, teardown on failure.
+**Rationale:** The CLI is the integration layer — it depends on all other modules. The web backends depend on DSL models and JSON schema generation. Both can be blueprinted after the core library layer is specified. Web backends introduce Spring Boot, which must be kept strictly separated from the Lambda runtime module via Maven dependency boundaries.
 
-**Avoids from PITFALLS.md:** No polling after async invocation (polling helper is the entire purpose of this phase), rate limit throttling (3-5s minimum interval + backoff), CloudWatch propagation delay (15s buffer baked into log query helper), IAM propagation race (15s sleep in deploy-to-invoke sequence), execution ID collision (UUID-suffixed IDs in invocation helper), orphaned log groups (explicit `delete_log_group()` in teardown step).
+**Delivers:**
+- `rsf-cli` blueprint: Picocli `@Command` hierarchy for 7 subcommands; `Callable<Integer>` pattern; fat JAR configuration; maven-shade-plugin setup; Jansi colored output equivalent
+- `rsf-editor` blueprint: Spring Boot `TextWebSocketHandler`; `SchemaController` (victools schema generation); React SPA serving from `resources/static/`; WebSocket configuration
+- `rsf-inspector` blueprint: Spring Boot `SseEmitter`; `InspectorController` REST + SSE endpoints; `LambdaInspectClient` wrapping AWS SDK v2 `LambdaClient`; Guava `RateLimiter` (12 req/s); React SPA serving
+- JSON Schema blueprint: victools jsonschema-generator 4.35.0; `SchemaGeneratorConfigBuilder` with `JacksonModule`; Draft 2020-12 output
 
-**Research flag:** Needs research-phase attention — the `GetDurableExecution` result extraction API and the relationship between `ListDurableExecutionsByFunction` response fields are documented at MEDIUM confidence. Specifically: the FEATURES.md research flagged `GetDurableExecutionState` as an internal SDK API used for replay; the correct external API for result retrieval is `GetDurableExecution`. Validate the exact response shape and field names (`Result`, `Status`, `Error`) against the boto3 client before writing the polling helper.
+**Uses:** Picocli 4.7.7, Spring Boot 3.5.9, AWS SDK v2, Guava
+**Implements:** rsf-cli, rsf-editor, rsf-inspector components
+**Avoids:** Spring Boot in Lambda pitfall (#6) — enforced by Maven; Spring Boot appears only in `rsf-editor` and `rsf-inspector`
 
----
+### Phase 6: Testing Strategy and Blueprint Finalization
 
-### Phase 4: Example AWS Deployment and Test Verification
+**Rationale:** The testing strategy section ties all component blueprints together with concrete test patterns. It must come last because it references patterns from all prior phases. The finalization step assembles RSF-BUILDPRINT-JAVA.md from all phase sections.
 
-**Rationale:** With the harness in place, deploy each example to AWS in sequence and write the test assertions. The order of examples should match deployment complexity: start with `order-processing` (most representative, covers the most surface area), then `retry-and-recovery` (verifies error handling is wired correctly), then `intrinsic-showcase` (validates I/O pipeline and intrinsic function coverage), then `approval-workflow` (adds Context Object and Wait state), and finally `data-pipeline` (DynamoDB integration — most dependencies).
+**Delivers:**
+- Testing strategy: JUnit 5 + Mockito 5 + AssertJ 3 patterns for each component type
+- DSL round-trip test pattern (serialize → deserialize → assert exact concrete type)
+- FreeMarker golden-file test pattern with both fully-populated and minimal-fixture inputs
+- I/O pipeline test patterns (null inputs, missing fields, all 5 stages)
+- Mock SDK test fixtures for all available durable context operations
+- RSF-BUILDPRINT-JAVA.md: consolidated, cross-referenced blueprint document
 
-**Delivers:** `tests/test_examples/test_<name>.py` for all 5 examples, each with dual-channel verification (return value assertion + CloudWatch log assertion). All 5 examples passing `pytest tests/test_examples/ -m integration`. Example README files documenting what each example demonstrates.
-
-**Addresses from FEATURES.md:** Dual verification (return value + CW logs), real AWS execution, coverage of all 8 state types, coverage of all 6 operator families, DynamoDB integration, Context Object, Variables/Assign.
-
-**Avoids from PITFALLS.md:** Using CloudWatch Logs as the only verification channel (return value is always the primary assertion), Lambda cold start timing (polling timeout set to 120s minimum to accommodate cold starts; warm-up invocation added if needed), hardcoding Lambda function names in tests (all resource names read from `terraform output -json`).
-
-**Research flag:** Standard patterns for the pure-Lambda examples. The DynamoDB integration example may benefit from a brief research-phase check on IAM policy specifics for the DynamoDB actions needed by the `data-pipeline` example.
-
----
-
-### Phase 5: Cleanup and Documentation
-
-**Rationale:** After all examples are verified, ensure the test suite is reproducible by a developer with no prior context. This means validating the single-command workflow (`pytest tests/test_examples/ -m integration`), confirming `terraform destroy` + `delete_log_group()` leaves no residual AWS resources, and documenting the prerequisite setup (AWS credentials, Terraform binary, boto3 version).
-
-**Delivers:** `scripts/run_integration_tests.sh` fully wired, verified teardown leaves no orphaned resources, `examples/README.md` with quick-start instructions, pyproject.toml `integration` extras documented.
-
-**Addresses from FEATURES.md:** Single-command test runner (validated end-to-end), teardown on failure (verified with forced failure scenario).
-
-**Avoids from PITFALLS.md:** Using production AWS credentials (account ID assertion in test harness startup), checkpoint storage accumulation (verified `retention_period = 1` across all examples).
-
-**Research flag:** Standard patterns — documentation and cleanup; no research needed.
-
----
+**Avoids:** Template testing gaps — mandating minimal-fixture tests alongside fully-populated fixtures catches all FreeMarker null pitfalls before implementation begins
 
 ### Phase Ordering Rationale
 
-- **Local before cloud:** Examples must be locally testable before any AWS deployment. This prevents spending Terraform apply/destroy cycles on broken workflows.
-- **Harness before tests:** The polling, log query, and teardown helpers are shared infrastructure. Building them first means every subsequent example test can immediately rely on correct, validated primitives.
-- **Sequential AWS deployment:** Examples deploy and verify one at a time to stay well within the Lambda control plane 15 req/s rate limit and to isolate failures.
-- **DynamoDB example last:** The `data-pipeline` example has the most AWS dependencies (DynamoDB table + IAM). It comes last so the simpler examples validate the harness first.
+- DSL models come first because every other component depends on `StateMachineDefinition` and the `State` sealed interface hierarchy — it is the build-order root.
+- SDK assessment is paired with DSL models (Phase 1) because the SDK's available primitives constrain what the code generator can emit; getting this wrong invalidates all downstream template design.
+- Runtime core (Phase 2) comes before code generation (Phase 3) because generated code calls runtime classes — the blueprint cannot document what is generated without first documenting what it calls into.
+- Terraform and importer (Phase 4) can be parallel work within the phase; they depend on DSL models and FreeMarker patterns but not on each other.
+- CLI and web backends (Phase 5) come after core library blueprinting because they are the integration layer that references all prior components; Spring Boot separation is enforced here.
+- The phase ordering directly mirrors the Maven module dependency graph: `rsf-dsl` → `rsf-runtime` / `rsf-codegen` → `rsf-terraform` / `rsf-importer` → `rsf-editor` / `rsf-inspector` → `rsf-cli`.
 
 ### Research Flags
 
-Phases needing deeper research during planning:
-- **Phase 3 (Test Harness):** Validate exact `GetDurableExecution` response schema — specifically `Result`, `Status`, and `Error` field names and the format of `Result` (JSON string vs. dict) before writing the polling helper. The FEATURES.md research flagged this at MEDIUM confidence because `GetDurableExecutionState` (an internal API) was confused with the external `GetDurableExecution` API. One boto3 test call against the actual API will resolve this definitively.
-- **Phase 4, DynamoDB example:** Confirm minimum IAM actions required for the `data-pipeline` example — `dynamodb:PutItem`, `dynamodb:GetItem`, `dynamodb:Query` are expected, but verify against the specific table access patterns before generating the IAM policy.
+Phases requiring additional investigation before or during blueprint authoring:
 
-Phases with standard patterns (skip research-phase):
-- **Phase 1 (Examples):** RSF DSL is the existing, fully-documented interface. Handler implementations use standard Python. No unknowns.
-- **Phase 2 (Terraform):** RSF Terraform generator is the source of truth. All templates verified by direct codebase inspection.
-- **Phase 5 (Cleanup):** Documentation and script wiring. No research needed.
+- **Phase 1 (SDK Assessment):** The Java SDK is in Developer Preview. Exact method signatures for `DurableContext` must be verified against `github.com/aws/aws-durable-execution-sdk-java` source before documenting. The Maven version number is unspecified in current AWS docs — the GitHub releases tab must be checked. Mark HIGH priority for pre-flight verification before authoring the Mock SDK section.
+- **Phase 2 (Mock SDK):** `MockDurableContext` must implement the actual `DurableContext` interface. Signatures for `parallel`, `map`, `waitForCondition`, `waitForCallback` are unconfirmed during Preview; these must be stubbed with `UnsupportedOperationException` and flagged "verify when SDK ships GA."
+- **Phase 4 (Container Deployment):** The Dockerfile pattern and ECR workflow are documented in AWS docs, but the current recommended ECR base image tag (Java 21 vs. Java 25) should be verified at blueprint-authoring time — both are referenced in AWS docs.
+
+Phases with well-documented standard patterns (additional research not required):
+
+- **Phase 3 (FreeMarker):** FreeMarker 2.3.34 is mature, fully documented. Square-bracket syntax is a single `setTagSyntax()` call. Standard patterns apply.
+- **Phase 5 (CLI + Web Backends):** Picocli 4.7.7 and Spring Boot 3.5.9 are mature with extensive official documentation. `SseEmitter`, `TextWebSocketHandler`, and Picocli subcommand patterns are all well-documented. No additional research needed.
+- **Phase 6 (Testing):** JUnit 5 + Mockito 5 + AssertJ is the industry-standard Java testing stack. No additional research needed.
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All library versions verified against PyPI as of 2026-02-26; AWS API patterns verified against official docs; existing codebase inspected directly |
-| Features | HIGH | AWS Lambda Durable Functions APIs confirmed in official docs; RSF source code inspected directly; one MEDIUM flag on `GetDurableExecutionState` (internal API) vs `GetDurableExecution` (public API) — see gaps |
-| Architecture | HIGH | Based on direct inspection of existing `src/rsf/` source tree, Jinja2 templates, and existing test organization; zero inference required |
-| Pitfalls | HIGH (core); MEDIUM (cost/billing) | Core pitfalls verified against official docs and confirmed GitHub issues; checkpoint storage cost structure verified at MEDIUM confidence via third-party analysis |
+| Stack | HIGH | All library versions verified against Maven Central, official docs, and GitHub releases. Spring Boot 3.5.9, Jackson 2.18.5, FreeMarker 2.3.34, Picocli 4.7.7 all confirmed current. AWS SDK for Java 2.x BOM-managed. Version incompatibilities (JUnit 6, Jackson 3.x, AWS SDK 1.x) explicitly documented. |
+| Features | MEDIUM-HIGH | Python-to-Java mapping for 12 of 14 components is HIGH confidence (both stacks are mature). Mock SDK and Parallel/Map feature stubs are MEDIUM confidence due to Java SDK Preview status and unconfirmed interface method signatures. |
+| Architecture | HIGH | Maven multi-module structure, module boundaries, data flow, and all 7 architectural patterns are well-established Java patterns verified against official Spring Boot, Picocli, FreeMarker, and Jackson documentation. The Lambda module isolation pattern is a known best practice. |
+| Pitfalls | HIGH (facts) / MEDIUM (SDK projections) | All 14 documented pitfalls are verified against official documentation, Jackson GitHub issues, and Maven plugin developer guides. SDK Preview stability and GA timeline projections are MEDIUM — based on Preview announcement, not a confirmed AWS roadmap. |
 
-**Overall confidence:** HIGH
+**Overall confidence:** HIGH for everything except Java SDK Preview feature gaps (MEDIUM)
 
 ### Gaps to Address
 
-- **`GetDurableExecution` response schema (MEDIUM confidence):** The FEATURES.md research references two distinct APIs — `GetDurableExecution` (public, for test result retrieval) and `GetDurableExecutionState` (internal SDK API, used for checkpoint replay). The exact shape of the `GetDurableExecution` response (specifically whether `Result` is a JSON string or a pre-parsed dict, and which fields are present for FAILED vs. SUCCEEDED) should be validated with a single boto3 test call before writing the polling helper. Resolve during Phase 3 planning.
-
-- **`DurableFunctionCloudTestRunner` viability (MEDIUM confidence):** The FEATURES.md research mentions `aws-durable-execution-sdk-python-testing` which provides a `DurableFunctionCloudTestRunner` that wraps the poll-until-complete pattern. If this library is production-quality and on PyPI, adopting it could eliminate the custom polling helper entirely. Validate during Phase 3 planning by checking PyPI status and last release date. If it is as lightly maintained as `pytest-terraform` was (last release 2023), skip it and use the custom helper.
-
-- **`$LATEST` vs. versioned ARN invocation for durable functions (LOW confidence):** The PITFALLS.md notes that `AllowInvokeLatest = true` is required (non-default) when invoking `$LATEST`. Verify whether the RSF-generated `iam.tf` includes this permission and whether the test harness should invoke `$LATEST` or a specific version. Resolve during Phase 2 Terraform structure review.
+- **Java SDK `DurableContext` exact interface signatures:** Must verify all method signatures by reading `aws/aws-durable-execution-sdk-java` source before writing the Mock SDK section. The Maven version number is `VERSION` (unspecified) in current AWS docs — find the actual release tag on GitHub.
+- **Parallel/Map state workaround:** The blueprint documents `runInChildContext()` as a temporary workaround for parallel sub-workflows. This is not semantically equivalent to true parallel execution (no checkpoint isolation between branches). Blueprint must clearly warn users and set expectations about GA timing.
+- **Java 25 vs. Java 21 ECR base image:** AWS docs reference both `public.ecr.aws/lambda/java:21` and `public.ecr.aws/lambda/java:25` as base images. Blueprint should verify which is current and recommended at authoring time.
+- **victools jsonschema-generator 4.35.0 compatibility with Jackson 2.18.5:** Verify on Maven Central that victools 4.35.0 is compatible with Jackson 2.18.5 specifically before recommending this version combination in the blueprint.
+- **SnakeYAML thread safety in web backends:** `Yaml` (raw SnakeYAML) instances are NOT thread-safe. Blueprint must explicitly recommend `jackson-dataformat-yaml`'s `YAMLMapper` for the web backend's DSL parsing — it is thread-safe because it shares the thread-safe `ObjectMapper` pipeline.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-- [boto3 1.42.57 on PyPI](https://pypi.org/project/boto3/) — current version, API availability for durable execution calls
-- [ListDurableExecutionsByFunction API Reference](https://docs.aws.amazon.com/lambda/latest/api/API_ListDurableExecutionsByFunction.html) — request parameters, response fields, status values
-- [GetDurableExecution API Reference](https://docs.aws.amazon.com/lambda/latest/api/API_GetDurableExecution.html) — result payload, error details, status enum
-- [Invoking durable Lambda functions](https://docs.aws.amazon.com/lambda/latest/dg/durable-invocation.html) — InvocationType=Event requirement, async invocation pattern
-- [AWS Lambda Durable Functions configuration](https://docs.aws.amazon.com/lambda/latest/dg/durable-configuration.html) — retention_period range, execution_timeout, AllowInvokeLatest
-- [Deploy Lambda Durable Functions with IaC](https://docs.aws.amazon.com/lambda/latest/dg/durable-getting-started-iac.html) — durable_config block, AWS provider >=6.25.0 requirement
-- [Monitoring durable functions](https://docs.aws.amazon.com/lambda/latest/dg/durable-monitoring.html) — CloudWatch metrics, execution ARN format, log group naming
-- [aws-lambda-powertools 3.24.0 on PyPI](https://pypi.org/project/aws-lambda-powertools/) — version, Logger docs, JSON field list
-- [pytest-timeout 2.4.0 on PyPI](https://pypi.org/project/pytest-timeout/) — version, per-test timeout mechanism
-- [pytest-asyncio 1.3.0 on PyPI](https://pypi.org/project/pytest-asyncio/) — version, asyncio_mode changes
-- [CloudWatch Log Group Destroy Issues — terraform-provider-aws #29247](https://github.com/hashicorp/terraform-provider-aws/issues/29247) — confirmed limitation causing orphaned log groups
-- [boto3 filter_log_events timing issue — GitHub #1524](https://github.com/boto/boto3/issues/1524) — confirmed propagation delay causing empty results
-- RSF source code (direct inspection): `src/rsf/`, `src/rsf/terraform/templates/`, `tests/`, `.planning/PROJECT.md` — all architecture and pattern findings
+
+- AWS Lambda Durable Execution SDK for Java Developer Preview Announcement — Java 17+ requirement, Preview status, Maven coordinates `software.amazon.lambda.durable:aws-durable-execution-sdk-java`
+- AWS Lambda Durable Supported Runtimes documentation — Container-image-only deployment, `DurableContext` API method availability, `parallel`/`map`/`waitForCondition`/`waitForCallback` "still in development" statement
+- `github.com/aws/aws-durable-execution-sdk-java` — Full API class list (DurableHandler, DurableContext, DurableFuture, DurableCallbackFuture, StepConfig, CallbackConfig, InvokeConfig, DurableConfig, TypeToken, RetryStrategies); package name `software.amazon.lambda.durable`
+- FreeMarker 2.3.34 official docs — Version (2024-12-22 release), `setTagSyntax(SQUARE_BRACKET_TAG_SYNTAX)`, `setInterpolationSyntax(SQUARE_BRACKET_INTERPOLATION_SYNTAX)`, null-handling operators (`!`, `??`)
+- Picocli 4.7.7 official site + GitHub — Subcommand pattern, annotation processor (`picocli-codegen`), fat JAR configuration, `Callable<Integer>` pattern
+- Spring Boot 3.5.9 docs + blog — `SseEmitter`, `TextWebSocketHandler`, `@EnableWebSocket`, `@RestController`, static resource handler
+- Jackson 2.18.5 Maven Central + FasterXML GitHub — `@JsonTypeInfo`/`@JsonSubTypes` on sealed interfaces; Jackson 2.x requires explicit `@JsonSubTypes` (no auto-detection for sealed classes); Jackson 3.x would auto-detect (not yet adopted by ecosystem)
+- Hibernate Validator 9.1.0.Final — Jakarta Validation 3.1, Java 17+ requirement, `jakarta.*` namespace
+- JUnit Jupiter 5.11.4, Mockito 5.14.2, AssertJ 3.27.7 — Maven Central version confirmation
+- networknt json-schema-validator 1.5.6 — Draft 2020-12 support, February 2025 release
+- RSF Python source code (direct inspection at `/home/esa/git/rsf-python/src/rsf/`) — all 14 component implementations as ground truth for mapping decisions
 
 ### Secondary (MEDIUM confidence)
-- [Testing Lambda durable functions (AWS docs)](https://docs.aws.amazon.com/lambda/latest/dg/durable-testing.html) — local vs. cloud testing modes, DurableFunctionCloudTestRunner
-- [aws-durable-execution-sdk-python-testing (GitHub)](https://github.com/aws/aws-durable-execution-sdk-python-testing) — cloud runner poll-until-complete pattern
-- [GetDurableExecutionState API (boto3)](https://docs.aws.amazon.com/boto3/latest/reference/services/lambda/client/get_durable_execution_state.html) — internal SDK API; external use for test result extraction is undocumented
-- [Terraform AWS Provider — Lambda issue #45354](https://github.com/hashicorp/terraform-provider-aws/issues/45354) — durable_config support added in provider v6.25.0
-- [aws-samples/sample-ai-workflows-in-aws-lambda-durable-functions (GitHub)](https://github.com/aws-samples/sample-ai-workflows-in-aws-lambda-durable-functions) — real-world workflow pattern examples
+
+- `github.com/victools/jsonschema-generator` 4.35.0 — JSON schema generation from Jackson DTOs; Draft 2020-12 support; `jsonschema-module-jackson` compatibility
+- `github.com/json-path/JsonPath` 2.9.0 — `JacksonJsonNodeJsonProvider` pattern; JSONPath evaluation; `JsonNode.path()` null-safety
+- Spring Boot WebSocket + SSE tutorials — `TextWebSocketHandler`, `SseEmitter` lifecycle management, executor service pattern
+- Java Code Geeks: Spring Boot vs. Quarkus vs. Micronaut 2025 — framework selection rationale for developer tools vs. serverless workloads
 
 ### Tertiary (LOW confidence)
-- [Lambda Durable Functions cost analysis — thecandidstartup.org](https://www.thecandidstartup.org/2026/01/12/aws-lambda-durable-functions.html) — checkpoint storage cost structure; third-party analysis, needs validation against AWS pricing page
+
+- Java SDK Preview stability projections — Timeline for `parallel()`/`map()` GA is not officially announced; projections based on Preview announcement cadence and Python SDK feature completeness as precedent only.
 
 ---
-*Research completed: 2026-02-26*
+*Research completed: 2026-02-28*
 *Ready for roadmap: yes*
