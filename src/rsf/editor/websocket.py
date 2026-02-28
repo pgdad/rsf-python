@@ -86,33 +86,41 @@ async def _handle_parse(websocket: WebSocket, message: dict[str, Any]) -> None:
         # Run semantic validation
         semantic_errors = validate_definition(definition)
         for err in semantic_errors:
-            errors.append({
-                "message": err.message,
-                "path": err.path,
-                "severity": err.severity,
-            })
+            errors.append(
+                {
+                    "message": err.message,
+                    "path": err.path,
+                    "severity": err.severity,
+                }
+            )
 
     except yaml.YAMLError as exc:
-        errors.append({
-            "message": f"YAML syntax error: {exc}",
-            "path": "",
-            "severity": "error",
-        })
+        errors.append(
+            {
+                "message": f"YAML syntax error: {exc}",
+                "path": "",
+                "severity": "error",
+            }
+        )
     except ValidationError as exc:
         for err in exc.errors():
             loc = ".".join(str(part) for part in err["loc"])
-            errors.append({
-                "message": err["msg"],
-                "path": loc,
-                "severity": "error",
-            })
+            errors.append(
+                {
+                    "message": err["msg"],
+                    "path": loc,
+                    "severity": "error",
+                }
+            )
 
-    await websocket.send_json({
-        "type": "parsed",
-        "ast": ast,
-        "yaml": yaml_content,
-        "errors": errors,
-    })
+    await websocket.send_json(
+        {
+            "type": "parsed",
+            "ast": ast,
+            "yaml": yaml_content,
+            "errors": errors,
+        }
+    )
 
 
 async def _handle_validate(websocket: WebSocket, message: dict[str, Any]) -> None:
@@ -131,31 +139,39 @@ async def _handle_validate(websocket: WebSocket, message: dict[str, Any]) -> Non
         # Run semantic validation
         semantic_errors = validate_definition(definition)
         for err in semantic_errors:
-            errors.append({
-                "message": err.message,
-                "path": err.path,
-                "severity": err.severity,
-            })
+            errors.append(
+                {
+                    "message": err.message,
+                    "path": err.path,
+                    "severity": err.severity,
+                }
+            )
 
     except yaml.YAMLError as exc:
-        errors.append({
-            "message": f"YAML syntax error: {exc}",
-            "path": "",
-            "severity": "error",
-        })
+        errors.append(
+            {
+                "message": f"YAML syntax error: {exc}",
+                "path": "",
+                "severity": "error",
+            }
+        )
     except ValidationError as exc:
         for err in exc.errors():
             loc = ".".join(str(part) for part in err["loc"])
-            errors.append({
-                "message": err["msg"],
-                "path": loc,
-                "severity": "error",
-            })
+            errors.append(
+                {
+                    "message": err["msg"],
+                    "path": loc,
+                    "severity": "error",
+                }
+            )
 
-    await websocket.send_json({
-        "type": "validated",
-        "errors": errors,
-    })
+    await websocket.send_json(
+        {
+            "type": "validated",
+            "errors": errors,
+        }
+    )
 
 
 async def _handle_load_file(websocket: WebSocket, message: dict[str, Any]) -> None:
@@ -176,11 +192,13 @@ async def _handle_load_file(websocket: WebSocket, message: dict[str, Any]) -> No
         await _send_error(websocket, f"Failed to read file: {exc}")
         return
 
-    await websocket.send_json({
-        "type": "file_loaded",
-        "yaml": content,
-        "path": str(path),
-    })
+    await websocket.send_json(
+        {
+            "type": "file_loaded",
+            "yaml": content,
+            "path": str(path),
+        }
+    )
 
 
 async def _handle_save_file(websocket: WebSocket, message: dict[str, Any]) -> None:
@@ -203,24 +221,30 @@ async def _handle_save_file(websocket: WebSocket, message: dict[str, Any]) -> No
         await _send_error(websocket, f"Failed to write file: {exc}")
         return
 
-    await websocket.send_json({
-        "type": "file_saved",
-        "path": str(path),
-    })
+    await websocket.send_json(
+        {
+            "type": "file_saved",
+            "path": str(path),
+        }
+    )
 
 
 async def _handle_get_schema(websocket: WebSocket) -> None:
     """Send the JSON Schema for the RSF DSL."""
     schema = websocket.app.state.json_schema
-    await websocket.send_json({
-        "type": "schema",
-        "json_schema": schema,
-    })
+    await websocket.send_json(
+        {
+            "type": "schema",
+            "json_schema": schema,
+        }
+    )
 
 
 async def _send_error(websocket: WebSocket, error_message: str) -> None:
     """Send an error response."""
-    await websocket.send_json({
-        "type": "error",
-        "message": error_message,
-    })
+    await websocket.send_json(
+        {
+            "type": "error",
+            "message": error_message,
+        }
+    )

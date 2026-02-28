@@ -131,13 +131,7 @@ class TestValidateSubcommand:
 
     def test_validate_invalid_semantic_fixture(self) -> None:
         """rsf validate reports errors for a semantic-invalid fixture."""
-        fixture = (
-            Path(__file__).parent.parent.parent
-            / "fixtures"
-            / "invalid"
-            / "semantic"
-            / "bad_reference.yaml"
-        )
+        fixture = Path(__file__).parent.parent.parent / "fixtures" / "invalid" / "semantic" / "bad_reference.yaml"
         if not fixture.exists():
             pytest.skip("Fixture file not found")
 

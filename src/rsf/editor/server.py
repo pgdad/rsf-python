@@ -81,6 +81,7 @@ def launch(
 
         def _open():
             import time
+
             time.sleep(0.5)
             webbrowser.open(f"http://127.0.0.1:{port}")
 

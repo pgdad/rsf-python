@@ -97,8 +97,7 @@ class TestGenerateSubcommand:
         assert "Skipped" in result2.output or "skipped" in result2.output.lower()
 
         # Handler content must not be overwritten
-        assert handler.stat().st_mtime == mtime_after_edit or \
-               "user-modified" in handler.read_text(encoding="utf-8")
+        assert handler.stat().st_mtime == mtime_after_edit or "user-modified" in handler.read_text(encoding="utf-8")
 
     def test_generate_invalid_workflow_exits_1_no_files(self, tmp_path: Path) -> None:
         """rsf generate with an invalid workflow exits 1 and creates no files."""
@@ -142,8 +141,11 @@ class TestGenerateSubcommand:
 
         # If cwd has workflow.yaml, it should succeed
         assert result.exit_code == 0, f"Expected exit 0, got {result.exit_code}: {result.output}"
-        assert (tmp_path / "orchestrator.py").exists() or (tmp_path / "out" / "orchestrator.py").exists() or \
-               any(p.name == "orchestrator.py" for p in tmp_path.rglob("orchestrator.py"))
+        assert (
+            (tmp_path / "orchestrator.py").exists()
+            or (tmp_path / "out" / "orchestrator.py").exists()
+            or any(p.name == "orchestrator.py" for p in tmp_path.rglob("orchestrator.py"))
+        )
 
     def test_generate_multi_task_creates_multiple_handlers(self, tmp_path: Path) -> None:
         """rsf generate creates one handler stub per Task state."""

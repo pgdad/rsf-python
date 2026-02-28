@@ -123,9 +123,7 @@ def _validate_references(
                     )
                 )
             for i, rule in enumerate(state.choices):
-                _validate_choice_rule_references(
-                    rule, state_names, f"{state_path}.Choices[{i}]", errors
-                )
+                _validate_choice_rule_references(rule, state_names, f"{state_path}.Choices[{i}]", errors)
 
         # Catch handlers
         if hasattr(state, "catch") and state.catch:
@@ -157,18 +155,12 @@ def _validate_choice_rule_references(
     # Recurse into boolean combinators
     if isinstance(rule, BooleanAndRule):
         for i, child in enumerate(rule.and_):
-            _validate_choice_rule_references(
-                child, state_names, f"{path}.And[{i}]", errors
-            )
+            _validate_choice_rule_references(child, state_names, f"{path}.And[{i}]", errors)
     elif isinstance(rule, BooleanOrRule):
         for i, child in enumerate(rule.or_):
-            _validate_choice_rule_references(
-                child, state_names, f"{path}.Or[{i}]", errors
-            )
+            _validate_choice_rule_references(child, state_names, f"{path}.Or[{i}]", errors)
     elif isinstance(rule, BooleanNotRule):
-        _validate_choice_rule_references(
-            rule.not_, state_names, f"{path}.Not", errors
-        )
+        _validate_choice_rule_references(rule.not_, state_names, f"{path}.Not", errors)
 
 
 def _validate_reachability(

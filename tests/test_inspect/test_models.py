@@ -205,11 +205,7 @@ class TestExecutionDetail:
             status=ExecutionStatus.RUNNING,
             function_name="fn",
             start_time=1700000000,
-            history=[
-                HistoryEvent(
-                    event_id=1, timestamp=1700000001, event_type="StepStarted"
-                )
-            ],
+            history=[HistoryEvent(event_id=1, timestamp=1700000001, event_type="StepStarted")],
         )
         data = detail.model_dump(mode="json")
         assert len(data["history"]) == 1
@@ -224,9 +220,7 @@ class TestExecutionDetail:
 
 class TestHistoryEvent:
     def test_basic_construction(self):
-        evt = HistoryEvent(
-            event_id=1, timestamp=1700000000, event_type="StepStarted"
-        )
+        evt = HistoryEvent(event_id=1, timestamp=1700000000, event_type="StepStarted")
         assert evt.event_id == 1
         assert evt.event_type == "StepStarted"
         assert evt.sub_type is None
@@ -244,9 +238,7 @@ class TestHistoryEvent:
         assert evt.details["error"] == "timeout"
 
     def test_timestamp_normalized(self):
-        evt = HistoryEvent(
-            event_id=1, timestamp=1700000000, event_type="StepStarted"
-        )
+        evt = HistoryEvent(event_id=1, timestamp=1700000000, event_type="StepStarted")
         assert evt.timestamp.tzinfo == timezone.utc
 
 

@@ -124,9 +124,7 @@ class TestLambdaInspectClient:
             "NextToken": None,
         }
 
-        client = LambdaInspectClient(
-            "my-func", rate_limiter=no_wait_limiter
-        )
+        client = LambdaInspectClient("my-func", rate_limiter=no_wait_limiter)
         client._client = mock_boto3_client
 
         result = await client.list_executions()
@@ -138,46 +136,34 @@ class TestLambdaInspectClient:
         assert result.executions[1].end_time is not None
 
     @pytest.mark.asyncio
-    async def test_list_executions_with_status_filter(
-        self, mock_boto3_client, no_wait_limiter
-    ):
+    async def test_list_executions_with_status_filter(self, mock_boto3_client, no_wait_limiter):
         """list_executions passes status filter to API."""
         mock_boto3_client.list_durable_executions_by_function.return_value = {
             "DurableExecutions": [],
         }
 
-        client = LambdaInspectClient(
-            "my-func", rate_limiter=no_wait_limiter
-        )
+        client = LambdaInspectClient("my-func", rate_limiter=no_wait_limiter)
         client._client = mock_boto3_client
 
         await client.list_executions(status=ExecutionStatus.FAILED)
 
-        call_kwargs = (
-            mock_boto3_client.list_durable_executions_by_function.call_args[1]
-        )
+        call_kwargs = mock_boto3_client.list_durable_executions_by_function.call_args[1]
         assert call_kwargs["StatusFilter"] == "FAILED"
 
     @pytest.mark.asyncio
-    async def test_list_executions_pagination(
-        self, mock_boto3_client, no_wait_limiter
-    ):
+    async def test_list_executions_pagination(self, mock_boto3_client, no_wait_limiter):
         """list_executions passes pagination tokens."""
         mock_boto3_client.list_durable_executions_by_function.return_value = {
             "DurableExecutions": [],
             "NextToken": "page2",
         }
 
-        client = LambdaInspectClient(
-            "my-func", rate_limiter=no_wait_limiter
-        )
+        client = LambdaInspectClient("my-func", rate_limiter=no_wait_limiter)
         client._client = mock_boto3_client
 
         result = await client.list_executions(next_token="page1", max_items=10)
 
-        call_kwargs = (
-            mock_boto3_client.list_durable_executions_by_function.call_args[1]
-        )
+        call_kwargs = mock_boto3_client.list_durable_executions_by_function.call_args[1]
         assert call_kwargs["NextToken"] == "page1"
         assert call_kwargs["MaxItems"] == 10
         assert result.next_token == "page2"
@@ -212,9 +198,7 @@ class TestLambdaInspectClient:
             }
         }
 
-        client = LambdaInspectClient(
-            "my-func", rate_limiter=no_wait_limiter
-        )
+        client = LambdaInspectClient("my-func", rate_limiter=no_wait_limiter)
         client._client = mock_boto3_client
 
         detail = await client.get_execution("exec-001")
@@ -228,9 +212,7 @@ class TestLambdaInspectClient:
         assert detail.history[1].event_type == "StepSucceeded"
 
     @pytest.mark.asyncio
-    async def test_get_execution_with_error(
-        self, mock_boto3_client, no_wait_limiter
-    ):
+    async def test_get_execution_with_error(self, mock_boto3_client, no_wait_limiter):
         """get_execution parses error fields."""
         mock_boto3_client.get_durable_execution.return_value = {
             "DurableExecution": {
@@ -244,9 +226,7 @@ class TestLambdaInspectClient:
             }
         }
 
-        client = LambdaInspectClient(
-            "my-func", rate_limiter=no_wait_limiter
-        )
+        client = LambdaInspectClient("my-func", rate_limiter=no_wait_limiter)
         client._client = mock_boto3_client
 
         detail = await client.get_execution("exec-fail")
@@ -256,9 +236,7 @@ class TestLambdaInspectClient:
         assert detail.error.cause == "Lambda function timed out"
 
     @pytest.mark.asyncio
-    async def test_get_execution_no_events(
-        self, mock_boto3_client, no_wait_limiter
-    ):
+    async def test_get_execution_no_events(self, mock_boto3_client, no_wait_limiter):
         """get_execution works with empty events list."""
         mock_boto3_client.get_durable_execution.return_value = {
             "DurableExecution": {
@@ -270,9 +248,7 @@ class TestLambdaInspectClient:
             }
         }
 
-        client = LambdaInspectClient(
-            "my-func", rate_limiter=no_wait_limiter
-        )
+        client = LambdaInspectClient("my-func", rate_limiter=no_wait_limiter)
         client._client = mock_boto3_client
 
         detail = await client.get_execution("exec-new")
@@ -306,9 +282,7 @@ class TestLambdaInspectClient:
     @pytest.mark.asyncio
     async def test_close(self, mock_boto3_client, no_wait_limiter):
         """close() calls underlying client close."""
-        client = LambdaInspectClient(
-            "my-func", rate_limiter=no_wait_limiter
-        )
+        client = LambdaInspectClient("my-func", rate_limiter=no_wait_limiter)
         client._client = mock_boto3_client
 
         await client.close()

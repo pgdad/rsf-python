@@ -19,9 +19,7 @@ class RetryPolicy(BaseModel):
     max_attempts: int = Field(default=3, alias="MaxAttempts", ge=0)
     backoff_rate: float = Field(default=2.0, alias="BackoffRate", ge=1.0)
     max_delay_seconds: int | None = Field(default=None, alias="MaxDelaySeconds", ge=0)
-    jitter_strategy: JitterStrategy | None = Field(
-        default=None, alias="JitterStrategy"
-    )
+    jitter_strategy: JitterStrategy | None = Field(default=None, alias="JitterStrategy")
 
 
 class Catcher(BaseModel):

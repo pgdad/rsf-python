@@ -58,9 +58,7 @@ def create_app(
     if _STATIC_DIR.is_dir():
         from fastapi.staticfiles import StaticFiles
 
-        app.mount(
-            "/", StaticFiles(directory=str(_STATIC_DIR), html=True), name="static"
-        )
+        app.mount("/", StaticFiles(directory=str(_STATIC_DIR), html=True), name="static")
 
     return app
 

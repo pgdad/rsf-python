@@ -16,21 +16,20 @@ def intrinsic(name: str) -> Callable:
         def states_format(template: str, *args: Any) -> str:
             ...
     """
+
     def decorator(func: Callable) -> Callable:
         if name in _REGISTRY:
             raise ValueError(f"Intrinsic function '{name}' already registered")
         _REGISTRY[name] = func
         return func
+
     return decorator
 
 
 def get_intrinsic(name: str) -> Callable[..., Any]:
     """Get a registered intrinsic function by name."""
     if name not in _REGISTRY:
-        raise KeyError(
-            f"Unknown intrinsic function '{name}'. "
-            f"Registered: {', '.join(sorted(_REGISTRY.keys()))}"
-        )
+        raise KeyError(f"Unknown intrinsic function '{name}'. Registered: {', '.join(sorted(_REGISTRY.keys()))}")
     return _REGISTRY[name]
 
 

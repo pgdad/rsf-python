@@ -61,6 +61,7 @@ def _build_and_exec(sm, dsl_path, ctx, event, handlers=None):
     try:
         # Strip handler import lines (they reference files that don't exist in tests)
         import re
+
         code = re.sub(r"^import handlers\.\w+\n", "", code, flags=re.MULTILINE)
 
         # Execute the generated code in a namespace
@@ -101,7 +102,10 @@ class TestSimpleTaskWorkflow:
         ctx.override_step("DoWork", {"processed": True})
 
         result = _build_and_exec(
-            sm, workflow, ctx, {"input": "data"},
+            sm,
+            workflow,
+            ctx,
+            {"input": "data"},
             handlers={"DoWork": lambda x: {"processed": True}},
         )
 
@@ -120,7 +124,10 @@ class TestSimpleTaskWorkflow:
             return {"done": True}
 
         result = _build_and_exec(
-            sm, workflow, ctx, {"key": "value"},
+            sm,
+            workflow,
+            ctx,
+            {"key": "value"},
             handlers={"DoWork": handler},
         )
 
@@ -154,7 +161,10 @@ class TestTaskChainWorkflow:
         ctx = MockDurableContext()
 
         result = _build_and_exec(
-            sm, workflow, ctx, {"n": 0},
+            sm,
+            workflow,
+            ctx,
+            {"n": 0},
             handlers={
                 "Step1": lambda x: {"n": x["n"] + 1},
                 "Step2": lambda x: {"n": x["n"] + 10},
@@ -359,6 +369,7 @@ class TestFixtureConformance:
     def test_invalid_pydantic_fixtures_rejected(self, fixture):
         """Pydantic-invalid fixtures should raise ValidationError."""
         from pydantic import ValidationError
+
         with pytest.raises(ValidationError):
             load_definition(fixture)
 
@@ -370,6 +381,7 @@ class TestFixtureConformance:
     def test_invalid_semantic_fixtures_have_errors(self, fixture):
         """Semantic-invalid fixtures should produce validation errors."""
         from rsf.dsl.validator import validate_definition
+
         sm = load_definition(fixture)
         errors = validate_definition(sm)
         assert len(errors) > 0

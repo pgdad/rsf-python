@@ -33,9 +33,7 @@ def workflow_dir(tmp_path: Path) -> Path:
     return tmp_path
 
 
-def test_deploy_full_happy_path(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_full_happy_path(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf deploy with valid workflow and mocked terraform exits 0, calls init then apply."""
     monkeypatch.chdir(workflow_dir)
 
@@ -68,9 +66,7 @@ def test_deploy_full_happy_path(
     assert apply_call[0][0] == ["terraform", "apply"]
 
 
-def test_deploy_auto_approve(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_auto_approve(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf deploy --auto-approve passes -auto-approve flag to terraform apply."""
     monkeypatch.chdir(workflow_dir)
 
@@ -98,9 +94,7 @@ def test_deploy_auto_approve(
     assert apply_call[0][0] == ["terraform", "apply", "-auto-approve"]
 
 
-def test_deploy_auto_approve_short_flag(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_auto_approve_short_flag(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf deploy -y is an alias for --auto-approve."""
     monkeypatch.chdir(workflow_dir)
 
@@ -127,9 +121,7 @@ def test_deploy_auto_approve_short_flag(
     assert "-auto-approve" in apply_call[0][0]
 
 
-def test_deploy_code_only(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_code_only(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf deploy --code-only uses -target flag and skips full Terraform apply."""
     monkeypatch.chdir(workflow_dir)
     # Create tf_dir so it exists
@@ -175,9 +167,7 @@ def test_deploy_no_workflow_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     assert "workflow.yaml" in result.output
 
 
-def test_deploy_terraform_not_in_path(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_terraform_not_in_path(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf deploy exits 1 and mentions terraform when terraform binary not found."""
     monkeypatch.chdir(workflow_dir)
 
@@ -199,9 +189,7 @@ def test_deploy_terraform_not_in_path(
     assert "terraform" in result.output.lower()
 
 
-def test_deploy_subprocess_error(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_subprocess_error(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf deploy exits 1 when terraform subprocess fails with CalledProcessError."""
     monkeypatch.chdir(workflow_dir)
 
@@ -225,9 +213,7 @@ def test_deploy_subprocess_error(
     assert "Error" in result.output
 
 
-def test_deploy_code_only_no_terraform_dir(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_code_only_no_terraform_dir(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf deploy --code-only exits 1 when tf_dir doesn't exist."""
     monkeypatch.chdir(workflow_dir)
     # Note: do NOT create tf_dir

@@ -18,8 +18,7 @@ def states_format(template: str, *args: Any) -> str:
     parts = template.split("{}")
     if len(parts) - 1 != len(args):
         raise ValueError(
-            f"States.Format: template has {len(parts) - 1} placeholders "
-            f"but {len(args)} arguments were provided"
+            f"States.Format: template has {len(parts) - 1} placeholders but {len(args)} arguments were provided"
         )
     result: list[str] = [parts[0]]
     for i, arg in enumerate(args):

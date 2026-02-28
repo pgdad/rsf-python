@@ -39,6 +39,7 @@ EXAMPLES_ROOT = PROJECT_ROOT / "examples"
 # Pytest marker registration
 # ---------------------------------------------------------------------------
 
+
 def pytest_configure(config):
     config.addinivalue_line(
         "markers",
@@ -49,6 +50,7 @@ def pytest_configure(config):
 # ---------------------------------------------------------------------------
 # UUID execution ID generator (HARN-06)
 # ---------------------------------------------------------------------------
+
 
 def make_execution_id(name: str) -> str:
     """Generate a unique execution ID for integration tests.
@@ -71,6 +73,7 @@ def make_execution_id(name: str) -> str:
 # ---------------------------------------------------------------------------
 # Polling helper (HARN-01)
 # ---------------------------------------------------------------------------
+
 
 def poll_execution(
     lambda_client: Any,
@@ -114,9 +117,7 @@ def poll_execution(
             if executions:
                 execution = executions[0]
                 status = execution.get("Status", "")
-                logger.info(
-                    "poll_execution: %s status=%s", execution_name, status
-                )
+                logger.info("poll_execution: %s status=%s", execution_name, status)
                 if status in TERMINAL_STATUSES:
                     return execution
 
@@ -126,9 +127,7 @@ def poll_execution(
         except ClientError as e:
             error_code = e.response["Error"]["Code"]
             if error_code in ("TooManyRequestsException", "ThrottlingException"):
-                logger.warning(
-                    "poll_execution: throttled, backing off %.1fs", backoff
-                )
+                logger.warning("poll_execution: throttled, backing off %.1fs", backoff)
                 backoff = min(backoff * 2, 30.0)
             else:
                 raise
@@ -139,15 +138,13 @@ def poll_execution(
             break
         time.sleep(sleep_time)
 
-    raise TimeoutError(
-        f"Execution {execution_name!r} did not reach terminal state "
-        f"within {timeout}s"
-    )
+    raise TimeoutError(f"Execution {execution_name!r} did not reach terminal state within {timeout}s")
 
 
 # ---------------------------------------------------------------------------
 # CloudWatch Logs query helper (HARN-02)
 # ---------------------------------------------------------------------------
+
 
 def query_logs(
     logs_client: Any,
@@ -183,9 +180,7 @@ def query_logs(
         end_time = datetime.now(timezone.utc)
 
     # Propagation buffer (HARN-07 overlap)
-    logger.info(
-        "query_logs: waiting %.0fs for log propagation", propagation_wait
-    )
+    logger.info("query_logs: waiting %.0fs for log propagation", propagation_wait)
     time.sleep(propagation_wait)
 
     for attempt in range(1, max_retries + 1):
@@ -231,6 +226,7 @@ def query_logs(
 # ---------------------------------------------------------------------------
 # Terraform helpers
 # ---------------------------------------------------------------------------
+
 
 def terraform_deploy(example_dir: Path) -> dict[str, str]:
     """Deploy an example's Terraform infrastructure.
@@ -308,9 +304,7 @@ def terraform_teardown(
 
     # Explicitly delete orphaned log groups (HARN-03)
     if logs_client and log_group_name:
-        logger.info(
-            "terraform_teardown: deleting log group %s", log_group_name
-        )
+        logger.info("terraform_teardown: deleting log group %s", log_group_name)
         try:
             logs_client.delete_log_group(logGroupName=log_group_name)
         except ClientError as e:
@@ -326,6 +320,7 @@ def terraform_teardown(
 # ---------------------------------------------------------------------------
 # IAM propagation buffer (HARN-07)
 # ---------------------------------------------------------------------------
+
 
 def iam_propagation_wait(seconds: float = 15.0) -> None:
     """Wait for IAM role/policy propagation after terraform apply.
@@ -343,6 +338,7 @@ def iam_propagation_wait(seconds: float = 15.0) -> None:
 # ---------------------------------------------------------------------------
 # Shared fixtures
 # ---------------------------------------------------------------------------
+
 
 @pytest.fixture(scope="session")
 def aws_region():

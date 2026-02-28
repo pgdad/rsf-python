@@ -285,10 +285,9 @@ class TestRecursiveConversion:
             },
         }
         result = convert_asl_to_rsf(asl)
-        deep = (
-            result.rsf_dict["States"]["MapIt"]["ItemProcessor"]
-            ["States"]["InnerParallel"]["Branches"][0]["States"]["Deep"]
-        )
+        deep = result.rsf_dict["States"]["MapIt"]["ItemProcessor"]["States"]["InnerParallel"]["Branches"][0]["States"][
+            "Deep"
+        ]
         assert "Resource" not in deep
         assert "Deep" in result.task_state_names
 

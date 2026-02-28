@@ -173,9 +173,7 @@ class TestParser:
         assert result == "aGVsbG8="
 
     def test_path_reference(self):
-        result = evaluate_intrinsic(
-            "States.Format('Hello {}', $.name)", data={"name": "Bob"}
-        )
+        result = evaluate_intrinsic("States.Format('Hello {}', $.name)", data={"name": "Bob"})
         assert result == "Hello Bob"
 
     def test_boolean_argument(self):

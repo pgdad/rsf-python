@@ -17,9 +17,7 @@ class _IOFields(BaseModel):
     input_path: str | None = Field(default=None, alias="InputPath")
     output_path: str | None = Field(default=None, alias="OutputPath")
     parameters: dict[str, Any] | None = Field(default=None, alias="Parameters")
-    result_selector: dict[str, Any] | None = Field(
-        default=None, alias="ResultSelector"
-    )
+    result_selector: dict[str, Any] | None = Field(default=None, alias="ResultSelector")
     result_path: str | None = Field(default=None, alias="ResultPath")
 
 
@@ -56,15 +54,9 @@ class TaskState(_IOFields, _TransitionFields, _AssignOutput):
     comment: str | None = Field(default=None, alias="Comment")
 
     timeout_seconds: int | None = Field(default=None, alias="TimeoutSeconds", ge=0)
-    timeout_seconds_path: str | None = Field(
-        default=None, alias="TimeoutSecondsPath"
-    )
-    heartbeat_seconds: int | None = Field(
-        default=None, alias="HeartbeatSeconds", ge=0
-    )
-    heartbeat_seconds_path: str | None = Field(
-        default=None, alias="HeartbeatSecondsPath"
-    )
+    timeout_seconds_path: str | None = Field(default=None, alias="TimeoutSecondsPath")
+    heartbeat_seconds: int | None = Field(default=None, alias="HeartbeatSeconds", ge=0)
+    heartbeat_seconds_path: str | None = Field(default=None, alias="HeartbeatSecondsPath")
 
     retry: list[RetryPolicy] | None = Field(default=None, alias="Retry")
     catch: list[Catcher] | None = Field(default=None, alias="Catch")
@@ -74,16 +66,9 @@ class TaskState(_IOFields, _TransitionFields, _AssignOutput):
     @model_validator(mode="after")
     def timeout_mutual_exclusion(self) -> "TaskState":
         if self.timeout_seconds is not None and self.timeout_seconds_path is not None:
-            raise ValueError(
-                "Cannot specify both TimeoutSeconds and TimeoutSecondsPath"
-            )
-        if (
-            self.heartbeat_seconds is not None
-            and self.heartbeat_seconds_path is not None
-        ):
-            raise ValueError(
-                "Cannot specify both HeartbeatSeconds and HeartbeatSecondsPath"
-            )
+            raise ValueError("Cannot specify both TimeoutSeconds and TimeoutSecondsPath")
+        if self.heartbeat_seconds is not None and self.heartbeat_seconds_path is not None:
+            raise ValueError("Cannot specify both HeartbeatSeconds and HeartbeatSecondsPath")
         # Heartbeat must be less than timeout (when both are static values)
         if (
             self.heartbeat_seconds is not None
@@ -143,10 +128,7 @@ class WaitState(_IOFields, _TransitionFields, _AssignOutput):
         ]
         count = sum(specs)
         if count != 1:
-            raise ValueError(
-                "Wait state must specify exactly one of: "
-                "Seconds, Timestamp, SecondsPath, TimestampPath"
-            )
+            raise ValueError("Wait state must specify exactly one of: Seconds, Timestamp, SecondsPath, TimestampPath")
         return self
 
 
@@ -213,9 +195,7 @@ class BranchDefinition(BaseModel):
     start_at: str = Field(alias="StartAt")
     states: dict[str, Any] = Field(alias="States")
     comment: str | None = Field(default=None, alias="Comment")
-    processor_config: ProcessorConfig | None = Field(
-        default=None, alias="ProcessorConfig"
-    )
+    processor_config: ProcessorConfig | None = Field(default=None, alias="ProcessorConfig")
     query_language: QueryLanguage | None = Field(default=None, alias="QueryLanguage")
 
     @model_validator(mode="after")
@@ -244,13 +224,9 @@ class MapState(_IOFields, _TransitionFields, _AssignOutput):
     type: Literal["Map"] = Field(alias="Type")
     comment: str | None = Field(default=None, alias="Comment")
 
-    item_processor: BranchDefinition | None = Field(
-        default=None, alias="ItemProcessor"
-    )
+    item_processor: BranchDefinition | None = Field(default=None, alias="ItemProcessor")
     items_path: str | None = Field(default=None, alias="ItemsPath")
-    max_concurrency: int | None = Field(
-        default=None, alias="MaxConcurrency", ge=0
-    )
+    max_concurrency: int | None = Field(default=None, alias="MaxConcurrency", ge=0)
     item_selector: dict[str, Any] | None = Field(default=None, alias="ItemSelector")
 
     retry: list[RetryPolicy] | None = Field(default=None, alias="Retry")

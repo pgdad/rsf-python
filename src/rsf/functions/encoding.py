@@ -44,8 +44,7 @@ def states_hash(data: str, algorithm: str) -> str:
         raise TypeError("States.Hash: first argument must be a string")
     if algorithm not in _SUPPORTED_ALGORITHMS:
         raise ValueError(
-            f"States.Hash: unsupported algorithm '{algorithm}'. "
-            f"Supported: {', '.join(sorted(_SUPPORTED_ALGORITHMS))}"
+            f"States.Hash: unsupported algorithm '{algorithm}'. Supported: {', '.join(sorted(_SUPPORTED_ALGORITHMS))}"
         )
     h = hashlib.new(_ALGORITHM_MAP[algorithm])
     h.update(data.encode("utf-8"))

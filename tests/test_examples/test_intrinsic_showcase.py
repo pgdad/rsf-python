@@ -67,9 +67,7 @@ class TestIntrinsicShowcaseIntegration:
             "function_name": fn,
         }
 
-        terraform_teardown(
-            self.EXAMPLE_DIR, logs_client, outputs["log_group_name"]
-        )
+        terraform_teardown(self.EXAMPLE_DIR, logs_client, outputs["log_group_name"])
 
     def test_execution_succeeds(self, deployment):
         """Intrinsic showcase reaches SUCCEEDED terminal state (VERF-01)."""
@@ -85,19 +83,10 @@ class TestIntrinsicShowcaseIntegration:
         log_group = deployment["outputs"]["log_group_name"]
         start_time = deployment["start_time"]
 
-        query = (
-            "fields @message"
-            " | filter @message like /step_name/"
-            " | sort @timestamp asc"
-        )
+        query = "fields @message | filter @message like /step_name/ | sort @timestamp asc"
         results = query_logs(logs_client, log_group, query, start_time)
 
-        messages = " ".join(
-            next((f["value"] for f in row if f["field"] == "@message"), "")
-            for row in results
-        )
+        messages = " ".join(next((f["value"] for f in row if f["field"] == "@message"), "") for row in results)
 
         for step in ("StringOperations", "ArrayOperations", "MathAndJsonOps"):
-            assert step in messages, (
-                f"Handler '{step}' not found in CloudWatch logs"
-            )
+            assert step in messages, f"Handler '{step}' not found in CloudWatch logs"

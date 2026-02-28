@@ -26,23 +26,31 @@ States:
 
     def test_load_yaml_file(self, tmp_path):
         workflow = tmp_path / "workflow.yaml"
-        workflow.write_text(yaml.dump({
-            "StartAt": "DoWork",
-            "States": {
-                "DoWork": {"Type": "Task", "Next": "Done"},
-                "Done": {"Type": "Succeed"},
-            },
-        }))
+        workflow.write_text(
+            yaml.dump(
+                {
+                    "StartAt": "DoWork",
+                    "States": {
+                        "DoWork": {"Type": "Task", "Next": "Done"},
+                        "Done": {"Type": "Succeed"},
+                    },
+                }
+            )
+        )
         sm = load_definition(workflow)
         assert sm.start_at == "DoWork"
         assert len(sm.states) == 2
 
     def test_load_json_file(self, tmp_path):
         workflow = tmp_path / "workflow.json"
-        workflow.write_text(json.dumps({
-            "StartAt": "A",
-            "States": {"A": {"Type": "Succeed"}},
-        }))
+        workflow.write_text(
+            json.dumps(
+                {
+                    "StartAt": "A",
+                    "States": {"A": {"Type": "Succeed"}},
+                }
+            )
+        )
         sm = load_definition(workflow)
         assert sm.start_at == "A"
 

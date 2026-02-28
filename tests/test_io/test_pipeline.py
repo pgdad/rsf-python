@@ -39,6 +39,7 @@ class TestJSONPath:
         class FakeCtx:
             class Execution:
                 Id = "exec-123"
+
         assert evaluate_jsonpath(None, "$$.Execution.Id", context=FakeCtx()) == "exec-123"
 
     def test_variable_reference(self):
@@ -78,9 +79,7 @@ class TestResultPath:
         assert apply_result_path({"old": 1}, {"new": 2}, "$") == {"new": 2}
 
     def test_merge_at_path(self):
-        result = apply_result_path(
-            {"x": 1, "y": 2}, {"done": True}, "$.taskResult"
-        )
+        result = apply_result_path({"x": 1, "y": 2}, {"done": True}, "$.taskResult")
         assert result == {"x": 1, "y": 2, "taskResult": {"done": True}}
 
     def test_discard_result(self):

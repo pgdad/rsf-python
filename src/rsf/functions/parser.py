@@ -45,9 +45,7 @@ def evaluate_intrinsic(
     result = parser.parse_expression(depth=0)
     parser.skip_whitespace()
     if parser.pos < len(parser.text):
-        raise IntrinsicParseError(
-            f"Unexpected characters after expression: '{parser.text[parser.pos:]}'"
-        )
+        raise IntrinsicParseError(f"Unexpected characters after expression: '{parser.text[parser.pos :]}'")
     return result
 
 
@@ -70,9 +68,7 @@ class _Parser:
     def parse_expression(self, depth: int) -> Any:
         """Parse a single expression (function call, literal, or path ref)."""
         if depth > MAX_NESTING_DEPTH:
-            raise IntrinsicParseError(
-                f"Maximum nesting depth ({MAX_NESTING_DEPTH}) exceeded"
-            )
+            raise IntrinsicParseError(f"Maximum nesting depth ({MAX_NESTING_DEPTH}) exceeded")
 
         self.skip_whitespace()
 
@@ -108,9 +104,7 @@ class _Parser:
         if self.peek() in "-0123456789":
             return self.parse_number()
 
-        raise IntrinsicParseError(
-            f"Unexpected character at position {self.pos}: '{self.peek()}'"
-        )
+        raise IntrinsicParseError(f"Unexpected character at position {self.pos}: '{self.peek()}'")
 
     def parse_function_call(self, depth: int) -> Any:
         """Parse States.FunctionName(arg1, arg2, ...)."""
@@ -181,9 +175,7 @@ class _Parser:
         while self.pos < len(self.text) and self.text[self.pos] not in ",) \t\n":
             self.pos += 1
         path = self.text[start : self.pos]
-        return evaluate_jsonpath(
-            self.data, path, variables=self.variables, context=self.context
-        )
+        return evaluate_jsonpath(self.data, path, variables=self.variables, context=self.context)
 
     def parse_number(self) -> int | float:
         """Parse a numeric literal."""

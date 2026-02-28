@@ -85,9 +85,7 @@ def test_import_malformed_json(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) 
     assert "ValueError" not in result.output
 
 
-def test_import_shows_warnings_for_resource_fields(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_import_shows_warnings_for_resource_fields(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf import shows warnings for Resource fields that were stripped."""
     monkeypatch.chdir(tmp_path)
     asl_file = tmp_path / "asl.json"

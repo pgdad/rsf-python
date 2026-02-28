@@ -65,9 +65,7 @@ class TestPollExecution:
     def _mock_client(self, responses):
         """Create a mock Lambda client that returns responses in order."""
         client = MagicMock()
-        client.list_durable_executions_by_function = MagicMock(
-            side_effect=responses
-        )
+        client.list_durable_executions_by_function = MagicMock(side_effect=responses)
         return client
 
     def test_returns_on_succeeded(self):
@@ -77,9 +75,7 @@ class TestPollExecution:
             "DurableExecutionName": "test-exec",
             "Status": "SUCCEEDED",
         }
-        client = self._mock_client(
-            [{"DurableExecutions": [execution]}]
-        )
+        client = self._mock_client([{"DurableExecutions": [execution]}])
 
         result = poll_execution(client, "fn", "test-exec", timeout=10)
         assert result["Status"] == "SUCCEEDED"
@@ -90,9 +86,7 @@ class TestPollExecution:
             "DurableExecutionName": "test-exec",
             "Status": "FAILED",
         }
-        client = self._mock_client(
-            [{"DurableExecutions": [execution]}]
-        )
+        client = self._mock_client([{"DurableExecutions": [execution]}])
 
         result = poll_execution(client, "fn", "test-exec", timeout=10)
         assert result["Status"] == "FAILED"
@@ -105,9 +99,7 @@ class TestPollExecution:
         client = self._mock_client([running, running, succeeded])
 
         with patch("tests.test_examples.conftest.time.sleep"):
-            result = poll_execution(
-                client, "fn", "x", timeout=60, poll_interval=0.01
-            )
+            result = poll_execution(client, "fn", "x", timeout=60, poll_interval=0.01)
         assert result["Status"] == "SUCCEEDED"
         assert client.list_durable_executions_by_function.call_count == 3
 
@@ -136,9 +128,7 @@ class TestPollExecution:
         client = self._mock_client([throttle_error, succeeded])
 
         with patch("tests.test_examples.conftest.time.sleep"):
-            result = poll_execution(
-                client, "fn", "x", timeout=60, poll_interval=0.01
-            )
+            result = poll_execution(client, "fn", "x", timeout=60, poll_interval=0.01)
         assert result["Status"] == "SUCCEEDED"
 
     def test_non_throttle_error_raises(self):
@@ -162,9 +152,7 @@ class TestPollExecution:
         client = self._mock_client([empty, empty, succeeded])
 
         with patch("tests.test_examples.conftest.time.sleep"):
-            result = poll_execution(
-                client, "fn", "x", timeout=60, poll_interval=0.01
-            )
+            result = poll_execution(client, "fn", "x", timeout=60, poll_interval=0.01)
         assert result["Status"] == "SUCCEEDED"
 
     def test_all_terminal_statuses(self):
@@ -194,10 +182,7 @@ class TestQueryLogs:
         client = MagicMock()
         client.start_query = MagicMock(return_value={"queryId": "qid-1"})
         client.get_query_results = MagicMock(
-            side_effect=[
-                {"status": "Complete", "results": r}
-                for r in query_results_sequence
-            ]
+            side_effect=[{"status": "Complete", "results": r} for r in query_results_sequence]
         )
         return client
 
@@ -287,9 +272,7 @@ class TestTerraformTeardown:
                 log_group_name="/aws/lambda/test-fn",
             )
 
-        logs_client.delete_log_group.assert_called_once_with(
-            logGroupName="/aws/lambda/test-fn"
-        )
+        logs_client.delete_log_group.assert_called_once_with(logGroupName="/aws/lambda/test-fn")
 
     def test_swallows_resource_not_found(self, tmp_path):
         """Swallows ResourceNotFoundException when log group already deleted."""

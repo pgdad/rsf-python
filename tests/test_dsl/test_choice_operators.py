@@ -42,10 +42,12 @@ def _choice_sm(rules: list[dict], default: str = "Fallback") -> StateMachineDefi
     for t in targets:
         states[t] = {"Type": "Succeed"}
 
-    return StateMachineDefinition.model_validate({
-        "StartAt": "Route",
-        "States": states,
-    })
+    return StateMachineDefinition.model_validate(
+        {
+            "StartAt": "Route",
+            "States": states,
+        }
+    )
 
 
 # -----------------------------------------------------------------------
@@ -314,83 +316,113 @@ class TestTypeCheckOperators:
 
 class TestBooleanCombinators:
     def test_and_with_two_rules(self):
-        sm = _choice_sm([{
-            "And": [
-                {"Variable": "$.x", "NumericGreaterThan": 0},
-                {"Variable": "$.y", "StringEquals": "yes"},
-            ],
-            "Next": "Match",
-        }])
+        sm = _choice_sm(
+            [
+                {
+                    "And": [
+                        {"Variable": "$.x", "NumericGreaterThan": 0},
+                        {"Variable": "$.y", "StringEquals": "yes"},
+                    ],
+                    "Next": "Match",
+                }
+            ]
+        )
         rule = sm.states["Route"].choices[0]
         assert isinstance(rule, BooleanAndRule)
         assert len(rule.and_) == 2
 
     def test_and_with_three_rules(self):
-        sm = _choice_sm([{
-            "And": [
-                {"Variable": "$.a", "BooleanEquals": True},
-                {"Variable": "$.b", "NumericEquals": 1},
-                {"Variable": "$.c", "StringEquals": "ok"},
-            ],
-            "Next": "Match",
-        }])
+        sm = _choice_sm(
+            [
+                {
+                    "And": [
+                        {"Variable": "$.a", "BooleanEquals": True},
+                        {"Variable": "$.b", "NumericEquals": 1},
+                        {"Variable": "$.c", "StringEquals": "ok"},
+                    ],
+                    "Next": "Match",
+                }
+            ]
+        )
         assert len(sm.states["Route"].choices[0].and_) == 3
 
     def test_or_combinator(self):
-        sm = _choice_sm([{
-            "Or": [
-                {"Variable": "$.x", "NumericEquals": 0},
-                {"Variable": "$.x", "NumericEquals": 1},
-            ],
-            "Next": "Match",
-        }])
+        sm = _choice_sm(
+            [
+                {
+                    "Or": [
+                        {"Variable": "$.x", "NumericEquals": 0},
+                        {"Variable": "$.x", "NumericEquals": 1},
+                    ],
+                    "Next": "Match",
+                }
+            ]
+        )
         rule = sm.states["Route"].choices[0]
         assert isinstance(rule, BooleanOrRule)
         assert len(rule.or_) == 2
 
     def test_not_combinator(self):
-        sm = _choice_sm([{
-            "Not": {"Variable": "$.flag", "BooleanEquals": False},
-            "Next": "Match",
-        }])
+        sm = _choice_sm(
+            [
+                {
+                    "Not": {"Variable": "$.flag", "BooleanEquals": False},
+                    "Next": "Match",
+                }
+            ]
+        )
         rule = sm.states["Route"].choices[0]
         assert isinstance(rule, BooleanNotRule)
         inner = rule.not_
         assert isinstance(inner, DataTestRule)
 
     def test_nested_and_or(self):
-        sm = _choice_sm([{
-            "And": [
-                {"Or": [
-                    {"Variable": "$.a", "NumericEquals": 1},
-                    {"Variable": "$.a", "NumericEquals": 2},
-                ]},
-                {"Variable": "$.b", "BooleanEquals": True},
-            ],
-            "Next": "Match",
-        }])
+        sm = _choice_sm(
+            [
+                {
+                    "And": [
+                        {
+                            "Or": [
+                                {"Variable": "$.a", "NumericEquals": 1},
+                                {"Variable": "$.a", "NumericEquals": 2},
+                            ]
+                        },
+                        {"Variable": "$.b", "BooleanEquals": True},
+                    ],
+                    "Next": "Match",
+                }
+            ]
+        )
         outer = sm.states["Route"].choices[0]
         assert isinstance(outer, BooleanAndRule)
         inner_or = outer.and_[0]
         assert isinstance(inner_or, BooleanOrRule)
 
     def test_nested_not_in_and(self):
-        sm = _choice_sm([{
-            "And": [
-                {"Not": {"Variable": "$.x", "IsNull": True}},
-                {"Variable": "$.y", "NumericGreaterThan": 0},
-            ],
-            "Next": "Match",
-        }])
+        sm = _choice_sm(
+            [
+                {
+                    "And": [
+                        {"Not": {"Variable": "$.x", "IsNull": True}},
+                        {"Variable": "$.y", "NumericGreaterThan": 0},
+                    ],
+                    "Next": "Match",
+                }
+            ]
+        )
         outer = sm.states["Route"].choices[0]
         assert isinstance(outer, BooleanAndRule)
         assert isinstance(outer.and_[0], BooleanNotRule)
 
     def test_condition_rule(self):
-        sm = _choice_sm([{
-            "Condition": "$$.input.value > 100",
-            "Next": "Match",
-        }])
+        sm = _choice_sm(
+            [
+                {
+                    "Condition": "$$.input.value > 100",
+                    "Next": "Match",
+                }
+            ]
+        )
         rule = sm.states["Route"].choices[0]
         assert isinstance(rule, ConditionRule)
         assert rule.condition == "$$.input.value > 100"
@@ -408,11 +440,13 @@ class TestChoiceValidation:
 
     def test_two_operators_rejected(self):
         with pytest.raises(ValidationError, match="exactly one"):
-            DataTestRule.model_validate({
-                "Variable": "$.x",
-                "StringEquals": "a",
-                "NumericEquals": 1,
-            })
+            DataTestRule.model_validate(
+                {
+                    "Variable": "$.x",
+                    "StringEquals": "a",
+                    "NumericEquals": 1,
+                }
+            )
 
     def test_no_operator_rejected(self):
         with pytest.raises(ValidationError, match="exactly one"):
@@ -420,22 +454,26 @@ class TestChoiceValidation:
 
     def test_three_operators_rejected(self):
         with pytest.raises(ValidationError, match="exactly one"):
-            DataTestRule.model_validate({
-                "Variable": "$.x",
-                "StringEquals": "a",
-                "NumericEquals": 1,
-                "BooleanEquals": True,
-            })
+            DataTestRule.model_validate(
+                {
+                    "Variable": "$.x",
+                    "StringEquals": "a",
+                    "NumericEquals": 1,
+                    "BooleanEquals": True,
+                }
+            )
 
     def test_choice_state_empty_choices_has_no_rules(self):
         """Empty choices list is structurally valid but produces no rules."""
-        sm = StateMachineDefinition.model_validate({
-            "StartAt": "C",
-            "States": {
-                "C": {"Type": "Choice", "Choices": [], "Default": "D"},
-                "D": {"Type": "Succeed"},
-            },
-        })
+        sm = StateMachineDefinition.model_validate(
+            {
+                "StartAt": "C",
+                "States": {
+                    "C": {"Type": "Choice", "Choices": [], "Default": "D"},
+                    "D": {"Type": "Succeed"},
+                },
+            }
+        )
         assert len(sm.states["C"].choices) == 0
 
     def test_all_39_operators_parseable(self):
@@ -490,10 +528,12 @@ class TestChoiceValidation:
         )
 
         for op_name, op_value in operator_values.items():
-            rule = DataTestRule.model_validate({
-                "Variable": "$.test",
-                op_name: op_value,
-            })
+            rule = DataTestRule.model_validate(
+                {
+                    "Variable": "$.test",
+                    op_name: op_value,
+                }
+            )
             parsed_op, parsed_val = rule.get_operator()
             assert parsed_op == op_name, f"Failed for operator {op_name}"
             assert parsed_val == op_value, f"Value mismatch for {op_name}"

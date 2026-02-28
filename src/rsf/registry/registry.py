@@ -31,10 +31,7 @@ def state(name: str) -> Callable:
 
     def decorator(func: Callable) -> Callable:
         if name in _handlers:
-            raise ValueError(
-                f"Duplicate handler for state '{name}': "
-                f"{_handlers[name].__name__} already registered"
-            )
+            raise ValueError(f"Duplicate handler for state '{name}': {_handlers[name].__name__} already registered")
         _handlers[name] = func
         return func
 
@@ -61,10 +58,7 @@ def get_handler(name: str) -> Callable:
     """
     if name not in _handlers:
         registered = sorted(_handlers.keys())
-        raise KeyError(
-            f"No handler registered for state '{name}'. "
-            f"Registered states: {registered}"
-        )
+        raise KeyError(f"No handler registered for state '{name}'. Registered states: {registered}")
     return _handlers[name]
 
 

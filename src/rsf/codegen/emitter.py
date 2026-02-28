@@ -64,9 +64,7 @@ def _emit_task(mapping: StateMapping) -> list[str]:
         for i, cp in enumerate(catch_policies):
             kw = "if" if i == 0 else "elif"
             error_list = topyrepr(cp["error_equals"])
-            lines.append(
-                f"    {kw} type(_err).__name__ in {error_list} or \"States.ALL\" in {error_list}:"
-            )
+            lines.append(f'    {kw} type(_err).__name__ in {error_list} or "States.ALL" in {error_list}:')
             if cp.get("result_path"):
                 lines.append(
                     f"        input_data = _apply_error_result(input_data, _err, {topyrepr(cp['result_path'])})"
@@ -90,9 +88,7 @@ def _emit_pass(mapping: StateMapping) -> list[str]:
     if "result" in p:
         result_repr = topyrepr(p["result"])
         if p.get("result_path"):
-            lines.append(
-                f"input_data = _apply_result_path(input_data, {result_repr}, {topyrepr(p['result_path'])})"
-            )
+            lines.append(f"input_data = _apply_result_path(input_data, {result_repr}, {topyrepr(p['result_path'])})")
         else:
             lines.append(f"input_data = {result_repr}")
     lines.append(_transition(p))
@@ -157,7 +153,9 @@ def _build_data_test_condition(rule: dict[str, Any]) -> str:
     elif op in ("string_greater_than_equals", "numeric_greater_than_equals", "timestamp_greater_than_equals"):
         return f"{accessor} >= {topyrepr(val)}"
     elif op in (
-        "string_greater_than_equals_path", "numeric_greater_than_equals_path", "timestamp_greater_than_equals_path"
+        "string_greater_than_equals_path",
+        "numeric_greater_than_equals_path",
+        "timestamp_greater_than_equals_path",
     ):
         return f"{accessor} >= _resolve_path(input_data, {topyrepr(val)})"
     elif op in ("string_less_than", "numeric_less_than", "timestamp_less_than"):
@@ -261,10 +259,7 @@ def _emit_parallel(mapping: StateMapping) -> list[str]:
     lines: list[str] = []
 
     # Build branch lambda list
-    branch_lambdas = ", ".join(
-        f"lambda _inp: _run_branch_{b['start_at'].lower()}(context, _inp)"
-        for b in branches
-    )
+    branch_lambdas = ", ".join(f"lambda _inp: _run_branch_{b['start_at'].lower()}(context, _inp)" for b in branches)
 
     if p.get("has_catch"):
         lines.append("try:")
@@ -276,9 +271,7 @@ def _emit_parallel(mapping: StateMapping) -> list[str]:
         for i, cp in enumerate(p.get("catch_policies", [])):
             kw = "if" if i == 0 else "elif"
             error_list = topyrepr(cp["error_equals"])
-            lines.append(
-                f"    {kw} type(_err).__name__ in {error_list} or \"States.ALL\" in {error_list}:"
-            )
+            lines.append(f'    {kw} type(_err).__name__ in {error_list} or "States.ALL" in {error_list}:')
             if cp.get("result_path"):
                 lines.append(
                     f"        input_data = _apply_error_result(input_data, _err, {topyrepr(cp['result_path'])})"
@@ -320,9 +313,7 @@ def _emit_map(mapping: StateMapping) -> list[str]:
         for i, cp in enumerate(p.get("catch_policies", [])):
             kw = "if" if i == 0 else "elif"
             error_list = topyrepr(cp["error_equals"])
-            lines.append(
-                f"    {kw} type(_err).__name__ in {error_list} or \"States.ALL\" in {error_list}:"
-            )
+            lines.append(f'    {kw} type(_err).__name__ in {error_list} or "States.ALL" in {error_list}:')
             if cp.get("result_path"):
                 lines.append(
                     f"        input_data = _apply_error_result(input_data, _err, {topyrepr(cp['result_path'])})"

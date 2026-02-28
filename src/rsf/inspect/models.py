@@ -25,12 +25,14 @@ class ExecutionStatus(str, Enum):
 
 
 # Statuses that indicate the execution has finished.
-TERMINAL_STATUSES = frozenset({
-    ExecutionStatus.SUCCEEDED,
-    ExecutionStatus.FAILED,
-    ExecutionStatus.TIMED_OUT,
-    ExecutionStatus.STOPPED,
-})
+TERMINAL_STATUSES = frozenset(
+    {
+        ExecutionStatus.SUCCEEDED,
+        ExecutionStatus.FAILED,
+        ExecutionStatus.TIMED_OUT,
+        ExecutionStatus.STOPPED,
+    }
+)
 
 
 def normalize_timestamp(value: Any) -> datetime:

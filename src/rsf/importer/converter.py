@@ -43,8 +43,13 @@ class ImportResult:
 
 # Fail state I/O fields that ASL allows but RSF rejects
 _FAIL_IO_FIELDS = {
-    "InputPath", "OutputPath", "Parameters", "ResultSelector",
-    "ResultPath", "Assign", "Output",
+    "InputPath",
+    "OutputPath",
+    "Parameters",
+    "ResultSelector",
+    "ResultPath",
+    "Assign",
+    "Output",
 }
 
 # Distributed Map fields that RSF does not support
@@ -214,16 +219,18 @@ def _convert_state(
 
     # Rule 2: Reject Resource field
     if "Resource" in state:
-        warnings.append(ImportWarning(
-            path=f"{path}.Resource",
-            field="Resource",
-            message=(
-                f"State '{name}' has a Resource field ('{state['Resource']}'). "
-                "RSF does not use Resource — use @state decorators to register handlers instead. "
-                "The Resource field has been removed."
-            ),
-            severity="warning",
-        ))
+        warnings.append(
+            ImportWarning(
+                path=f"{path}.Resource",
+                field="Resource",
+                message=(
+                    f"State '{name}' has a Resource field ('{state['Resource']}'). "
+                    "RSF does not use Resource — use @state decorators to register handlers instead. "
+                    "The Resource field has been removed."
+                ),
+                severity="warning",
+            )
+        )
         del state["Resource"]
 
     # Rule 3: Strip Fail state I/O fields
@@ -235,26 +242,30 @@ def _convert_state(
     # Rule 4: Rename legacy Iterator → ItemProcessor
     if state_type == "Map" and "Iterator" in state:
         state["ItemProcessor"] = state.pop("Iterator")
-        warnings.append(ImportWarning(
-            path=f"{path}.Iterator",
-            field="Iterator",
-            message=f"Renamed legacy 'Iterator' to 'ItemProcessor' in state '{name}'.",
-            severity="warning",
-        ))
+        warnings.append(
+            ImportWarning(
+                path=f"{path}.Iterator",
+                field="Iterator",
+                message=f"Renamed legacy 'Iterator' to 'ItemProcessor' in state '{name}'.",
+                severity="warning",
+            )
+        )
 
     # Rule 5: Warn on distributed Map fields
     if state_type == "Map":
         for dist_field in _DISTRIBUTED_MAP_FIELDS:
             if dist_field in state:
-                warnings.append(ImportWarning(
-                    path=f"{path}.{dist_field}",
-                    field=dist_field,
-                    message=(
-                        f"Distributed Map field '{dist_field}' in state '{name}' "
-                        "is not supported by RSF and has been removed."
-                    ),
-                    severity="warning",
-                ))
+                warnings.append(
+                    ImportWarning(
+                        path=f"{path}.{dist_field}",
+                        field=dist_field,
+                        message=(
+                            f"Distributed Map field '{dist_field}' in state '{name}' "
+                            "is not supported by RSF and has been removed."
+                        ),
+                        severity="warning",
+                    )
+                )
                 del state[dist_field]
 
     # Collect Task state names for handler stub generation
@@ -270,9 +281,7 @@ def _convert_state(
 
     # Rule 6: Recursive conversion for Map ItemProcessor
     if state_type == "Map" and "ItemProcessor" in state:
-        state["ItemProcessor"] = _convert_branch(
-            state["ItemProcessor"], f"{path}.ItemProcessor", warnings, task_names
-        )
+        state["ItemProcessor"] = _convert_branch(state["ItemProcessor"], f"{path}.ItemProcessor", warnings, task_names)
 
     return state
 

@@ -21,55 +21,27 @@ class DataTestRule(BaseModel):
     string_equals: str | None = Field(default=None, alias="StringEquals")
     string_equals_path: str | None = Field(default=None, alias="StringEqualsPath")
     string_greater_than: str | None = Field(default=None, alias="StringGreaterThan")
-    string_greater_than_path: str | None = Field(
-        default=None, alias="StringGreaterThanPath"
-    )
-    string_greater_than_equals: str | None = Field(
-        default=None, alias="StringGreaterThanEquals"
-    )
-    string_greater_than_equals_path: str | None = Field(
-        default=None, alias="StringGreaterThanEqualsPath"
-    )
+    string_greater_than_path: str | None = Field(default=None, alias="StringGreaterThanPath")
+    string_greater_than_equals: str | None = Field(default=None, alias="StringGreaterThanEquals")
+    string_greater_than_equals_path: str | None = Field(default=None, alias="StringGreaterThanEqualsPath")
     string_less_than: str | None = Field(default=None, alias="StringLessThan")
-    string_less_than_path: str | None = Field(
-        default=None, alias="StringLessThanPath"
-    )
-    string_less_than_equals: str | None = Field(
-        default=None, alias="StringLessThanEquals"
-    )
-    string_less_than_equals_path: str | None = Field(
-        default=None, alias="StringLessThanEqualsPath"
-    )
+    string_less_than_path: str | None = Field(default=None, alias="StringLessThanPath")
+    string_less_than_equals: str | None = Field(default=None, alias="StringLessThanEquals")
+    string_less_than_equals_path: str | None = Field(default=None, alias="StringLessThanEqualsPath")
     string_matches: str | None = Field(default=None, alias="StringMatches")
     string_matches_path: str | None = Field(default=None, alias="StringMatchesPath")
 
     # Numeric operators
     numeric_equals: int | float | None = Field(default=None, alias="NumericEquals")
     numeric_equals_path: str | None = Field(default=None, alias="NumericEqualsPath")
-    numeric_greater_than: int | float | None = Field(
-        default=None, alias="NumericGreaterThan"
-    )
-    numeric_greater_than_path: str | None = Field(
-        default=None, alias="NumericGreaterThanPath"
-    )
-    numeric_greater_than_equals: int | float | None = Field(
-        default=None, alias="NumericGreaterThanEquals"
-    )
-    numeric_greater_than_equals_path: str | None = Field(
-        default=None, alias="NumericGreaterThanEqualsPath"
-    )
-    numeric_less_than: int | float | None = Field(
-        default=None, alias="NumericLessThan"
-    )
-    numeric_less_than_path: str | None = Field(
-        default=None, alias="NumericLessThanPath"
-    )
-    numeric_less_than_equals: int | float | None = Field(
-        default=None, alias="NumericLessThanEquals"
-    )
-    numeric_less_than_equals_path: str | None = Field(
-        default=None, alias="NumericLessThanEqualsPath"
-    )
+    numeric_greater_than: int | float | None = Field(default=None, alias="NumericGreaterThan")
+    numeric_greater_than_path: str | None = Field(default=None, alias="NumericGreaterThanPath")
+    numeric_greater_than_equals: int | float | None = Field(default=None, alias="NumericGreaterThanEquals")
+    numeric_greater_than_equals_path: str | None = Field(default=None, alias="NumericGreaterThanEqualsPath")
+    numeric_less_than: int | float | None = Field(default=None, alias="NumericLessThan")
+    numeric_less_than_path: str | None = Field(default=None, alias="NumericLessThanPath")
+    numeric_less_than_equals: int | float | None = Field(default=None, alias="NumericLessThanEquals")
+    numeric_less_than_equals_path: str | None = Field(default=None, alias="NumericLessThanEqualsPath")
 
     # Boolean operator
     boolean_equals: bool | None = Field(default=None, alias="BooleanEquals")
@@ -77,31 +49,15 @@ class DataTestRule(BaseModel):
 
     # Timestamp operators
     timestamp_equals: str | None = Field(default=None, alias="TimestampEquals")
-    timestamp_equals_path: str | None = Field(
-        default=None, alias="TimestampEqualsPath"
-    )
-    timestamp_greater_than: str | None = Field(
-        default=None, alias="TimestampGreaterThan"
-    )
-    timestamp_greater_than_path: str | None = Field(
-        default=None, alias="TimestampGreaterThanPath"
-    )
-    timestamp_greater_than_equals: str | None = Field(
-        default=None, alias="TimestampGreaterThanEquals"
-    )
-    timestamp_greater_than_equals_path: str | None = Field(
-        default=None, alias="TimestampGreaterThanEqualsPath"
-    )
+    timestamp_equals_path: str | None = Field(default=None, alias="TimestampEqualsPath")
+    timestamp_greater_than: str | None = Field(default=None, alias="TimestampGreaterThan")
+    timestamp_greater_than_path: str | None = Field(default=None, alias="TimestampGreaterThanPath")
+    timestamp_greater_than_equals: str | None = Field(default=None, alias="TimestampGreaterThanEquals")
+    timestamp_greater_than_equals_path: str | None = Field(default=None, alias="TimestampGreaterThanEqualsPath")
     timestamp_less_than: str | None = Field(default=None, alias="TimestampLessThan")
-    timestamp_less_than_path: str | None = Field(
-        default=None, alias="TimestampLessThanPath"
-    )
-    timestamp_less_than_equals: str | None = Field(
-        default=None, alias="TimestampLessThanEquals"
-    )
-    timestamp_less_than_equals_path: str | None = Field(
-        default=None, alias="TimestampLessThanEqualsPath"
-    )
+    timestamp_less_than_path: str | None = Field(default=None, alias="TimestampLessThanPath")
+    timestamp_less_than_equals: str | None = Field(default=None, alias="TimestampLessThanEquals")
+    timestamp_less_than_equals_path: str | None = Field(default=None, alias="TimestampLessThanEqualsPath")
 
     # Type checking operators
     is_boolean: bool | None = Field(default=None, alias="IsBoolean")
@@ -158,17 +114,12 @@ class DataTestRule(BaseModel):
             "IsTimestamp": "is_timestamp",
         }
         set_operators = [
-            alias
-            for alias, field_name in operator_fields.items()
-            if getattr(self, field_name) is not None
+            alias for alias, field_name in operator_fields.items() if getattr(self, field_name) is not None
         ]
         if len(set_operators) == 0:
             raise ValueError("DataTestRule must have exactly one comparison operator")
         if len(set_operators) > 1:
-            raise ValueError(
-                f"DataTestRule must have exactly one comparison operator, "
-                f"got: {', '.join(set_operators)}"
-            )
+            raise ValueError(f"DataTestRule must have exactly one comparison operator, got: {', '.join(set_operators)}")
         return self
 
     def get_operator(self) -> tuple[str, Any]:

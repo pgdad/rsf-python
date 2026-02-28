@@ -29,9 +29,7 @@ def import_asl(
 
     # Warn if output already exists (overwrite is intentional)
     if output.exists():
-        console.print(
-            f"[yellow]Warning:[/yellow] Output file already exists and will be overwritten: {output}"
-        )
+        console.print(f"[yellow]Warning:[/yellow] Output file already exists and will be overwritten: {output}")
 
     try:
         result = _import_asl(

@@ -47,32 +47,24 @@ def process_jsonpath_pipeline(
     """
     # Stage 1: InputPath filters raw_input → effective_input
     if input_path is not None:
-        effective_input = evaluate_jsonpath(
-            raw_input, input_path, variables=variables, context=context
-        )
+        effective_input = evaluate_jsonpath(raw_input, input_path, variables=variables, context=context)
     else:
         effective_input = raw_input
 
     # Stage 2: Parameters payload template on effective_input
     if parameters is not None:
-        effective_input = apply_payload_template(
-            parameters, effective_input, context, variables, intrinsic_evaluator
-        )
+        effective_input = apply_payload_template(parameters, effective_input, context, variables, intrinsic_evaluator)
 
     # Stage 3: ResultSelector payload template on task_result
     effective_result = task_result
     if result_selector is not None:
-        effective_result = apply_payload_template(
-            result_selector, task_result, context, variables, intrinsic_evaluator
-        )
+        effective_result = apply_payload_template(result_selector, task_result, context, variables, intrinsic_evaluator)
 
     # Stage 4: ResultPath merges into RAW input (not effective!)
     merged = apply_result_path(raw_input, effective_result, result_path)
 
     # Stage 5: OutputPath filters merged output
     if output_path is not None:
-        return evaluate_jsonpath(
-            merged, output_path, variables=variables, context=context
-        )
+        return evaluate_jsonpath(merged, output_path, variables=variables, context=context)
 
     return merged

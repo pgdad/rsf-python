@@ -33,7 +33,7 @@ class TestTopyrepr:
 
     def test_string_with_quotes(self):
         result = topyrepr("it's")
-        assert result == "\"it's\""
+        assert result == '"it\'s"'
 
     def test_integer(self):
         assert topyrepr(42) == "42"
@@ -97,7 +97,7 @@ class TestShouldOverwrite:
 class TestRenderHandlerStub:
     def test_basic_stub(self):
         code = render_handler_stub("ValidateOrder")
-        assert "@state(\"ValidateOrder\")" in code
+        assert '@state("ValidateOrder")' in code
         assert "def validate_order(input_data: dict)" in code
         assert "raise NotImplementedError" in code
 
@@ -111,14 +111,7 @@ class TestRenderOrchestrator:
     @pytest.fixture
     def simple_workflow(self, tmp_path):
         dsl = tmp_path / "workflow.yaml"
-        dsl.write_text(
-            'rsf_version: "1.0"\n'
-            "StartAt: DoWork\n"
-            "States:\n"
-            "  DoWork:\n"
-            "    Type: Task\n"
-            "    End: true\n"
-        )
+        dsl.write_text('rsf_version: "1.0"\nStartAt: DoWork\nStates:\n  DoWork:\n    Type: Task\n    End: true\n')
         return dsl
 
     def test_header_has_marker(self, simple_workflow):

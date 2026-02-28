@@ -32,6 +32,7 @@ logger = logging.getLogger(__name__)
 # Token-bucket rate limiter
 # ---------------------------------------------------------------------------
 
+
 class TokenBucketRateLimiter:
     """Async-safe token-bucket rate limiter.
 
@@ -67,6 +68,7 @@ class TokenBucketRateLimiter:
 # ---------------------------------------------------------------------------
 # Lambda inspect client
 # ---------------------------------------------------------------------------
+
 
 class LambdaInspectClient:
     """Async wrapper around boto3 Lambda durable-execution APIs.
@@ -115,22 +117,16 @@ class LambdaInspectClient:
             kwargs["NextToken"] = next_token
 
         await self._limiter.acquire()
-        raw = await asyncio.to_thread(
-            self._client.list_durable_executions_by_function, **kwargs
-        )
+        raw = await asyncio.to_thread(self._client.list_durable_executions_by_function, **kwargs)
 
-        executions = [
-            self._parse_summary(item) for item in raw.get("DurableExecutions", [])
-        ]
+        executions = [self._parse_summary(item) for item in raw.get("DurableExecutions", [])]
 
         return ExecutionListResponse(
             executions=executions,
             next_token=raw.get("NextToken"),
         )
 
-    async def get_execution(
-        self, execution_id: str
-    ) -> ExecutionDetail:
+    async def get_execution(self, execution_id: str) -> ExecutionDetail:
         """Get full detail (including history) for one execution.
 
         Args:
@@ -162,11 +158,7 @@ class LambdaInspectClient:
             status=ExecutionStatus(item.get("Status", "RUNNING")),
             function_name=item.get("FunctionName", self.function_name),
             start_time=normalize_timestamp(item.get("StartTime", 0)),
-            end_time=(
-                normalize_timestamp(item["EndTime"])
-                if item.get("EndTime") is not None
-                else None
-            ),
+            end_time=(normalize_timestamp(item["EndTime"]) if item.get("EndTime") is not None else None),
         )
 
     def _parse_detail(self, raw: dict[str, Any]) -> ExecutionDetail:
@@ -185,24 +177,15 @@ class LambdaInspectClient:
             )
 
         # Parse history events.
-        history = [
-            self._parse_history_event(evt)
-            for evt in exec_data.get("Events", [])
-        ]
+        history = [self._parse_history_event(evt) for evt in exec_data.get("Events", [])]
 
         return ExecutionDetail(
             execution_id=exec_data.get("ExecutionId", ""),
-            name=exec_data.get(
-                "ExecutionName", exec_data.get("ExecutionId", "")
-            ),
+            name=exec_data.get("ExecutionName", exec_data.get("ExecutionId", "")),
             status=ExecutionStatus(exec_data.get("Status", "RUNNING")),
             function_name=exec_data.get("FunctionName", self.function_name),
             start_time=normalize_timestamp(exec_data.get("StartTime", 0)),
-            end_time=(
-                normalize_timestamp(exec_data["EndTime"])
-                if exec_data.get("EndTime") is not None
-                else None
-            ),
+            end_time=(normalize_timestamp(exec_data["EndTime"]) if exec_data.get("EndTime") is not None else None),
             input_payload=input_payload,
             result=result,
             error=error_info,

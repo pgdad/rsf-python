@@ -55,11 +55,10 @@ class TestSanitizeName:
             "a",
         ]
         import re
+
         for name in test_names:
             result = sanitize_name(name)
-            assert re.match(r"^[a-z_][a-z0-9_]*$", result), (
-                f"'{name}' → '{result}' is not a valid Terraform identifier"
-            )
+            assert re.match(r"^[a-z_][a-z0-9_]*$", result), f"'{name}' → '{result}' is not a valid Terraform identifier"
 
 
 class TestDeriveIamStatements:
@@ -96,12 +95,12 @@ class TestShouldOverwrite:
 
     def test_file_with_marker(self, tmp_path):
         f = tmp_path / "gen.tf"
-        f.write_text(f"{GENERATED_MARKER}\n\nresource \"aws_lambda_function\" ...\n")
+        f.write_text(f'{GENERATED_MARKER}\n\nresource "aws_lambda_function" ...\n')
         assert _should_overwrite(f) is True
 
     def test_file_without_marker(self, tmp_path):
         f = tmp_path / "custom.tf"
-        f.write_text("# My custom terraform\nresource \"aws_s3_bucket\" ...\n")
+        f.write_text('# My custom terraform\nresource "aws_s3_bucket" ...\n')
         assert _should_overwrite(f) is False
 
     def test_empty_file(self, tmp_path):
@@ -253,6 +252,7 @@ class TestGenerateTerraform:
     def test_resource_id_is_valid_terraform_identifier(self, tmp_path):
         """Resource IDs derived from workflow names are valid Terraform identifiers."""
         import re
+
         test_cases = [
             ("my-workflow", "my_workflow"),
             ("MyWorkflow", "my_workflow"),

@@ -35,9 +35,7 @@ router = APIRouter(prefix="/api/inspect")
 
 def _get_client(request: Request) -> LambdaInspectClient:
     """Retrieve the Lambda inspect client from app state."""
-    client: LambdaInspectClient | None = getattr(
-        request.app.state, "inspect_client", None
-    )
+    client: LambdaInspectClient | None = getattr(request.app.state, "inspect_client", None)
     if client is None:
         raise HTTPException(
             status_code=503,
@@ -121,9 +119,7 @@ async def stream_execution(
                 seen_event_ids.add(evt.event_id)
             yield {
                 "event": "history",
-                "data": json.dumps(
-                    [e.model_dump(mode="json") for e in detail.history]
-                ),
+                "data": json.dumps([e.model_dump(mode="json") for e in detail.history]),
             }
 
         # If already terminal, close immediately.
@@ -147,17 +143,13 @@ async def stream_execution(
             }
 
             # Send only new history events.
-            new_events = [
-                e for e in detail.history if e.event_id not in seen_event_ids
-            ]
+            new_events = [e for e in detail.history if e.event_id not in seen_event_ids]
             if new_events:
                 for evt in new_events:
                     seen_event_ids.add(evt.event_id)
                 yield {
                     "event": "history_update",
-                    "data": json.dumps(
-                        [e.model_dump(mode="json") for e in new_events]
-                    ),
+                    "data": json.dumps([e.model_dump(mode="json") for e in new_events]),
                 }
 
             if detail.status in TERMINAL_STATUSES:

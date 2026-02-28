@@ -140,9 +140,7 @@ class TestListExecutions:
 
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as c:
-            resp = await c.get(
-                "/api/inspect/executions?max_items=10&next_token=prev-token"
-            )
+            resp = await c.get("/api/inspect/executions?max_items=10&next_token=prev-token")
 
         assert resp.status_code == 200
         data = resp.json()
@@ -271,9 +269,7 @@ class TestSSEStream:
 
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as c:
-            async with c.stream(
-                "GET", "/api/inspect/execution/exec-001/stream"
-            ) as resp:
+            async with c.stream("GET", "/api/inspect/execution/exec-001/stream") as resp:
                 assert resp.status_code == 200
 
                 lines = []
@@ -328,12 +324,8 @@ class TestSSEStream:
         # Patch asyncio.sleep to avoid real waiting.
         with patch("rsf.inspect.router.asyncio.sleep", new_callable=AsyncMock):
             transport = ASGITransport(app=app)
-            async with AsyncClient(
-                transport=transport, base_url="http://test"
-            ) as c:
-                async with c.stream(
-                    "GET", "/api/inspect/execution/exec-001/stream"
-                ) as resp:
+            async with AsyncClient(transport=transport, base_url="http://test") as c:
+                async with c.stream("GET", "/api/inspect/execution/exec-001/stream") as resp:
                     assert resp.status_code == 200
 
                     lines = []
@@ -356,9 +348,7 @@ class TestSSEStream:
 
         transport = ASGITransport(app=app)
         async with AsyncClient(transport=transport, base_url="http://test") as c:
-            async with c.stream(
-                "GET", "/api/inspect/execution/exec-001/stream"
-            ) as resp:
+            async with c.stream("GET", "/api/inspect/execution/exec-001/stream") as resp:
                 lines = []
                 async for line in resp.aiter_lines():
                     lines.append(line)

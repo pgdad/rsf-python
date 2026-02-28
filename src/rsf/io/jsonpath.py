@@ -136,9 +136,7 @@ def _tokenize(path: str) -> list[str | int]:
                 tokens.append(match.group(1))
                 i += len(match.group(1))
             else:
-                raise JSONPathError(
-                    f"Invalid path segment at position {i}: '{path[i:]}'"
-                )
+                raise JSONPathError(f"Invalid path segment at position {i}: '{path[i:]}'")
     return tokens
 
 
@@ -146,9 +144,7 @@ def _access(data: Any, key: str | int) -> Any:
     """Access a single key/index on data."""
     if isinstance(key, int):
         if not isinstance(data, (list, tuple)):
-            raise JSONPathError(
-                f"Cannot index non-array with [{key}]"
-            )
+            raise JSONPathError(f"Cannot index non-array with [{key}]")
         try:
             return data[key]
         except IndexError:

@@ -22,9 +22,7 @@ def extract_variable_name(value: str) -> str | None:
     return match.group(1) if match else None
 
 
-def apply_assign(
-    store: VariableStore, assign: dict[str, Any] | None, data: Any
-) -> None:
+def apply_assign(store: VariableStore, assign: dict[str, Any] | None, data: Any) -> None:
     """Apply Assign field — set variables from state output.
 
     Each key in the assign dict becomes a variable name, with the value

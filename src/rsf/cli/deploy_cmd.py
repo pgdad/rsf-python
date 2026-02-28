@@ -20,15 +20,9 @@ console = Console()
 
 def deploy(
     workflow: Path = typer.Argument("workflow.yaml", help="Path to workflow YAML file"),
-    code_only: bool = typer.Option(
-        False, "--code-only", help="Re-package and update Lambda code only"
-    ),
-    auto_approve: bool = typer.Option(
-        False, "--auto-approve", "-y", help="Skip Terraform confirmation prompt"
-    ),
-    tf_dir: Path = typer.Option(
-        "terraform", "--tf-dir", help="Terraform output directory"
-    ),
+    code_only: bool = typer.Option(False, "--code-only", help="Re-package and update Lambda code only"),
+    auto_approve: bool = typer.Option(False, "--auto-approve", "-y", help="Skip Terraform confirmation prompt"),
+    tf_dir: Path = typer.Option("terraform", "--tf-dir", help="Terraform output directory"),
 ) -> None:
     """Deploy an RSF workflow to AWS via Terraform.
 
@@ -69,11 +63,7 @@ def deploy(
     )
 
     # Step 4: Derive workflow name
-    workflow_name = (
-        definition.comment
-        if definition.comment
-        else workflow.stem.replace("_", "-").replace(" ", "-")
-    )
+    workflow_name = definition.comment if definition.comment else workflow.stem.replace("_", "-").replace(" ", "-")
 
     if code_only:
         _deploy_code_only(definition, workflow, workflow_name, tf_dir)
@@ -103,10 +93,7 @@ def _deploy_full(
 
     # Step 6: Check terraform binary
     if not shutil.which("terraform"):
-        console.print(
-            "[red]Error:[/red] terraform binary not found. "
-            "Install from https://terraform.io"
-        )
+        console.print("[red]Error:[/red] terraform binary not found. Install from https://terraform.io")
         raise typer.Exit(code=1)
 
     # Step 7: terraform init
@@ -146,10 +133,7 @@ def _deploy_code_only(
     """Re-package Lambda code and update it via targeted Terraform apply."""
     # Step 4 (code-only): Check terraform binary
     if not shutil.which("terraform"):
-        console.print(
-            "[red]Error:[/red] terraform binary not found. "
-            "Install from https://terraform.io"
-        )
+        console.print("[red]Error:[/red] terraform binary not found. Install from https://terraform.io")
         raise typer.Exit(code=1)
 
     # Step 5 (code-only): Check tf_dir has terraform state
@@ -174,9 +158,7 @@ def _deploy_code_only(
             check=True,
         )
     except subprocess.CalledProcessError as exc:
-        console.print(
-            f"[red]Error:[/red] terraform apply --code-only failed (exit {exc.returncode})"
-        )
+        console.print(f"[red]Error:[/red] terraform apply --code-only failed (exit {exc.returncode})")
         raise typer.Exit(code=1)
 
     console.print("\n[green]Code update complete[/green]")

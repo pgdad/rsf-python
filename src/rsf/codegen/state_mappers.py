@@ -172,24 +172,45 @@ def _map_choice_rule(rule: Any) -> dict[str, Any]:
         operator = None
         value = None
         for op in (
-            "string_equals", "string_equals_path",
-            "string_greater_than", "string_greater_than_path",
-            "string_greater_than_equals", "string_greater_than_equals_path",
-            "string_less_than", "string_less_than_path",
-            "string_less_than_equals", "string_less_than_equals_path",
+            "string_equals",
+            "string_equals_path",
+            "string_greater_than",
+            "string_greater_than_path",
+            "string_greater_than_equals",
+            "string_greater_than_equals_path",
+            "string_less_than",
+            "string_less_than_path",
+            "string_less_than_equals",
+            "string_less_than_equals_path",
             "string_matches",
-            "numeric_equals", "numeric_equals_path",
-            "numeric_greater_than", "numeric_greater_than_path",
-            "numeric_greater_than_equals", "numeric_greater_than_equals_path",
-            "numeric_less_than", "numeric_less_than_path",
-            "numeric_less_than_equals", "numeric_less_than_equals_path",
-            "boolean_equals", "boolean_equals_path",
-            "timestamp_equals", "timestamp_equals_path",
-            "timestamp_greater_than", "timestamp_greater_than_path",
-            "timestamp_greater_than_equals", "timestamp_greater_than_equals_path",
-            "timestamp_less_than", "timestamp_less_than_path",
-            "timestamp_less_than_equals", "timestamp_less_than_equals_path",
-            "is_null", "is_present", "is_numeric", "is_string", "is_boolean", "is_timestamp",
+            "numeric_equals",
+            "numeric_equals_path",
+            "numeric_greater_than",
+            "numeric_greater_than_path",
+            "numeric_greater_than_equals",
+            "numeric_greater_than_equals_path",
+            "numeric_less_than",
+            "numeric_less_than_path",
+            "numeric_less_than_equals",
+            "numeric_less_than_equals_path",
+            "boolean_equals",
+            "boolean_equals_path",
+            "timestamp_equals",
+            "timestamp_equals_path",
+            "timestamp_greater_than",
+            "timestamp_greater_than_path",
+            "timestamp_greater_than_equals",
+            "timestamp_greater_than_equals_path",
+            "timestamp_less_than",
+            "timestamp_less_than_path",
+            "timestamp_less_than_equals",
+            "timestamp_less_than_equals_path",
+            "is_null",
+            "is_present",
+            "is_numeric",
+            "is_string",
+            "is_boolean",
+            "is_timestamp",
         ):
             val = getattr(rule, op, None)
             if val is not None:
@@ -280,10 +301,12 @@ def _map_parallel(name: str, state: ParallelState) -> StateMapping:
     """Map a Parallel state to context.parallel."""
     branches = []
     for branch in state.branches:
-        branches.append({
-            "start_at": branch.start_at,
-            "states": list(branch.states.keys()),
-        })
+        branches.append(
+            {
+                "start_at": branch.start_at,
+                "states": list(branch.states.keys()),
+            }
+        )
     params: dict[str, Any] = {
         "next": state.next,
         "end": state.end,

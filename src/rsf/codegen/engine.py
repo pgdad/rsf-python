@@ -33,9 +33,7 @@ def topyrepr(value: Any) -> str:
         items = ", ".join(topyrepr(item) for item in value)
         return f"[{items}]"
     if isinstance(value, dict):
-        items = ", ".join(
-            f"{topyrepr(k)}: {topyrepr(v)}" for k, v in value.items()
-        )
+        items = ", ".join(f"{topyrepr(k)}: {topyrepr(v)}" for k, v in value.items())
         return "{" + items + "}"
     return repr(value)
 

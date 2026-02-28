@@ -46,9 +46,7 @@ def generate(
         raise typer.Exit(code=1)
 
     if not isinstance(data, dict):
-        console.print(
-            f"[red]Error:[/red] Workflow file must be a YAML mapping, got: {type(data).__name__}"
-        )
+        console.print(f"[red]Error:[/red] Workflow file must be a YAML mapping, got: {type(data).__name__}")
         raise typer.Exit(code=1)
 
     # 3. Pydantic structural validation
@@ -93,6 +91,5 @@ def generate(
     total_handlers = len(result.handler_paths)
     total_skipped = len(result.skipped_handlers)
     console.print(
-        f"\n[bold]Summary:[/bold] orchestrator written, "
-        f"{total_handlers} handler(s) created, {total_skipped} skipped."
+        f"\n[bold]Summary:[/bold] orchestrator written, {total_handlers} handler(s) created, {total_skipped} skipped."
     )

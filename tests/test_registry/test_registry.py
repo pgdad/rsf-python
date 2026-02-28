@@ -38,12 +38,14 @@ class TestStateDecorator:
 
     def test_empty_name_raises(self):
         with pytest.raises(ValueError, match="non-empty"):
+
             @state("")
             def handler(data):
                 return data
 
     def test_whitespace_name_raises(self):
         with pytest.raises(ValueError, match="non-empty"):
+
             @state("   ")
             def handler(data):
                 return data
@@ -54,6 +56,7 @@ class TestStateDecorator:
             return data
 
         with pytest.raises(ValueError, match="Duplicate"):
+
             @state("MyState")
             def handler2(data):
                 return data
@@ -146,10 +149,7 @@ class TestDiscoverHandlers:
     def test_discover_imports_py_files(self, tmp_path):
         handler_file = tmp_path / "my_handler.py"
         handler_file.write_text(
-            'from rsf.registry import state\n\n'
-            '@state("Discovered")\n'
-            'def discovered(data):\n'
-            '    return data\n'
+            'from rsf.registry import state\n\n@state("Discovered")\ndef discovered(data):\n    return data\n'
         )
 
         discover_handlers(tmp_path)
@@ -158,10 +158,7 @@ class TestDiscoverHandlers:
     def test_discover_skips_underscored_files(self, tmp_path):
         (tmp_path / "__init__.py").write_text("")
         (tmp_path / "_private.py").write_text(
-            'from rsf.registry import state\n\n'
-            '@state("Private")\n'
-            'def private(data):\n'
-            '    return data\n'
+            'from rsf.registry import state\n\n@state("Private")\ndef private(data):\n    return data\n'
         )
 
         discover_handlers(tmp_path)

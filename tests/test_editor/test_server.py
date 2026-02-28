@@ -18,9 +18,7 @@ def app():
 def app_with_workflow(tmp_path):
     """Create a test app with a workflow file configured."""
     wf = tmp_path / "workflow.yaml"
-    wf.write_text(
-        'rsf_version: "1.0"\nStartAt: S1\nStates:\n  S1:\n    Type: Succeed\n'
-    )
+    wf.write_text('rsf_version: "1.0"\nStartAt: S1\nStates:\n  S1:\n    Type: Succeed\n')
     return create_app(workflow_path=str(wf))
 
 

@@ -39,16 +39,12 @@ def apply_payload_template(
         if key.endswith(".$"):
             # Dynamic reference — strip the .$ suffix
             output_key = key[:-2]
-            resolved = _resolve_reference(
-                value, data, context, variables, intrinsic_evaluator
-            )
+            resolved = _resolve_reference(value, data, context, variables, intrinsic_evaluator)
             result[output_key] = resolved
         else:
             # Static key — recurse into nested dicts
             if isinstance(value, dict):
-                result[key] = apply_payload_template(
-                    value, data, context, variables, intrinsic_evaluator
-                )
+                result[key] = apply_payload_template(value, data, context, variables, intrinsic_evaluator)
             else:
                 result[key] = value
     return result
