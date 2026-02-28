@@ -5,7 +5,7 @@ milestone_name: Ruff Linting Cleanup
 status: active
 last_updated: "2026-02-28"
 progress:
-  total_phases: 0
+  total_phases: 7
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,14 +18,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** Ruff Linting Cleanup
+**Current focus:** v1.6 Ruff Linting Cleanup — Phase 28 (F401 Unused Imports)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-02-28 — Milestone v1.6 started
+Phase: 28 of 34 (F401 Unused Imports)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-02-28 — Roadmap created for v1.6
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -49,6 +51,10 @@ Last activity: 2026-02-28 — Milestone v1.6 started
 
 All decisions logged in PROJECT.md Key Decisions table.
 
+Recent decisions affecting current work:
+- Phase 28: Remove `exclude = ["examples"]` first so examples/ violations are visible and fixable in the same phase as F401
+- Each phase removes its own rule from the ignore list before moving to the next rule
+
 ### Pending Todos
 
 None.
@@ -60,5 +66,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: Defining v1.6 requirements
+Stopped at: Roadmap created — ready to plan Phase 28
 Resume file: None

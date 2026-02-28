@@ -65,33 +65,33 @@ None — this is a self-contained code quality milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONF-01 | — | Pending |
-| CONF-02 | — | Pending |
-| F401-01 | — | Pending |
-| F401-02 | — | Pending |
-| F401-03 | — | Pending |
-| F401-04 | — | Pending |
-| F401-05 | — | Pending |
-| F401-06 | — | Pending |
-| F841-01 | — | Pending |
-| F841-02 | — | Pending |
-| F841-03 | — | Pending |
-| F541-01 | — | Pending |
-| F541-02 | — | Pending |
-| E402-01 | — | Pending |
-| E402-02 | — | Pending |
-| E402-03 | — | Pending |
-| E402-04 | — | Pending |
-| E741-01 | — | Pending |
-| E741-02 | — | Pending |
-| E501-01 | — | Pending |
-| E501-02 | — | Pending |
+| CONF-01 | Phase 28 | Pending |
+| CONF-02 | Phase 34 | Pending |
+| F401-01 | Phase 28 | Pending |
+| F401-02 | Phase 28 | Pending |
+| F401-03 | Phase 28 | Pending |
+| F401-04 | Phase 28 | Pending |
+| F401-05 | Phase 28 | Pending |
+| F401-06 | Phase 28 | Pending |
+| F841-01 | Phase 29 | Pending |
+| F841-02 | Phase 29 | Pending |
+| F841-03 | Phase 29 | Pending |
+| F541-01 | Phase 30 | Pending |
+| F541-02 | Phase 30 | Pending |
+| E402-01 | Phase 31 | Pending |
+| E402-02 | Phase 31 | Pending |
+| E402-03 | Phase 31 | Pending |
+| E402-04 | Phase 31 | Pending |
+| E741-01 | Phase 32 | Pending |
+| E741-02 | Phase 32 | Pending |
+| E501-01 | Phase 33 | Pending |
+| E501-02 | Phase 33 | Pending |
 
 **Coverage:**
 - v1.6 requirements: 21 total
-- Mapped to phases: 0
-- Unmapped: 21 ⚠️
+- Mapped to phases: 21
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 after initial definition*
+*Last updated: 2026-02-28 after roadmap creation*

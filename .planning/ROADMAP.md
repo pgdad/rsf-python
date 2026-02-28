@@ -8,6 +8,7 @@
 - ✅ **v1.3 Comprehensive Tutorial** — Phases 18-20 (shipped 2026-02-26)
 - ✅ **v1.4 UI Screenshots** — Phases 21-24 (shipped 2026-02-27)
 - ✅ **v1.5 PyPI Packaging & Distribution** — Phases 25-27 (shipped 2026-02-28)
+- 🚧 **v1.6 Ruff Linting Cleanup** — Phases 28-34 (in progress)
 
 ## Phases
 
@@ -84,3 +85,99 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
 Full details: `.planning/milestones/v1.5-ROADMAP.md`
 
 </details>
+
+### 🚧 v1.6 Ruff Linting Cleanup (In Progress)
+
+**Milestone Goal:** Fix all ruff linting violations and remove all ignored rules and exclusions so the entire codebase passes strict ruff checks with zero suppressions.
+
+- [ ] **Phase 28: F401 Unused Imports** — Remove examples/ exclusion from ruff config; fix all unused imports across src/, tests/, examples/, and generated code (~61 violations)
+- [ ] **Phase 29: F841 Unused Variables** — Fix all unused variable assignments across src/, tests/, and examples/ (6 violations)
+- [ ] **Phase 30: F541 f-string Without Placeholders** — Convert all bare f-strings to regular strings (1 violation)
+- [ ] **Phase 31: E402 Import Not at Top of File** — Fix or justify all out-of-order imports; clean up redundant noqa comments (6 violations)
+- [ ] **Phase 32: E741 Ambiguous Variable Names** — Rename all ambiguous single-letter variables (2 violations)
+- [ ] **Phase 33: E501 Line Too Long** — Shorten all lines exceeding 120 characters in examples/ (2 violations)
+- [ ] **Phase 34: Config Cleanup** — Remove any remaining ignore entries, verify zero violations across the whole codebase
+
+## Phase Details
+
+### Phase 28: F401 Unused Imports
+**Goal**: The entire codebase (including examples/) is linted and all unused imports are eliminated or justified
+**Depends on**: Phase 27
+**Requirements**: CONF-01, F401-01, F401-02, F401-03, F401-04, F401-05, F401-06
+**Success Criteria** (what must be TRUE):
+  1. `exclude = ["examples"]` is removed from pyproject.toml ruff config so examples/ is linted
+  2. `ruff check src/` reports zero F401 violations
+  3. `ruff check tests/` reports zero F401 violations
+  4. `ruff check examples/` reports zero F401 violations
+  5. F401 is removed from the `ignore` list in pyproject.toml
+**Plans**: TBD
+
+### Phase 29: F841 Unused Variables
+**Goal**: All unused variable assignments are eliminated across the whole codebase
+**Depends on**: Phase 28
+**Requirements**: F841-01, F841-02, F841-03
+**Success Criteria** (what must be TRUE):
+  1. `ruff check src/ tests/` reports zero F841 violations
+  2. `ruff check examples/` reports zero F841 violations
+  3. F841 is removed from the `ignore` list in pyproject.toml
+**Plans**: TBD
+
+### Phase 30: F541 f-string Without Placeholders
+**Goal**: All f-strings that contain no interpolation expressions are converted to regular strings
+**Depends on**: Phase 29
+**Requirements**: F541-01, F541-02
+**Success Criteria** (what must be TRUE):
+  1. `ruff check .` reports zero F541 violations
+  2. F541 is removed from the `ignore` list in pyproject.toml
+**Plans**: TBD
+
+### Phase 31: E402 Import Not at Top of File
+**Goal**: All import statements appear at the top of their files or carry justified inline suppressions; no redundant noqa comments remain
+**Depends on**: Phase 30
+**Requirements**: E402-01, E402-02, E402-03, E402-04
+**Success Criteria** (what must be TRUE):
+  1. `ruff check src/` reports zero E402 violations
+  2. `ruff check examples/` reports zero E402 violations
+  3. Redundant `# noqa: E402` in cli/main.py is removed
+  4. E402 is removed from the `ignore` list in pyproject.toml
+**Plans**: TBD
+
+### Phase 32: E741 Ambiguous Variable Names
+**Goal**: All single-letter ambiguous variable names (l, O, I) are renamed to clear, descriptive names
+**Depends on**: Phase 31
+**Requirements**: E741-01, E741-02
+**Success Criteria** (what must be TRUE):
+  1. `ruff check .` reports zero E741 violations
+  2. E741 is removed from the `ignore` list in pyproject.toml
+**Plans**: TBD
+
+### Phase 33: E501 Line Too Long
+**Goal**: All lines in examples/ that exceed 120 characters are shortened
+**Depends on**: Phase 32
+**Requirements**: E501-01, E501-02
+**Success Criteria** (what must be TRUE):
+  1. `ruff check examples/` reports zero E501 violations
+  2. `ruff check .` reports zero E501 violations across the entire codebase
+**Plans**: TBD
+
+### Phase 34: Config Cleanup
+**Goal**: The ruff ignore list is empty and the full codebase passes strict ruff checks with zero suppressions
+**Depends on**: Phase 33
+**Requirements**: CONF-02
+**Success Criteria** (what must be TRUE):
+  1. The `ignore` list in pyproject.toml is empty (or absent)
+  2. `ruff check .` exits with code 0 and zero violations reported
+  3. The CI lint step passes on the final commit
+**Plans**: TBD
+
+## Progress
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 28. F401 Unused Imports | v1.6 | 0/? | Not started | - |
+| 29. F841 Unused Variables | v1.6 | 0/? | Not started | - |
+| 30. F541 f-string Without Placeholders | v1.6 | 0/? | Not started | - |
+| 31. E402 Import Not at Top of File | v1.6 | 0/? | Not started | - |
+| 32. E741 Ambiguous Variable Names | v1.6 | 0/? | Not started | - |
+| 33. E501 Line Too Long | v1.6 | 0/? | Not started | - |
+| 34. Config Cleanup | v1.6 | 0/? | Not started | - |
