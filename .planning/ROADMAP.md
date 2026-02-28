@@ -107,7 +107,7 @@ Full details: `.planning/milestones/v1.4-ROADMAP.md`
   4. PyPI publishing uses OIDC trusted publisher authentication — no API tokens stored in repository secrets
 **Plans**: 1 plan
 Plans:
-- [ ] 26-01-PLAN.md -- CI/CD workflows (ci.yml for PR checks + release.yml for tag-triggered PyPI publishing)
+- [x] 26-01-PLAN.md -- CI/CD workflows (ci.yml for PR checks + release.yml for tag-triggered PyPI publishing)
 
 ### Phase 27: README as Landing Page
 **Goal**: The README serves as a polished landing page on both GitHub and PyPI, with accurate install instructions, a working quick-start example, and status badges
@@ -127,5 +127,5 @@ Plans:
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
 | 25. Package & Version | v1.5 | 1/1 | Complete | 2026-02-28 |
-| 26. CI/CD Pipeline | 1/1 | Complete   | 2026-02-28 | - |
+| 26. CI/CD Pipeline | v1.5 | 1/1 | Complete | 2026-02-28 |
 | 27. README as Landing Page | v1.5 | 0/TBD | Not started | - |

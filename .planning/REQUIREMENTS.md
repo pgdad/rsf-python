@@ -23,10 +23,10 @@ Requirements for PyPI Packaging & Distribution milestone. Each maps to roadmap p
 
 ### CI/CD Pipeline
 
-- [ ] **CICD-01**: GitHub Actions runs lint and tests on every pull request
-- [ ] **CICD-02**: GitHub Actions builds wheel and publishes to PyPI on git tag push
-- [ ] **CICD-03**: CI builds React UIs as part of the wheel build process
-- [ ] **CICD-04**: PyPI publishing uses trusted publisher authentication (no API tokens)
+- [x] **CICD-01**: GitHub Actions runs lint and tests on every pull request
+- [x] **CICD-02**: GitHub Actions builds wheel and publishes to PyPI on git tag push
+- [x] **CICD-03**: CI builds React UIs as part of the wheel build process
+- [x] **CICD-04**: PyPI publishing uses trusted publisher authentication (no API tokens)
 
 ### README
 
@@ -76,10 +76,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | VER-01 | Phase 25 | Pending |
 | VER-02 | Phase 25 | Pending |
 | VER-03 | Phase 25 | Pending |
-| CICD-01 | Phase 26 | Pending |
-| CICD-02 | Phase 26 | Pending |
-| CICD-03 | Phase 26 | Pending |
-| CICD-04 | Phase 26 | Pending |
+| CICD-01 | Phase 26 | Complete |
+| CICD-02 | Phase 26 | Complete |
+| CICD-03 | Phase 26 | Complete |
+| CICD-04 | Phase 26 | Complete |
 | README-01 | Phase 27 | Pending |
 | README-02 | Phase 27 | Pending |
 | README-03 | Phase 27 | Pending |
