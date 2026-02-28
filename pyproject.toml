@@ -62,6 +62,7 @@ packages = ["src/rsf"]
 
 [tool.ruff]
 exclude = ["examples"]
+line-length = 120
 
 [tool.ruff.lint]
 select = ["E", "F", "W"]
