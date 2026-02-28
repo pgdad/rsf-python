@@ -8,6 +8,9 @@ build/
 *.egg
 site/
 
+# Generated orchestrator files
+orchestrator.py
+
 # Terraform runtime files
 .terraform/
 *.tfstate
