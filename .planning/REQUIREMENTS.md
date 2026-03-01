@@ -28,7 +28,7 @@ Requirements for v2.0 release. Each maps to roadmap phases.
 
 ### Infrastructure
 
-- [ ] **INFRA-01**: User can generate workflow code and handlers without any Terraform/AWS resource generation, making infrastructure creation fully optional
+- [x] **INFRA-01**: User can generate workflow code and handlers without any Terraform/AWS resource generation, making infrastructure creation fully optional
 
 ### Observability
 
@@ -93,7 +93,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DSL-05 | Phase 41 | Pending |
 | DSL-06 | Phase 39 | Pending |
 | DSL-07 | Phase 41 | Pending |
-| INFRA-01 | Phase 39 | Pending |
+| INFRA-01 | Phase 39 | Complete |
 | OBS-01 | Phase 44 | Pending |
 | OBS-02 | Phase 44 | Pending |
 | OBS-03 | Phase 44 | Pending |
