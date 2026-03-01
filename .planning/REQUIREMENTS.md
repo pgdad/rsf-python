@@ -9,14 +9,14 @@ Requirements for Lambda Function URL support. Each maps to roadmap phases.
 
 ### DSL (Workflow Definition)
 
-- [ ] **DSL-01**: User can add optional `lambda_url` configuration to workflow YAML with `enabled: true` and `auth_type: NONE|AWS_IAM`
-- [ ] **DSL-02**: DSL validation accepts lambda_url configuration and rejects invalid auth types
+- [x] **DSL-01**: User can add optional `lambda_url` configuration to workflow YAML with `enabled: true` and `auth_type: NONE|AWS_IAM`
+- [x] **DSL-02**: DSL validation accepts lambda_url configuration and rejects invalid auth types
 
 ### Terraform (Infrastructure Generation)
 
-- [ ] **TF-01**: When lambda_url is enabled, Terraform generation includes `aws_lambda_function_url` resource with configured auth type
-- [ ] **TF-02**: Generated Terraform outputs include the Lambda Function URL endpoint
-- [ ] **TF-03**: IAM policy includes necessary permissions when Lambda URL uses AWS_IAM auth
+- [x] **TF-01**: When lambda_url is enabled, Terraform generation includes `aws_lambda_function_url` resource with configured auth type
+- [x] **TF-02**: Generated Terraform outputs include the Lambda Function URL endpoint
+- [x] **TF-03**: IAM policy includes necessary permissions when Lambda URL uses AWS_IAM auth
 
 ### Example (Demonstration Workflow)
 
@@ -46,11 +46,11 @@ None — this is a focused feature milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DSL-01 | Phase 36 | Pending |
-| DSL-02 | Phase 36 | Pending |
-| TF-01 | Phase 36 | Pending |
-| TF-02 | Phase 36 | Pending |
-| TF-03 | Phase 36 | Pending |
+| DSL-01 | Phase 36 | Complete |
+| DSL-02 | Phase 36 | Complete |
+| TF-01 | Phase 36 | Complete |
+| TF-02 | Phase 36 | Complete |
+| TF-03 | Phase 36 | Complete |
 | EX-01 | Phase 37 | Pending |
 | EX-02 | Phase 37 | Pending |
 | EX-03 | Phase 37 | Pending |

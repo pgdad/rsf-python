@@ -241,6 +241,6 @@ Plans:
 | 33. E501 Line Too Long | v1.6 | 1/1 | Complete | 2026-02-28 |
 | 34. Config Cleanup | v1.6 | 1/1 | Complete | 2026-02-28 |
 | 35. Run All Tests (Non-AWS) | v1.6 | 1/1 | Complete | 2026-03-01 |
-| 36. DSL and Terraform | 2/2 | Complete   | 2026-03-01 | - |
+| 36. DSL and Terraform | 2/2 | Complete    | 2026-03-01 | - |
 | 37. Example Workflow | v1.7 | 0/? | Not started | - |
 | 38. Tutorial | v1.7 | 0/? | Not started | - |
