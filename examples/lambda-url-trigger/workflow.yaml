@@ -1,0 +1,15 @@
+rsf_version: "1.0"
+Comment: "Lambda URL trigger example — receive an order via HTTP POST, validate, process, and complete"
+lambda_url:
+  enabled: true
+  auth_type: NONE
+StartAt: ValidateOrder
+States:
+  ValidateOrder:
+    Type: Task
+    Next: ProcessOrder
+  ProcessOrder:
+    Type: Task
+    Next: OrderComplete
+  OrderComplete:
+    Type: Succeed
