@@ -142,6 +142,7 @@ def render_orchestrator(
         state_blocks=state_blocks,
         handler_imports=handler_imports,
         mappings=mappings,
+        timeout_seconds=definition.timeout_seconds,
     )
 
 

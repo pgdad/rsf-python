@@ -4,6 +4,9 @@
 from aws_lambda_durable_execution_sdk_python import DurableContext, durable_execution
 from aws_lambda_durable_execution_sdk_python.config import Duration
 from rsf.registry import get_handler, get_startup_hooks
+{% if timeout_seconds %}
+import time
+{% endif %}
 {% for handler_import in handler_imports %}
 import {{ handler_import }}
 {% endfor %}
@@ -16,6 +19,17 @@ class WorkflowError(Exception):
         self.error = error
         self.cause = cause
         super().__init__(f"{error}: {cause}" if cause else error)
+
+{% if timeout_seconds %}
+
+class WorkflowTimeoutError(Exception):
+    """Raised when the workflow exceeds its configured timeout."""
+
+    def __init__(self, timeout_seconds: int, elapsed: float):
+        self.timeout_seconds = timeout_seconds
+        self.elapsed = elapsed
+        super().__init__(f"Workflow timed out after {elapsed:.1f}s (limit: {timeout_seconds}s)")
+{% endif %}
 
 
 _startup_done = False
@@ -31,8 +45,16 @@ def lambda_handler(context: DurableContext, event: dict) -> dict:
 
     current_state = {{ start_at | topyrepr }}
     input_data = event
+{% if timeout_seconds %}
+    _workflow_start_time = time.monotonic()
+{% endif %}
 
     while current_state is not None:
+{% if timeout_seconds %}
+        _elapsed = time.monotonic() - _workflow_start_time
+        if _elapsed > {{ timeout_seconds }}:
+            raise WorkflowTimeoutError({{ timeout_seconds }}, _elapsed)
+{% endif %}
 {% for block in state_blocks %}
         {{ "el" if not loop.first }}if current_state == {{ block.name | topyrepr }}:
 {{ block.code }}

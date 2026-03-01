@@ -44,6 +44,7 @@ def validate_definition(definition: StateMachineDefinition) -> list[ValidationEr
     Returns a list of ValidationError instances (empty if valid).
     """
     errors: list[ValidationError] = []
+    _validate_timeout(definition, errors)
     _validate_state_machine(
         states=definition.states,
         start_at=definition.start_at,
@@ -51,6 +52,21 @@ def validate_definition(definition: StateMachineDefinition) -> list[ValidationEr
         errors=errors,
     )
     return errors
+
+
+def _validate_timeout(
+    definition: StateMachineDefinition,
+    errors: list[ValidationError],
+) -> None:
+    """Validate the top-level TimeoutSeconds value."""
+    if definition.timeout_seconds is not None and definition.timeout_seconds > 2592000:
+        errors.append(
+            ValidationError(
+                message=f"TimeoutSeconds value {definition.timeout_seconds} exceeds 30 days — this is unusually large",
+                path="TimeoutSeconds",
+                severity="warning",
+            )
+        )
 
 
 def _validate_state_machine(

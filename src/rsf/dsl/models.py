@@ -262,7 +262,7 @@ class StateMachineDefinition(BaseModel):
     start_at: str = Field(alias="StartAt")
     states: dict[str, Any] = Field(alias="States")
     version: str | None = Field(default=None, alias="Version")
-    timeout_seconds: int | None = Field(default=None, alias="TimeoutSeconds", ge=0)
+    timeout_seconds: int | None = Field(default=None, alias="TimeoutSeconds", gt=0)
     query_language: QueryLanguage | None = Field(default=None, alias="QueryLanguage")
     lambda_url: LambdaUrlConfig | None = Field(default=None, alias="lambda_url")
 
