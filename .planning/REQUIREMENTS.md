@@ -21,10 +21,10 @@ Requirements for v2.0 release. Each maps to roadmap phases.
 - [ ] **DSL-01**: User can configure EventBridge rules, SQS queues, and SNS subscriptions as workflow trigger sources in the DSL
 - [ ] **DSL-02**: User can invoke one workflow from another as a nested sub-workflow call
 - [ ] **DSL-03**: User can define DynamoDB tables in the DSL with auto-generated Terraform and IAM permissions
-- [ ] **DSL-04**: User can define CloudWatch Alarms (error rate, duration, throttle) in the DSL with SNS notification Terraform
-- [ ] **DSL-05**: User can configure dead letter queues for Lambda functions that exhaust all retries
+- [x] **DSL-04**: User can define CloudWatch Alarms (error rate, duration, throttle) in the DSL with SNS notification Terraform
+- [x] **DSL-05**: User can configure dead letter queues for Lambda functions that exhaust all retries
 - [x] **DSL-06**: User can set a top-level workflow timeout that terminates the entire execution if exceeded
-- [ ] **DSL-07**: User can deploy to multiple stages (dev/staging/prod) via `--stage` with stage-specific variable files
+- [x] **DSL-07**: User can deploy to multiple stages (dev/staging/prod) via `--stage` with stage-specific variable files
 
 ### Infrastructure
 
@@ -89,10 +89,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DSL-01 | Phase 40 | Pending |
 | DSL-02 | Phase 40 | Pending |
 | DSL-03 | Phase 40 | Pending |
-| DSL-04 | Phase 41 | Pending |
-| DSL-05 | Phase 41 | Pending |
+| DSL-04 | Phase 41 | Complete |
+| DSL-05 | Phase 41 | Complete |
 | DSL-06 | Phase 39 | Complete |
-| DSL-07 | Phase 41 | Pending |
+| DSL-07 | Phase 41 | Complete |
 | INFRA-01 | Phase 39 | Complete |
 | OBS-01 | Phase 44 | Pending |
 | OBS-02 | Phase 44 | Pending |

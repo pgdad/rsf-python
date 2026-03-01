@@ -119,7 +119,7 @@ Full details: `.planning/milestones/v1.7-ROADMAP.md`
 
 - [x] **Phase 39: Infrastructure Decoupling and Workflow Timeout** — Make Terraform generation optional and add top-level workflow timeout to the DSL (completed 2026-03-01)
 - [x] **Phase 40: Event Triggers, Sub-Workflows, and DynamoDB** — Extend the DSL with event source triggers, nested workflow invocation, and DynamoDB table definitions (completed 2026-03-01)
-- [ ] **Phase 41: Alerts, Dead Letter Queues, and Multi-Stage Deploy** — Add operational DSL extensions for CloudWatch alarms, Lambda DLQs, and stage-based deployments
+- [x] **Phase 41: Alerts, Dead Letter Queues, and Multi-Stage Deploy** — Add operational DSL extensions for CloudWatch alarms, Lambda DLQs, and stage-based deployments (completed 2026-03-01)
 - [ ] **Phase 42: Developer CLI Commands** — Add `rsf diff`, `rsf test`, and `rsf watch` for local development iteration
 - [ ] **Phase 43: Operational CLI Commands** — Add `rsf logs`, `rsf doctor`, and `rsf export` for deployment and operations support
 - [ ] **Phase 44: Observability** — Add OpenTelemetry tracing, cost estimation CLI, and a CloudWatch metrics dashboard example
@@ -165,11 +165,11 @@ Plans:
   2. User can configure a dead letter queue for any Lambda function in the workflow and the generated Terraform wires up the SQS DLQ and IAM permissions
   3. User can run `rsf deploy --stage prod` and the deploy uses a prod-specific variable file, keeping dev and prod infrastructure isolated
   4. Stage-specific variable files override the base configuration without modifying core workflow definition files
-**Plans:** 3 plans
+**Plans:** 3/3 plans complete
 Plans:
-- [ ] 41-01-PLAN.md -- CloudWatch alarm DSL models, validation, and Terraform generation with SNS targets
-- [ ] 41-02-PLAN.md -- Dead letter queue DSL model, validation, and Terraform generation with Lambda wiring
-- [ ] 41-03-PLAN.md -- Multi-stage deployment with --stage CLI option and stage-specific variable files
+- [x] 41-01-PLAN.md -- CloudWatch alarm DSL models, validation, and Terraform generation with SNS targets
+- [x] 41-02-PLAN.md -- Dead letter queue DSL model, validation, and Terraform generation with Lambda wiring
+- [x] 41-03-PLAN.md -- Multi-stage deployment with --stage CLI option and stage-specific variable files
 
 ### Phase 42: Developer CLI Commands
 **Goal**: Users can compare local and deployed workflow state, run workflows locally with full trace output, and watch for file changes to auto-validate and re-generate
@@ -256,7 +256,7 @@ Note: Phase 45 (Testing) depends only on Phase 39 and can be worked in parallel 
 |-------|----------------|--------|-----------|
 | 39. Infrastructure Decoupling and Workflow Timeout | 2/2 | Complete    | 2026-03-01 |
 | 40. Event Triggers, Sub-Workflows, and DynamoDB | 2/3 | Complete    | 2026-03-01 |
-| 41. Alerts, Dead Letter Queues, and Multi-Stage Deploy | 0/3 | Not started | - |
+| 41. Alerts, Dead Letter Queues, and Multi-Stage Deploy | 3/3 | Complete    | 2026-03-01 |
 | 42. Developer CLI Commands | 0/TBD | Not started | - |
 | 43. Operational CLI Commands | 0/TBD | Not started | - |
 | 44. Observability | 0/TBD | Not started | - |
