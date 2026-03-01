@@ -80,37 +80,37 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLI-01 | TBD | Pending |
-| CLI-02 | TBD | Pending |
-| CLI-03 | TBD | Pending |
-| CLI-04 | TBD | Pending |
-| CLI-05 | TBD | Pending |
-| CLI-06 | TBD | Pending |
-| DSL-01 | TBD | Pending |
-| DSL-02 | TBD | Pending |
-| DSL-03 | TBD | Pending |
-| DSL-04 | TBD | Pending |
-| DSL-05 | TBD | Pending |
-| DSL-06 | TBD | Pending |
-| DSL-07 | TBD | Pending |
-| INFRA-01 | TBD | Pending |
-| OBS-01 | TBD | Pending |
-| OBS-02 | TBD | Pending |
-| OBS-03 | TBD | Pending |
-| UI-01 | TBD | Pending |
-| UI-02 | TBD | Pending |
-| TEST-01 | TBD | Pending |
-| TEST-02 | TBD | Pending |
-| TEST-03 | TBD | Pending |
-| ECO-01 | TBD | Pending |
-| ECO-02 | TBD | Pending |
-| ECO-03 | TBD | Pending |
+| CLI-01 | Phase 42 | Pending |
+| CLI-02 | Phase 42 | Pending |
+| CLI-03 | Phase 42 | Pending |
+| CLI-04 | Phase 43 | Pending |
+| CLI-05 | Phase 43 | Pending |
+| CLI-06 | Phase 43 | Pending |
+| DSL-01 | Phase 40 | Pending |
+| DSL-02 | Phase 40 | Pending |
+| DSL-03 | Phase 40 | Pending |
+| DSL-04 | Phase 41 | Pending |
+| DSL-05 | Phase 41 | Pending |
+| DSL-06 | Phase 39 | Pending |
+| DSL-07 | Phase 41 | Pending |
+| INFRA-01 | Phase 39 | Pending |
+| OBS-01 | Phase 44 | Pending |
+| OBS-02 | Phase 44 | Pending |
+| OBS-03 | Phase 44 | Pending |
+| UI-01 | Phase 46 | Pending |
+| UI-02 | Phase 46 | Pending |
+| TEST-01 | Phase 45 | Pending |
+| TEST-02 | Phase 45 | Pending |
+| TEST-03 | Phase 45 | Pending |
+| ECO-01 | Phase 48 | Pending |
+| ECO-02 | Phase 47 | Pending |
+| ECO-03 | Phase 47 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 25 total
-- Mapped to phases: 0
-- Unmapped: 25 ⚠️
+- Mapped to phases: 25
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 after initial definition*
+*Last updated: 2026-03-01 — traceability complete after v2.0 roadmap creation*
