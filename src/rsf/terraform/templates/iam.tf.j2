@@ -51,7 +51,16 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "lambda:ListDurableExecutionsByFunction"
         ]
         Resource = aws_lambda_function.<< resource_id >>.arn
+      }<% if lambda_url_enabled and lambda_url_auth_type == "AWS_IAM" %>,
+      {
+        Sid    = "InvokeFunctionUrl"
+        Effect = "Allow"
+        Action = [
+          "lambda:InvokeFunctionUrl"
+        ]
+        Resource = aws_lambda_function.<< resource_id >>.arn
       }
+<% endif %>
     ]
   })
 }

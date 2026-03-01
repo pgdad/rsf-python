@@ -19,3 +19,10 @@ output "log_group_name" {
   description = "Name of the CloudWatch log group"
   value       = aws_cloudwatch_log_group.lambda_logs.name
 }
+<% if lambda_url_enabled %>
+
+output "function_url" {
+  description = "Lambda Function URL endpoint"
+  value       = aws_lambda_function_url.<< resource_id >>_url.function_url
+}
+<% endif %>

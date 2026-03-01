@@ -325,3 +325,90 @@ class TestGenerationGap:
             second_run[f.name] = f.read_text()
 
         assert first_run == second_run
+
+
+class TestLambdaUrlTerraform:
+    """Tests for Lambda Function URL Terraform generation."""
+
+    def test_lambda_url_none_auth_generates_resource(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            lambda_url_enabled=True,
+            lambda_url_auth_type="NONE",
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "lambda_url.tf").read_text()
+        assert "aws_lambda_function_url" in content
+        assert 'authorization_type = "NONE"' in content
+
+    def test_lambda_url_aws_iam_auth_generates_resource(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            lambda_url_enabled=True,
+            lambda_url_auth_type="AWS_IAM",
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "lambda_url.tf").read_text()
+        assert 'authorization_type = "AWS_IAM"' in content
+
+    def test_lambda_url_enabled_adds_function_url_output(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            lambda_url_enabled=True,
+            lambda_url_auth_type="NONE",
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "outputs.tf").read_text()
+        assert "function_url" in content
+        assert "aws_lambda_function_url" in content
+
+    def test_lambda_url_aws_iam_adds_invoke_iam_statement(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            lambda_url_enabled=True,
+            lambda_url_auth_type="AWS_IAM",
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "iam.tf").read_text()
+        assert content.count("Sid") == 4
+        assert "InvokeFunctionUrl" in content
+        assert "lambda:InvokeFunctionUrl" in content
+
+    def test_lambda_url_none_auth_no_extra_iam(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            lambda_url_enabled=True,
+            lambda_url_auth_type="NONE",
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "iam.tf").read_text()
+        assert content.count("Sid") == 3
+        assert "InvokeFunctionUrl" not in content
+
+    def test_lambda_url_disabled_no_extra_files(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            lambda_url_enabled=False,
+        )
+        result = generate_terraform(config, tmp_path)
+        assert len(result.generated_files) == 6
+        assert not (tmp_path / "lambda_url.tf").exists()
+
+    def test_lambda_url_default_no_extra_files(self, tmp_path):
+        config = TerraformConfig(workflow_name="test")
+        result = generate_terraform(config, tmp_path)
+        assert len(result.generated_files) == 6
+        assert not (tmp_path / "lambda_url.tf").exists()
+
+    def test_lambda_url_no_raw_jinja_delimiters(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            lambda_url_enabled=True,
+            lambda_url_auth_type="AWS_IAM",
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "lambda_url.tf").read_text()
+        assert "<<" not in content
+        assert ">>" not in content
+        assert "<%" not in content
+        assert "%>" not in content
