@@ -117,7 +117,7 @@ Full details: `.planning/milestones/v1.7-ROADMAP.md`
 
 **Milestone Goal:** Expand RSF from a code generation toolkit into a full development platform with new CLI commands, event triggers, observability, testing utilities, IDE integration, and optional infrastructure generation.
 
-- [ ] **Phase 39: Infrastructure Decoupling and Workflow Timeout** — Make Terraform generation optional and add top-level workflow timeout to the DSL
+- [x] **Phase 39: Infrastructure Decoupling and Workflow Timeout** — Make Terraform generation optional and add top-level workflow timeout to the DSL (completed 2026-03-01)
 - [ ] **Phase 40: Event Triggers, Sub-Workflows, and DynamoDB** — Extend the DSL with event source triggers, nested workflow invocation, and DynamoDB table definitions
 - [ ] **Phase 41: Alerts, Dead Letter Queues, and Multi-Stage Deploy** — Add operational DSL extensions for CloudWatch alarms, Lambda DLQs, and stage-based deployments
 - [ ] **Phase 42: Developer CLI Commands** — Add `rsf diff`, `rsf test`, and `rsf watch` for local development iteration
@@ -246,7 +246,7 @@ Note: Phase 45 (Testing) depends only on Phase 39 and can be worked in parallel 
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 39. Infrastructure Decoupling and Workflow Timeout | 1/2 | In Progress|  |
+| 39. Infrastructure Decoupling and Workflow Timeout | 2/2 | Complete   | 2026-03-01 |
 | 40. Event Triggers, Sub-Workflows, and DynamoDB | 0/TBD | Not started | - |
 | 41. Alerts, Dead Letter Queues, and Multi-Stage Deploy | 0/TBD | Not started | - |
 | 42. Developer CLI Commands | 0/TBD | Not started | - |

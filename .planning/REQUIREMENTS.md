@@ -23,7 +23,7 @@ Requirements for v2.0 release. Each maps to roadmap phases.
 - [ ] **DSL-03**: User can define DynamoDB tables in the DSL with auto-generated Terraform and IAM permissions
 - [ ] **DSL-04**: User can define CloudWatch Alarms (error rate, duration, throttle) in the DSL with SNS notification Terraform
 - [ ] **DSL-05**: User can configure dead letter queues for Lambda functions that exhaust all retries
-- [ ] **DSL-06**: User can set a top-level workflow timeout that terminates the entire execution if exceeded
+- [x] **DSL-06**: User can set a top-level workflow timeout that terminates the entire execution if exceeded
 - [ ] **DSL-07**: User can deploy to multiple stages (dev/staging/prod) via `--stage` with stage-specific variable files
 
 ### Infrastructure
@@ -91,7 +91,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DSL-03 | Phase 40 | Pending |
 | DSL-04 | Phase 41 | Pending |
 | DSL-05 | Phase 41 | Pending |
-| DSL-06 | Phase 39 | Pending |
+| DSL-06 | Phase 39 | Complete |
 | DSL-07 | Phase 41 | Pending |
 | INFRA-01 | Phase 39 | Complete |
 | OBS-01 | Phase 44 | Pending |
