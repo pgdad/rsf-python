@@ -30,6 +30,7 @@ TEMPLATE_FILES = {
     "backend.tf": "backend.tf.j2",
     "lambda_url.tf": "lambda_url.tf.j2",
     "triggers.tf": "triggers.tf.j2",
+    "dynamodb.tf": "dynamodb.tf.j2",
 }
 
 
@@ -47,6 +48,8 @@ class TerraformConfig:
     lambda_url_auth_type: str = "NONE"
     triggers: list[dict[str, Any]] = field(default_factory=list)
     has_sqs_triggers: bool = False
+    dynamodb_tables: list[dict[str, Any]] = field(default_factory=list)
+    has_dynamodb_tables: bool = False
 
 
 @dataclass
@@ -87,6 +90,8 @@ def generate_terraform(
         "lambda_url_auth_type": config.lambda_url_auth_type,
         "triggers": config.triggers,
         "has_sqs_triggers": config.has_sqs_triggers,
+        "dynamodb_tables": config.dynamodb_tables,
+        "has_dynamodb_tables": config.has_dynamodb_tables,
     }
 
     result = TerraformResult()
@@ -94,6 +99,10 @@ def generate_terraform(
     for filename, template_name in TEMPLATE_FILES.items():
         # Skip triggers.tf when no triggers configured
         if filename == "triggers.tf" and not config.triggers:
+            continue
+
+        # Skip dynamodb.tf when no DynamoDB tables configured
+        if filename == "dynamodb.tf" and not config.dynamodb_tables:
             continue
 
         # Skip lambda_url.tf when not enabled

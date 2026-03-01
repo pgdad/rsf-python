@@ -62,6 +62,27 @@ resource "aws_iam_role_policy" "lambda_policy" {
         ]
         Resource = "*"
       }
+<% endif %><% if has_dynamodb_tables %>,
+      {
+        Sid    = "DynamoDBAccess"
+        Effect = "Allow"
+        Action = [
+          "dynamodb:GetItem",
+          "dynamodb:PutItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Query",
+          "dynamodb:Scan",
+          "dynamodb:BatchGetItem",
+          "dynamodb:BatchWriteItem"
+        ]
+        Resource = [
+<% for table in dynamodb_tables %>
+          aws_dynamodb_table.<< resource_id >>_<< table.table_name | replace('-', '_') >>.arn<% if not loop.last %>,<% endif %>
+
+<% endfor %>
+        ]
+      }
 <% endif %><% if lambda_url_enabled and lambda_url_auth_type == "AWS_IAM" %>,
       {
         Sid    = "InvokeFunctionUrl"

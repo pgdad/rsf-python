@@ -425,6 +425,153 @@ class TestTriggerGeneration:
         assert "events.amazonaws.com" in content
 
 
+class TestDynamoDBGeneration:
+    """Tests for DynamoDB Terraform generation."""
+
+    def test_dynamodb_table_creates_resource(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dynamodb_tables=[
+                {
+                    "table_name": "orders",
+                    "partition_key": {"name": "order_id", "type": "S"},
+                    "billing_mode": "PAY_PER_REQUEST",
+                }
+            ],
+            has_dynamodb_tables=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "dynamodb.tf").read_text()
+        assert "aws_dynamodb_table" in content
+        assert "orders" in content
+
+    def test_dynamodb_table_with_sort_key(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dynamodb_tables=[
+                {
+                    "table_name": "orders",
+                    "partition_key": {"name": "order_id", "type": "S"},
+                    "sort_key": {"name": "created_at", "type": "N"},
+                    "billing_mode": "PAY_PER_REQUEST",
+                }
+            ],
+            has_dynamodb_tables=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "dynamodb.tf").read_text()
+        assert "hash_key" in content
+        assert "range_key" in content
+        assert "order_id" in content
+        assert "created_at" in content
+
+    def test_dynamodb_provisioned_billing(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dynamodb_tables=[
+                {
+                    "table_name": "orders",
+                    "partition_key": {"name": "id", "type": "S"},
+                    "billing_mode": "PROVISIONED",
+                    "read_capacity": 5,
+                    "write_capacity": 10,
+                }
+            ],
+            has_dynamodb_tables=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "dynamodb.tf").read_text()
+        assert "PROVISIONED" in content
+        assert "read_capacity" in content
+        assert "write_capacity" in content
+
+    def test_dynamodb_pay_per_request_no_capacity(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dynamodb_tables=[
+                {
+                    "table_name": "orders",
+                    "partition_key": {"name": "id", "type": "S"},
+                    "billing_mode": "PAY_PER_REQUEST",
+                }
+            ],
+            has_dynamodb_tables=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "dynamodb.tf").read_text()
+        assert "PAY_PER_REQUEST" in content
+        # PAY_PER_REQUEST should NOT have read/write capacity
+        assert "read_capacity" not in content
+        assert "write_capacity" not in content
+
+    def test_multiple_dynamodb_tables(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dynamodb_tables=[
+                {
+                    "table_name": "orders",
+                    "partition_key": {"name": "order_id", "type": "S"},
+                    "billing_mode": "PAY_PER_REQUEST",
+                },
+                {
+                    "table_name": "inventory",
+                    "partition_key": {"name": "product_id", "type": "S"},
+                    "billing_mode": "PAY_PER_REQUEST",
+                },
+            ],
+            has_dynamodb_tables=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "dynamodb.tf").read_text()
+        assert "orders" in content
+        assert "inventory" in content
+
+    def test_no_dynamodb_no_dynamodb_tf(self, tmp_path):
+        config = TerraformConfig(workflow_name="test")
+        result = generate_terraform(config, tmp_path)
+        assert not (tmp_path / "dynamodb.tf").exists()
+        assert len(result.generated_files) == 6  # standard files only
+
+    def test_dynamodb_produces_iam_permissions(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dynamodb_tables=[
+                {
+                    "table_name": "orders",
+                    "partition_key": {"name": "id", "type": "S"},
+                    "billing_mode": "PAY_PER_REQUEST",
+                }
+            ],
+            has_dynamodb_tables=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "iam.tf").read_text()
+        assert "DynamoDBAccess" in content
+        assert "dynamodb:GetItem" in content
+        assert "dynamodb:PutItem" in content
+        assert "dynamodb:UpdateItem" in content
+        assert "dynamodb:DeleteItem" in content
+        assert "dynamodb:Query" in content
+        assert "dynamodb:Scan" in content
+
+    def test_dynamodb_iam_includes_batch_operations(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dynamodb_tables=[
+                {
+                    "table_name": "orders",
+                    "partition_key": {"name": "id", "type": "S"},
+                    "billing_mode": "PAY_PER_REQUEST",
+                }
+            ],
+            has_dynamodb_tables=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "iam.tf").read_text()
+        assert "dynamodb:BatchGetItem" in content
+        assert "dynamodb:BatchWriteItem" in content
+
+
 class TestLambdaUrlTerraform:
     """Tests for Lambda Function URL Terraform generation."""
 

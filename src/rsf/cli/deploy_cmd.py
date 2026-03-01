@@ -115,6 +115,23 @@ def _deploy_full(
             triggers_config.append(trigger_dict)
     has_sqs = any(t["type"] == "sqs" for t in triggers_config)
 
+    # Build DynamoDB config from DSL definition
+    dynamodb_config: list[dict] = []
+    if hasattr(definition, "dynamodb_tables") and definition.dynamodb_tables:
+        for table in definition.dynamodb_tables:
+            table_dict: dict = {
+                "table_name": table.table_name,
+                "partition_key": {"name": table.partition_key.name, "type": table.partition_key.type.value},
+                "billing_mode": table.billing_mode.value,
+            }
+            if table.sort_key:
+                table_dict["sort_key"] = {"name": table.sort_key.name, "type": table.sort_key.type.value}
+            if table.read_capacity is not None:
+                table_dict["read_capacity"] = table.read_capacity
+            if table.write_capacity is not None:
+                table_dict["write_capacity"] = table.write_capacity
+            dynamodb_config.append(table_dict)
+
     with Status("[bold]Generating Terraform files...[/bold]", console=console):
         tf_result = generate_terraform(
             config=TerraformConfig(
@@ -123,6 +140,8 @@ def _deploy_full(
                 lambda_url_auth_type=lambda_url_auth_type,
                 triggers=triggers_config,
                 has_sqs_triggers=has_sqs,
+                dynamodb_tables=dynamodb_config,
+                has_dynamodb_tables=bool(dynamodb_config),
             ),
             output_dir=tf_dir,
         )
