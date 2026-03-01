@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from rsf.dsl import (
     AlarmConfig,
+    DeadLetterQueueConfig,
     DurationAlarm,
     ErrorRateAlarm,
     StateMachineDefinition,
@@ -1044,3 +1045,80 @@ class TestAlarmConfig:
     def test_state_machine_without_alarms_backward_compat(self):
         sm = StateMachineDefinition.model_validate(self._base())
         assert sm.alarms is None
+
+
+class TestDLQConfig:
+    """Tests for dead letter queue DSL models."""
+
+    def _base(self, **extra):
+        data = {
+            "StartAt": "S",
+            "States": {"S": {"Type": "Succeed"}},
+        }
+        data.update(extra)
+        return data
+
+    def test_dlq_enabled_default_max_receive_count(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(dead_letter_queue={"enabled": True})
+        )
+        assert sm.dead_letter_queue is not None
+        assert sm.dead_letter_queue.enabled is True
+        assert sm.dead_letter_queue.max_receive_count == 3
+
+    def test_dlq_custom_max_receive_count(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(dead_letter_queue={"enabled": True, "max_receive_count": 5})
+        )
+        assert sm.dead_letter_queue.max_receive_count == 5
+
+    def test_dlq_custom_queue_name(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                dead_letter_queue={"enabled": True, "queue_name": "my-custom-dlq"}
+            )
+        )
+        assert sm.dead_letter_queue.queue_name == "my-custom-dlq"
+
+    def test_dlq_max_receive_count_must_be_at_least_1(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(
+                    dead_letter_queue={"enabled": True, "max_receive_count": 0}
+                )
+            )
+
+    def test_dlq_max_receive_count_must_be_at_most_1000(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(
+                    dead_letter_queue={"enabled": True, "max_receive_count": 1001}
+                )
+            )
+
+    def test_dlq_disabled(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(dead_letter_queue={"enabled": False})
+        )
+        assert sm.dead_letter_queue.enabled is False
+
+    def test_dlq_rejects_extra_fields(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(
+                    dead_letter_queue={
+                        "enabled": True,
+                        "unknown_field": "bad",
+                    }
+                )
+            )
+
+    def test_state_machine_with_dlq_parses(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(dead_letter_queue={"enabled": True})
+        )
+        assert sm.dead_letter_queue is not None
+
+    def test_state_machine_without_dlq_backward_compat(self):
+        sm = StateMachineDefinition.model_validate(self._base())
+        assert sm.dead_letter_queue is None

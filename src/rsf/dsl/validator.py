@@ -53,6 +53,7 @@ def validate_definition(definition: StateMachineDefinition) -> list[ValidationEr
     _validate_sub_workflows(definition, errors)
     _validate_dynamodb_tables(definition, errors)
     _validate_alarms(definition, errors)
+    _validate_dlq(definition, errors)
     _validate_state_machine(
         states=definition.states,
         start_at=definition.start_at,
@@ -239,6 +240,30 @@ def _validate_alarms(
             )
         else:
             seen_types[alarm.type] = i
+
+
+def _validate_dlq(
+    definition: StateMachineDefinition,
+    errors: list[ValidationError],
+) -> None:
+    """Validate dead letter queue configuration."""
+    if definition.dead_letter_queue is None:
+        return
+
+    if not definition.dead_letter_queue.enabled:
+        return
+
+    if definition.dead_letter_queue.max_receive_count > 100:
+        errors.append(
+            ValidationError(
+                message=(
+                    f"DLQ max_receive_count {definition.dead_letter_queue.max_receive_count} "
+                    "is unusually high — messages will retry many times before reaching DLQ"
+                ),
+                path="dead_letter_queue.max_receive_count",
+                severity="warning",
+            )
+        )
 
 
 def _collect_sub_workflow_refs(

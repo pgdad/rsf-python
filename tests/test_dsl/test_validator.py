@@ -610,3 +610,38 @@ class TestAlarmValidation:
         )
         warnings = [e for e in errors if e.severity == "warning" and "multiple" in e.message.lower()]
         assert len(warnings) >= 1
+
+
+class TestDLQValidation:
+    """Tests for semantic validation of dead letter queue configurations."""
+
+    def test_valid_dlq_enabled_no_errors(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "dead_letter_queue": {"enabled": True},
+            }
+        )
+        assert not any("dlq" in e.message.lower() or "dead_letter" in e.message.lower() for e in errors if e.severity == "error")
+
+    def test_dlq_disabled_no_errors(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "dead_letter_queue": {"enabled": False},
+            }
+        )
+        assert not any("dlq" in e.message.lower() or "max_receive" in e.message.lower() for e in errors)
+
+    def test_dlq_high_max_receive_count_produces_warning(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "dead_letter_queue": {"enabled": True, "max_receive_count": 500},
+            }
+        )
+        warnings = [e for e in errors if e.severity == "warning" and "max_receive_count" in e.message]
+        assert len(warnings) >= 1

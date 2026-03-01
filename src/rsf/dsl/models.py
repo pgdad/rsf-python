@@ -293,6 +293,16 @@ AlarmConfig = Annotated[
 ]
 
 
+class DeadLetterQueueConfig(BaseModel):
+    """Dead letter queue configuration for the workflow Lambda function."""
+
+    model_config = {"extra": "forbid"}
+
+    enabled: bool = True
+    max_receive_count: int = Field(default=3, ge=1, le=1000)
+    queue_name: str | None = None  # Optional: custom queue name (default: {function_name}-dlq)
+
+
 class SubWorkflowRef(BaseModel):
     """A reference to a child workflow that can be invoked as a sub-execution."""
 
@@ -384,6 +394,7 @@ class StateMachineDefinition(BaseModel):
     sub_workflows: list[SubWorkflowRef] | None = Field(default=None, alias="sub_workflows")
     dynamodb_tables: list[DynamoDBTableConfig] | None = Field(default=None, alias="dynamodb_tables")
     alarms: list[AlarmConfig] | None = Field(default=None, alias="alarms")
+    dead_letter_queue: DeadLetterQueueConfig | None = Field(default=None, alias="dead_letter_queue")
 
     @model_validator(mode="after")
     def _resolve_states(self) -> "StateMachineDefinition":
