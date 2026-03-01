@@ -253,3 +253,38 @@ class TestRecursiveBranchValidation:
             }
         )
         assert any("Ghost" in e.message for e in errors)
+
+
+class TestTimeoutValidation:
+    """Tests for semantic validation of timeout values."""
+
+    def test_valid_timeout_no_warning(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "TimeoutSeconds": 300,
+                "States": {"T": {"Type": "Task", "End": True}},
+            }
+        )
+        assert len(errors) == 0
+
+    def test_no_timeout_no_warning(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+            }
+        )
+        assert len(errors) == 0
+
+    def test_extremely_large_timeout_warning(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "TimeoutSeconds": 2592001,  # >30 days
+                "States": {"T": {"Type": "Task", "End": True}},
+            }
+        )
+        warnings = [e for e in errors if e.severity == "warning"]
+        assert len(warnings) == 1
+        assert "30 days" in warnings[0].message

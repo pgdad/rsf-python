@@ -527,3 +527,43 @@ class TestLambdaUrlConfig:
                     }
                 )
             )
+
+
+class TestWorkflowTimeout:
+    """Tests for top-level TimeoutSeconds field on StateMachineDefinition."""
+
+    def _base(self, **overrides):
+        data = {
+            "StartAt": "T",
+            "States": {"T": {"Type": "Task", "End": True}},
+        }
+        data.update(overrides)
+        return data
+
+    def test_valid_timeout_parsed(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(TimeoutSeconds=300)
+        )
+        assert sm.timeout_seconds == 300
+
+    def test_zero_timeout_rejected(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(TimeoutSeconds=0)
+            )
+
+    def test_negative_timeout_rejected(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(TimeoutSeconds=-5)
+            )
+
+    def test_no_timeout_optional(self):
+        sm = StateMachineDefinition.model_validate(self._base())
+        assert sm.timeout_seconds is None
+
+    def test_large_timeout_accepted(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(TimeoutSeconds=2592001)  # >30 days
+        )
+        assert sm.timeout_seconds == 2592001

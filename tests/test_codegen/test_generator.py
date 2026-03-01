@@ -316,3 +316,58 @@ class TestGenerateChoiceWorkflow:
         assert "'ProcessRefund'" in code
         assert "'AutoApprove'" in code
         assert "'ManualReview'" in code
+
+
+class TestTimeoutCodeGeneration:
+    """Test that timeout enforcement code is correctly generated."""
+
+    def _make_workflow(self, tmp_path, timeout_seconds=None):
+        """Create a workflow YAML file with optional TimeoutSeconds."""
+        import yaml
+
+        data = {
+            "rsf_version": "1.0",
+            "StartAt": "DoWork",
+            "States": {
+                "DoWork": {"Type": "Task", "End": True},
+            },
+        }
+        if timeout_seconds is not None:
+            data["TimeoutSeconds"] = timeout_seconds
+
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(yaml.dump(data), encoding="utf-8")
+        return wf
+
+    def test_timeout_code_present_when_configured(self, tmp_path):
+        """When TimeoutSeconds is set, orchestrator contains timeout enforcement."""
+        wf = self._make_workflow(tmp_path, timeout_seconds=300)
+        sm = load_definition(wf)
+        result = generate(sm, wf, tmp_path / "output")
+        code = result.orchestrator_path.read_text()
+
+        assert "import time" in code
+        assert "time.monotonic()" in code
+        assert "WorkflowTimeoutError" in code
+        assert "300" in code
+
+    def test_no_timeout_code_when_not_configured(self, tmp_path):
+        """When TimeoutSeconds is not set, orchestrator has no timeout code."""
+        wf = self._make_workflow(tmp_path, timeout_seconds=None)
+        sm = load_definition(wf)
+        result = generate(sm, wf, tmp_path / "output")
+        code = result.orchestrator_path.read_text()
+
+        assert "WorkflowTimeoutError" not in code or "class WorkflowTimeoutError" in code
+        # Should NOT have time.monotonic() tracking
+        assert "_workflow_start_time" not in code
+
+    def test_workflow_timeout_error_class_when_timeout_set(self, tmp_path):
+        """WorkflowTimeoutError class is defined when timeout is configured."""
+        wf = self._make_workflow(tmp_path, timeout_seconds=600)
+        sm = load_definition(wf)
+        result = generate(sm, wf, tmp_path / "output")
+        code = result.orchestrator_path.read_text()
+
+        assert "class WorkflowTimeoutError" in code
+        assert "timeout_seconds" in code
