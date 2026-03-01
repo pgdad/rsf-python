@@ -171,3 +171,40 @@ class TestGenerateSubcommand:
         assert result.exit_code == 0
         # Summary line must mention handler count
         assert "handler" in result.output.lower()
+
+
+class TestGenerateNoInfra:
+    """Tests for the --no-infra flag on `rsf generate`."""
+
+    def test_generate_no_infra_exits_0_and_creates_orchestrator(self, tmp_path: Path) -> None:
+        """rsf generate --no-infra with a valid workflow exits 0 and generates orchestrator.py."""
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(VALID_WORKFLOW, encoding="utf-8")
+        out = tmp_path / "out"
+
+        result = runner.invoke(app, ["generate", "--no-infra", str(wf), "--output", str(out)])
+
+        assert result.exit_code == 0, f"Expected exit 0, got {result.exit_code}: {result.output}"
+        assert (out / "orchestrator.py").exists(), "orchestrator.py should be created"
+
+    def test_generate_no_infra_mentions_skip(self, tmp_path: Path) -> None:
+        """rsf generate --no-infra output mentions that infrastructure generation was skipped."""
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(VALID_WORKFLOW, encoding="utf-8")
+        out = tmp_path / "out"
+
+        result = runner.invoke(app, ["generate", "--no-infra", str(wf), "--output", str(out)])
+
+        assert result.exit_code == 0
+        assert "--no-infra" in result.output or "no-infra" in result.output.lower() or "infrastructure" in result.output.lower()
+
+    def test_generate_no_infra_with_output_dir(self, tmp_path: Path) -> None:
+        """rsf generate --no-infra --output respects the output directory."""
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(VALID_WORKFLOW, encoding="utf-8")
+        out = tmp_path / "custom_out"
+
+        result = runner.invoke(app, ["generate", "--no-infra", str(wf), "--output", str(out)])
+
+        assert result.exit_code == 0, f"Expected exit 0: {result.output}"
+        assert (out / "orchestrator.py").exists(), "orchestrator.py in custom output dir"

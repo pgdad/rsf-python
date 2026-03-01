@@ -246,3 +246,79 @@ def test_deploy_help_shows_all_options(monkeypatch: pytest.MonkeyPatch) -> None:
     assert "--code-only" in plain
     assert "--auto-approve" in plain
     assert "--tf-dir" in plain
+
+
+# ── --no-infra flag tests ─────────────────────────────────────────────────────
+
+
+def test_deploy_no_infra_skips_terraform(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """rsf deploy --no-infra generates code but does NOT call terraform."""
+    monkeypatch.chdir(workflow_dir)
+
+    with (
+        patch("rsf.cli.deploy_cmd.subprocess.run") as mock_run,
+        patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+    ):
+        mock_codegen.return_value = MagicMock(
+            orchestrator_path=workflow_dir / "orchestrator.py",
+            handler_paths=[],
+            skipped_handlers=[],
+        )
+
+        result = runner.invoke(app, ["deploy", "--no-infra", "workflow.yaml"])
+
+    assert result.exit_code == 0, f"Unexpected exit: {result.output}"
+    # subprocess.run should NOT have been called (no terraform)
+    mock_run.assert_not_called()
+    # Output should mention infra was skipped
+    assert "skipped" in result.output.lower() or "no-infra" in result.output.lower()
+
+
+def test_deploy_no_infra_and_code_only_mutually_exclusive(
+    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """rsf deploy --no-infra --code-only exits 1 with a mutual exclusion error."""
+    monkeypatch.chdir(workflow_dir)
+
+    result = runner.invoke(app, ["deploy", "--no-infra", "--code-only", "workflow.yaml"])
+
+    assert result.exit_code == 1, f"Expected exit 1, got: {result.exit_code}: {result.output}"
+    assert "mutually exclusive" in result.output.lower() or "no-infra" in result.output.lower()
+
+
+def test_deploy_without_no_infra_still_calls_terraform(
+    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """rsf deploy (without --no-infra) still calls terraform as before."""
+    monkeypatch.chdir(workflow_dir)
+
+    with (
+        patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
+        patch("rsf.cli.deploy_cmd.subprocess.run") as mock_run,
+        patch("rsf.cli.deploy_cmd.generate_terraform") as mock_tf,
+        patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+    ):
+        mock_codegen.return_value = MagicMock(
+            orchestrator_path=workflow_dir / "orchestrator.py",
+            handler_paths=[],
+            skipped_handlers=[],
+        )
+        mock_tf.return_value = MagicMock(generated_files=[], skipped_files=[])
+        mock_run.return_value = MagicMock(returncode=0)
+
+        result = runner.invoke(app, ["deploy", "workflow.yaml"])
+
+    assert result.exit_code == 0, f"Unexpected exit: {result.output}"
+    # terraform should have been called (init + apply)
+    assert mock_run.call_count == 2
+
+
+def test_deploy_help_shows_no_infra_option() -> None:
+    """rsf deploy --help shows --no-infra option."""
+    result = runner.invoke(app, ["deploy", "--help"])
+
+    assert result.exit_code == 0
+    import re
+
+    plain = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
+    assert "--no-infra" in plain
