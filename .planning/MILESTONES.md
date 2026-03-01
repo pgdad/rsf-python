@@ -1,5 +1,22 @@
 # Milestones
 
+## v1.7 Lambda Function URL Support (Shipped: 2026-03-01)
+
+**Phases completed:** 3 phases (36-38), 6 plans
+**Files changed:** 35 | **Insertions:** 1,325
+**Timeline:** 2026-03-01
+**Git range:** 87bc283..526e7f1
+
+**Key accomplishments:**
+- LambdaUrlConfig DSL model with NONE/AWS_IAM auth types, Pydantic validation, and extra=forbid
+- Lambda Function URL Terraform generation: lambda_url.tf.j2 template, conditional IAM InvokeFunctionUrl permission, conditional function_url output
+- End-to-end deploy wiring: DSL lambda_url config → deploy_cmd.py → TerraformConfig → Jinja2 templates
+- Working lambda-url-trigger example with 3-state webhook workflow, 19 local tests, and real-AWS integration test
+- Tutorial Steps 12-14 extending docs/tutorial.md with Lambda URL YAML config, deploy, and curl POST walkthrough
+- 779 total non-integration tests passing (16 new for Lambda URL features)
+
+---
+
 ## v1.5 PyPI Packaging & Distribution (Shipped: 2026-02-28)
 
 **Phases completed:** 3 phases (25-27), 3 plans

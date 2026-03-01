@@ -10,7 +10,7 @@ Users can define, visualize, generate, deploy, and debug state machine workflows
 
 ## Current State
 
-v1.6 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. Entire codebase passes strict ruff linting with zero suppressions. All 744 non-AWS tests pass in unified pytest invocation. 18,696 LOC Python.
+v1.7 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. Entire codebase passes strict ruff linting with zero suppressions. All 779 non-AWS tests pass in unified pytest invocation. Optional Lambda Function URL support enables HTTP POST triggers for durable workflow executions. Six real-world example workflows with automated integration testing prove end-to-end correctness on real AWS.
 
 ## Requirements
 
@@ -54,21 +54,16 @@ v1.6 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled
 - ✓ README as polished landing page with badges, quick-start, and hero screenshots — v1.5
 - ✓ Zero ruff linting violations with no ignored rules or exclusions — v1.6
 - ✓ All 744 non-AWS tests pass in unified pytest invocation — v1.6
+- ✓ Optional lambda_url DSL field with NONE/AWS_IAM auth types and Pydantic validation — v1.7
+- ✓ Lambda Function URL Terraform generation (lambda_url.tf, conditional IAM, conditional outputs) — v1.7
+- ✓ Lambda URL trigger example workflow with 19 local tests and real-AWS integration test — v1.7
+- ✓ Tutorial Steps 12-14 covering Lambda URL YAML config, deploy, and curl POST invocation — v1.7
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-## Current Milestone: v1.7 Lambda Function URL Support
-
-**Goal:** Add optional Lambda Function URL support so users can trigger durable workflow executions via HTTP POST, with a new example and tutorial.
-
-**Target features:**
-- Optional `lambda_url` DSL field with configurable auth type (NONE or AWS_IAM)
-- Terraform generation of `aws_lambda_function_url` resource when enabled
-- POST to Lambda URL triggers durable execution
-- New example workflow demonstrating Lambda URL invocation
-- New tutorial entry covering Lambda URL setup and usage
+(No active milestone — run `/gsd:new-milestone` to start next version)
 
 ### Out of Scope
 
@@ -98,6 +93,7 @@ v1.6 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled
 - Shipped v1.4 with 15 automated Playwright screenshots embedded in example READMEs and tutorials
 - Shipped v1.5 with PyPI packaging, CI/CD, and README landing page
 - Shipped v1.6 with zero ruff violations and 744 non-AWS tests passing
+- Shipped v1.7 with Lambda Function URL support (DSL, Terraform, example, tutorial) and 779 non-AWS tests
 
 ## Constraints
 
@@ -134,6 +130,9 @@ v1.6 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled
 | Separate ci.yml and release.yml workflows | Different triggers, different permission scopes (id-token: write only on publish) | ✓ Good |
 | OIDC trusted publisher for PyPI | Zero secrets stored in repo; PyPI and GitHub exchange OIDC token at publish time | ✓ Good |
 | Absolute URLs in README for PyPI | PyPI does not resolve relative paths; raw.githubusercontent.com for images | ✓ Good |
+| snake_case alias for RSF extension fields | `lambda_url` uses snake_case (matching `rsf_version`), distinguishing RSF extensions from PascalCase ASL fields | ✓ Good |
+| Required enabled + auth_type fields (no defaults) | Forces explicit configuration; prevents accidental public endpoints | ✓ Good |
+| Conditional Terraform file generation | lambda_url.tf skipped entirely when disabled, rather than rendered empty | ✓ Good |
 
 ---
-*Last updated: 2026-03-01 after v1.7 milestone started*
+*Last updated: 2026-03-01 after v1.7 milestone*
