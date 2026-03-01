@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.7
-milestone_name: Lambda Function URL Support
-status: unknown
-last_updated: "2026-03-01T17:31:47.999Z"
+milestone: v2.0
+milestone_name: Comprehensive Enhancement Suite
+status: defining_requirements
+last_updated: "2026-03-01"
 progress:
-  total_phases: 5
-  completed_phases: 4
-  total_plans: 9
-  completed_plans: 8
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -18,16 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** v1.7 complete — Lambda Function URL Support shipped
+**Current focus:** v2.0 — Comprehensive Enhancement Suite (25 features)
 
 ## Current Position
 
-Phase: 38 of 38 (Tutorial)
-Plan: 38-01 complete (all plans done)
-Status: Complete
-Last activity: 2026-03-01 — Phase 38 complete (Lambda URL tutorial)
-
-Progress: [██████████] 100% (v1.7)
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-01 — Milestone v2.0 started
 
 ## Performance Metrics
 
@@ -55,10 +53,7 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ### Roadmap Evolution
 
-- v1.7 roadmap created: 3 phases (36-38) covering Lambda Function URL support
-  - Phase 36: DSL field + Terraform generation (DSL-01, DSL-02, TF-01, TF-02, TF-03)
-  - Phase 37: Example workflow with local + integration tests (EX-01, EX-02, EX-03)
-  - Phase 38: Tutorial (TUT-01, TUT-02)
+- v2.0 roadmap: 25 requirements across 7 categories (CLI, DSL, Infrastructure, Observability, UI, Testing, Ecosystem)
 
 ### Pending Todos
 
@@ -71,5 +66,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: v1.7 milestone complete — all 3 phases (36-38) shipped
+Stopped at: v2.0 milestone started — defining requirements
 Resume file: None

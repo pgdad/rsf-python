@@ -63,7 +63,18 @@ v1.7 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled
 
 <!-- Current scope. Building toward these. -->
 
-(No active milestone — run `/gsd:new-milestone` to start next version)
+## Current Milestone: v2.0 Comprehensive Enhancement Suite
+
+**Goal:** Expand RSF from a code generation toolkit into a full development platform with new CLI commands, event triggers, observability, testing utilities, IDE integration, and optional infrastructure generation.
+
+**Target features:**
+- 6 new CLI commands (diff, test, watch, logs, doctor, export)
+- 7 DSL extensions (triggers, sub-workflows, DynamoDB, alerts, DLQ, timeout, stages)
+- Optional Terraform generation (infrastructure decoupled from code generation)
+- OpenTelemetry tracing, cost estimation, metrics dashboard
+- Inspector replay, SchemaStore publishing
+- Property-based testing, chaos testing, snapshot testing
+- VS Code extension, workflow templates, GitHub Actions
 
 ### Out of Scope
 
@@ -72,7 +83,7 @@ v1.7 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled
 - Go or other language runtime support — Python-only implementation
 - Team collaboration features — local-first tool, no multi-user editing
 - Hosted web service with authentication — runs on developer's machine
-- VS Code extension — CLI + web UI is the interface
+- ~~VS Code extension~~ — Moved to Active for v2.0 (ECO-01)
 - Direct AWS Console integration — operates independently
 - Mobile app — desktop developer tool
 - LocalStack / moto mocking of durable functions — Lambda Durable Functions (re:Invent 2025) not supported by either framework
@@ -135,4 +146,4 @@ v1.7 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled
 | Conditional Terraform file generation | lambda_url.tf skipped entirely when disabled, rather than rendered empty | ✓ Good |
 
 ---
-*Last updated: 2026-03-01 after v1.7 milestone*
+*Last updated: 2026-03-01 after v2.0 milestone started*
