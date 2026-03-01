@@ -48,6 +48,14 @@ class DynamoDBAttributeType(str, Enum):
     B = "B"  # Binary
 
 
+class AlarmType(str, Enum):
+    """CloudWatch alarm types for workflow monitoring."""
+
+    ERROR_RATE = "error_rate"
+    DURATION = "duration"
+    THROTTLE = "throttle"
+
+
 # All 39 comparison operators for Choice rules
 COMPARISON_OPERATORS: frozenset[str] = frozenset(
     {

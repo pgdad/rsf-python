@@ -4,6 +4,9 @@ import pytest
 from pydantic import ValidationError
 
 from rsf.dsl import (
+    AlarmConfig,
+    DurationAlarm,
+    ErrorRateAlarm,
     StateMachineDefinition,
     TaskState,
     PassState,
@@ -16,6 +19,7 @@ from rsf.dsl import (
     BooleanAndRule,
     BooleanNotRule,
     LambdaUrlAuthType,
+    ThrottleAlarm,
 )
 
 
@@ -897,3 +901,146 @@ class TestWorkflowTimeout:
             self._base(TimeoutSeconds=2592001)  # >30 days
         )
         assert sm.timeout_seconds == 2592001
+
+
+class TestAlarmConfig:
+    """Tests for CloudWatch alarm DSL models."""
+
+    def _base(self, **extra):
+        data = {
+            "StartAt": "S",
+            "States": {"S": {"Type": "Succeed"}},
+        }
+        data.update(extra)
+        return data
+
+    def test_error_rate_alarm_parses(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                alarms=[
+                    {
+                        "type": "error_rate",
+                        "threshold": 5,
+                        "period": 300,
+                        "evaluation_periods": 1,
+                    }
+                ]
+            )
+        )
+        assert sm.alarms is not None
+        assert len(sm.alarms) == 1
+        alarm = sm.alarms[0]
+        assert isinstance(alarm, ErrorRateAlarm)
+        assert alarm.threshold == 5
+        assert alarm.period == 300
+        assert alarm.evaluation_periods == 1
+
+    def test_duration_alarm_parses(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                alarms=[
+                    {
+                        "type": "duration",
+                        "threshold": 5000,
+                        "period": 300,
+                        "evaluation_periods": 1,
+                    }
+                ]
+            )
+        )
+        alarm = sm.alarms[0]
+        assert isinstance(alarm, DurationAlarm)
+        assert alarm.threshold == 5000
+
+    def test_throttle_alarm_parses(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                alarms=[
+                    {
+                        "type": "throttle",
+                        "threshold": 10,
+                        "period": 300,
+                        "evaluation_periods": 1,
+                    }
+                ]
+            )
+        )
+        alarm = sm.alarms[0]
+        assert isinstance(alarm, ThrottleAlarm)
+        assert alarm.threshold == 10
+
+    def test_alarm_with_sns_topic_arn(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                alarms=[
+                    {
+                        "type": "error_rate",
+                        "threshold": 5,
+                        "sns_topic_arn": "arn:aws:sns:us-east-2:123456789012:MyAlerts",
+                    }
+                ]
+            )
+        )
+        alarm = sm.alarms[0]
+        assert alarm.sns_topic_arn == "arn:aws:sns:us-east-2:123456789012:MyAlerts"
+
+    def test_alarm_without_sns_topic_arn(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                alarms=[{"type": "error_rate", "threshold": 5}]
+            )
+        )
+        alarm = sm.alarms[0]
+        assert alarm.sns_topic_arn is None
+
+    def test_multiple_alarms(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                alarms=[
+                    {"type": "error_rate", "threshold": 5},
+                    {"type": "duration", "threshold": 10000},
+                    {"type": "throttle", "threshold": 10},
+                ]
+            )
+        )
+        assert len(sm.alarms) == 3
+        assert isinstance(sm.alarms[0], ErrorRateAlarm)
+        assert isinstance(sm.alarms[1], DurationAlarm)
+        assert isinstance(sm.alarms[2], ThrottleAlarm)
+
+    def test_unknown_alarm_type_rejected(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(
+                    alarms=[{"type": "cpu_usage", "threshold": 80}]
+                )
+            )
+
+    def test_threshold_must_be_positive(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(
+                    alarms=[{"type": "error_rate", "threshold": 0}]
+                )
+            )
+
+    def test_period_must_be_at_least_60(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(
+                    alarms=[{"type": "error_rate", "threshold": 5, "period": 30}]
+                )
+            )
+
+    def test_state_machine_with_alarms_parses(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                alarms=[{"type": "error_rate", "threshold": 5}]
+            )
+        )
+        assert sm.alarms is not None
+        assert len(sm.alarms) == 1
+
+    def test_state_machine_without_alarms_backward_compat(self):
+        sm = StateMachineDefinition.model_validate(self._base())
+        assert sm.alarms is None

@@ -540,3 +540,73 @@ class TestTimeoutValidation:
         warnings = [e for e in errors if e.severity == "warning"]
         assert len(warnings) == 1
         assert "30 days" in warnings[0].message
+
+
+class TestAlarmValidation:
+    """Tests for semantic validation of alarm configurations."""
+
+    def test_valid_error_rate_alarm_no_errors(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "alarms": [{"type": "error_rate", "threshold": 5, "period": 300}],
+            }
+        )
+        assert not any("alarm" in e.message.lower() for e in errors if e.severity == "error")
+
+    def test_valid_duration_alarm_no_errors(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "alarms": [{"type": "duration", "threshold": 5000}],
+            }
+        )
+        assert not any("alarm" in e.message.lower() for e in errors if e.severity == "error")
+
+    def test_valid_throttle_alarm_no_errors(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "alarms": [{"type": "throttle", "threshold": 10}],
+            }
+        )
+        assert not any("alarm" in e.message.lower() for e in errors if e.severity == "error")
+
+    def test_error_rate_threshold_over_100_produces_warning(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "alarms": [{"type": "error_rate", "threshold": 150}],
+            }
+        )
+        warnings = [e for e in errors if e.severity == "warning" and "100%" in e.message]
+        assert len(warnings) >= 1
+
+    def test_empty_alarms_list_produces_warning(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "alarms": [],
+            }
+        )
+        warnings = [e for e in errors if e.severity == "warning" and "alarm" in e.message.lower()]
+        assert len(warnings) >= 1
+
+    def test_duplicate_alarm_types_produce_warning(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "alarms": [
+                    {"type": "error_rate", "threshold": 5},
+                    {"type": "error_rate", "threshold": 10},
+                ],
+            }
+        )
+        warnings = [e for e in errors if e.severity == "warning" and "multiple" in e.message.lower()]
+        assert len(warnings) >= 1

@@ -20,10 +20,13 @@ from rsf.dsl.choice import (
 )
 from rsf.dsl.errors import Catcher, RetryPolicy
 from rsf.dsl.models import (
+    AlarmConfig,
     BranchDefinition,
     ChoiceState,
+    DurationAlarm,
     DynamoDBAttribute,
     DynamoDBTableConfig,
+    ErrorRateAlarm,
     EventBridgeTrigger,
     FailState,
     LambdaUrlConfig,
@@ -37,10 +40,12 @@ from rsf.dsl.models import (
     SubWorkflowRef,
     SucceedState,
     TaskState,
+    ThrottleAlarm,
     TriggerConfig,
     WaitState,
 )
 from rsf.dsl.types import (
+    AlarmType,
     COMPARISON_OPERATORS,
     DynamoDBAttributeType,
     DynamoDBBillingMode,
@@ -86,6 +91,8 @@ import rsf.dsl.models as _models  # noqa: E402
 _models._state_validator = _validate_states_dict
 
 __all__ = [
+    "AlarmConfig",
+    "AlarmType",
     "BooleanAndRule",
     "BooleanNotRule",
     "BooleanOrRule",
@@ -96,10 +103,12 @@ __all__ = [
     "COMPARISON_OPERATORS",
     "ConditionRule",
     "DataTestRule",
+    "DurationAlarm",
     "DynamoDBAttribute",
     "DynamoDBAttributeType",
     "DynamoDBBillingMode",
     "DynamoDBTableConfig",
+    "ErrorRateAlarm",
     "EventBridgeTrigger",
     "FailState",
     "JitterStrategy",
@@ -119,6 +128,7 @@ __all__ = [
     "SubWorkflowRef",
     "SucceedState",
     "TaskState",
+    "ThrottleAlarm",
     "TriggerConfig",
     "WaitState",
     "discriminate_choice_rule",

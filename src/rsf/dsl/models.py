@@ -251,6 +251,48 @@ _state_validator: Any = None
 State = Any
 
 
+class ErrorRateAlarm(BaseModel):
+    """CloudWatch error rate alarm configuration."""
+
+    model_config = {"extra": "forbid"}
+
+    type: Literal["error_rate"]
+    threshold: float = Field(gt=0)  # Error percentage threshold (e.g., 5 means 5%)
+    period: int = Field(default=300, ge=60)  # Evaluation period in seconds
+    evaluation_periods: int = Field(default=1, ge=1)
+    sns_topic_arn: str | None = None  # Optional: use existing SNS topic
+
+
+class DurationAlarm(BaseModel):
+    """CloudWatch duration alarm configuration."""
+
+    model_config = {"extra": "forbid"}
+
+    type: Literal["duration"]
+    threshold: float = Field(gt=0)  # Duration threshold in milliseconds
+    period: int = Field(default=300, ge=60)
+    evaluation_periods: int = Field(default=1, ge=1)
+    sns_topic_arn: str | None = None
+
+
+class ThrottleAlarm(BaseModel):
+    """CloudWatch throttle alarm configuration."""
+
+    model_config = {"extra": "forbid"}
+
+    type: Literal["throttle"]
+    threshold: float = Field(gt=0)  # Throttle count threshold
+    period: int = Field(default=300, ge=60)
+    evaluation_periods: int = Field(default=1, ge=1)
+    sns_topic_arn: str | None = None
+
+
+AlarmConfig = Annotated[
+    Union[ErrorRateAlarm, DurationAlarm, ThrottleAlarm],
+    Field(discriminator="type"),
+]
+
+
 class SubWorkflowRef(BaseModel):
     """A reference to a child workflow that can be invoked as a sub-execution."""
 
@@ -341,6 +383,7 @@ class StateMachineDefinition(BaseModel):
     triggers: list[TriggerConfig] | None = Field(default=None, alias="triggers")
     sub_workflows: list[SubWorkflowRef] | None = Field(default=None, alias="sub_workflows")
     dynamodb_tables: list[DynamoDBTableConfig] | None = Field(default=None, alias="dynamodb_tables")
+    alarms: list[AlarmConfig] | None = Field(default=None, alias="alarms")
 
     @model_validator(mode="after")
     def _resolve_states(self) -> "StateMachineDefinition":

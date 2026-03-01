@@ -16,6 +16,7 @@ from typing import Any
 
 from rsf.dsl.models import (
     ChoiceState,
+    ErrorRateAlarm,
     EventBridgeTrigger,
     FailState,
     MapState,
@@ -51,6 +52,7 @@ def validate_definition(definition: StateMachineDefinition) -> list[ValidationEr
     _validate_triggers(definition, errors)
     _validate_sub_workflows(definition, errors)
     _validate_dynamodb_tables(definition, errors)
+    _validate_alarms(definition, errors)
     _validate_state_machine(
         states=definition.states,
         start_at=definition.start_at,
@@ -187,6 +189,56 @@ def _validate_dynamodb_tables(
                         path=f"dynamodb_tables[{i}]",
                     )
                 )
+
+
+def _validate_alarms(
+    definition: StateMachineDefinition,
+    errors: list[ValidationError],
+) -> None:
+    """Validate alarm configurations."""
+    if definition.alarms is None:
+        return
+
+    if len(definition.alarms) == 0:
+        errors.append(
+            ValidationError(
+                message="Alarms list is empty — remove it or add at least one alarm",
+                path="alarms",
+                severity="warning",
+            )
+        )
+        return
+
+    # Check for error rate > 100%
+    for i, alarm in enumerate(definition.alarms):
+        if isinstance(alarm, ErrorRateAlarm) and alarm.threshold > 100:
+            errors.append(
+                ValidationError(
+                    message=(
+                        f"Error rate alarm threshold {alarm.threshold} exceeds 100% "
+                        "— error rate is a percentage, >100% is unusual"
+                    ),
+                    path=f"alarms[{i}].threshold",
+                    severity="warning",
+                )
+            )
+
+    # Check for duplicate alarm types
+    seen_types: dict[str, int] = {}
+    for i, alarm in enumerate(definition.alarms):
+        if alarm.type in seen_types:
+            errors.append(
+                ValidationError(
+                    message=(
+                        f"Multiple alarms of type '{alarm.type}' — "
+                        "consider combining into a single alarm"
+                    ),
+                    path=f"alarms[{i}]",
+                    severity="warning",
+                )
+            )
+        else:
+            seen_types[alarm.type] = i
 
 
 def _collect_sub_workflow_refs(
