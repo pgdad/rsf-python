@@ -6,7 +6,7 @@ from pydantic import BaseModel, Field, model_validator
 
 from rsf.dsl.choice import ChoiceRule
 from rsf.dsl.errors import Catcher, RetryPolicy
-from rsf.dsl.types import ProcessorMode, QueryLanguage
+from rsf.dsl.types import LambdaUrlAuthType, ProcessorMode, QueryLanguage
 
 
 class _IOFields(BaseModel):
@@ -243,6 +243,15 @@ _state_validator: Any = None
 State = Any
 
 
+class LambdaUrlConfig(BaseModel):
+    """Configuration for Lambda Function URL."""
+
+    model_config = {"extra": "forbid"}
+
+    enabled: bool
+    auth_type: LambdaUrlAuthType
+
+
 class StateMachineDefinition(BaseModel):
     """Root model for an RSF workflow definition."""
 
@@ -255,6 +264,7 @@ class StateMachineDefinition(BaseModel):
     version: str | None = Field(default=None, alias="Version")
     timeout_seconds: int | None = Field(default=None, alias="TimeoutSeconds", ge=0)
     query_language: QueryLanguage | None = Field(default=None, alias="QueryLanguage")
+    lambda_url: LambdaUrlConfig | None = Field(default=None, alias="lambda_url")
 
     @model_validator(mode="after")
     def _resolve_states(self) -> "StateMachineDefinition":

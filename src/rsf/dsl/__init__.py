@@ -23,6 +23,7 @@ from rsf.dsl.models import (
     BranchDefinition,
     ChoiceState,
     FailState,
+    LambdaUrlConfig,
     MapState,
     ParallelState,
     PassState,
@@ -35,6 +36,7 @@ from rsf.dsl.models import (
 from rsf.dsl.types import (
     COMPARISON_OPERATORS,
     JitterStrategy,
+    LambdaUrlAuthType,
     ProcessorMode,
     QueryLanguage,
 )
@@ -87,6 +89,8 @@ __all__ = [
     "DataTestRule",
     "FailState",
     "JitterStrategy",
+    "LambdaUrlAuthType",
+    "LambdaUrlConfig",
     "MapState",
     "ParallelState",
     "PassState",

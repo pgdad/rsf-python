@@ -15,6 +15,7 @@ from rsf.dsl import (
     DataTestRule,
     BooleanAndRule,
     BooleanNotRule,
+    LambdaUrlAuthType,
 )
 
 
@@ -457,3 +458,72 @@ class TestStateMachineDefinition:
         assert sm.comment == "test"
         assert sm.version == "1.0"
         assert sm.timeout_seconds == 3600
+
+
+class TestLambdaUrlConfig:
+    """Tests for lambda_url DSL field parsing, validation, and backward compatibility."""
+
+    def _base(self, **extra):
+        """Create minimal valid workflow dict with optional extra fields."""
+        data = {
+            "StartAt": "S",
+            "States": {"S": {"Type": "Succeed"}},
+        }
+        data.update(extra)
+        return data
+
+    def test_lambda_url_none_auth(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(lambda_url={"enabled": True, "auth_type": "NONE"})
+        )
+        assert sm.lambda_url is not None
+        assert sm.lambda_url.enabled is True
+        assert sm.lambda_url.auth_type == LambdaUrlAuthType.NONE
+
+    def test_lambda_url_aws_iam_auth(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(lambda_url={"enabled": True, "auth_type": "AWS_IAM"})
+        )
+        assert sm.lambda_url is not None
+        assert sm.lambda_url.auth_type == LambdaUrlAuthType.AWS_IAM
+
+    def test_lambda_url_disabled(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(lambda_url={"enabled": False, "auth_type": "NONE"})
+        )
+        assert sm.lambda_url is not None
+        assert sm.lambda_url.enabled is False
+
+    def test_lambda_url_omitted_backward_compat(self):
+        sm = StateMachineDefinition.model_validate(self._base())
+        assert sm.lambda_url is None
+
+    def test_lambda_url_rejects_invalid_auth_type(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(lambda_url={"enabled": True, "auth_type": "BASIC"})
+            )
+
+    def test_lambda_url_rejects_missing_auth_type(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(lambda_url={"enabled": True})
+            )
+
+    def test_lambda_url_rejects_missing_enabled(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(lambda_url={"auth_type": "NONE"})
+            )
+
+    def test_lambda_url_rejects_extra_fields(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(
+                    lambda_url={
+                        "enabled": True,
+                        "auth_type": "NONE",
+                        "cors": True,
+                    }
+                )
+            )

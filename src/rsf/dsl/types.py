@@ -26,6 +26,13 @@ class ProcessorMode(str, Enum):
     DISTRIBUTED = "DISTRIBUTED"
 
 
+class LambdaUrlAuthType(str, Enum):
+    """Authentication types for Lambda Function URL."""
+
+    NONE = "NONE"
+    AWS_IAM = "AWS_IAM"
+
+
 # All 39 comparison operators for Choice rules
 COMPARISON_OPERATORS: frozenset[str] = frozenset(
     {
