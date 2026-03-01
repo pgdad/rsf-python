@@ -25,6 +25,11 @@ def generate(
         "-o",
         help="Output directory for generated files",
     ),
+    no_infra: bool = typer.Option(
+        False,
+        "--no-infra",
+        help="Generate code only, skip infrastructure files",
+    ),
 ) -> None:
     """Generate orchestrator.py and handler stubs from a workflow YAML.
 
@@ -33,6 +38,8 @@ def generate(
     Existing handler stubs without the generated marker are preserved
     (Generation Gap pattern).
     """
+    if no_infra:
+        console.print("[dim]--no-infra: infrastructure generation skipped[/dim]")
     # 1. File existence check
     if not workflow.exists():
         console.print(f"[red]Error:[/red] File not found: {workflow}")

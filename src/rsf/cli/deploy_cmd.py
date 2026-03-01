@@ -23,12 +23,19 @@ def deploy(
     code_only: bool = typer.Option(False, "--code-only", help="Re-package and update Lambda code only"),
     auto_approve: bool = typer.Option(False, "--auto-approve", "-y", help="Skip Terraform confirmation prompt"),
     tf_dir: Path = typer.Option("terraform", "--tf-dir", help="Terraform output directory"),
+    no_infra: bool = typer.Option(False, "--no-infra", help="Generate and deploy code only, skip Terraform"),
 ) -> None:
     """Deploy an RSF workflow to AWS via Terraform.
 
     Generates Terraform files, then runs terraform init and terraform apply.
     Use --code-only to re-package Lambda code without a full Terraform apply.
+    Use --no-infra to skip Terraform generation entirely.
     """
+    # Check mutual exclusion: --no-infra and --code-only
+    if no_infra and code_only:
+        console.print("[red]Error:[/red] --no-infra and --code-only are mutually exclusive")
+        raise typer.Exit(code=1)
+
     # Step 1: Check workflow file exists
     if not workflow.exists():
         console.print(
@@ -61,6 +68,11 @@ def deploy(
         f"+ {len(codegen_result.handler_paths)} handler(s) "
         f"({len(codegen_result.skipped_handlers)} skipped)"
     )
+
+    # --no-infra: skip all Terraform steps, return after code generation
+    if no_infra:
+        console.print("[green]Code generated (infrastructure skipped).[/green]")
+        return
 
     # Step 4: Derive workflow name
     workflow_name = definition.comment if definition.comment else workflow.stem.replace("_", "-").replace(" ", "-")
