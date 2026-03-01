@@ -18,19 +18,19 @@ progress:
 See: .planning/PROJECT.md (updated 2026-02-28)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** v1.6 Ruff Linting Cleanup — COMPLETE
+**Current focus:** Phase 35 — Run All Tests That Do Not Require AWS Access/Resources
 
 ## Current Position
 
-Milestone v1.6 Ruff Linting Cleanup: SHIPPED 2026-02-28
-All phases complete (28-34). Ready for next milestone.
+Phase 35: Run All Tests — COMPLETE
+All 744 non-AWS tests pass in a unified pytest invocation.
 
 Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 71 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 8, v1.4: 5, v1.5: 3, v1.6: 2)
+- Total plans completed: 72 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 8, v1.4: 5, v1.5: 3, v1.6: 2, phase-35: 1)
 
 **By Milestone:**
 
@@ -50,6 +50,11 @@ Progress: [██████████] 100%
 
 All decisions logged in PROJECT.md Key Decisions table.
 
+### Roadmap Evolution
+
+- Phase 35 added: run all tests that do not require AWS access/resources
+- Phase 35 completed: unified pytest invocation running all 744 non-AWS tests
+
 ### Pending Todos
 
 None.
@@ -61,5 +66,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-02-28
-Stopped at: v1.6 milestone complete. Ready for next milestone.
+Stopped at: Phase 35 complete. All 744 non-AWS tests pass in unified invocation.
 Resume file: None
