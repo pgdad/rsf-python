@@ -184,3 +184,18 @@ Plans:
 | 32. E741 Ambiguous Variable Names | v1.6 | 0/? | Not started | - |
 | 33. E501 Line Too Long | v1.6 | 0/? | Not started | - |
 | 34. Config Cleanup | v1.6 | 0/? | Not started | - |
+
+### Phase 35: Run All Tests That Do Not Require AWS Access/Resources
+
+**Goal:** A single `pytest -m "not integration"` invocation from the project root runs ALL non-AWS tests (both tests/ and examples/*/tests/) with zero failures, and CI does the same
+**Requirements**: None (standalone quality phase)
+**Depends on:** Phase 34
+**Success Criteria** (what must be TRUE):
+  1. `pytest -m "not integration"` discovers and runs all 744 non-AWS tests (592 unit + 152 example local)
+  2. All tests pass with zero failures
+  3. The 13 integration tests remain excluded
+  4. CI runs the same comprehensive test suite
+**Plans:** 1 plan
+
+Plans:
+- [ ] 35-01-PLAN.md — Fix pytest config (importmode=importlib, testpaths), verify CI runs full non-AWS test suite
