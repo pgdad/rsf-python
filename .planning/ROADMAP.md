@@ -106,7 +106,7 @@ Full details: `.planning/milestones/v1.5-ROADMAP.md`
 **Milestone Goal:** Add optional Lambda Function URL support so users can trigger durable workflow executions via HTTP POST, with a new example and tutorial.
 
 - [x] **Phase 36: DSL and Terraform** - Lambda URL DSL field, validation, and Terraform resource generation (completed 2026-03-01)
-- [ ] **Phase 37: Example Workflow** - New example demonstrating Lambda URL invocation with local and integration tests
+- [x] **Phase 37: Example Workflow** - New example demonstrating Lambda URL invocation with local and integration tests (completed 2026-03-01)
 - [ ] **Phase 38: Tutorial** - New tutorial covering Lambda URL configuration, deployment, and HTTP invocation
 
 ## Phase Details
@@ -242,5 +242,5 @@ Plans:
 | 34. Config Cleanup | v1.6 | 1/1 | Complete | 2026-02-28 |
 | 35. Run All Tests (Non-AWS) | v1.6 | 1/1 | Complete | 2026-03-01 |
 | 36. DSL and Terraform | 2/2 | Complete    | 2026-03-01 | - |
-| 37. Example Workflow | v1.7 | 0/? | Not started | - |
+| 37. Example Workflow | v1.7 | Complete    | 2026-03-01 | - |
 | 38. Tutorial | v1.7 | 0/? | Not started | - |

@@ -20,9 +20,9 @@ Requirements for Lambda Function URL support. Each maps to roadmap phases.
 
 ### Example (Demonstration Workflow)
 
-- [ ] **EX-01**: New example workflow demonstrates triggering durable execution via Lambda Function URL POST
-- [ ] **EX-02**: Example includes local tests verifying handler logic without AWS
-- [ ] **EX-03**: Example includes integration test for Lambda URL invocation on real AWS
+- [x] **EX-01**: New example workflow demonstrates triggering durable execution via Lambda Function URL POST
+- [x] **EX-02**: Example includes local tests verifying handler logic without AWS
+- [x] **EX-03**: Example includes integration test for Lambda URL invocation on real AWS
 
 ### Tutorial (Documentation)
 
@@ -51,9 +51,9 @@ None — this is a focused feature milestone.
 | TF-01 | Phase 36 | Complete |
 | TF-02 | Phase 36 | Complete |
 | TF-03 | Phase 36 | Complete |
-| EX-01 | Phase 37 | Pending |
-| EX-02 | Phase 37 | Pending |
-| EX-03 | Phase 37 | Pending |
+| EX-01 | Phase 37 | Complete |
+| EX-02 | Phase 37 | Complete |
+| EX-03 | Phase 37 | Complete |
 | TUT-01 | Phase 38 | Pending |
 | TUT-02 | Phase 38 | Pending |
 
@@ -64,4 +64,4 @@ None — this is a focused feature milestone.
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 after roadmap creation (traceability complete)*
+*Last updated: 2026-03-01 after Phase 37 completion (EX-01, EX-02, EX-03 complete)*
