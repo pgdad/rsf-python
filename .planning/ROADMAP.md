@@ -245,4 +245,4 @@ Plans:
 | 35. Run All Tests (Non-AWS) | v1.6 | 1/1 | Complete | 2026-03-01 |
 | 36. DSL and Terraform | 2/2 | Complete    | 2026-03-01 | - |
 | 37. Example Workflow | v1.7 | Complete    | 2026-03-01 | - |
-| 38. Tutorial | 1/1 | Complete   | 2026-03-01 | - |
+| 38. Tutorial | 1/1 | Complete    | 2026-03-01 | - |

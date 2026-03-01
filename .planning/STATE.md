@@ -2,12 +2,12 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Lambda Function URL Support
-status: complete
-last_updated: "2026-03-01T12:00:00.000Z"
+status: unknown
+last_updated: "2026-03-01T11:40:32.420Z"
 progress:
-  total_phases: 4
+  total_phases: 5
   completed_phases: 4
-  total_plans: 8
+  total_plans: 9
   completed_plans: 8
 ---
 
