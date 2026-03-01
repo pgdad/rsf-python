@@ -2,10 +2,10 @@
 gsd_state_version: 1.0
 milestone: v1.7
 milestone_name: Lambda Function URL Support
-status: defining_requirements
+status: ready_to_plan
 last_updated: "2026-03-01"
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -18,19 +18,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-01)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** Defining requirements for v1.7 Lambda Function URL Support
+**Current focus:** Phase 36 — DSL and Terraform (Lambda URL support)
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-01 — Milestone v1.7 started
+Phase: 36 of 38 (DSL and Terraform)
+Plan: Not started
+Status: Ready to plan
+Last activity: 2026-03-01 — Roadmap created for v1.7, 3 phases defined (36-38)
+
+Progress: [░░░░░░░░░░] 0% (v1.7)
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 72 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 8, v1.4: 5, v1.5: 3, v1.6: 2, phase-35: 1)
+- Total plans completed: 73 (v1.0: 39, v1.1: 4, v1.2: 10, v1.3: 8, v1.4: 5, v1.5: 3, v1.6: 3, phase-35: 1)
 
 **By Milestone:**
 
@@ -52,7 +54,10 @@ All decisions logged in PROJECT.md Key Decisions table.
 
 ### Roadmap Evolution
 
-- v1.7 milestone started: Lambda Function URL Support
+- v1.7 roadmap created: 3 phases (36-38) covering Lambda Function URL support
+  - Phase 36: DSL field + Terraform generation (DSL-01, DSL-02, TF-01, TF-02, TF-03)
+  - Phase 37: Example workflow with local + integration tests (EX-01, EX-02, EX-03)
+  - Phase 38: Tutorial (TUT-01, TUT-02)
 
 ### Pending Todos
 
@@ -65,5 +70,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-01
-Stopped at: Defining requirements for v1.7
+Stopped at: Roadmap created for v1.7 — ready to plan Phase 36
 Resume file: None

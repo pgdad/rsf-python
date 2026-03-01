@@ -46,22 +46,22 @@ None — this is a focused feature milestone.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| DSL-01 | TBD | Pending |
-| DSL-02 | TBD | Pending |
-| TF-01 | TBD | Pending |
-| TF-02 | TBD | Pending |
-| TF-03 | TBD | Pending |
-| EX-01 | TBD | Pending |
-| EX-02 | TBD | Pending |
-| EX-03 | TBD | Pending |
-| TUT-01 | TBD | Pending |
-| TUT-02 | TBD | Pending |
+| DSL-01 | Phase 36 | Pending |
+| DSL-02 | Phase 36 | Pending |
+| TF-01 | Phase 36 | Pending |
+| TF-02 | Phase 36 | Pending |
+| TF-03 | Phase 36 | Pending |
+| EX-01 | Phase 37 | Pending |
+| EX-02 | Phase 37 | Pending |
+| EX-03 | Phase 37 | Pending |
+| TUT-01 | Phase 38 | Pending |
+| TUT-02 | Phase 38 | Pending |
 
 **Coverage:**
-- v1.7 requirements: 9 total
-- Mapped to phases: 0
-- Unmapped: 9 ⚠️
+- v1.7 requirements: 10 total
+- Mapped to phases: 10
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 after initial definition*
+*Last updated: 2026-03-01 after roadmap creation (traceability complete)*
