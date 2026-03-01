@@ -83,6 +83,15 @@ resource "aws_iam_role_policy" "lambda_policy" {
 <% endfor %>
         ]
       }
+<% endif %><% if has_alarms %>,
+      {
+        Sid    = "SNSAlarmPublish"
+        Effect = "Allow"
+        Action = [
+          "sns:Publish"
+        ]
+        Resource = "*"
+      }
 <% endif %><% if lambda_url_enabled and lambda_url_auth_type == "AWS_IAM" %>,
       {
         Sid    = "InvokeFunctionUrl"

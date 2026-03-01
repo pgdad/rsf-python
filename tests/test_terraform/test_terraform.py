@@ -657,3 +657,143 @@ class TestLambdaUrlTerraform:
         assert ">>" not in content
         assert "<%" not in content
         assert "%>" not in content
+
+
+class TestAlarmGeneration:
+    """Tests for CloudWatch alarm Terraform generation."""
+
+    def test_error_rate_alarm_creates_cloudwatch_alarm(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            alarms=[
+                {
+                    "type": "error_rate",
+                    "threshold": 5,
+                    "period": 300,
+                    "evaluation_periods": 2,
+                    "sns_topic_arn": None,
+                }
+            ],
+            has_alarms=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "alarms.tf").read_text()
+        assert "aws_cloudwatch_metric_alarm" in content
+        assert '"Errors"' in content
+        assert '"Sum"' in content
+        assert "aws_sns_topic" in content  # auto-generated SNS topic
+
+    def test_duration_alarm_creates_cloudwatch_alarm(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            alarms=[
+                {
+                    "type": "duration",
+                    "threshold": 5000,
+                    "period": 300,
+                    "evaluation_periods": 1,
+                    "sns_topic_arn": None,
+                }
+            ],
+            has_alarms=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "alarms.tf").read_text()
+        assert "aws_cloudwatch_metric_alarm" in content
+        assert '"Duration"' in content
+        assert '"Average"' in content
+
+    def test_throttle_alarm_creates_cloudwatch_alarm(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            alarms=[
+                {
+                    "type": "throttle",
+                    "threshold": 10,
+                    "period": 300,
+                    "evaluation_periods": 1,
+                    "sns_topic_arn": None,
+                }
+            ],
+            has_alarms=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "alarms.tf").read_text()
+        assert "aws_cloudwatch_metric_alarm" in content
+        assert '"Throttles"' in content
+        assert '"Sum"' in content
+
+    def test_alarm_with_existing_sns_topic_no_auto_topic(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            alarms=[
+                {
+                    "type": "error_rate",
+                    "threshold": 5,
+                    "period": 300,
+                    "evaluation_periods": 1,
+                    "sns_topic_arn": "arn:aws:sns:us-east-2:123456789012:MyAlerts",
+                }
+            ],
+            has_alarms=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "alarms.tf").read_text()
+        assert "aws_cloudwatch_metric_alarm" in content
+        assert "arn:aws:sns:us-east-2:123456789012:MyAlerts" in content
+        # Should NOT create an auto-generated SNS topic
+        assert 'resource "aws_sns_topic"' not in content
+
+    def test_alarm_without_sns_topic_creates_auto_topic(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            alarms=[
+                {
+                    "type": "error_rate",
+                    "threshold": 5,
+                    "period": 300,
+                    "evaluation_periods": 1,
+                    "sns_topic_arn": None,
+                }
+            ],
+            has_alarms=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "alarms.tf").read_text()
+        assert 'resource "aws_sns_topic"' in content
+        assert "alarm_notifications" in content
+
+    def test_multiple_alarms_all_generated(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            alarms=[
+                {"type": "error_rate", "threshold": 5, "period": 300, "evaluation_periods": 1, "sns_topic_arn": None},
+                {"type": "duration", "threshold": 10000, "period": 60, "evaluation_periods": 1, "sns_topic_arn": None},
+                {"type": "throttle", "threshold": 10, "period": 300, "evaluation_periods": 1, "sns_topic_arn": None},
+            ],
+            has_alarms=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "alarms.tf").read_text()
+        assert '"Errors"' in content
+        assert '"Duration"' in content
+        assert '"Throttles"' in content
+
+    def test_no_alarms_no_alarms_tf(self, tmp_path):
+        config = TerraformConfig(workflow_name="test")
+        result = generate_terraform(config, tmp_path)
+        assert not (tmp_path / "alarms.tf").exists()
+        assert len(result.generated_files) == 6  # standard files only
+
+    def test_alarms_produce_sns_iam_permission(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            alarms=[
+                {"type": "error_rate", "threshold": 5, "period": 300, "evaluation_periods": 1, "sns_topic_arn": None},
+            ],
+            has_alarms=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "iam.tf").read_text()
+        assert "SNSAlarmPublish" in content
+        assert "sns:Publish" in content

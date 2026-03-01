@@ -31,6 +31,7 @@ TEMPLATE_FILES = {
     "lambda_url.tf": "lambda_url.tf.j2",
     "triggers.tf": "triggers.tf.j2",
     "dynamodb.tf": "dynamodb.tf.j2",
+    "alarms.tf": "alarms.tf.j2",
 }
 
 
@@ -50,6 +51,8 @@ class TerraformConfig:
     has_sqs_triggers: bool = False
     dynamodb_tables: list[dict[str, Any]] = field(default_factory=list)
     has_dynamodb_tables: bool = False
+    alarms: list[dict[str, Any]] = field(default_factory=list)
+    has_alarms: bool = False
 
 
 @dataclass
@@ -92,6 +95,8 @@ def generate_terraform(
         "has_sqs_triggers": config.has_sqs_triggers,
         "dynamodb_tables": config.dynamodb_tables,
         "has_dynamodb_tables": config.has_dynamodb_tables,
+        "alarms": config.alarms,
+        "has_alarms": config.has_alarms,
     }
 
     result = TerraformResult()
@@ -103,6 +108,10 @@ def generate_terraform(
 
         # Skip dynamodb.tf when no DynamoDB tables configured
         if filename == "dynamodb.tf" and not config.dynamodb_tables:
+            continue
+
+        # Skip alarms.tf when no alarms configured
+        if filename == "alarms.tf" and not config.alarms:
             continue
 
         # Skip lambda_url.tf when not enabled

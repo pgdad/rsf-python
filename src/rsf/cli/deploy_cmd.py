@@ -132,6 +132,19 @@ def _deploy_full(
                 table_dict["write_capacity"] = table.write_capacity
             dynamodb_config.append(table_dict)
 
+    # Build alarm config from DSL definition
+    alarms_config: list[dict] = []
+    if hasattr(definition, "alarms") and definition.alarms:
+        for alarm in definition.alarms:
+            alarm_dict: dict = {
+                "type": alarm.type,
+                "threshold": alarm.threshold,
+                "period": alarm.period,
+                "evaluation_periods": alarm.evaluation_periods,
+                "sns_topic_arn": alarm.sns_topic_arn,
+            }
+            alarms_config.append(alarm_dict)
+
     with Status("[bold]Generating Terraform files...[/bold]", console=console):
         tf_result = generate_terraform(
             config=TerraformConfig(
@@ -142,6 +155,8 @@ def _deploy_full(
                 has_sqs_triggers=has_sqs,
                 dynamodb_tables=dynamodb_config,
                 has_dynamodb_tables=bool(dynamodb_config),
+                alarms=alarms_config,
+                has_alarms=bool(alarms_config),
             ),
             output_dir=tf_dir,
         )
