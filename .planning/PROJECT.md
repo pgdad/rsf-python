@@ -10,7 +10,7 @@ Users can define, visualize, generate, deploy, and debug state machine workflows
 
 ## Current State
 
-v1.5 shipped (2026-02-28). RSF is installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. GitHub Actions CI runs lint + tests on PRs; release workflow builds wheel with React UIs and publishes to PyPI on v* tag push using OIDC trusted publisher (no API tokens). README serves as polished landing page on both GitHub and PyPI with badges, quick-start guide, and hero screenshots. 18,696 LOC Python. 152 local tests + 13 integration tests + 20 harness tests passing.
+v1.6 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. Entire codebase passes strict ruff linting with zero suppressions. All 744 non-AWS tests pass in unified pytest invocation. 18,696 LOC Python.
 
 ## Requirements
 
@@ -52,25 +52,23 @@ v1.5 shipped (2026-02-28). RSF is installable via `pip install rsf` with bundled
 - ✓ GitHub Actions CI/CD pipeline (lint + test on PR, build + publish on tag push) — v1.5
 - ✓ OIDC trusted publisher for zero-secret PyPI publishing — v1.5
 - ✓ README as polished landing page with badges, quick-start, and hero screenshots — v1.5
+- ✓ Zero ruff linting violations with no ignored rules or exclusions — v1.6
+- ✓ All 744 non-AWS tests pass in unified pytest invocation — v1.6
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-## Current Milestone: v1.6 Ruff Linting Cleanup
+## Current Milestone: v1.7 Lambda Function URL Support
 
-**Goal:** Fix all ruff linting violations and remove all ignored rules and exclusions so the entire codebase passes strict ruff checks with zero suppressions.
+**Goal:** Add optional Lambda Function URL support so users can trigger durable workflow executions via HTTP POST, with a new example and tutorial.
 
 **Target features:**
-- Fix all F401 unused imports across source, tests, examples, and generated code
-- Fix all F841 unused variables
-- Fix F541 f-string without placeholders
-- Fix all E402 import-not-at-top-of-file violations
-- Fix all E741 ambiguous variable names
-- Fix all E501 line-too-long violations in examples/
-- Remove `exclude = ["examples"]` from ruff config
-- Remove all rules from `ignore` list in pyproject.toml
-- Ensure generated code (from Jinja2 templates) is also lint-clean
+- Optional `lambda_url` DSL field with configurable auth type (NONE or AWS_IAM)
+- Terraform generation of `aws_lambda_function_url` resource when enabled
+- POST to Lambda URL triggers durable execution
+- New example workflow demonstrating Lambda URL invocation
+- New tutorial entry covering Lambda URL setup and usage
 
 ### Out of Scope
 
@@ -99,6 +97,7 @@ v1.5 shipped (2026-02-28). RSF is installable via `pip install rsf` with bundled
 - Shipped v1.3 with 2,753 lines of tutorial documentation across 8 tutorials
 - Shipped v1.4 with 15 automated Playwright screenshots embedded in example READMEs and tutorials
 - Shipped v1.5 with PyPI packaging, CI/CD, and README landing page
+- Shipped v1.6 with zero ruff violations and 744 non-AWS tests passing
 
 ## Constraints
 
@@ -137,4 +136,4 @@ v1.5 shipped (2026-02-28). RSF is installable via `pip install rsf` with bundled
 | Absolute URLs in README for PyPI | PyPI does not resolve relative paths; raw.githubusercontent.com for images | ✓ Good |
 
 ---
-*Last updated: 2026-02-28 after v1.6 milestone started*
+*Last updated: 2026-03-01 after v1.7 milestone started*
