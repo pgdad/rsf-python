@@ -797,3 +797,81 @@ class TestAlarmGeneration:
         content = (tmp_path / "iam.tf").read_text()
         assert "SNSAlarmPublish" in content
         assert "sns:Publish" in content
+
+
+class TestDLQGeneration:
+    """Tests for dead letter queue Terraform generation."""
+
+    def test_dlq_enabled_creates_sqs_queue(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dlq_enabled=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "dlq.tf").read_text()
+        assert "aws_sqs_queue" in content
+        assert "dlq" in content
+
+    def test_dlq_default_queue_name(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dlq_enabled=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "dlq.tf").read_text()
+        assert "${local.function_name}-dlq" in content
+
+    def test_dlq_custom_queue_name(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dlq_enabled=True,
+            dlq_queue_name="my-custom-dlq",
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "dlq.tf").read_text()
+        assert "my-custom-dlq" in content
+
+    def test_dlq_creates_dead_letter_config_in_main(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dlq_enabled=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "main.tf").read_text()
+        assert "dead_letter_config" in content
+        assert "_dlq.arn" in content
+
+    def test_no_dlq_no_dlq_tf(self, tmp_path):
+        config = TerraformConfig(workflow_name="test")
+        result = generate_terraform(config, tmp_path)
+        assert not (tmp_path / "dlq.tf").exists()
+        content = (tmp_path / "main.tf").read_text()
+        assert "dead_letter_config" not in content
+
+    def test_dlq_disabled_no_dlq_tf(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dlq_enabled=False,
+        )
+        result = generate_terraform(config, tmp_path)
+        assert not (tmp_path / "dlq.tf").exists()
+
+    def test_dlq_produces_sqs_iam_permission(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dlq_enabled=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "iam.tf").read_text()
+        assert "DLQSendMessage" in content
+        assert "sqs:SendMessage" in content
+
+    def test_dlq_message_retention(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            dlq_enabled=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "dlq.tf").read_text()
+        assert "message_retention_seconds" in content
+        assert "1209600" in content  # 14 days

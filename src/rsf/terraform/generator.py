@@ -32,6 +32,7 @@ TEMPLATE_FILES = {
     "triggers.tf": "triggers.tf.j2",
     "dynamodb.tf": "dynamodb.tf.j2",
     "alarms.tf": "alarms.tf.j2",
+    "dlq.tf": "dlq.tf.j2",
 }
 
 
@@ -53,6 +54,9 @@ class TerraformConfig:
     has_dynamodb_tables: bool = False
     alarms: list[dict[str, Any]] = field(default_factory=list)
     has_alarms: bool = False
+    dlq_enabled: bool = False
+    dlq_max_receive_count: int = 3
+    dlq_queue_name: str | None = None
 
 
 @dataclass
@@ -97,6 +101,9 @@ def generate_terraform(
         "has_dynamodb_tables": config.has_dynamodb_tables,
         "alarms": config.alarms,
         "has_alarms": config.has_alarms,
+        "dlq_enabled": config.dlq_enabled,
+        "dlq_max_receive_count": config.dlq_max_receive_count,
+        "dlq_queue_name": config.dlq_queue_name,
     }
 
     result = TerraformResult()
@@ -112,6 +119,10 @@ def generate_terraform(
 
         # Skip alarms.tf when no alarms configured
         if filename == "alarms.tf" and not config.alarms:
+            continue
+
+        # Skip dlq.tf when DLQ not enabled
+        if filename == "dlq.tf" and not config.dlq_enabled:
             continue
 
         # Skip lambda_url.tf when not enabled

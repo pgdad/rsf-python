@@ -145,6 +145,16 @@ def _deploy_full(
             }
             alarms_config.append(alarm_dict)
 
+    # Build DLQ config from DSL definition
+    dlq_enabled = False
+    dlq_max_receive_count = 3
+    dlq_queue_name = None
+    if hasattr(definition, "dead_letter_queue") and definition.dead_letter_queue is not None:
+        if definition.dead_letter_queue.enabled:
+            dlq_enabled = True
+            dlq_max_receive_count = definition.dead_letter_queue.max_receive_count
+            dlq_queue_name = definition.dead_letter_queue.queue_name
+
     with Status("[bold]Generating Terraform files...[/bold]", console=console):
         tf_result = generate_terraform(
             config=TerraformConfig(
@@ -157,6 +167,9 @@ def _deploy_full(
                 has_dynamodb_tables=bool(dynamodb_config),
                 alarms=alarms_config,
                 has_alarms=bool(alarms_config),
+                dlq_enabled=dlq_enabled,
+                dlq_max_receive_count=dlq_max_receive_count,
+                dlq_queue_name=dlq_queue_name,
             ),
             output_dir=tf_dir,
         )

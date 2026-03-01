@@ -92,6 +92,15 @@ resource "aws_iam_role_policy" "lambda_policy" {
         ]
         Resource = "*"
       }
+<% endif %><% if dlq_enabled %>,
+      {
+        Sid    = "DLQSendMessage"
+        Effect = "Allow"
+        Action = [
+          "sqs:SendMessage"
+        ]
+        Resource = aws_sqs_queue.<< resource_id >>_dlq.arn
+      }
 <% endif %><% if lambda_url_enabled and lambda_url_auth_type == "AWS_IAM" %>,
       {
         Sid    = "InvokeFunctionUrl"
