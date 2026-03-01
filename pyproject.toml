@@ -67,8 +67,16 @@ line-length = 120
 select = ["E", "F", "W"]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = [
+    "tests",
+    "examples/order-processing/tests",
+    "examples/data-pipeline/tests",
+    "examples/intrinsic-showcase/tests",
+    "examples/approval-workflow/tests",
+    "examples/retry-and-recovery/tests",
+]
 pythonpath = ["src"]
+addopts = "--import-mode=importlib"
 markers = [
     "integration: AWS integration tests (require credentials and terraform)",
 ]
