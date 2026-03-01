@@ -74,6 +74,7 @@ testpaths = [
     "examples/intrinsic-showcase/tests",
     "examples/approval-workflow/tests",
     "examples/retry-and-recovery/tests",
+    "examples/lambda-url-trigger/tests",
 ]
 pythonpath = ["src"]
 addopts = "--import-mode=importlib"
