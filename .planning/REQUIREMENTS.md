@@ -1,97 +1,67 @@
-# Requirements: RSF — Ruff Linting Cleanup
+# Requirements: RSF — Lambda Function URL Support
 
-**Defined:** 2026-02-28
+**Defined:** 2026-03-01
 **Core Value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
-## v1.6 Requirements
+## v1.7 Requirements
 
-Requirements for ruff linting cleanup. Each maps to roadmap phases.
+Requirements for Lambda Function URL support. Each maps to roadmap phases.
 
-### Config
+### DSL (Workflow Definition)
 
-- [ ] **CONF-01**: Ruff `exclude = ["examples"]` is removed — all Python code is linted
-- [ ] **CONF-02**: Ruff `ignore` list is empty — no rules suppressed globally
+- [ ] **DSL-01**: User can add optional `lambda_url` configuration to workflow YAML with `enabled: true` and `auth_type: NONE|AWS_IAM`
+- [ ] **DSL-02**: DSL validation accepts lambda_url configuration and rejects invalid auth types
 
-### F401 — Unused Imports
+### Terraform (Infrastructure Generation)
 
-- [x] **F401-01**: All unused imports in `src/` are removed or justified with inline `# noqa: F401`
-- [x] **F401-02**: All unused imports in `tests/` are removed
-- [x] **F401-03**: All unused imports in `examples/` are removed
-- [x] **F401-04**: Side-effect imports in `functions/__init__.py` use `__all__` or inline `# noqa: F401`
-- [x] **F401-05**: Generated `handlers/__init__.py` code uses appropriate `# noqa: F401` for side-effect imports
-- [ ] **F401-06**: F401 is removed from the global `ignore` list
+- [ ] **TF-01**: When lambda_url is enabled, Terraform generation includes `aws_lambda_function_url` resource with configured auth type
+- [ ] **TF-02**: Generated Terraform outputs include the Lambda Function URL endpoint
+- [ ] **TF-03**: IAM policy includes necessary permissions when Lambda URL uses AWS_IAM auth
 
-### F841 — Unused Variables
+### Example (Demonstration Workflow)
 
-- [ ] **F841-01**: All unused variables in `src/` and `tests/` are removed or used
-- [ ] **F841-02**: All unused variables in `examples/` are removed or used
-- [ ] **F841-03**: F841 is removed from the global `ignore` list
+- [ ] **EX-01**: New example workflow demonstrates triggering durable execution via Lambda Function URL POST
+- [ ] **EX-02**: Example includes local tests verifying handler logic without AWS
+- [ ] **EX-03**: Example includes integration test for Lambda URL invocation on real AWS
 
-### F541 — f-string Without Placeholders
+### Tutorial (Documentation)
 
-- [ ] **F541-01**: All f-strings without placeholders are converted to regular strings
-- [ ] **F541-02**: F541 is removed from the global `ignore` list
-
-### E402 — Import Not at Top of File
-
-- [ ] **E402-01**: All E402 violations in `src/` are fixed or justified with inline `# noqa: E402`
-- [ ] **E402-02**: All E402 violations in `examples/` conftest files are fixed or justified
-- [ ] **E402-03**: Redundant `# noqa: E402` in `cli/main.py` is cleaned up
-- [ ] **E402-04**: E402 is removed from the global `ignore` list
-
-### E741 — Ambiguous Variable Name
-
-- [ ] **E741-01**: All ambiguous variable names (`l`, `O`, `I`) are renamed to clear names
-- [ ] **E741-02**: E741 is removed from the global `ignore` list
-
-### E501 — Line Too Long
-
-- [ ] **E501-01**: All lines exceeding 120 characters in `examples/` are shortened
-- [ ] **E501-02**: `ruff check .` passes with zero violations across the entire codebase
+- [ ] **TUT-01**: New tutorial covers Lambda URL configuration in workflow YAML and Terraform deployment
+- [ ] **TUT-02**: Tutorial demonstrates invoking durable execution via curl POST to Lambda URL
 
 ## Future Requirements
 
-None — this is a self-contained code quality milestone.
+None — this is a focused feature milestone.
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Enabling additional ruff rule categories (ANN, PLR, UP, I, etc.) | Would be a separate milestone; current scope is removing existing ignores only |
-| ruff format changes | Formatting is already passing; this milestone covers linting only |
-| Type annotation improvements | Separate concern from linting cleanup |
+| API Gateway integration | Lambda URL is the simpler HTTP trigger; API Gateway is a separate feature |
+| Custom domain for Lambda URL | Would require ACM certificate and Route53 setup; out of scope for v1 |
+| Lambda URL CORS configuration | Can be added later; basic trigger functionality first |
+| Request/response payload transformation | Lambda URL passes payload directly; no transform layer needed |
 
 ## Traceability
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CONF-01 | Phase 28 | Complete |
-| CONF-02 | Phase 34 | Complete |
-| F401-01 | Phase 28 | Complete |
-| F401-02 | Phase 28 | Complete |
-| F401-03 | Phase 28 | Complete |
-| F401-04 | Phase 28 | Complete |
-| F401-05 | Phase 28 | Complete |
-| F401-06 | Phase 28 | Complete |
-| F841-01 | Phase 29 | Complete |
-| F841-02 | Phase 29 | Complete |
-| F841-03 | Phase 29 | Complete |
-| F541-01 | Phase 30 | Complete |
-| F541-02 | Phase 30 | Complete |
-| E402-01 | Phase 31 | Complete |
-| E402-02 | Phase 31 | Complete |
-| E402-03 | Phase 31 | Complete |
-| E402-04 | Phase 31 | Complete |
-| E741-01 | Phase 32 | Complete |
-| E741-02 | Phase 32 | Complete |
-| E501-01 | Phase 33 | Complete |
-| E501-02 | Phase 33 | Complete |
+| DSL-01 | TBD | Pending |
+| DSL-02 | TBD | Pending |
+| TF-01 | TBD | Pending |
+| TF-02 | TBD | Pending |
+| TF-03 | TBD | Pending |
+| EX-01 | TBD | Pending |
+| EX-02 | TBD | Pending |
+| EX-03 | TBD | Pending |
+| TUT-01 | TBD | Pending |
+| TUT-02 | TBD | Pending |
 
 **Coverage:**
-- v1.6 requirements: 21 total
-- Mapped to phases: 21
-- Complete: 21 ✓
+- v1.7 requirements: 9 total
+- Mapped to phases: 0
+- Unmapped: 9 ⚠️
 
 ---
-*Requirements defined: 2026-02-28*
-*Last updated: 2026-02-28 after milestone completion*
+*Requirements defined: 2026-03-01*
+*Last updated: 2026-03-01 after initial definition*
