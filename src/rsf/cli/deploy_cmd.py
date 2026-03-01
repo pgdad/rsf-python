@@ -99,12 +99,30 @@ def _deploy_full(
         lambda_url_enabled = True
         lambda_url_auth_type = definition.lambda_url.auth_type.value
 
+    # Build trigger config from DSL definition
+    triggers_config: list[dict] = []
+    if hasattr(definition, "triggers") and definition.triggers:
+        for trigger in definition.triggers:
+            trigger_dict: dict = {"type": trigger.type}
+            if trigger.type == "eventbridge":
+                trigger_dict["schedule_expression"] = trigger.schedule_expression
+                trigger_dict["event_pattern"] = trigger.event_pattern
+            elif trigger.type == "sqs":
+                trigger_dict["queue_name"] = trigger.queue_name
+                trigger_dict["batch_size"] = trigger.batch_size
+            elif trigger.type == "sns":
+                trigger_dict["topic_arn"] = trigger.topic_arn
+            triggers_config.append(trigger_dict)
+    has_sqs = any(t["type"] == "sqs" for t in triggers_config)
+
     with Status("[bold]Generating Terraform files...[/bold]", console=console):
         tf_result = generate_terraform(
             config=TerraformConfig(
                 workflow_name=workflow_name,
                 lambda_url_enabled=lambda_url_enabled,
                 lambda_url_auth_type=lambda_url_auth_type,
+                triggers=triggers_config,
+                has_sqs_triggers=has_sqs,
             ),
             output_dir=tf_dir,
         )

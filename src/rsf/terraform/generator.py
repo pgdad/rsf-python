@@ -29,6 +29,7 @@ TEMPLATE_FILES = {
     "cloudwatch.tf": "cloudwatch.tf.j2",
     "backend.tf": "backend.tf.j2",
     "lambda_url.tf": "lambda_url.tf.j2",
+    "triggers.tf": "triggers.tf.j2",
 }
 
 
@@ -44,6 +45,8 @@ class TerraformConfig:
     backend_dynamodb_table: str | None = None
     lambda_url_enabled: bool = False
     lambda_url_auth_type: str = "NONE"
+    triggers: list[dict[str, Any]] = field(default_factory=list)
+    has_sqs_triggers: bool = False
 
 
 @dataclass
@@ -82,11 +85,17 @@ def generate_terraform(
         "backend_dynamodb_table": config.backend_dynamodb_table,
         "lambda_url_enabled": config.lambda_url_enabled,
         "lambda_url_auth_type": config.lambda_url_auth_type,
+        "triggers": config.triggers,
+        "has_sqs_triggers": config.has_sqs_triggers,
     }
 
     result = TerraformResult()
 
     for filename, template_name in TEMPLATE_FILES.items():
+        # Skip triggers.tf when no triggers configured
+        if filename == "triggers.tf" and not config.triggers:
+            continue
+
         # Skip lambda_url.tf when not enabled
         if filename == "lambda_url.tf" and not config.lambda_url_enabled:
             continue

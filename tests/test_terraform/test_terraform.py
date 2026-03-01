@@ -327,6 +327,104 @@ class TestGenerationGap:
         assert first_run == second_run
 
 
+class TestTriggerGeneration:
+    """Tests for event trigger Terraform generation."""
+
+    def test_eventbridge_trigger_creates_resources(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            triggers=[
+                {
+                    "type": "eventbridge",
+                    "schedule_expression": "rate(5 minutes)",
+                    "event_pattern": None,
+                }
+            ],
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "triggers.tf").read_text()
+        assert "aws_cloudwatch_event_rule" in content
+        assert "aws_cloudwatch_event_target" in content
+        assert "rate(5 minutes)" in content
+
+    def test_sqs_trigger_creates_resources(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            triggers=[
+                {"type": "sqs", "queue_name": "order-events", "batch_size": 5}
+            ],
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "triggers.tf").read_text()
+        assert "aws_sqs_queue" in content
+        assert "aws_lambda_event_source_mapping" in content
+        assert "order-events" in content
+
+    def test_sns_trigger_creates_resources(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            triggers=[
+                {
+                    "type": "sns",
+                    "topic_arn": "arn:aws:sns:us-east-1:123456789012:MyTopic",
+                }
+            ],
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "triggers.tf").read_text()
+        assert "aws_sns_topic_subscription" in content
+        assert "aws_lambda_permission" in content
+        assert "arn:aws:sns:us-east-1:123456789012:MyTopic" in content
+
+    def test_multiple_triggers_all_present(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            triggers=[
+                {"type": "eventbridge", "schedule_expression": "rate(1 hour)", "event_pattern": None},
+                {"type": "sqs", "queue_name": "orders", "batch_size": 10},
+                {"type": "sns", "topic_arn": "arn:aws:sns:us-east-1:123456789012:T"},
+            ],
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "triggers.tf").read_text()
+        assert "aws_cloudwatch_event_rule" in content
+        assert "aws_sqs_queue" in content
+        assert "aws_sns_topic_subscription" in content
+
+    def test_no_triggers_no_triggers_tf(self, tmp_path):
+        config = TerraformConfig(workflow_name="test")
+        result = generate_terraform(config, tmp_path)
+        assert not (tmp_path / "triggers.tf").exists()
+        assert len(result.generated_files) == 6  # standard files only
+
+    def test_sqs_trigger_produces_iam_permissions(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            triggers=[
+                {"type": "sqs", "queue_name": "my-queue", "batch_size": 10}
+            ],
+            has_sqs_triggers=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "iam.tf").read_text()
+        assert "SQSTriggerAccess" in content
+        assert "sqs:ReceiveMessage" in content
+        assert "sqs:DeleteMessage" in content
+        assert "sqs:GetQueueAttributes" in content
+
+    def test_eventbridge_trigger_produces_lambda_permission(self, tmp_path):
+        config = TerraformConfig(
+            workflow_name="test",
+            triggers=[
+                {"type": "eventbridge", "schedule_expression": "rate(5 minutes)", "event_pattern": None}
+            ],
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "triggers.tf").read_text()
+        assert "aws_lambda_permission" in content
+        assert "events.amazonaws.com" in content
+
+
 class TestLambdaUrlTerraform:
     """Tests for Lambda Function URL Terraform generation."""
 

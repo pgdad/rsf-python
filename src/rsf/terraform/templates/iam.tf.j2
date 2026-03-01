@@ -51,7 +51,18 @@ resource "aws_iam_role_policy" "lambda_policy" {
           "lambda:ListDurableExecutionsByFunction"
         ]
         Resource = aws_lambda_function.<< resource_id >>.arn
-      }<% if lambda_url_enabled and lambda_url_auth_type == "AWS_IAM" %>,
+      }<% if has_sqs_triggers %>,
+      {
+        Sid    = "SQSTriggerAccess"
+        Effect = "Allow"
+        Action = [
+          "sqs:ReceiveMessage",
+          "sqs:DeleteMessage",
+          "sqs:GetQueueAttributes"
+        ]
+        Resource = "*"
+      }
+<% endif %><% if lambda_url_enabled and lambda_url_auth_type == "AWS_IAM" %>,
       {
         Sid    = "InvokeFunctionUrl"
         Effect = "Allow"
