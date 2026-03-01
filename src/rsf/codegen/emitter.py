@@ -54,6 +54,40 @@ def _emit_task(mapping: StateMapping) -> list[str]:
     name = topyrepr(mapping.state_name)
     lines: list[str] = []
 
+    # Sub-workflow invocation: use Lambda invoke instead of handler call
+    if mapping.sub_workflow:
+        sw_name = topyrepr(mapping.sub_workflow)
+        invoke_lines = [
+            f"# Sub-workflow invocation: {mapping.sub_workflow}",
+            f"_sw_response = lambda_client.invoke(",
+            f'    FunctionName=f"{{RSF_NAME_PREFIX}}-{mapping.sub_workflow}",',
+            '    InvocationType="RequestResponse",',
+            "    Payload=json.dumps(input_data),",
+            ")",
+            'input_data = json.loads(_sw_response["Payload"].read())',
+            _transition(p),
+        ]
+        if p.get("has_catch"):
+            lines.append("try:")
+            for line in invoke_lines:
+                lines.append(f"    {line}")
+            lines.append("except Exception as _err:")
+            catch_policies = p.get("catch_policies", [])
+            for i, cp in enumerate(catch_policies):
+                kw = "if" if i == 0 else "elif"
+                error_list = topyrepr(cp["error_equals"])
+                lines.append(f'    {kw} type(_err).__name__ in {error_list} or "States.ALL" in {error_list}:')
+                if cp.get("result_path"):
+                    lines.append(
+                        f"        input_data = _apply_error_result(input_data, _err, {topyrepr(cp['result_path'])})"
+                    )
+                lines.append(f"        current_state = {topyrepr(cp['next'])}")
+            lines.append("    else:")
+            lines.append("        raise")
+        else:
+            lines.extend(invoke_lines)
+        return lines
+
     if p.get("has_catch"):
         lines.append("try:")
         lines.append(f"    handler = get_handler({name})")

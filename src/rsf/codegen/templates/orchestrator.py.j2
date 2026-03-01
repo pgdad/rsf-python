@@ -7,6 +7,14 @@ from rsf.registry import get_handler, get_startup_hooks
 {% if timeout_seconds %}
 import time
 {% endif %}
+{% if has_sub_workflows %}
+import boto3
+import json
+import os
+
+lambda_client = boto3.client("lambda")
+RSF_NAME_PREFIX = os.environ.get("RSF_NAME_PREFIX", "rsf")
+{% endif %}
 {% for handler_import in handler_imports %}
 import {{ handler_import }}
 {% endfor %}

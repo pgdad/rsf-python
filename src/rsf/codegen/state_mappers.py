@@ -38,6 +38,7 @@ class StateMapping:
     # context.step, context.wait, conditional, passthrough, return, raise, context.parallel, context.map
     sdk_primitive: str
     params: dict[str, Any] = field(default_factory=dict)
+    sub_workflow: str | None = None
 
 
 def map_states(definition: StateMachineDefinition) -> list[StateMapping]:
@@ -124,11 +125,13 @@ def _map_task(name: str, state: TaskState) -> StateMapping:
             }
             for c in state.catch
         ]
+    sub_wf = getattr(state, "sub_workflow", None)
     return StateMapping(
         state_name=name,
         state_type="Task",
         sdk_primitive="context.step",
         params=params,
+        sub_workflow=sub_wf,
     )
 
 

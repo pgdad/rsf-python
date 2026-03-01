@@ -76,10 +76,10 @@ def generate(
     orchestrator_path = output_dir / "orchestrator.py"
     orchestrator_path.write_text(orchestrator_code, encoding="utf-8")
 
-    # Generate handler stubs
+    # Generate handler stubs (skip sub-workflow tasks - they invoke child workflows, not handlers)
     handler_paths: list[Path] = []
     skipped_handlers: list[Path] = []
-    task_mappings = [m for m in mappings if m.state_type == "Task"]
+    task_mappings = [m for m in mappings if m.state_type == "Task" and not m.sub_workflow]
 
     if task_mappings:
         handlers_dir.mkdir(parents=True, exist_ok=True)
@@ -128,9 +128,16 @@ def render_orchestrator(
         code = emit_state_block(mapping, indent=3)
         state_blocks.append(StateBlock(name=mapping.state_name, code=code))
 
-    # Build handler imports for Task states
-    task_names = [m.state_name for m in mappings if m.state_type == "Task"]
+    # Build handler imports for Task states (skip sub-workflow tasks)
+    task_names = [
+        m.state_name for m in mappings
+        if m.state_type == "Task" and not m.sub_workflow
+    ]
     handler_imports = [f"handlers.{_to_snake_case(name)}" for name in task_names]
+
+    # Check for sub-workflows
+    has_sub_workflows = any(m.sub_workflow for m in mappings)
+    sub_workflow_names = sorted({m.sub_workflow for m in mappings if m.sub_workflow})
 
     return render_template(
         "orchestrator.py.j2",
@@ -143,6 +150,8 @@ def render_orchestrator(
         handler_imports=handler_imports,
         mappings=mappings,
         timeout_seconds=definition.timeout_seconds,
+        has_sub_workflows=has_sub_workflows,
+        sub_workflow_names=sub_workflow_names,
     )
 
 

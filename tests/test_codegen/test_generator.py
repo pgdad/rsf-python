@@ -318,6 +318,86 @@ class TestGenerateChoiceWorkflow:
         assert "'ManualReview'" in code
 
 
+class TestSubWorkflowCodeGen:
+    """Tests for sub-workflow invocation code generation."""
+
+    def _make_workflow(self, tmp_path, sub_workflow=None, sub_workflows=None):
+        """Create a workflow YAML file with optional sub-workflow config."""
+        import yaml
+
+        data = {
+            "rsf_version": "1.0",
+            "StartAt": "DoWork",
+            "States": {
+                "DoWork": {"Type": "Task", "End": True},
+            },
+        }
+        if sub_workflow:
+            data["States"]["DoWork"]["SubWorkflow"] = sub_workflow
+        if sub_workflows:
+            data["sub_workflows"] = sub_workflows
+
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(yaml.dump(data), encoding="utf-8")
+        return wf
+
+    def test_sub_workflow_generates_lambda_invoke(self, tmp_path):
+        wf = self._make_workflow(
+            tmp_path,
+            sub_workflow="payment-processor",
+            sub_workflows=[{"name": "payment-processor"}],
+        )
+        sm = load_definition(wf)
+        result = generate(sm, wf, tmp_path / "output")
+        code = result.orchestrator_path.read_text()
+        assert "lambda_client.invoke" in code or "invoke" in code.lower()
+        assert "payment-processor" in code
+
+    def test_no_sub_workflow_normal_handler(self, tmp_path):
+        wf = self._make_workflow(tmp_path)
+        sm = load_definition(wf)
+        result = generate(sm, wf, tmp_path / "output")
+        code = result.orchestrator_path.read_text()
+        assert "get_handler" in code
+        assert "lambda_client" not in code
+
+    def test_sub_workflow_imports_boto3(self, tmp_path):
+        wf = self._make_workflow(
+            tmp_path,
+            sub_workflow="child-wf",
+            sub_workflows=[{"name": "child-wf"}],
+        )
+        sm = load_definition(wf)
+        result = generate(sm, wf, tmp_path / "output")
+        code = result.orchestrator_path.read_text()
+        assert "import boto3" in code
+        assert "import json" in code
+
+    def test_sub_workflow_passes_input_data(self, tmp_path):
+        wf = self._make_workflow(
+            tmp_path,
+            sub_workflow="child-wf",
+            sub_workflows=[{"name": "child-wf"}],
+        )
+        sm = load_definition(wf)
+        result = generate(sm, wf, tmp_path / "output")
+        code = result.orchestrator_path.read_text()
+        assert "input_data" in code
+        # Should serialize input_data as payload
+        assert "json.dumps" in code or "Payload" in code
+
+    def test_sub_workflow_function_name_uses_prefix(self, tmp_path):
+        wf = self._make_workflow(
+            tmp_path,
+            sub_workflow="child-wf",
+            sub_workflows=[{"name": "child-wf"}],
+        )
+        sm = load_definition(wf)
+        result = generate(sm, wf, tmp_path / "output")
+        code = result.orchestrator_path.read_text()
+        assert "RSF_NAME_PREFIX" in code
+
+
 class TestTimeoutCodeGeneration:
     """Test that timeout enforcement code is correctly generated."""
 
