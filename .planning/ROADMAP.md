@@ -9,7 +9,7 @@
 - ✅ **v1.4 UI Screenshots** — Phases 21-24 (shipped 2026-02-27)
 - ✅ **v1.5 PyPI Packaging & Distribution** — Phases 25-27 (shipped 2026-02-28)
 - ✅ **v1.6 Ruff Linting Cleanup** — Phases 28-35 (shipped 2026-03-01)
-- 🚧 **v1.7 Lambda Function URL Support** — Phases 36-38 (in progress)
+- ✅ **v1.7 Lambda Function URL Support** — Phases 36-38 (shipped 2026-03-01)
 
 ## Phases
 
@@ -101,13 +101,13 @@ Full details: `.planning/milestones/v1.5-ROADMAP.md`
 
 </details>
 
-### v1.7 Lambda Function URL Support (In Progress)
+### v1.7 Lambda Function URL Support (Complete)
 
 **Milestone Goal:** Add optional Lambda Function URL support so users can trigger durable workflow executions via HTTP POST, with a new example and tutorial.
 
 - [x] **Phase 36: DSL and Terraform** - Lambda URL DSL field, validation, and Terraform resource generation (completed 2026-03-01)
 - [x] **Phase 37: Example Workflow** - New example demonstrating Lambda URL invocation with local and integration tests (completed 2026-03-01)
-- [ ] **Phase 38: Tutorial** - New tutorial covering Lambda URL configuration, deployment, and HTTP invocation
+- [x] **Phase 38: Tutorial** - New tutorial covering Lambda URL configuration, deployment, and HTTP invocation (completed 2026-03-01)
 
 ## Phase Details
 
@@ -227,7 +227,9 @@ Plans:
 **Success Criteria** (what must be TRUE):
   1. A new tutorial document exists covering how to add `lambda_url` configuration to workflow YAML and how to run `rsf deploy` to provision the Lambda URL resource
   2. The tutorial includes a working curl command that users can copy-paste to POST to their Lambda URL and trigger a durable execution
-**Plans**: TBD
+**Plans**: 1/1 complete
+Plans:
+- [x] 38-01-PLAN.md -- Extend tutorial with Lambda URL steps 12-14 (YAML config, deploy, curl POST)
 
 ## Progress
 
@@ -243,4 +245,4 @@ Plans:
 | 35. Run All Tests (Non-AWS) | v1.6 | 1/1 | Complete | 2026-03-01 |
 | 36. DSL and Terraform | 2/2 | Complete    | 2026-03-01 | - |
 | 37. Example Workflow | v1.7 | Complete    | 2026-03-01 | - |
-| 38. Tutorial | v1.7 | 0/? | Not started | - |
+| 38. Tutorial | 1/1 | Complete   | 2026-03-01 | - |

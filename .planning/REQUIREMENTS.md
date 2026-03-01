@@ -26,8 +26,8 @@ Requirements for Lambda Function URL support. Each maps to roadmap phases.
 
 ### Tutorial (Documentation)
 
-- [ ] **TUT-01**: New tutorial covers Lambda URL configuration in workflow YAML and Terraform deployment
-- [ ] **TUT-02**: Tutorial demonstrates invoking durable execution via curl POST to Lambda URL
+- [x] **TUT-01**: New tutorial covers Lambda URL configuration in workflow YAML and Terraform deployment
+- [x] **TUT-02**: Tutorial demonstrates invoking durable execution via curl POST to Lambda URL
 
 ## Future Requirements
 
@@ -54,8 +54,8 @@ None — this is a focused feature milestone.
 | EX-01 | Phase 37 | Complete |
 | EX-02 | Phase 37 | Complete |
 | EX-03 | Phase 37 | Complete |
-| TUT-01 | Phase 38 | Pending |
-| TUT-02 | Phase 38 | Pending |
+| TUT-01 | Phase 38 | Complete |
+| TUT-02 | Phase 38 | Complete |
 
 **Coverage:**
 - v1.7 requirements: 10 total
@@ -64,4 +64,4 @@ None — this is a focused feature milestone.
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 after Phase 37 completion (EX-01, EX-02, EX-03 complete)*
+*Last updated: 2026-03-01 after Phase 38 completion (TUT-01, TUT-02 complete — v1.7 milestone complete)*
