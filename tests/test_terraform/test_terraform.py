@@ -875,3 +875,32 @@ class TestDLQGeneration:
         content = (tmp_path / "dlq.tf").read_text()
         assert "message_retention_seconds" in content
         assert "1209600" in content  # 14 days
+
+
+class TestStageConfig:
+    """Tests for stage-aware Terraform generation."""
+
+    def test_stage_produces_stage_variable(self, tmp_path):
+        """generate_terraform with stage produces variables.tf with stage variable."""
+        config = TerraformConfig(
+            workflow_name="test",
+            stage="prod",
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "variables.tf").read_text()
+        assert 'variable "stage"' in content
+        assert '"prod"' in content
+
+    def test_no_stage_no_stage_variable(self, tmp_path):
+        """generate_terraform without stage produces variables.tf without stage variable (backward compatible)."""
+        config = TerraformConfig(
+            workflow_name="test",
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "variables.tf").read_text()
+        assert 'variable "stage"' not in content
+
+    def test_stage_config_field_default_none(self):
+        """TerraformConfig.stage defaults to None."""
+        config = TerraformConfig(workflow_name="test")
+        assert config.stage is None

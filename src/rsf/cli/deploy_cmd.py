@@ -24,12 +24,14 @@ def deploy(
     auto_approve: bool = typer.Option(False, "--auto-approve", "-y", help="Skip Terraform confirmation prompt"),
     tf_dir: Path = typer.Option("terraform", "--tf-dir", help="Terraform output directory"),
     no_infra: bool = typer.Option(False, "--no-infra", help="Generate and deploy code only, skip Terraform"),
+    stage: str | None = typer.Option(None, "--stage", help="Deployment stage (e.g., dev, staging, prod)"),
 ) -> None:
     """Deploy an RSF workflow to AWS via Terraform.
 
     Generates Terraform files, then runs terraform init and terraform apply.
     Use --code-only to re-package Lambda code without a full Terraform apply.
     Use --no-infra to skip Terraform generation entirely.
+    Use --stage to deploy to a named stage with stage-specific variable overrides.
     """
     # Check mutual exclusion: --no-infra and --code-only
     if no_infra and code_only:
@@ -77,10 +79,25 @@ def deploy(
     # Step 4: Derive workflow name
     workflow_name = definition.comment if definition.comment else workflow.stem.replace("_", "-").replace(" ", "-")
 
+    # Stage handling: isolate tf_dir and resolve stage variable file
+    stage_var_file: Path | None = None
+    if stage:
+        tf_dir = tf_dir / stage  # e.g., terraform/prod/
+        stage_var_file = workflow.parent / "stages" / f"{stage}.tfvars"
+        if not stage_var_file.exists():
+            console.print(
+                f"[red]Error:[/red] Stage variable file not found: [bold]{stage_var_file}[/bold]\n"
+                "Create it with stage-specific overrides. Example:\n"
+                '  name_prefix = "rsf-prod"\n'
+                "  timeout     = 300\n"
+                "  memory_size = 512"
+            )
+            raise typer.Exit(code=1)
+
     if code_only:
-        _deploy_code_only(definition, workflow, workflow_name, tf_dir)
+        _deploy_code_only(definition, workflow, workflow_name, tf_dir, stage=stage, stage_var_file=stage_var_file)
     else:
-        _deploy_full(definition, workflow, workflow_name, tf_dir, auto_approve)
+        _deploy_full(definition, workflow, workflow_name, tf_dir, auto_approve, stage=stage, stage_var_file=stage_var_file)
 
 
 def _deploy_full(
@@ -89,6 +106,8 @@ def _deploy_full(
     workflow_name: str,
     tf_dir: Path,
     auto_approve: bool,
+    stage: str | None = None,
+    stage_var_file: Path | None = None,
 ) -> None:
     """Run the full Terraform deploy pipeline."""
     # Step 5: Generate Terraform files
@@ -170,6 +189,7 @@ def _deploy_full(
                 dlq_enabled=dlq_enabled,
                 dlq_max_receive_count=dlq_max_receive_count,
                 dlq_queue_name=dlq_queue_name,
+                stage=stage,
             ),
             output_dir=tf_dir,
         )
@@ -198,6 +218,8 @@ def _deploy_full(
 
     # Step 8 + 9: terraform apply
     apply_cmd = ["terraform", "apply"]
+    if stage_var_file:
+        apply_cmd.extend(["-var-file", str(stage_var_file.resolve())])
     if auto_approve:
         apply_cmd.append("-auto-approve")
 
@@ -217,6 +239,8 @@ def _deploy_code_only(
     workflow: Path,
     workflow_name: str,
     tf_dir: Path,
+    stage: str | None = None,
+    stage_var_file: Path | None = None,
 ) -> None:
     """Re-package Lambda code and update it via targeted Terraform apply."""
     # Step 4 (code-only): Check terraform binary
@@ -234,14 +258,17 @@ def _deploy_code_only(
 
     # Step 5 (code-only): Run targeted terraform apply for Lambda only
     console.print("\n[bold]Running targeted terraform apply (Lambda code update)...[/bold]")
+    targeted_cmd = [
+        "terraform",
+        "apply",
+        "-target=aws_lambda_function.*",
+        "-auto-approve",
+    ]
+    if stage_var_file:
+        targeted_cmd.extend(["-var-file", str(stage_var_file.resolve())])
     try:
         subprocess.run(
-            [
-                "terraform",
-                "apply",
-                "-target=aws_lambda_function.*",
-                "-auto-approve",
-            ],
+            targeted_cmd,
             cwd=tf_dir,
             check=True,
         )

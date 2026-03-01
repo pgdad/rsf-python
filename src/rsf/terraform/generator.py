@@ -57,6 +57,7 @@ class TerraformConfig:
     dlq_enabled: bool = False
     dlq_max_receive_count: int = 3
     dlq_queue_name: str | None = None
+    stage: str | None = None
 
 
 @dataclass
@@ -104,6 +105,7 @@ def generate_terraform(
         "dlq_enabled": config.dlq_enabled,
         "dlq_max_receive_count": config.dlq_max_receive_count,
         "dlq_queue_name": config.dlq_queue_name,
+        "stage": config.stage,
     }
 
     result = TerraformResult()

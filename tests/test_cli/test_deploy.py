@@ -322,3 +322,234 @@ def test_deploy_help_shows_no_infra_option() -> None:
 
     plain = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
     assert "--no-infra" in plain
+
+
+# ── --stage flag tests ───────────────────────────────────────────────────────
+
+
+class TestStageDeployment:
+    """Tests for multi-stage deployment via --stage option."""
+
+    def test_deploy_stage_prod_uses_stage_var_file(
+        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """rsf deploy --stage prod looks for stages/prod.tfvars file."""
+        monkeypatch.chdir(workflow_dir)
+        # Create stage var file
+        stages_dir = workflow_dir / "stages"
+        stages_dir.mkdir()
+        (stages_dir / "prod.tfvars").write_text('name_prefix = "rsf-prod"\n')
+
+        with (
+            patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
+            patch("rsf.cli.deploy_cmd.subprocess.run") as mock_run,
+            patch("rsf.cli.deploy_cmd.generate_terraform") as mock_tf,
+            patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+        ):
+            mock_codegen.return_value = MagicMock(
+                orchestrator_path=workflow_dir / "orchestrator.py",
+                handler_paths=[],
+                skipped_handlers=[],
+            )
+            mock_tf.return_value = MagicMock(generated_files=[], skipped_files=[])
+            mock_run.return_value = MagicMock(returncode=0)
+
+            result = runner.invoke(app, ["deploy", "--stage", "prod", "workflow.yaml"])
+
+        assert result.exit_code == 0, f"Unexpected exit: {result.output}"
+        assert "Deploy complete" in result.output
+
+    def test_deploy_stage_dev_uses_stage_var_file(
+        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """rsf deploy --stage dev looks for stages/dev.tfvars file."""
+        monkeypatch.chdir(workflow_dir)
+        stages_dir = workflow_dir / "stages"
+        stages_dir.mkdir()
+        (stages_dir / "dev.tfvars").write_text('name_prefix = "rsf-dev"\n')
+
+        with (
+            patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
+            patch("rsf.cli.deploy_cmd.subprocess.run") as mock_run,
+            patch("rsf.cli.deploy_cmd.generate_terraform") as mock_tf,
+            patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+        ):
+            mock_codegen.return_value = MagicMock(
+                orchestrator_path=workflow_dir / "orchestrator.py",
+                handler_paths=[],
+                skipped_handlers=[],
+            )
+            mock_tf.return_value = MagicMock(generated_files=[], skipped_files=[])
+            mock_run.return_value = MagicMock(returncode=0)
+
+            result = runner.invoke(app, ["deploy", "--stage", "dev", "workflow.yaml"])
+
+        assert result.exit_code == 0, f"Unexpected exit: {result.output}"
+
+    def test_deploy_without_stage_no_var_file(
+        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """rsf deploy without --stage works as before (no -var-file passed)."""
+        monkeypatch.chdir(workflow_dir)
+
+        with (
+            patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
+            patch("rsf.cli.deploy_cmd.subprocess.run") as mock_run,
+            patch("rsf.cli.deploy_cmd.generate_terraform") as mock_tf,
+            patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+        ):
+            mock_codegen.return_value = MagicMock(
+                orchestrator_path=workflow_dir / "orchestrator.py",
+                handler_paths=[],
+                skipped_handlers=[],
+            )
+            mock_tf.return_value = MagicMock(generated_files=[], skipped_files=[])
+            mock_run.return_value = MagicMock(returncode=0)
+
+            result = runner.invoke(app, ["deploy", "workflow.yaml"])
+
+        assert result.exit_code == 0, f"Unexpected exit: {result.output}"
+        # Verify no -var-file in any terraform command
+        for call in mock_run.call_args_list:
+            cmd = call[0][0]
+            assert "-var-file" not in cmd
+
+    def test_deploy_stage_missing_var_file_errors(
+        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """rsf deploy --stage prod with missing prod.tfvars prints error and exits."""
+        monkeypatch.chdir(workflow_dir)
+        # Do NOT create stages/prod.tfvars
+
+        with (
+            patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+        ):
+            mock_codegen.return_value = MagicMock(
+                orchestrator_path=workflow_dir / "orchestrator.py",
+                handler_paths=[],
+                skipped_handlers=[],
+            )
+
+            result = runner.invoke(app, ["deploy", "--stage", "prod", "workflow.yaml"])
+
+        assert result.exit_code == 1, f"Expected exit 1, got: {result.exit_code}"
+        assert "Stage variable file not found" in result.output
+
+    def test_deploy_stage_passes_var_file_to_terraform_apply(
+        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """rsf deploy --stage prod passes -var-file=stages/prod.tfvars to terraform apply."""
+        monkeypatch.chdir(workflow_dir)
+        stages_dir = workflow_dir / "stages"
+        stages_dir.mkdir()
+        (stages_dir / "prod.tfvars").write_text('name_prefix = "rsf-prod"\n')
+
+        with (
+            patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
+            patch("rsf.cli.deploy_cmd.subprocess.run") as mock_run,
+            patch("rsf.cli.deploy_cmd.generate_terraform") as mock_tf,
+            patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+        ):
+            mock_codegen.return_value = MagicMock(
+                orchestrator_path=workflow_dir / "orchestrator.py",
+                handler_paths=[],
+                skipped_handlers=[],
+            )
+            mock_tf.return_value = MagicMock(generated_files=[], skipped_files=[])
+            mock_run.return_value = MagicMock(returncode=0)
+
+            result = runner.invoke(app, ["deploy", "--stage", "prod", "workflow.yaml"])
+
+        assert result.exit_code == 0, f"Unexpected exit: {result.output}"
+        # Check terraform apply call has -var-file
+        calls = mock_run.call_args_list
+        apply_call = calls[1]  # second call is terraform apply
+        cmd = apply_call[0][0]
+        assert "-var-file" in cmd
+        # The var file path should contain prod.tfvars
+        var_file_idx = cmd.index("-var-file")
+        assert "prod.tfvars" in cmd[var_file_idx + 1]
+
+    def test_deploy_stage_no_var_file_in_terraform_init(
+        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """rsf deploy --stage does NOT pass -var-file to terraform init (init doesn't support it)."""
+        monkeypatch.chdir(workflow_dir)
+        stages_dir = workflow_dir / "stages"
+        stages_dir.mkdir()
+        (stages_dir / "prod.tfvars").write_text('name_prefix = "rsf-prod"\n')
+
+        with (
+            patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
+            patch("rsf.cli.deploy_cmd.subprocess.run") as mock_run,
+            patch("rsf.cli.deploy_cmd.generate_terraform") as mock_tf,
+            patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+        ):
+            mock_codegen.return_value = MagicMock(
+                orchestrator_path=workflow_dir / "orchestrator.py",
+                handler_paths=[],
+                skipped_handlers=[],
+            )
+            mock_tf.return_value = MagicMock(generated_files=[], skipped_files=[])
+            mock_run.return_value = MagicMock(returncode=0)
+
+            result = runner.invoke(app, ["deploy", "--stage", "prod", "workflow.yaml"])
+
+        assert result.exit_code == 0, f"Unexpected exit: {result.output}"
+        # First call is terraform init — should NOT have -var-file
+        init_call = mock_run.call_args_list[0]
+        init_cmd = init_call[0][0]
+        assert init_cmd == ["terraform", "init"]
+
+    def test_deploy_stage_with_no_infra_ignores_stage(
+        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """rsf deploy --stage prod --no-infra generates code only, ignores stage."""
+        monkeypatch.chdir(workflow_dir)
+        # No stages dir needed — --no-infra returns before stage var file check
+
+        with (
+            patch("rsf.cli.deploy_cmd.subprocess.run") as mock_run,
+            patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+        ):
+            mock_codegen.return_value = MagicMock(
+                orchestrator_path=workflow_dir / "orchestrator.py",
+                handler_paths=[],
+                skipped_handlers=[],
+            )
+
+            result = runner.invoke(app, ["deploy", "--stage", "prod", "--no-infra", "workflow.yaml"])
+
+        assert result.exit_code == 0, f"Unexpected exit: {result.output}"
+        mock_run.assert_not_called()
+
+    def test_deploy_stage_isolates_tf_dir(
+        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+    ) -> None:
+        """rsf deploy --stage prod uses terraform/prod/ directory for isolation."""
+        monkeypatch.chdir(workflow_dir)
+        stages_dir = workflow_dir / "stages"
+        stages_dir.mkdir()
+        (stages_dir / "prod.tfvars").write_text('name_prefix = "rsf-prod"\n')
+
+        with (
+            patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
+            patch("rsf.cli.deploy_cmd.subprocess.run") as mock_run,
+            patch("rsf.cli.deploy_cmd.generate_terraform") as mock_tf,
+            patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+        ):
+            mock_codegen.return_value = MagicMock(
+                orchestrator_path=workflow_dir / "orchestrator.py",
+                handler_paths=[],
+                skipped_handlers=[],
+            )
+            mock_tf.return_value = MagicMock(generated_files=[], skipped_files=[])
+            mock_run.return_value = MagicMock(returncode=0)
+
+            result = runner.invoke(app, ["deploy", "--stage", "prod", "workflow.yaml"])
+
+        assert result.exit_code == 0, f"Unexpected exit: {result.output}"
+        # Verify generate_terraform was called with output_dir ending in /prod
+        tf_call = mock_tf.call_args
+        output_dir = tf_call.kwargs.get("output_dir") or tf_call[1].get("output_dir")
+        assert str(output_dir).endswith("prod"), f"Expected tf_dir to end with 'prod', got: {output_dir}"

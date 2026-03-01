@@ -68,3 +68,11 @@ variable "retention_period" {
     error_message = "retention_period must be between 1 and 90 days."
   }
 }
+<% if stage %>
+
+variable "stage" {
+  description = "Deployment stage (e.g., dev, staging, prod)"
+  type        = string
+  default     = "<< stage >>"
+}
+<% endif %>
