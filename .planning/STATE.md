@@ -23,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 ## Current Position
 
 Phase: 36 of 38 (DSL and Terraform)
-Plan: 36-01 complete, 36-02 in progress
-Status: Executing
-Last activity: 2026-03-01 — Plan 36-01 complete (DSL lambda_url model)
+Plan: 36-02 complete (all plans done)
+Status: Verifying
+Last activity: 2026-03-01 — Plan 36-02 complete (Terraform lambda_url generation)
 
 Progress: [░░░░░░░░░░] 0% (v1.7)
 
