@@ -23,9 +23,9 @@ See: .planning/PROJECT.md (updated 2026-03-01)
 ## Current Position
 
 Phase: 36 of 38 (DSL and Terraform)
-Plan: Not started
-Status: Ready to plan
-Last activity: 2026-03-01 — Roadmap created for v1.7, 3 phases defined (36-38)
+Plan: 36-01 complete, 36-02 in progress
+Status: Executing
+Last activity: 2026-03-01 — Plan 36-01 complete (DSL lambda_url model)
 
 Progress: [░░░░░░░░░░] 0% (v1.7)
 
