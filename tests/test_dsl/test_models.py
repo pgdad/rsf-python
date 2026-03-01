@@ -529,6 +529,72 @@ class TestLambdaUrlConfig:
             )
 
 
+class TestSubWorkflow:
+    """Tests for sub-workflow invocation DSL models."""
+
+    def _base(self, **extra):
+        """Create minimal valid workflow dict with optional extra fields."""
+        data = {
+            "StartAt": "S",
+            "States": {"S": {"Type": "Task", "End": True}},
+        }
+        data.update(extra)
+        return data
+
+    def test_task_state_with_sub_workflow(self):
+        sm = StateMachineDefinition.model_validate(
+            {
+                "StartAt": "T",
+                "sub_workflows": [{"name": "child-workflow"}],
+                "States": {
+                    "T": {"Type": "Task", "SubWorkflow": "child-workflow", "End": True}
+                },
+            }
+        )
+        task = sm.states["T"]
+        assert task.sub_workflow == "child-workflow"
+
+    def test_task_state_without_sub_workflow_backward_compat(self):
+        sm = StateMachineDefinition.model_validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+            }
+        )
+        task = sm.states["T"]
+        assert task.sub_workflow is None
+
+    def test_state_machine_with_sub_workflows_list(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                sub_workflows=[
+                    {"name": "payment-processor"},
+                    {"name": "inventory-checker"},
+                ]
+            )
+        )
+        assert sm.sub_workflows is not None
+        assert len(sm.sub_workflows) == 2
+        assert sm.sub_workflows[0].name == "payment-processor"
+        assert sm.sub_workflows[1].name == "inventory-checker"
+
+    def test_state_machine_without_sub_workflows(self):
+        sm = StateMachineDefinition.model_validate(self._base())
+        assert sm.sub_workflows is None
+
+    def test_sub_workflow_ref_requires_name(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(sub_workflows=[{}])
+            )
+
+    def test_sub_workflow_ref_empty_name_rejected(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(sub_workflows=[{"name": ""}])
+            )
+
+
 class TestTriggerConfig:
     """Tests for EventBridge, SQS, and SNS trigger DSL models."""
 

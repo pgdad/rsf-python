@@ -61,6 +61,8 @@ class TaskState(_IOFields, _TransitionFields, _AssignOutput):
     retry: list[RetryPolicy] | None = Field(default=None, alias="Retry")
     catch: list[Catcher] | None = Field(default=None, alias="Catch")
 
+    sub_workflow: str | None = Field(default=None, alias="SubWorkflow")
+
     query_language: QueryLanguage | None = Field(default=None, alias="QueryLanguage")
 
     @model_validator(mode="after")
@@ -243,6 +245,14 @@ _state_validator: Any = None
 State = Any
 
 
+class SubWorkflowRef(BaseModel):
+    """A reference to a child workflow that can be invoked as a sub-execution."""
+
+    model_config = {"extra": "forbid"}
+
+    name: str = Field(min_length=1)
+
+
 class LambdaUrlConfig(BaseModel):
     """Configuration for Lambda Function URL."""
 
@@ -301,6 +311,7 @@ class StateMachineDefinition(BaseModel):
     query_language: QueryLanguage | None = Field(default=None, alias="QueryLanguage")
     lambda_url: LambdaUrlConfig | None = Field(default=None, alias="lambda_url")
     triggers: list[TriggerConfig] | None = Field(default=None, alias="triggers")
+    sub_workflows: list[SubWorkflowRef] | None = Field(default=None, alias="sub_workflows")
 
     @model_validator(mode="after")
     def _resolve_states(self) -> "StateMachineDefinition":

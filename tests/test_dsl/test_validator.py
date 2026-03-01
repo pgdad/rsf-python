@@ -255,6 +255,72 @@ class TestRecursiveBranchValidation:
         assert any("Ghost" in e.message for e in errors)
 
 
+class TestSubWorkflowValidation:
+    """Tests for semantic validation of sub-workflow references."""
+
+    def test_valid_sub_workflow_reference(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "sub_workflows": [{"name": "payment-processor"}],
+                "States": {
+                    "T": {
+                        "Type": "Task",
+                        "SubWorkflow": "payment-processor",
+                        "End": True,
+                    }
+                },
+            }
+        )
+        assert not any("SubWorkflow" in e.message or "sub_workflow" in e.message.lower() for e in errors if e.severity == "error")
+
+    def test_undeclared_sub_workflow_produces_error(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "sub_workflows": [{"name": "payment-processor"}],
+                "States": {
+                    "T": {
+                        "Type": "Task",
+                        "SubWorkflow": "unknown-workflow",
+                        "End": True,
+                    }
+                },
+            }
+        )
+        sub_errors = [e for e in errors if "unknown-workflow" in e.message and e.severity == "error"]
+        assert len(sub_errors) >= 1
+
+    def test_unused_sub_workflow_produces_warning(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "sub_workflows": [
+                    {"name": "payment-processor"},
+                    {"name": "unused-workflow"},
+                ],
+                "States": {
+                    "T": {
+                        "Type": "Task",
+                        "SubWorkflow": "payment-processor",
+                        "End": True,
+                    }
+                },
+            }
+        )
+        warnings = [e for e in errors if e.severity == "warning" and "unused-workflow" in e.message]
+        assert len(warnings) >= 1
+
+    def test_no_sub_workflows_no_errors(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+            }
+        )
+        assert not any("sub_workflow" in e.message.lower() for e in errors)
+
+
 class TestTriggerValidation:
     """Tests for semantic validation of trigger configurations."""
 

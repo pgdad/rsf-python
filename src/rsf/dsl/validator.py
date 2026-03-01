@@ -23,6 +23,7 @@ from rsf.dsl.models import (
     SQSTrigger,
     StateMachineDefinition,
     SucceedState,
+    TaskState,
 )
 from rsf.dsl.choice import (
     BooleanAndRule,
@@ -48,6 +49,7 @@ def validate_definition(definition: StateMachineDefinition) -> list[ValidationEr
     errors: list[ValidationError] = []
     _validate_timeout(definition, errors)
     _validate_triggers(definition, errors)
+    _validate_sub_workflows(definition, errors)
     _validate_state_machine(
         states=definition.states,
         start_at=definition.start_at,
@@ -114,6 +116,63 @@ def _validate_triggers(
                         severity="warning",
                     )
                 )
+
+
+def _validate_sub_workflows(
+    definition: StateMachineDefinition,
+    errors: list[ValidationError],
+) -> None:
+    """Validate sub-workflow references in Task states."""
+    if definition.sub_workflows is None:
+        return
+
+    declared_names = {sw.name for sw in definition.sub_workflows}
+
+    # Walk all states (including nested in Parallel/Map) to find SubWorkflow references
+    referenced_names: set[str] = set()
+    _collect_sub_workflow_refs(definition.states, referenced_names, errors, declared_names)
+
+    # Warn about unused declarations
+    unused = declared_names - referenced_names
+    for name in sorted(unused):
+        errors.append(
+            ValidationError(
+                message=f"Sub-workflow '{name}' is declared but never referenced",
+                path="sub_workflows",
+                severity="warning",
+            )
+        )
+
+
+def _collect_sub_workflow_refs(
+    states: dict[str, Any],
+    referenced: set[str],
+    errors: list[ValidationError],
+    declared: set[str],
+) -> None:
+    """Recursively collect SubWorkflow references and validate them."""
+    for name, state in states.items():
+        if isinstance(state, TaskState) and state.sub_workflow is not None:
+            referenced.add(state.sub_workflow)
+            if state.sub_workflow not in declared:
+                errors.append(
+                    ValidationError(
+                        message=(
+                            f"SubWorkflow '{state.sub_workflow}' in state '{name}' "
+                            "is not declared in sub_workflows"
+                        ),
+                        path=f"States.{name}.SubWorkflow",
+                    )
+                )
+        # Recurse into Parallel branches
+        if isinstance(state, ParallelState):
+            for branch in state.branches:
+                _collect_sub_workflow_refs(branch.states, referenced, errors, declared)
+        # Recurse into Map ItemProcessor
+        if isinstance(state, MapState) and state.item_processor is not None:
+            _collect_sub_workflow_refs(
+                state.item_processor.states, referenced, errors, declared
+            )
 
 
 def _validate_state_machine(
