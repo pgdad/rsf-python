@@ -529,6 +529,142 @@ class TestLambdaUrlConfig:
             )
 
 
+class TestDynamoDBConfig:
+    """Tests for DynamoDB table definition DSL models."""
+
+    def _base(self, **extra):
+        data = {
+            "StartAt": "S",
+            "States": {"S": {"Type": "Succeed"}},
+        }
+        data.update(extra)
+        return data
+
+    def test_dynamodb_table_with_partition_key(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                dynamodb_tables=[
+                    {
+                        "table_name": "orders",
+                        "partition_key": {"name": "order_id", "type": "S"},
+                    }
+                ]
+            )
+        )
+        assert sm.dynamodb_tables is not None
+        assert len(sm.dynamodb_tables) == 1
+        table = sm.dynamodb_tables[0]
+        assert table.table_name == "orders"
+        assert table.partition_key.name == "order_id"
+        assert table.partition_key.type.value == "S"
+
+    def test_dynamodb_table_with_sort_key(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                dynamodb_tables=[
+                    {
+                        "table_name": "orders",
+                        "partition_key": {"name": "order_id", "type": "S"},
+                        "sort_key": {"name": "created_at", "type": "N"},
+                    }
+                ]
+            )
+        )
+        table = sm.dynamodb_tables[0]
+        assert table.sort_key is not None
+        assert table.sort_key.name == "created_at"
+        assert table.sort_key.type.value == "N"
+
+    def test_dynamodb_table_pay_per_request_default(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                dynamodb_tables=[
+                    {
+                        "table_name": "orders",
+                        "partition_key": {"name": "id", "type": "S"},
+                    }
+                ]
+            )
+        )
+        table = sm.dynamodb_tables[0]
+        assert table.billing_mode.value == "PAY_PER_REQUEST"
+
+    def test_dynamodb_table_provisioned_with_capacity(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                dynamodb_tables=[
+                    {
+                        "table_name": "orders",
+                        "partition_key": {"name": "id", "type": "S"},
+                        "billing_mode": "PROVISIONED",
+                        "read_capacity": 5,
+                        "write_capacity": 5,
+                    }
+                ]
+            )
+        )
+        table = sm.dynamodb_tables[0]
+        assert table.billing_mode.value == "PROVISIONED"
+        assert table.read_capacity == 5
+        assert table.write_capacity == 5
+
+    def test_dynamodb_attribute_type_must_be_s_n_or_b(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(
+                    dynamodb_tables=[
+                        {
+                            "table_name": "orders",
+                            "partition_key": {"name": "id", "type": "X"},
+                        }
+                    ]
+                )
+            )
+
+    def test_dynamodb_table_requires_table_name_and_partition_key(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(
+                    dynamodb_tables=[{}]
+                )
+            )
+
+    def test_multiple_dynamodb_tables(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                dynamodb_tables=[
+                    {
+                        "table_name": "orders",
+                        "partition_key": {"name": "order_id", "type": "S"},
+                    },
+                    {
+                        "table_name": "inventory",
+                        "partition_key": {"name": "product_id", "type": "S"},
+                    },
+                ]
+            )
+        )
+        assert len(sm.dynamodb_tables) == 2
+
+    def test_dynamodb_tables_omitted_backward_compat(self):
+        sm = StateMachineDefinition.model_validate(self._base())
+        assert sm.dynamodb_tables is None
+
+    def test_dynamodb_table_rejects_extra_fields(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(
+                    dynamodb_tables=[
+                        {
+                            "table_name": "orders",
+                            "partition_key": {"name": "id", "type": "S"},
+                            "unknown_field": True,
+                        }
+                    ]
+                )
+            )
+
+
 class TestSubWorkflow:
     """Tests for sub-workflow invocation DSL models."""
 

@@ -33,6 +33,21 @@ class LambdaUrlAuthType(str, Enum):
     AWS_IAM = "AWS_IAM"
 
 
+class DynamoDBBillingMode(str, Enum):
+    """DynamoDB billing modes."""
+
+    PAY_PER_REQUEST = "PAY_PER_REQUEST"
+    PROVISIONED = "PROVISIONED"
+
+
+class DynamoDBAttributeType(str, Enum):
+    """DynamoDB attribute types for keys."""
+
+    S = "S"  # String
+    N = "N"  # Number
+    B = "B"  # Binary
+
+
 # All 39 comparison operators for Choice rules
 COMPARISON_OPERATORS: frozenset[str] = frozenset(
     {

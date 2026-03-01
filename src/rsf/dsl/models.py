@@ -6,7 +6,13 @@ from pydantic import BaseModel, Field, model_validator
 
 from rsf.dsl.choice import ChoiceRule
 from rsf.dsl.errors import Catcher, RetryPolicy
-from rsf.dsl.types import LambdaUrlAuthType, ProcessorMode, QueryLanguage
+from rsf.dsl.types import (
+    DynamoDBAttributeType,
+    DynamoDBBillingMode,
+    LambdaUrlAuthType,
+    ProcessorMode,
+    QueryLanguage,
+)
 
 
 class _IOFields(BaseModel):
@@ -253,6 +259,28 @@ class SubWorkflowRef(BaseModel):
     name: str = Field(min_length=1)
 
 
+class DynamoDBAttribute(BaseModel):
+    """A DynamoDB key attribute definition."""
+
+    model_config = {"extra": "forbid"}
+
+    name: str = Field(min_length=1)
+    type: DynamoDBAttributeType
+
+
+class DynamoDBTableConfig(BaseModel):
+    """DynamoDB table definition."""
+
+    model_config = {"extra": "forbid"}
+
+    table_name: str = Field(min_length=1)
+    partition_key: DynamoDBAttribute
+    sort_key: DynamoDBAttribute | None = None
+    billing_mode: DynamoDBBillingMode = DynamoDBBillingMode.PAY_PER_REQUEST
+    read_capacity: int | None = Field(default=None, ge=1)
+    write_capacity: int | None = Field(default=None, ge=1)
+
+
 class LambdaUrlConfig(BaseModel):
     """Configuration for Lambda Function URL."""
 
@@ -312,6 +340,7 @@ class StateMachineDefinition(BaseModel):
     lambda_url: LambdaUrlConfig | None = Field(default=None, alias="lambda_url")
     triggers: list[TriggerConfig] | None = Field(default=None, alias="triggers")
     sub_workflows: list[SubWorkflowRef] | None = Field(default=None, alias="sub_workflows")
+    dynamodb_tables: list[DynamoDBTableConfig] | None = Field(default=None, alias="dynamodb_tables")
 
     @model_validator(mode="after")
     def _resolve_states(self) -> "StateMachineDefinition":

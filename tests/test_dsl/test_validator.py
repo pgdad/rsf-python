@@ -255,6 +255,91 @@ class TestRecursiveBranchValidation:
         assert any("Ghost" in e.message for e in errors)
 
 
+class TestDynamoDBValidation:
+    """Tests for semantic validation of DynamoDB table configurations."""
+
+    def test_valid_pay_per_request_no_errors(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "dynamodb_tables": [
+                    {
+                        "table_name": "orders",
+                        "partition_key": {"name": "order_id", "type": "S"},
+                    }
+                ],
+            }
+        )
+        assert not any("dynamodb" in e.message.lower() for e in errors if e.severity == "error")
+
+    def test_valid_provisioned_with_capacities_no_errors(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "dynamodb_tables": [
+                    {
+                        "table_name": "orders",
+                        "partition_key": {"name": "id", "type": "S"},
+                        "billing_mode": "PROVISIONED",
+                        "read_capacity": 5,
+                        "write_capacity": 5,
+                    }
+                ],
+            }
+        )
+        assert not any("capacity" in e.message.lower() for e in errors if e.severity == "error")
+
+    def test_provisioned_without_capacity_produces_error(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "dynamodb_tables": [
+                    {
+                        "table_name": "orders",
+                        "partition_key": {"name": "id", "type": "S"},
+                        "billing_mode": "PROVISIONED",
+                    }
+                ],
+            }
+        )
+        capacity_errors = [e for e in errors if "capacity" in e.message.lower() and e.severity == "error"]
+        assert len(capacity_errors) >= 1
+
+    def test_duplicate_table_names_produce_error(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "dynamodb_tables": [
+                    {
+                        "table_name": "orders",
+                        "partition_key": {"name": "id", "type": "S"},
+                    },
+                    {
+                        "table_name": "orders",
+                        "partition_key": {"name": "pk", "type": "S"},
+                    },
+                ],
+            }
+        )
+        dup_errors = [e for e in errors if "duplicate" in e.message.lower() and e.severity == "error"]
+        assert len(dup_errors) >= 1
+
+    def test_empty_dynamodb_tables_warning(self):
+        errors = _validate(
+            {
+                "StartAt": "T",
+                "States": {"T": {"Type": "Task", "End": True}},
+                "dynamodb_tables": [],
+            }
+        )
+        warnings = [e for e in errors if e.severity == "warning" and "dynamodb" in e.message.lower()]
+        assert len(warnings) >= 1
+
+
 class TestSubWorkflowValidation:
     """Tests for semantic validation of sub-workflow references."""
 

@@ -22,6 +22,8 @@ from rsf.dsl.errors import Catcher, RetryPolicy
 from rsf.dsl.models import (
     BranchDefinition,
     ChoiceState,
+    DynamoDBAttribute,
+    DynamoDBTableConfig,
     EventBridgeTrigger,
     FailState,
     LambdaUrlConfig,
@@ -40,6 +42,8 @@ from rsf.dsl.models import (
 )
 from rsf.dsl.types import (
     COMPARISON_OPERATORS,
+    DynamoDBAttributeType,
+    DynamoDBBillingMode,
     JitterStrategy,
     LambdaUrlAuthType,
     ProcessorMode,
@@ -92,6 +96,10 @@ __all__ = [
     "COMPARISON_OPERATORS",
     "ConditionRule",
     "DataTestRule",
+    "DynamoDBAttribute",
+    "DynamoDBAttributeType",
+    "DynamoDBBillingMode",
+    "DynamoDBTableConfig",
     "EventBridgeTrigger",
     "FailState",
     "JitterStrategy",

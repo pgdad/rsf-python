@@ -50,6 +50,7 @@ def validate_definition(definition: StateMachineDefinition) -> list[ValidationEr
     _validate_timeout(definition, errors)
     _validate_triggers(definition, errors)
     _validate_sub_workflows(definition, errors)
+    _validate_dynamodb_tables(definition, errors)
     _validate_state_machine(
         states=definition.states,
         start_at=definition.start_at,
@@ -142,6 +143,50 @@ def _validate_sub_workflows(
                 severity="warning",
             )
         )
+
+
+def _validate_dynamodb_tables(
+    definition: StateMachineDefinition,
+    errors: list[ValidationError],
+) -> None:
+    """Validate DynamoDB table configurations."""
+    if definition.dynamodb_tables is None:
+        return
+
+    if len(definition.dynamodb_tables) == 0:
+        errors.append(
+            ValidationError(
+                message="DynamoDB tables list is empty — remove it or add at least one table",
+                path="dynamodb_tables",
+                severity="warning",
+            )
+        )
+        return
+
+    # Check for duplicate table names
+    seen_names: set[str] = set()
+    for i, table in enumerate(definition.dynamodb_tables):
+        if table.table_name in seen_names:
+            errors.append(
+                ValidationError(
+                    message=f"Duplicate DynamoDB table name '{table.table_name}'",
+                    path=f"dynamodb_tables[{i}].table_name",
+                )
+            )
+        seen_names.add(table.table_name)
+
+        # PROVISIONED billing requires read/write capacity
+        if table.billing_mode.value == "PROVISIONED":
+            if table.read_capacity is None or table.write_capacity is None:
+                errors.append(
+                    ValidationError(
+                        message=(
+                            f"DynamoDB table '{table.table_name}' uses PROVISIONED billing "
+                            "but is missing read_capacity or write_capacity"
+                        ),
+                        path=f"dynamodb_tables[{i}]",
+                    )
+                )
 
 
 def _collect_sub_workflow_refs(
