@@ -80,9 +80,20 @@ def _deploy_full(
 ) -> None:
     """Run the full Terraform deploy pipeline."""
     # Step 5: Generate Terraform files
+    # Build lambda_url config from DSL definition
+    lambda_url_enabled = False
+    lambda_url_auth_type = "NONE"
+    if hasattr(definition, "lambda_url") and definition.lambda_url is not None and definition.lambda_url.enabled:
+        lambda_url_enabled = True
+        lambda_url_auth_type = definition.lambda_url.auth_type.value
+
     with Status("[bold]Generating Terraform files...[/bold]", console=console):
         tf_result = generate_terraform(
-            config=TerraformConfig(workflow_name=workflow_name),
+            config=TerraformConfig(
+                workflow_name=workflow_name,
+                lambda_url_enabled=lambda_url_enabled,
+                lambda_url_auth_type=lambda_url_auth_type,
+            ),
             output_dir=tf_dir,
         )
 
