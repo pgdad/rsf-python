@@ -150,7 +150,11 @@ Full details: `.planning/milestones/v1.7-ROADMAP.md`
   2. User can reference a child workflow by name inside a parent workflow state and the generated code invokes it as a durable sub-execution
   3. User can define DynamoDB table schemas in workflow.yaml and `rsf generate` produces Terraform table definitions with correct IAM permissions
   4. `rsf validate` catches invalid trigger configurations and unknown sub-workflow references before code generation
-**Plans**: TBD
+**Plans:** 3 plans
+Plans:
+- [ ] 40-01-PLAN.md -- Event triggers DSL models, validation, and Terraform generation
+- [ ] 40-02-PLAN.md -- Sub-workflow DSL support and orchestrator code generation
+- [ ] 40-03-PLAN.md -- DynamoDB table DSL models, validation, and Terraform generation
 
 ### Phase 41: Alerts, Dead Letter Queues, and Multi-Stage Deploy
 **Goal**: Users can define CloudWatch alarms and Lambda dead letter queues in the DSL, and deploy to named stages with stage-specific variable overrides
@@ -247,7 +251,7 @@ Note: Phase 45 (Testing) depends only on Phase 39 and can be worked in parallel 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 39. Infrastructure Decoupling and Workflow Timeout | 2/2 | Complete    | 2026-03-01 |
-| 40. Event Triggers, Sub-Workflows, and DynamoDB | 0/TBD | Not started | - |
+| 40. Event Triggers, Sub-Workflows, and DynamoDB | 0/3 | Not started | - |
 | 41. Alerts, Dead Letter Queues, and Multi-Stage Deploy | 0/TBD | Not started | - |
 | 42. Developer CLI Commands | 0/TBD | Not started | - |
 | 43. Operational CLI Commands | 0/TBD | Not started | - |
