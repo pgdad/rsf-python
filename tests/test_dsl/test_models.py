@@ -529,6 +529,134 @@ class TestLambdaUrlConfig:
             )
 
 
+class TestTriggerConfig:
+    """Tests for EventBridge, SQS, and SNS trigger DSL models."""
+
+    def _base(self, **extra):
+        """Create minimal valid workflow dict with optional extra fields."""
+        data = {
+            "StartAt": "S",
+            "States": {"S": {"Type": "Succeed"}},
+        }
+        data.update(extra)
+        return data
+
+    def test_eventbridge_trigger_with_schedule(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                triggers=[
+                    {"type": "eventbridge", "schedule_expression": "rate(5 minutes)"}
+                ]
+            )
+        )
+        assert sm.triggers is not None
+        assert len(sm.triggers) == 1
+        trigger = sm.triggers[0]
+        assert trigger.type == "eventbridge"
+        assert trigger.schedule_expression == "rate(5 minutes)"
+
+    def test_eventbridge_trigger_with_event_pattern(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                triggers=[
+                    {
+                        "type": "eventbridge",
+                        "event_pattern": {"source": ["aws.s3"]},
+                    }
+                ]
+            )
+        )
+        trigger = sm.triggers[0]
+        assert trigger.event_pattern == {"source": ["aws.s3"]}
+
+    def test_sqs_trigger(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                triggers=[
+                    {"type": "sqs", "queue_name": "my-queue"}
+                ]
+            )
+        )
+        trigger = sm.triggers[0]
+        assert trigger.type == "sqs"
+        assert trigger.queue_name == "my-queue"
+        assert trigger.batch_size == 10  # default
+
+    def test_sqs_trigger_custom_batch_size(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                triggers=[
+                    {"type": "sqs", "queue_name": "my-queue", "batch_size": 5}
+                ]
+            )
+        )
+        assert sm.triggers[0].batch_size == 5
+
+    def test_sns_trigger(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                triggers=[
+                    {
+                        "type": "sns",
+                        "topic_arn": "arn:aws:sns:us-east-1:123456789012:MyTopic",
+                    }
+                ]
+            )
+        )
+        trigger = sm.triggers[0]
+        assert trigger.type == "sns"
+        assert trigger.topic_arn == "arn:aws:sns:us-east-1:123456789012:MyTopic"
+
+    def test_multiple_triggers(self):
+        sm = StateMachineDefinition.model_validate(
+            self._base(
+                triggers=[
+                    {"type": "eventbridge", "schedule_expression": "rate(1 hour)"},
+                    {"type": "sqs", "queue_name": "orders"},
+                    {
+                        "type": "sns",
+                        "topic_arn": "arn:aws:sns:us-east-1:123456789012:T",
+                    },
+                ]
+            )
+        )
+        assert len(sm.triggers) == 3
+
+    def test_unknown_trigger_type_rejected(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(
+                    triggers=[{"type": "kinesis", "stream_name": "my-stream"}]
+                )
+            )
+
+    def test_eventbridge_requires_schedule_or_pattern(self):
+        """EventBridge trigger with neither schedule_expression nor event_pattern
+        should still parse at the model level (semantic validator catches this)."""
+        sm = StateMachineDefinition.model_validate(
+            self._base(triggers=[{"type": "eventbridge"}])
+        )
+        trigger = sm.triggers[0]
+        assert trigger.schedule_expression is None
+        assert trigger.event_pattern is None
+
+    def test_sqs_trigger_requires_queue_name(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(triggers=[{"type": "sqs"}])
+            )
+
+    def test_sns_trigger_requires_topic_arn(self):
+        with pytest.raises(ValidationError):
+            StateMachineDefinition.model_validate(
+                self._base(triggers=[{"type": "sns"}])
+            )
+
+    def test_triggers_omitted_backward_compat(self):
+        sm = StateMachineDefinition.model_validate(self._base())
+        assert sm.triggers is None
+
+
 class TestWorkflowTimeout:
     """Tests for top-level TimeoutSeconds field on StateMachineDefinition."""
 

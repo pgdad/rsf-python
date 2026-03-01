@@ -16,9 +16,11 @@ from typing import Any
 
 from rsf.dsl.models import (
     ChoiceState,
+    EventBridgeTrigger,
     FailState,
     MapState,
     ParallelState,
+    SQSTrigger,
     StateMachineDefinition,
     SucceedState,
 )
@@ -45,6 +47,7 @@ def validate_definition(definition: StateMachineDefinition) -> list[ValidationEr
     """
     errors: list[ValidationError] = []
     _validate_timeout(definition, errors)
+    _validate_triggers(definition, errors)
     _validate_state_machine(
         states=definition.states,
         start_at=definition.start_at,
@@ -67,6 +70,50 @@ def _validate_timeout(
                 severity="warning",
             )
         )
+
+
+def _validate_triggers(
+    definition: StateMachineDefinition,
+    errors: list[ValidationError],
+) -> None:
+    """Validate trigger configurations."""
+    if definition.triggers is None:
+        return
+
+    if len(definition.triggers) == 0:
+        errors.append(
+            ValidationError(
+                message="Triggers list is empty — remove it or add at least one trigger",
+                path="triggers",
+                severity="warning",
+            )
+        )
+        return
+
+    for i, trigger in enumerate(definition.triggers):
+        if isinstance(trigger, EventBridgeTrigger):
+            if trigger.schedule_expression is None and trigger.event_pattern is None:
+                errors.append(
+                    ValidationError(
+                        message=(
+                            "EventBridge trigger must have at least one of "
+                            "schedule_expression or event_pattern"
+                        ),
+                        path=f"triggers[{i}]",
+                    )
+                )
+        elif isinstance(trigger, SQSTrigger):
+            if trigger.batch_size >= 10000:
+                errors.append(
+                    ValidationError(
+                        message=(
+                            f"SQS batch_size {trigger.batch_size} is very large — "
+                            "consider a smaller value for most use cases"
+                        ),
+                        path=f"triggers[{i}].batch_size",
+                        severity="warning",
+                    )
+                )
 
 
 def _validate_state_machine(

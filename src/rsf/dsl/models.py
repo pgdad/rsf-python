@@ -1,6 +1,6 @@
 """Pydantic v2 models for all 8 ASL state types and the root StateMachineDefinition."""
 
-from typing import Any, Literal
+from typing import Annotated, Any, Literal, Union
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -252,6 +252,41 @@ class LambdaUrlConfig(BaseModel):
     auth_type: LambdaUrlAuthType
 
 
+class EventBridgeTrigger(BaseModel):
+    """EventBridge rule trigger configuration."""
+
+    model_config = {"extra": "forbid"}
+
+    type: Literal["eventbridge"]
+    schedule_expression: str | None = None
+    event_pattern: dict[str, Any] | None = None
+
+
+class SQSTrigger(BaseModel):
+    """SQS queue trigger configuration."""
+
+    model_config = {"extra": "forbid"}
+
+    type: Literal["sqs"]
+    queue_name: str
+    batch_size: int = Field(default=10, ge=1, le=10000)
+
+
+class SNSTrigger(BaseModel):
+    """SNS subscription trigger configuration."""
+
+    model_config = {"extra": "forbid"}
+
+    type: Literal["sns"]
+    topic_arn: str
+
+
+TriggerConfig = Annotated[
+    Union[EventBridgeTrigger, SQSTrigger, SNSTrigger],
+    Field(discriminator="type"),
+]
+
+
 class StateMachineDefinition(BaseModel):
     """Root model for an RSF workflow definition."""
 
@@ -265,6 +300,7 @@ class StateMachineDefinition(BaseModel):
     timeout_seconds: int | None = Field(default=None, alias="TimeoutSeconds", gt=0)
     query_language: QueryLanguage | None = Field(default=None, alias="QueryLanguage")
     lambda_url: LambdaUrlConfig | None = Field(default=None, alias="lambda_url")
+    triggers: list[TriggerConfig] | None = Field(default=None, alias="triggers")
 
     @model_validator(mode="after")
     def _resolve_states(self) -> "StateMachineDefinition":
