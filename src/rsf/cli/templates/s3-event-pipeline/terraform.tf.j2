@@ -1,0 +1,26 @@
+resource "aws_s3_bucket" "uploads" {
+  bucket = "{{ project_name }}-uploads"
+
+  tags = {
+    Project   = "{{ project_name }}"
+    ManagedBy = "rsf"
+  }
+}
+
+resource "aws_s3_bucket_notification" "upload_trigger" {
+  bucket = aws_s3_bucket.uploads.id
+
+  lambda_function {
+    lambda_function_arn = aws_lambda_function.orchestrator.arn
+    events              = ["s3:ObjectCreated:*"]
+  }
+}
+
+resource "aws_sns_topic" "notifications" {
+  name = "{{ project_name }}-notifications"
+
+  tags = {
+    Project   = "{{ project_name }}"
+    ManagedBy = "rsf"
+  }
+}
