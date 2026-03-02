@@ -1088,3 +1088,151 @@ body {
   flex-shrink: 0;
   padding: 0 2px;
 }
+
+/* ---------------------------------------------------------------------------
+ * Replay Modal & Button
+ * --------------------------------------------------------------------------- */
+
+.replay-btn {
+  padding: 4px 12px;
+  background: #3498db;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 12px;
+  margin-left: 8px;
+}
+.replay-btn:hover {
+  background: #2980b9;
+}
+
+.replay-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.replay-modal {
+  background: var(--bg-primary, #1e1e1e);
+  border: 1px solid var(--border-color, #333);
+  border-radius: 8px;
+  width: 600px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.replay-modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border-color, #333);
+}
+
+.replay-modal-header h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.replay-modal-close {
+  background: none;
+  border: none;
+  color: var(--text-secondary, #999);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.replay-modal-body {
+  padding: 16px;
+  flex: 1;
+  overflow: auto;
+}
+
+.replay-payload-label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary, #999);
+  margin-bottom: 8px;
+}
+
+.replay-payload-editor {
+  width: 100%;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.5;
+  background: var(--bg-secondary, #2d2d2d);
+  color: var(--text-primary, #d4d4d4);
+  border: 1px solid var(--border-color, #444);
+  border-radius: 4px;
+  padding: 8px;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.replay-payload-editor.invalid {
+  border-color: #e74c3c;
+}
+
+.replay-error {
+  color: #e74c3c;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.replay-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 16px;
+  border-top: 1px solid var(--border-color, #333);
+}
+
+.replay-execute-btn {
+  padding: 8px 20px;
+  background: #27ae60;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.replay-execute-btn:hover {
+  background: #219a52;
+}
+
+.replay-execute-btn:disabled {
+  background: #555;
+  cursor: not-allowed;
+}
+
+.replay-cancel-btn {
+  padding: 8px 20px;
+  background: transparent;
+  color: var(--text-secondary, #ccc);
+  border: 1px solid var(--border-color, #555);
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.replay-cancel-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.replay-badge {
+  font-size: 10px;
+  padding: 1px 6px;
+  background: #3498db22;
+  color: #3498db;
+  border: 1px solid #3498db44;
+  border-radius: 3px;
+  margin-left: 4px;
+}

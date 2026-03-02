@@ -14,6 +14,7 @@ import { EventTimeline } from './EventTimeline';
 import { StateDetailPanel } from './StateDetailPanel';
 import { TimelineScrubber } from './TimelineScrubber';
 import { buildSnapshots } from './timeMachine';
+import { ReplayModal } from './ReplayModal';
 import type { ExecutionDetail, HistoryEvent } from './types';
 
 export function InspectorApp() {
@@ -90,6 +91,7 @@ export function InspectorApp() {
           <StateDetailPanel />
         </div>
       </div>
+      <ReplayModal />
     </div>
   );
 }

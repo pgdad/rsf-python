@@ -67,6 +67,12 @@ interface InspectState {
   // Selected state for detail panel
   selectedNodeId: string | null;
 
+  // Replay modal
+  replayModalOpen: boolean;
+  replayLoading: boolean;
+  replayError: string | null;
+  replayedIds: string[];
+
   // Actions
   setFunctionName: (name: string) => void;
   setExecutions: (executions: ExecutionSummary[], nextToken: string | null) => void;
@@ -90,6 +96,12 @@ interface InspectState {
 
   selectNode: (nodeId: string | null) => void;
 
+  openReplayModal: () => void;
+  closeReplayModal: () => void;
+  setReplayLoading: (loading: boolean) => void;
+  setReplayError: (error: string | null) => void;
+  addReplayedId: (id: string) => void;
+
   reset: () => void;
 }
 
@@ -111,6 +123,10 @@ const initialState = {
   playbackIndex: -1,
   isLive: true,
   selectedNodeId: null,
+  replayModalOpen: false,
+  replayLoading: false,
+  replayError: null,
+  replayedIds: [] as string[],
 };
 
 export const useInspectStore = create<InspectState>()(
@@ -164,6 +180,16 @@ export const useInspectStore = create<InspectState>()(
     setIsLive: (live) => set({ isLive: live }),
 
     selectNode: (nodeId) => set({ selectedNodeId: nodeId }),
+
+    openReplayModal: () => set({ replayModalOpen: true, replayError: null }),
+    closeReplayModal: () =>
+      set({ replayModalOpen: false, replayLoading: false, replayError: null }),
+    setReplayLoading: (loading) => set({ replayLoading: loading }),
+    setReplayError: (error) => set({ replayError: error }),
+    addReplayedId: (id) =>
+      set((state) => {
+        state.replayedIds.push(id);
+      }),
 
     reset: () => set(initialState),
   })),

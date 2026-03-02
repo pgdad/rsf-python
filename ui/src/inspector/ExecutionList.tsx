@@ -56,6 +56,7 @@ export function ExecutionList() {
   const searchQuery = useInspectStore((s) => s.searchQuery);
   const selectedExecutionId = useInspectStore((s) => s.selectedExecutionId);
   const loading = useInspectStore((s) => s.loading);
+  const replayedIds = useInspectStore((s) => s.replayedIds);
   const setStatusFilter = useInspectStore((s) => s.setStatusFilter);
   const setSearchQuery = useInspectStore((s) => s.setSearchQuery);
   const setExecutions = useInspectStore((s) => s.setExecutions);
@@ -147,6 +148,9 @@ export function ExecutionList() {
             <div className="execution-item-info">
               <div className="execution-item-name">
                 {exec.name || exec.execution_id}
+                {replayedIds.includes(exec.execution_id) && (
+                  <span className="replay-badge">Replay</span>
+                )}
               </div>
               <div className="execution-item-meta">
                 <span className="execution-item-time">

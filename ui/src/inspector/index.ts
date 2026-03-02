@@ -12,5 +12,6 @@ export { EventTimeline } from './EventTimeline';
 export { StateDetailPanel } from './StateDetailPanel';
 export { TimelineScrubber } from './TimelineScrubber';
 export { JsonDiff } from './JsonDiff';
+export { ReplayModal } from './ReplayModal';
 export { useSSE } from './useSSE';
 export { buildSnapshots } from './timeMachine';

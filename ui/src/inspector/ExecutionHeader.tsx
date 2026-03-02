@@ -6,6 +6,7 @@
 
 import { useInspectStore } from '../store/inspectStore';
 import type { ExecutionStatus } from './types';
+import { TERMINAL_STATUSES } from './types';
 
 const STATUS_COLORS: Record<ExecutionStatus, string> = {
   RUNNING: '#3498db',
@@ -37,6 +38,7 @@ function formatDuration(startIso: string, endIso: string | null): string {
 
 export function ExecutionHeader() {
   const detail = useInspectStore((s) => s.executionDetail);
+  const openReplayModal = useInspectStore((s) => s.openReplayModal);
   if (!detail) return null;
 
   return (
@@ -55,6 +57,15 @@ export function ExecutionHeader() {
         >
           {detail.status}
         </span>
+        {TERMINAL_STATUSES.has(detail.status) && (
+          <button
+            className="replay-btn"
+            onClick={openReplayModal}
+            title="Replay this execution with the same or modified payload"
+          >
+            Replay
+          </button>
+        )}
       </div>
       <div className="execution-header-meta">
         <span title="Start time">

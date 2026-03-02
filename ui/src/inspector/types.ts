@@ -99,3 +99,11 @@ export interface TransitionSnapshot {
 
 /** Status filter options for execution list */
 export type StatusFilter = ExecutionStatus | 'ALL';
+
+/** Response from the replay endpoint */
+export interface ReplayResponse {
+  execution_id: string;
+  replay_from: string;
+  function_name: string;
+  status_code: number;
+}
