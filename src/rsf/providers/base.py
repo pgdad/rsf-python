@@ -39,6 +39,8 @@ class ProviderContext:
     stage: str | None
     workflow_path: Path
     definition: Any = None  # StateMachineDefinition, optional
+    auto_approve: bool = False
+    stage_var_file: Path | None = None
 
 
 class InfrastructureProvider(ABC):

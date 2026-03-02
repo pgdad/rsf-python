@@ -20,12 +20,16 @@ from rsf.providers.registry import (
     list_providers,
     register_provider,
 )
+from rsf.providers.terraform import TerraformProvider
 from rsf.providers.transports import (
     ArgsTransport,
     EnvTransport,
     FileTransport,
     MetadataTransport,
 )
+
+# Register built-in providers
+register_provider("terraform", TerraformProvider)
 
 __all__ = [
     "ArgsTransport",
@@ -36,6 +40,7 @@ __all__ = [
     "PrerequisiteCheck",
     "ProviderContext",
     "ProviderNotFoundError",
+    "TerraformProvider",
     "WorkflowMetadata",
     "create_metadata",
     "get_provider",
