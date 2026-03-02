@@ -377,6 +377,32 @@ TriggerConfig = Annotated[
 ]
 
 
+class TerraformProviderConfig(BaseModel):
+    """Terraform-specific provider configuration."""
+
+    model_config = {"extra": "forbid", "populate_by_name": True}
+
+    tf_dir: str = "terraform"
+    backend_bucket: str | None = None
+    backend_key: str | None = None
+    backend_dynamodb_table: str | None = None
+
+
+class InfrastructureConfig(BaseModel):
+    """Infrastructure provider configuration block.
+
+    Can appear in workflow YAML as top-level ``infrastructure:`` key
+    or in rsf.toml under ``[infrastructure]`` table.
+    """
+
+    model_config = {"extra": "forbid", "populate_by_name": True}
+
+    provider: str = "terraform"
+    terraform: TerraformProviderConfig | None = None
+    cdk: dict[str, Any] | None = None  # Phase 53
+    custom: dict[str, Any] | None = None  # Phase 54
+
+
 class StateMachineDefinition(BaseModel):
     """Root model for an RSF workflow definition."""
 
@@ -395,6 +421,7 @@ class StateMachineDefinition(BaseModel):
     dynamodb_tables: list[DynamoDBTableConfig] | None = Field(default=None, alias="dynamodb_tables")
     alarms: list[AlarmConfig] | None = Field(default=None, alias="alarms")
     dead_letter_queue: DeadLetterQueueConfig | None = Field(default=None, alias="dead_letter_queue")
+    infrastructure: InfrastructureConfig | None = Field(default=None, alias="infrastructure")
 
     @model_validator(mode="after")
     def _resolve_states(self) -> "StateMachineDefinition":
