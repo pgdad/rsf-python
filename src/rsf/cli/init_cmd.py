@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import os
 import shutil
 from pathlib import Path
+from typing import Optional
 
 import typer
 from jinja2 import Template
@@ -12,6 +14,12 @@ from rich.console import Console
 console = Console()
 
 _TEMPLATES_DIR = Path(__file__).parent / "templates"
+
+# Template descriptions for --template list output
+_TEMPLATE_DESCRIPTIONS: dict[str, str] = {
+    "api-gateway-crud": "REST API with DynamoDB CRUD operations via API Gateway",
+    "s3-event-pipeline": "S3 event-driven pipeline with processing and notification states",
+}
 
 
 def _render_template(template_name: str, **kwargs: str) -> str:
@@ -23,10 +31,140 @@ def _render_template(template_name: str, **kwargs: str) -> str:
     return template_text
 
 
+def _get_available_templates() -> list[str]:
+    """Return names of available template subdirectories containing a workflow.yaml."""
+    return sorted(
+        d.name
+        for d in _TEMPLATES_DIR.iterdir()
+        if d.is_dir() and (d / "workflow.yaml").exists()
+    )
+
+
+def _scaffold_from_template(template_name: str, project_name: str, project_dir: Path) -> list[str]:
+    """Copy a named template subdirectory into the project directory.
+
+    Handles Jinja2 rendering for .j2 files, renames gitignore to .gitignore,
+    and preserves subdirectory structure.
+
+    Returns:
+        List of relative file paths created.
+    """
+    template_dir = _TEMPLATES_DIR / template_name
+    created_files: list[str] = []
+
+    for root, dirs, files in os.walk(template_dir):
+        root_path = Path(root)
+        relative_root = root_path.relative_to(template_dir)
+        dest_root = project_dir / relative_root
+
+        # Skip __pycache__ directories
+        dirs[:] = [d for d in dirs if d != "__pycache__"]
+
+        dest_root.mkdir(parents=True, exist_ok=True)
+
+        for filename in sorted(files):
+            src_file = root_path / filename
+            if filename == "__pycache__":
+                continue
+
+            if filename.endswith(".j2"):
+                # Render Jinja2 templates, strip .j2 extension
+                dest_name = filename[:-3]
+                dest_file = dest_root / dest_name
+                template_text = src_file.read_text(encoding="utf-8")
+                rendered = Template(template_text).render(project_name=project_name)
+                dest_file.write_text(rendered, encoding="utf-8")
+            elif filename == "gitignore":
+                # Rename gitignore to .gitignore
+                dest_file = dest_root / ".gitignore"
+                dest_name = ".gitignore"
+                shutil.copy2(src_file, dest_file)
+            else:
+                dest_file = dest_root / filename
+                dest_name = filename
+                shutil.copy2(src_file, dest_file)
+
+            rel_path = str((relative_root / dest_name))
+            created_files.append(rel_path)
+
+    return created_files
+
+
 def init(
-    project_name: str = typer.Argument(..., help="Name of the project to create"),
+    project_name: Optional[str] = typer.Argument(None, help="Name of the project to create"),
+    template: Optional[str] = typer.Option(
+        None,
+        "--template",
+        "-t",
+        help="Template to scaffold from. Use 'list' to see available templates.",
+    ),
 ) -> None:
     """Scaffold a new RSF project directory with workflow, handlers, and tests."""
+    available_templates = _get_available_templates()
+
+    # Handle --template list
+    if template == "list":
+        console.print("\n[bold]Available templates:[/bold]\n")
+        for tpl_name in available_templates:
+            desc = _TEMPLATE_DESCRIPTIONS.get(tpl_name, "No description available")
+            console.print(f"  [cyan]{tpl_name}[/cyan] — {desc}")
+        console.print(
+            f"\n[bold]Usage:[/bold] rsf init --template <name> [project-name]\n"
+        )
+        return
+
+    # Handle --template <name>
+    if template is not None:
+        if template not in available_templates:
+            console.print(
+                f"[red]Error:[/red] Unknown template '{template}'. "
+                f"Available templates:"
+            )
+            for tpl_name in available_templates:
+                desc = _TEMPLATE_DESCRIPTIONS.get(tpl_name, "")
+                console.print(f"  [cyan]{tpl_name}[/cyan] — {desc}")
+            raise typer.Exit(code=1)
+
+        # Default project name to template name if not provided
+        if project_name is None:
+            project_name = template
+
+        project_dir = Path.cwd() / project_name
+
+        # Guard: refuse to overwrite
+        if (project_dir / "workflow.yaml").exists():
+            console.print(
+                f"[red]Error:[/red] '{project_name}/workflow.yaml' already exists. "
+                "Refusing to overwrite an existing project."
+            )
+            raise typer.Exit(code=1)
+
+        created_files = _scaffold_from_template(template, project_name, project_dir)
+
+        console.print(
+            f"\n[bold green]Created project from template "
+            f"[cyan]{template}[/cyan]:[/bold green] {project_name}/\n"
+        )
+        for filename in created_files:
+            console.print(f"  [dim]+[/dim] {project_name}/{filename}")
+        console.print(
+            f"\n[bold]Next steps:[/bold]\n"
+            f"  cd {project_name}\n"
+            f"  rsf validate          # Validate the workflow\n"
+            f"  rsf generate          # Generate orchestrator code\n"
+            f"  rsf deploy            # Deploy to AWS"
+        )
+        return
+
+    # Default path: no --template, use HelloWorld scaffold
+    if project_name is None:
+        console.print(
+            "[red]Error:[/red] Please provide a project name.\n"
+            "  Usage: rsf init <project-name>\n"
+            "  Or:    rsf init --template <name> [project-name]"
+        )
+        raise typer.Exit(code=1)
+
     project_dir = Path.cwd() / project_name
 
     # Guard: refuse to overwrite an existing project

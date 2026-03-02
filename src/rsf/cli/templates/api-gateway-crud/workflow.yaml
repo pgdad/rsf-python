@@ -1,0 +1,57 @@
+rsf_version: "1.0"
+Comment: "API Gateway CRUD workflow — DynamoDB-backed REST API"
+StartAt: RouteRequest
+
+States:
+  RouteRequest:
+    Type: Choice
+    Choices:
+      - Variable: "$.httpMethod"
+        StringEquals: "POST"
+        Next: CreateItem
+      - Variable: "$.httpMethod"
+        StringEquals: "GET"
+        Next: CheckSingleItem
+      - Variable: "$.httpMethod"
+        StringEquals: "PUT"
+        Next: UpdateItem
+      - Variable: "$.httpMethod"
+        StringEquals: "DELETE"
+        Next: DeleteItem
+    Default: ListItems
+
+  CheckSingleItem:
+    Type: Choice
+    Choices:
+      - Variable: "$.pathParameters.id"
+        IsPresent: true
+        Next: GetItem
+    Default: ListItems
+
+  CreateItem:
+    Type: Task
+    Handler: handlers/create_item.py
+    Next: Done
+
+  GetItem:
+    Type: Task
+    Handler: handlers/get_item.py
+    Next: Done
+
+  UpdateItem:
+    Type: Task
+    Handler: handlers/update_item.py
+    Next: Done
+
+  DeleteItem:
+    Type: Task
+    Handler: handlers/delete_item.py
+    Next: Done
+
+  ListItems:
+    Type: Task
+    Handler: handlers/list_items.py
+    Next: Done
+
+  Done:
+    Type: Succeed
