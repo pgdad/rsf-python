@@ -126,7 +126,7 @@ Full details: `.planning/milestones/v1.7-ROADMAP.md`
 - [x] **Phase 45: Advanced Testing Utilities** — Add property-based, chaos, and snapshot testing capabilities (completed 2026-03-02)
 - [x] **Phase 46: Inspector Replay and SchemaStore** — Enable execution replay from the inspector UI and publish the DSL schema to SchemaStore (completed 2026-03-02)
 - [x] **Phase 47: Workflow Templates and GitHub Action** — Add `rsf init --template` scaffolding and a reusable `rsf-action` GitHub Action (completed 2026-03-02)
-- [ ] **Phase 48: VS Code Extension** — Deliver YAML schema validation, go-to-definition, and inline graph preview in VS Code
+- [x] **Phase 48: VS Code Extension** — Deliver YAML schema validation, go-to-definition, and inline graph preview in VS Code (completed 2026-03-02)
 
 ## Phase Details
 
@@ -267,4 +267,4 @@ Note: Phase 45 (Testing) depends only on Phase 39 and can be worked in parallel 
 | 45. Advanced Testing Utilities | 0/3 | Complete    | 2026-03-02 |
 | 46. Inspector Replay and SchemaStore | 3/3 | Complete    | 2026-03-02 |
 | 47. Workflow Templates and GitHub Action | 3/3 | Complete   | 2026-03-02 |
-| 48. VS Code Extension | 0/TBD | Not started | - |
+| 48. VS Code Extension | 0/TBD | Complete    | 2026-03-02 |

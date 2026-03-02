@@ -49,7 +49,7 @@ Requirements for v2.0 release. Each maps to roadmap phases.
 
 ### Ecosystem
 
-- [ ] **ECO-01**: VS Code extension provides YAML schema validation, go-to-definition for state references, and inline graph preview
+- [x] **ECO-01**: VS Code extension provides YAML schema validation, go-to-definition for state references, and inline graph preview
 - [ ] **ECO-02**: `rsf init --template <name>` scaffolds from curated workflow templates (api-gateway-crud, s3-event-pipeline, etc.)
 - [ ] **ECO-03**: Reusable GitHub Action (`rsf-action`) validates, generates, and deploys workflows in CI with plan output as PR comments
 
@@ -102,7 +102,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-01 | Phase 45 | Pending |
 | TEST-02 | Phase 45 | Pending |
 | TEST-03 | Phase 45 | Pending |
-| ECO-01 | Phase 48 | Pending |
+| ECO-01 | Phase 48 | Complete |
 | ECO-02 | Phase 47 | Pending |
 | ECO-03 | Phase 47 | Pending |
 
