@@ -36,10 +36,14 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+watch = [
+    "watchfiles>=0.20",
+]
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",
     "httpx>=0.24",
+    "watchfiles>=0.20",
 ]
 
 [project.scripts]
