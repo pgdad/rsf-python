@@ -43,6 +43,9 @@ tracing = [
     "opentelemetry-api>=1.20",
     "opentelemetry-sdk>=1.20",
 ]
+testing = [
+    "hypothesis>=6.0",
+]
 dev = [
     "pytest>=7.0",
     "pytest-asyncio>=0.21",
