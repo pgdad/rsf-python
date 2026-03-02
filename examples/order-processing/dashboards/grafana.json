@@ -1,0 +1,329 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 1,
+  "id": null,
+  "links": [],
+  "panels": [
+    {
+      "id": 1,
+      "title": "Workflow Executions",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "cloudwatch", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "bars",
+            "fillOpacity": 30,
+            "lineWidth": 1,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "short"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "single" }
+      },
+      "targets": [
+        {
+          "alias": "Executions",
+          "dimensions": {
+            "WorkflowName": ["$workflow_name"]
+          },
+          "expression": "",
+          "id": "",
+          "matchExact": true,
+          "metricName": "WorkflowExecutions",
+          "namespace": "RSF/Workflows",
+          "period": "60",
+          "refId": "A",
+          "region": "$region",
+          "statistics": ["Sum"]
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Duration Percentiles (p50 / p95 / p99)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "cloudwatch", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "drawStyle": "line",
+            "fillOpacity": 10,
+            "lineWidth": 2,
+            "pointSize": 5,
+            "showPoints": "auto"
+          },
+          "unit": "ms"
+        },
+        "overrides": []
+      },
+      "options": {
+        "legend": { "displayMode": "list", "placement": "bottom" },
+        "tooltip": { "mode": "multi" }
+      },
+      "targets": [
+        {
+          "alias": "p50",
+          "dimensions": {
+            "WorkflowName": ["$workflow_name"]
+          },
+          "expression": "",
+          "id": "",
+          "matchExact": true,
+          "metricName": "WorkflowDuration",
+          "namespace": "RSF/Workflows",
+          "period": "60",
+          "refId": "A",
+          "region": "$region",
+          "statistics": ["p50"]
+        },
+        {
+          "alias": "p95",
+          "dimensions": {
+            "WorkflowName": ["$workflow_name"]
+          },
+          "expression": "",
+          "id": "",
+          "matchExact": true,
+          "metricName": "WorkflowDuration",
+          "namespace": "RSF/Workflows",
+          "period": "60",
+          "refId": "B",
+          "region": "$region",
+          "statistics": ["p95"]
+        },
+        {
+          "alias": "p99",
+          "dimensions": {
+            "WorkflowName": ["$workflow_name"]
+          },
+          "expression": "",
+          "id": "",
+          "matchExact": true,
+          "metricName": "WorkflowDuration",
+          "namespace": "RSF/Workflows",
+          "period": "60",
+          "refId": "C",
+          "region": "$region",
+          "statistics": ["p99"]
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "title": "Error Rate %",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 },
+      "datasource": { "type": "cloudwatch", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 1 },
+              { "color": "red", "value": 5 }
+            ]
+          },
+          "unit": "percent",
+          "min": 0,
+          "max": 100
+        },
+        "overrides": []
+      },
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "targets": [
+        {
+          "alias": "Errors",
+          "dimensions": {
+            "WorkflowName": ["$workflow_name"]
+          },
+          "expression": "",
+          "id": "errors",
+          "matchExact": true,
+          "metricName": "WorkflowErrors",
+          "namespace": "RSF/Workflows",
+          "period": "300",
+          "refId": "A",
+          "region": "$region",
+          "statistics": ["Sum"],
+          "hide": true
+        },
+        {
+          "alias": "Executions",
+          "dimensions": {
+            "WorkflowName": ["$workflow_name"]
+          },
+          "expression": "",
+          "id": "executions",
+          "matchExact": true,
+          "metricName": "WorkflowExecutions",
+          "namespace": "RSF/Workflows",
+          "period": "300",
+          "refId": "B",
+          "region": "$region",
+          "statistics": ["Sum"],
+          "hide": true
+        },
+        {
+          "expression": "(errors / executions) * 100",
+          "id": "error_rate",
+          "refId": "C",
+          "type": "math"
+        }
+      ]
+    },
+    {
+      "id": 4,
+      "title": "Recent Errors",
+      "type": "table",
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 },
+      "datasource": { "type": "cloudwatch", "uid": "${datasource}" },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": [
+          {
+            "matcher": { "id": "byName", "options": "@timestamp" },
+            "properties": [
+              { "id": "custom.width", "value": 200 }
+            ]
+          },
+          {
+            "matcher": { "id": "byName", "options": "@message" },
+            "properties": [
+              { "id": "custom.width", "value": 600 }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "showHeader": true,
+        "sortBy": [
+          { "desc": true, "displayName": "@timestamp" }
+        ]
+      },
+      "targets": [
+        {
+          "expression": "fields @timestamp, @message, @logStream\n| filter @message like /ERROR|Exception|WorkflowError/\n| sort @timestamp desc\n| limit 50",
+          "id": "",
+          "logGroupNames": ["/aws/lambda/rsf-${workflow_name}"],
+          "queryMode": "Logs",
+          "refId": "A",
+          "region": "$region",
+          "statsGroups": []
+        }
+      ]
+    }
+  ],
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "style": "dark",
+  "tags": ["rsf", "workflow", "observability"],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "CloudWatch",
+          "value": "CloudWatch"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "cloudwatch",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "order-processing",
+          "value": "order-processing"
+        },
+        "hide": 0,
+        "label": "Workflow Name",
+        "name": "workflow_name",
+        "options": [
+          {
+            "selected": true,
+            "text": "order-processing",
+            "value": "order-processing"
+          }
+        ],
+        "query": "order-processing",
+        "skipUrlSync": false,
+        "type": "textbox"
+      },
+      {
+        "current": {
+          "selected": false,
+          "text": "us-east-1",
+          "value": "us-east-1"
+        },
+        "hide": 0,
+        "label": "AWS Region",
+        "name": "region",
+        "options": [
+          {
+            "selected": true,
+            "text": "us-east-1",
+            "value": "us-east-1"
+          }
+        ],
+        "query": "us-east-1",
+        "skipUrlSync": false,
+        "type": "textbox"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "RSF Workflow Observability - Order Processing",
+  "uid": "rsf-workflow-observability",
+  "version": 1
+}
