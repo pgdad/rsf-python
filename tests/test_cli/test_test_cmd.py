@@ -399,3 +399,218 @@ class TestLocalRunner:
         # Verbose mode should record input/output in transitions
         assert result.transitions[0].input_data == {"original": "data"}
         assert result.transitions[0].output_data == {"transformed": True}
+
+
+class TestChaosIntegration:
+    """Tests for --chaos flag integration with LocalRunner."""
+
+    def test_chaos_timeout_injection_fails_state(self, tmp_path):
+        """--chaos StateName:timeout causes the state to fail with ChaosTimeoutError."""
+        from rsf.testing.chaos import ChaosFixture
+
+        defn = _make_definition({
+            "Start": {"Type": "Task", "End": True},
+        })
+
+        handlers_dir = tmp_path / "handlers"
+        handlers_dir.mkdir()
+        (handlers_dir / "start.py").write_text(
+            "def start(event):\n    return {'result': 'done'}\n"
+        )
+
+        chaos = ChaosFixture()
+        chaos.inject_failure("Start", "timeout")
+
+        runner = LocalRunner(
+            definition=defn,
+            workflow_dir=tmp_path,
+            chaos_fixture=chaos,
+            console=Console(file=StringIO()),
+        )
+        result = runner.run({"input": "test"})
+
+        assert result.success is False
+        assert "timeout" in result.error.lower() or "Timeout" in result.error
+
+    def test_chaos_exception_injection_fails_state(self, tmp_path):
+        """--chaos StateName:exception causes RuntimeError."""
+        from rsf.testing.chaos import ChaosFixture
+
+        defn = _make_definition({
+            "Start": {"Type": "Task", "End": True},
+        })
+
+        handlers_dir = tmp_path / "handlers"
+        handlers_dir.mkdir()
+        (handlers_dir / "start.py").write_text(
+            "def start(event):\n    return {'result': 'done'}\n"
+        )
+
+        chaos = ChaosFixture()
+        chaos.inject_failure("Start", "exception")
+
+        runner = LocalRunner(
+            definition=defn,
+            workflow_dir=tmp_path,
+            chaos_fixture=chaos,
+            console=Console(file=StringIO()),
+        )
+        result = runner.run({})
+
+        assert result.success is False
+        assert "Exception injected" in result.error or "RuntimeError" in result.error
+
+    def test_chaos_throttle_injection_fails_state(self, tmp_path):
+        """--chaos StateName:throttle causes ChaosThrottleError."""
+        from rsf.testing.chaos import ChaosFixture
+
+        defn = _make_definition({
+            "Start": {"Type": "Task", "End": True},
+        })
+
+        handlers_dir = tmp_path / "handlers"
+        handlers_dir.mkdir()
+        (handlers_dir / "start.py").write_text(
+            "def start(event):\n    return {'ok': True}\n"
+        )
+
+        chaos = ChaosFixture()
+        chaos.inject_failure("Start", "throttle")
+
+        runner = LocalRunner(
+            definition=defn,
+            workflow_dir=tmp_path,
+            chaos_fixture=chaos,
+            console=Console(file=StringIO()),
+        )
+        result = runner.run({})
+
+        assert result.success is False
+        assert "TooManyRequests" in result.error or "throttle" in result.error.lower()
+
+    def test_chaos_with_catch_routes_to_error_handler(self, tmp_path):
+        """Chaos-injected failure interacts with Catch to route to error handler."""
+        from rsf.testing.chaos import ChaosFixture
+
+        defn = _make_definition({
+            "Start": {
+                "Type": "Task",
+                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "HandleError"}],
+                "End": True,
+            },
+            "HandleError": {
+                "Type": "Pass",
+                "Result": {"caught": True},
+                "End": True,
+            },
+        })
+
+        handlers_dir = tmp_path / "handlers"
+        handlers_dir.mkdir()
+        (handlers_dir / "start.py").write_text(
+            "def start(event):\n    return {'ok': True}\n"
+        )
+
+        chaos = ChaosFixture()
+        chaos.inject_failure("Start", "exception")
+
+        runner = LocalRunner(
+            definition=defn,
+            workflow_dir=tmp_path,
+            chaos_fixture=chaos,
+            console=Console(file=StringIO()),
+        )
+        result = runner.run({})
+
+        assert result.success is True
+        assert result.final_output == {"caught": True}
+
+    def test_chaos_with_retry_and_count(self, tmp_path):
+        """Chaos-injected failure with count=1 interacts with Retry -- first call fails, retry succeeds."""
+        from rsf.testing.chaos import ChaosFixture
+
+        defn = _make_definition({
+            "Start": {
+                "Type": "Task",
+                "Retry": [{"ErrorEquals": ["States.ALL"], "MaxAttempts": 2, "IntervalSeconds": 0}],
+                "End": True,
+            },
+        })
+
+        handlers_dir = tmp_path / "handlers"
+        handlers_dir.mkdir()
+        (handlers_dir / "start.py").write_text(
+            "def start(event):\n    return {'result': 'ok'}\n"
+        )
+
+        chaos = ChaosFixture()
+        chaos.inject_failure("Start", "timeout", count=1)
+
+        runner = LocalRunner(
+            definition=defn,
+            workflow_dir=tmp_path,
+            chaos_fixture=chaos,
+            console=Console(file=StringIO()),
+        )
+        result = runner.run({})
+
+        # First attempt hits chaos (timeout), retry calls real handler which succeeds
+        assert result.success is True
+        assert result.final_output == {"result": "ok"}
+
+    def test_chaos_non_injected_state_runs_normally(self, tmp_path):
+        """States without chaos injection execute normally."""
+        from rsf.testing.chaos import ChaosFixture
+
+        defn = _make_definition({
+            "Start": {"Type": "Task", "Next": "Process"},
+            "Process": {"Type": "Task", "End": True},
+        })
+
+        handlers_dir = tmp_path / "handlers"
+        handlers_dir.mkdir()
+        (handlers_dir / "start.py").write_text(
+            "def start(event):\n    return {'step': 1}\n"
+        )
+        (handlers_dir / "process.py").write_text(
+            "def process(event):\n    return {'step': 2}\n"
+        )
+
+        chaos = ChaosFixture()
+        chaos.inject_failure("Process", "timeout")  # Only Process fails
+
+        runner = LocalRunner(
+            definition=defn,
+            workflow_dir=tmp_path,
+            chaos_fixture=chaos,
+            console=Console(file=StringIO()),
+        )
+        result = runner.run({})
+
+        # Start runs fine, Process fails
+        assert result.success is False
+        assert result.transitions[0].from_state == "Start"
+        assert result.transitions[0].error is None  # Start succeeded
+
+    def test_no_chaos_fixture_runs_normally(self, tmp_path):
+        """When chaos_fixture is None (default), behavior is unchanged."""
+        defn = _make_definition({
+            "Start": {"Type": "Task", "End": True},
+        })
+
+        handlers_dir = tmp_path / "handlers"
+        handlers_dir.mkdir()
+        (handlers_dir / "start.py").write_text(
+            "def start(event):\n    return {'result': 'done'}\n"
+        )
+
+        runner = LocalRunner(
+            definition=defn,
+            workflow_dir=tmp_path,
+            chaos_fixture=None,
+            console=Console(file=StringIO()),
+        )
+        result = runner.run({"input": "test"})
+
+        assert result.success is True
+        assert result.final_output == {"result": "done"}
