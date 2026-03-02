@@ -144,6 +144,27 @@ class LambdaInspectClient:
 
         return self._parse_detail(raw)
 
+    async def invoke_execution(self, payload: dict[str, Any]) -> dict[str, Any]:
+        """Invoke the Lambda function asynchronously with the given payload.
+
+        Uses InvocationType='Event' for async invocation so the call returns
+        immediately and the execution runs in the background.
+
+        Args:
+            payload: The JSON payload to send to the Lambda function.
+
+        Returns:
+            Raw response dict from boto3 invoke call.
+        """
+        await self._limiter.acquire()
+        raw = await asyncio.to_thread(
+            self._client.invoke,
+            FunctionName=self.function_name,
+            InvocationType="Event",
+            Payload=json.dumps(payload).encode("utf-8"),
+        )
+        return raw
+
     async def close(self) -> None:
         """Close the underlying boto3 client."""
         await asyncio.to_thread(self._client.close)

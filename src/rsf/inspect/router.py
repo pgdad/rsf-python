@@ -26,6 +26,8 @@ from rsf.inspect.models import (
     ExecutionDetail,
     ExecutionListResponse,
     ExecutionStatus,
+    ReplayRequest,
+    ReplayResponse,
 )
 
 logger = logging.getLogger(__name__)
@@ -156,3 +158,54 @@ async def stream_execution(
                 return
 
     return EventSourceResponse(event_generator())
+
+
+@router.post("/execution/{execution_id}/replay", response_model=ReplayResponse)
+async def replay_execution(
+    request: Request,
+    execution_id: str,
+    body: ReplayRequest | None = None,
+) -> ReplayResponse:
+    """Replay an execution with the same or modified payload.
+
+    Fetches the original execution to validate it is in a terminal status
+    and to retrieve the original input_payload if no override is provided.
+    Then invokes the Lambda function asynchronously.
+    """
+    client = _get_client(request)
+
+    # Fetch source execution
+    try:
+        source = await client.get_execution(execution_id)
+    except Exception:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Execution {execution_id} not found",
+        )
+
+    # Validate terminal status
+    if source.status not in TERMINAL_STATUSES:
+        raise HTTPException(
+            status_code=400,
+            detail=(
+                f"Cannot replay execution in {source.status.value} status. "
+                "Only terminal executions can be replayed."
+            ),
+        )
+
+    # Determine payload: use provided override, or fall back to original
+    payload = (
+        body.input_payload
+        if body and body.input_payload is not None
+        else source.input_payload or {}
+    )
+
+    # Invoke Lambda asynchronously
+    result = await client.invoke_execution(payload)
+
+    return ReplayResponse(
+        execution_id=result.get("ResponseMetadata", {}).get("RequestId", ""),
+        replay_from=execution_id,
+        function_name=client.function_name,
+        status_code=result.get("StatusCode", 202),
+    )

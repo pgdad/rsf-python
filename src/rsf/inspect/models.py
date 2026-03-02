@@ -116,3 +116,18 @@ class ExecutionListResponse(BaseModel):
 
     executions: list[ExecutionSummary]
     next_token: str | None = None
+
+
+class ReplayRequest(BaseModel):
+    """Request body for replaying an execution."""
+
+    input_payload: dict[str, Any] | None = None
+
+
+class ReplayResponse(BaseModel):
+    """Response from a replay invocation."""
+
+    execution_id: str
+    replay_from: str
+    function_name: str
+    status_code: int
