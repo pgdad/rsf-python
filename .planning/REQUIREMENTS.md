@@ -12,15 +12,15 @@ Requirements for v2.0 release. Each maps to roadmap phases.
 - [x] **CLI-01**: User can run `rsf diff` to see structural differences between local workflow definition and deployed state
 - [x] **CLI-02**: User can run `rsf test` to execute a workflow locally with a given input payload, printing state transitions and final output
 - [x] **CLI-03**: User can run `rsf watch` to auto-validate and re-generate on file changes, with optional `--deploy` for code-only updates
-- [ ] **CLI-04**: User can run `rsf logs` to tail/search CloudWatch logs across all Lambda functions in a workflow, correlated by execution ID
-- [ ] **CLI-05**: User can run `rsf doctor` to diagnose Python version, Terraform, AWS credentials, and SDK availability
-- [ ] **CLI-06**: User can run `rsf export --format cloudformation` to generate CloudFormation/SAM templates from workflow definitions
+- [x] **CLI-04**: User can run `rsf logs` to tail/search CloudWatch logs across all Lambda functions in a workflow, correlated by execution ID
+- [x] **CLI-05**: User can run `rsf doctor` to diagnose Python version, Terraform, AWS credentials, and SDK availability
+- [x] **CLI-06**: User can run `rsf export --format cloudformation` to generate CloudFormation/SAM templates from workflow definitions
 
 ### DSL & Core
 
-- [ ] **DSL-01**: User can configure EventBridge rules, SQS queues, and SNS subscriptions as workflow trigger sources in the DSL
-- [ ] **DSL-02**: User can invoke one workflow from another as a nested sub-workflow call
-- [ ] **DSL-03**: User can define DynamoDB tables in the DSL with auto-generated Terraform and IAM permissions
+- [x] **DSL-01**: User can configure EventBridge rules, SQS queues, and SNS subscriptions as workflow trigger sources in the DSL
+- [x] **DSL-02**: User can invoke one workflow from another as a nested sub-workflow call
+- [x] **DSL-03**: User can define DynamoDB tables in the DSL with auto-generated Terraform and IAM permissions
 - [x] **DSL-04**: User can define CloudWatch Alarms (error rate, duration, throttle) in the DSL with SNS notification Terraform
 - [x] **DSL-05**: User can configure dead letter queues for Lambda functions that exhaust all retries
 - [x] **DSL-06**: User can set a top-level workflow timeout that terminates the entire execution if exceeded
@@ -32,26 +32,26 @@ Requirements for v2.0 release. Each maps to roadmap phases.
 
 ### Observability
 
-- [ ] **OBS-01**: Generated orchestrator code includes OpenTelemetry trace context injection for distributed tracing
-- [ ] **OBS-02**: User can run `rsf cost` to estimate monthly AWS costs based on workflow structure and expected invocation count
-- [ ] **OBS-03**: An example workflow demonstrates CloudWatch custom metrics with a Grafana dashboard JSON
+- [x] **OBS-01**: Generated orchestrator code includes OpenTelemetry trace context injection for distributed tracing
+- [x] **OBS-02**: User can run `rsf cost` to estimate monthly AWS costs based on workflow structure and expected invocation count
+- [x] **OBS-03**: An example workflow demonstrates CloudWatch custom metrics with a Grafana dashboard JSON
 
 ### UI & Inspector
 
-- [ ] **UI-01**: User can replay a workflow execution from the inspector UI with the same or modified input payload
-- [ ] **UI-02**: RSF's workflow.yaml JSON Schema is published to SchemaStore for automatic IDE auto-complete
+- [x] **UI-01**: User can replay a workflow execution from the inspector UI with the same or modified input payload
+- [x] **UI-02**: RSF's workflow.yaml JSON Schema is published to SchemaStore for automatic IDE auto-complete
 
 ### Testing
 
-- [ ] **TEST-01**: Property-based tests (hypothesis) verify I/O pipeline invariants across randomly generated inputs and JSONPath expressions
-- [ ] **TEST-02**: Test utilities inject failures (timeout, exception, throttle) into specific states during local test runs
-- [ ] **TEST-03**: Snapshot tests capture full generated orchestrator.py for each example, catching code generation regressions
+- [x] **TEST-01**: Property-based tests (hypothesis) verify I/O pipeline invariants across randomly generated inputs and JSONPath expressions
+- [x] **TEST-02**: Test utilities inject failures (timeout, exception, throttle) into specific states during local test runs
+- [x] **TEST-03**: Snapshot tests capture full generated orchestrator.py for each example, catching code generation regressions
 
 ### Ecosystem
 
 - [x] **ECO-01**: VS Code extension provides YAML schema validation, go-to-definition for state references, and inline graph preview
-- [ ] **ECO-02**: `rsf init --template <name>` scaffolds from curated workflow templates (api-gateway-crud, s3-event-pipeline, etc.)
-- [ ] **ECO-03**: Reusable GitHub Action (`rsf-action`) validates, generates, and deploys workflows in CI with plan output as PR comments
+- [x] **ECO-02**: `rsf init --template <name>` scaffolds from curated workflow templates (api-gateway-crud, s3-event-pipeline, etc.)
+- [x] **ECO-03**: Reusable GitHub Action (`rsf-action`) validates, generates, and deploys workflows in CI with plan output as PR comments
 
 ## Future Requirements
 
@@ -80,40 +80,40 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLI-01 | Phase 42 → 49 | Pending |
-| CLI-02 | Phase 42 → 49 | Pending |
-| CLI-03 | Phase 42 → 49 | Pending |
-| CLI-04 | Phase 43 → 49 | Pending |
-| CLI-05 | Phase 43 → 49 | Pending |
-| CLI-06 | Phase 43 → 49 | Pending |
-| DSL-01 | Phase 40 → 49 | Pending |
-| DSL-02 | Phase 40 → 49 | Pending |
-| DSL-03 | Phase 40 → 49 | Pending |
-| DSL-04 | Phase 41 → 49 | Pending |
-| DSL-05 | Phase 41 → 49 | Pending |
+| CLI-01 | Phase 42 | Complete |
+| CLI-02 | Phase 42 | Complete |
+| CLI-03 | Phase 42 | Complete |
+| CLI-04 | Phase 43 | Complete |
+| CLI-05 | Phase 43 | Complete |
+| CLI-06 | Phase 43 | Complete |
+| DSL-01 | Phase 40 | Complete |
+| DSL-02 | Phase 40 | Complete |
+| DSL-03 | Phase 40 | Complete |
+| DSL-04 | Phase 41 | Complete |
+| DSL-05 | Phase 41 | Complete |
 | DSL-06 | Phase 39 | Complete |
-| DSL-07 | Phase 41 → 49 | Pending |
+| DSL-07 | Phase 41 | Complete |
 | INFRA-01 | Phase 39 | Complete |
-| OBS-01 | Phase 44 → 49 | Pending |
-| OBS-02 | Phase 44 → 49 | Pending |
-| OBS-03 | Phase 44 → 49 | Pending |
-| UI-01 | Phase 46 → 49 | Pending |
-| UI-02 | Phase 46 → 49 | Pending |
-| TEST-01 | Phase 45 → 49 | Pending |
-| TEST-02 | Phase 45 → 50 | Pending |
-| TEST-03 | Phase 45 → 49 | Pending |
-| ECO-01 | Phase 48 → 49 | Pending |
-| ECO-02 | Phase 47 → 49 | Pending |
-| ECO-03 | Phase 47 → 50 | Pending |
+| OBS-01 | Phase 44 | Complete |
+| OBS-02 | Phase 44 | Complete |
+| OBS-03 | Phase 44 | Complete |
+| UI-01 | Phase 46 | Complete |
+| UI-02 | Phase 46 | Complete |
+| TEST-01 | Phase 45 | Complete |
+| TEST-02 | Phase 45 | Complete |
+| TEST-03 | Phase 45 | Complete |
+| ECO-01 | Phase 48 | Complete |
+| ECO-02 | Phase 47 | Complete |
+| ECO-03 | Phase 47 | Complete |
 
 **Coverage:**
 - v2.0 requirements: 25 total
 - Mapped to phases: 25
 - Unmapped: 0 ✓
-- Satisfied: 2 (INFRA-01, DSL-06)
-- Pending verification: 21 (Phase 49)
-- Pending integration fix: 2 (Phase 50: TEST-02, ECO-03)
+- Satisfied: 25 (all requirements)
+- Pending verification: 0
+- Pending integration fix: 0
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-02 — gap closure phases 49-50 added per milestone audit*
+*Last updated: 2026-03-02 — all 25 requirements verified per Phase 49*
