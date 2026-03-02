@@ -31,11 +31,11 @@ Requirements for pluggable infrastructure provider system. Each maps to roadmap 
 
 ### CDK Provider
 
-- [ ] **CDKP-01**: `CDKProvider` generates a Python CDK app (app.py, stack.py, cdk.json) via Jinja2 with Generation Gap pattern
-- [ ] **CDKP-02**: User can deploy infrastructure via `cdk deploy` invoked by RSF
-- [ ] **CDKP-03**: RSF detects missing CDK bootstrap and warns user before deploy
-- [ ] **CDKP-04**: CDK CLI (npm package `aws-cdk`) is installed/updated to latest on local machine
-- [ ] **CDKP-05**: `rsf doctor` checks for CDK CLI binary when CDK provider is configured
+- [x] **CDKP-01**: `CDKProvider` generates a Python CDK app (app.py, stack.py, cdk.json) via Jinja2 with Generation Gap pattern
+- [x] **CDKP-02**: User can deploy infrastructure via `cdk deploy` invoked by RSF
+- [x] **CDKP-03**: RSF detects missing CDK bootstrap and warns user before deploy
+- [x] **CDKP-04**: CDK CLI (npm package `aws-cdk`) is installed/updated to latest on local machine
+- [x] **CDKP-05**: `rsf doctor` checks for CDK CLI binary when CDK provider is configured
 
 ### Custom Provider
 
@@ -111,11 +111,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CONF-02 | Phase 52 | Pending |
 | CONF-03 | Phase 52 | Pending |
 | CONF-04 | Phase 52 | Pending |
-| CDKP-01 | Phase 53 | Pending |
-| CDKP-02 | Phase 53 | Pending |
-| CDKP-03 | Phase 53 | Pending |
-| CDKP-04 | Phase 53 | Pending |
-| CDKP-05 | Phase 53 | Pending |
+| CDKP-01 | Phase 53 | Done |
+| CDKP-02 | Phase 53 | Done |
+| CDKP-03 | Phase 53 | Done |
+| CDKP-04 | Phase 53 | Done |
+| CDKP-05 | Phase 53 | Done |
 | CUST-01 | Phase 54 | Pending |
 | CUST-02 | Phase 54 | Pending |
 | CUST-03 | Phase 54 | Pending |

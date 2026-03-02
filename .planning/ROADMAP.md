@@ -142,7 +142,7 @@ Full details: `.planning/milestones/v2.0-ROADMAP.md`
 
 - [x] **Phase 51: Provider Interface and Metadata Foundation** - Abstract base class, ProviderContext, WorkflowMetadata schema, and all three metadata transports (completed 2026-03-02)
 - [x] **Phase 52: Terraform Provider, deploy_cmd Refactor, and Configuration** - TerraformProvider wrapping existing generator, provider registry, rsf.toml config, deploy_cmd integration, and provider config validation (completed 2026-03-02)
-- [ ] **Phase 53: CDK Provider** - CDKProvider with Jinja2-generated CDK app template, cdk deploy invocation, bootstrap detection, and doctor check
+- [x] **Phase 53: CDK Provider** - CDKProvider with Jinja2-generated CDK app template, cdk deploy invocation, bootstrap detection, and doctor check (completed 2026-03-02)
 - [ ] **Phase 54: Custom Provider** - CustomProvider with shell=False subprocess, all three metadata transport modes, and security hardening
 - [ ] **Phase 55: Provider-Aware Command Audit** - doctor/diff/watch/export updated to be provider-agnostic
 
@@ -226,6 +226,6 @@ Full details: `.planning/milestones/v2.0-ROADMAP.md`
 |-------|----------------|--------|-----------|
 | 51. Provider Interface and Metadata Foundation | 3/3 | Complete    | 2026-03-02 |
 | 52. Terraform Provider, deploy_cmd Refactor, and Configuration | 4/4 | Complete   | 2026-03-02 |
-| 53. CDK Provider | 0/TBD | Not started | - |
+| 53. CDK Provider | 3/3 | Complete    | 2026-03-02 |
 | 54. Custom Provider | 0/TBD | Not started | - |
 | 55. Provider-Aware Command Audit | 0/TBD | Not started | - |
