@@ -1,4 +1,9 @@
-"""RSF deploy subcommand — generates Terraform and deploys to AWS."""
+"""RSF deploy subcommand -- generates infrastructure and deploys to AWS.
+
+Routes deployment through the pluggable provider interface. The default
+provider is Terraform, with zero-config backward compatibility for v2.0
+workflows that have no ``infrastructure:`` block.
+"""
 
 from __future__ import annotations
 
@@ -12,8 +17,11 @@ from rich.console import Console
 from rich.status import Status
 
 from rsf.codegen.generator import generate as codegen_generate
+from rsf.config import resolve_infra_config
 from rsf.dsl.parser import load_definition
-from rsf.terraform.generator import TerraformConfig, generate_terraform
+from rsf.providers import ProviderNotFoundError, get_provider
+from rsf.providers.base import ProviderContext
+from rsf.providers.metadata import create_metadata
 
 console = Console()
 
@@ -21,18 +29,23 @@ console = Console()
 def deploy(
     workflow: Path = typer.Argument("workflow.yaml", help="Path to workflow YAML file"),
     code_only: bool = typer.Option(False, "--code-only", help="Re-package and update Lambda code only"),
-    auto_approve: bool = typer.Option(False, "--auto-approve", "-y", help="Skip Terraform confirmation prompt"),
-    tf_dir: Path = typer.Option("terraform", "--tf-dir", help="Terraform output directory"),
-    no_infra: bool = typer.Option(False, "--no-infra", help="Generate and deploy code only, skip Terraform"),
+    auto_approve: bool = typer.Option(False, "--auto-approve", "-y", help="Skip confirmation prompt"),
+    output_dir: Path = typer.Option("terraform", "--output-dir", help="Infrastructure output directory"),
+    tf_dir: Path = typer.Option(None, "--tf-dir", hidden=True, help="[deprecated] Alias for --output-dir"),
+    no_infra: bool = typer.Option(False, "--no-infra", help="Generate and deploy code only, skip infrastructure"),
     stage: str | None = typer.Option(None, "--stage", help="Deployment stage (e.g., dev, staging, prod)"),
 ) -> None:
-    """Deploy an RSF workflow to AWS via Terraform.
+    """Deploy an RSF workflow to AWS via the configured infrastructure provider.
 
-    Generates Terraform files, then runs terraform init and terraform apply.
-    Use --code-only to re-package Lambda code without a full Terraform apply.
-    Use --no-infra to skip Terraform generation entirely.
+    Generates infrastructure files, then deploys. Default provider is Terraform.
+    Use --code-only to re-package Lambda code without a full infrastructure deploy.
+    Use --no-infra to skip infrastructure generation entirely.
     Use --stage to deploy to a named stage with stage-specific variable overrides.
     """
+    # Handle --tf-dir alias (deprecated, hidden)
+    if tf_dir is not None:
+        output_dir = tf_dir
+
     # Check mutual exclusion: --no-infra and --code-only
     if no_infra and code_only:
         console.print("[red]Error:[/red] --no-infra and --code-only are mutually exclusive")
@@ -71,18 +84,39 @@ def deploy(
         f"({len(codegen_result.skipped_handlers)} skipped)"
     )
 
-    # --no-infra: skip all Terraform steps, return after code generation
+    # --no-infra: skip all infrastructure steps, return after code generation
     if no_infra:
         console.print("[green]Code generated (infrastructure skipped).[/green]")
         return
 
-    # Step 4: Derive workflow name
-    workflow_name = definition.comment if definition.comment else workflow.stem.replace("_", "-").replace(" ", "-")
+    # Step 4: Resolve infrastructure config (YAML > rsf.toml > default)
+    infra_config = resolve_infra_config(definition, workflow.parent)
 
-    # Stage handling: isolate tf_dir and resolve stage variable file
+    # Step 5: Get provider
+    try:
+        provider = get_provider(infra_config.provider)
+    except ProviderNotFoundError as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise typer.Exit(code=1)
+
+    # Step 6: Check --code-only constraint (Terraform-specific)
+    if code_only and infra_config.provider != "terraform":
+        console.print(
+            "[red]Error:[/red] --code-only is only supported with the terraform provider"
+        )
+        raise typer.Exit(code=1)
+
+    # Step 7: Derive workflow name
+    workflow_name = (
+        definition.comment
+        if definition.comment
+        else workflow.stem.replace("_", "-").replace(" ", "-")
+    )
+
+    # Stage handling: isolate output_dir and resolve stage variable file
     stage_var_file: Path | None = None
     if stage:
-        tf_dir = tf_dir / stage  # e.g., terraform/prod/
+        output_dir = output_dir / stage  # e.g., terraform/prod/
         stage_var_file = workflow.parent / "stages" / f"{stage}.tfvars"
         if not stage_var_file.exists():
             console.print(
@@ -94,186 +128,99 @@ def deploy(
             )
             raise typer.Exit(code=1)
 
-    if code_only:
-        _deploy_code_only(definition, workflow, workflow_name, tf_dir, stage=stage, stage_var_file=stage_var_file)
-    else:
-        _deploy_full(definition, workflow, workflow_name, tf_dir, auto_approve, stage=stage, stage_var_file=stage_var_file)
-
-
-def _deploy_full(
-    definition: object,
-    workflow: Path,
-    workflow_name: str,
-    tf_dir: Path,
-    auto_approve: bool,
-    stage: str | None = None,
-    stage_var_file: Path | None = None,
-) -> None:
-    """Run the full Terraform deploy pipeline."""
-    # Step 5: Generate Terraform files
-    # Build lambda_url config from DSL definition
-    lambda_url_enabled = False
-    lambda_url_auth_type = "NONE"
-    if hasattr(definition, "lambda_url") and definition.lambda_url is not None and definition.lambda_url.enabled:
-        lambda_url_enabled = True
-        lambda_url_auth_type = definition.lambda_url.auth_type.value
-
-    # Build trigger config from DSL definition
-    triggers_config: list[dict] = []
-    if hasattr(definition, "triggers") and definition.triggers:
-        for trigger in definition.triggers:
-            trigger_dict: dict = {"type": trigger.type}
-            if trigger.type == "eventbridge":
-                trigger_dict["schedule_expression"] = trigger.schedule_expression
-                trigger_dict["event_pattern"] = trigger.event_pattern
-            elif trigger.type == "sqs":
-                trigger_dict["queue_name"] = trigger.queue_name
-                trigger_dict["batch_size"] = trigger.batch_size
-            elif trigger.type == "sns":
-                trigger_dict["topic_arn"] = trigger.topic_arn
-            triggers_config.append(trigger_dict)
-    has_sqs = any(t["type"] == "sqs" for t in triggers_config)
-
-    # Build DynamoDB config from DSL definition
-    dynamodb_config: list[dict] = []
-    if hasattr(definition, "dynamodb_tables") and definition.dynamodb_tables:
-        for table in definition.dynamodb_tables:
-            table_dict: dict = {
-                "table_name": table.table_name,
-                "partition_key": {"name": table.partition_key.name, "type": table.partition_key.type.value},
-                "billing_mode": table.billing_mode.value,
-            }
-            if table.sort_key:
-                table_dict["sort_key"] = {"name": table.sort_key.name, "type": table.sort_key.type.value}
-            if table.read_capacity is not None:
-                table_dict["read_capacity"] = table.read_capacity
-            if table.write_capacity is not None:
-                table_dict["write_capacity"] = table.write_capacity
-            dynamodb_config.append(table_dict)
-
-    # Build alarm config from DSL definition
-    alarms_config: list[dict] = []
-    if hasattr(definition, "alarms") and definition.alarms:
-        for alarm in definition.alarms:
-            alarm_dict: dict = {
-                "type": alarm.type,
-                "threshold": alarm.threshold,
-                "period": alarm.period,
-                "evaluation_periods": alarm.evaluation_periods,
-                "sns_topic_arn": alarm.sns_topic_arn,
-            }
-            alarms_config.append(alarm_dict)
-
-    # Build DLQ config from DSL definition
-    dlq_enabled = False
-    dlq_max_receive_count = 3
-    dlq_queue_name = None
-    if hasattr(definition, "dead_letter_queue") and definition.dead_letter_queue is not None:
-        if definition.dead_letter_queue.enabled:
-            dlq_enabled = True
-            dlq_max_receive_count = definition.dead_letter_queue.max_receive_count
-            dlq_queue_name = definition.dead_letter_queue.queue_name
-
-    with Status("[bold]Generating Terraform files...[/bold]", console=console):
-        tf_result = generate_terraform(
-            config=TerraformConfig(
-                workflow_name=workflow_name,
-                lambda_url_enabled=lambda_url_enabled,
-                lambda_url_auth_type=lambda_url_auth_type,
-                triggers=triggers_config,
-                has_sqs_triggers=has_sqs,
-                dynamodb_tables=dynamodb_config,
-                has_dynamodb_tables=bool(dynamodb_config),
-                alarms=alarms_config,
-                has_alarms=bool(alarms_config),
-                dlq_enabled=dlq_enabled,
-                dlq_max_receive_count=dlq_max_receive_count,
-                dlq_queue_name=dlq_queue_name,
-                stage=stage,
-            ),
-            output_dir=tf_dir,
-        )
-
-    console.print(
-        f"[green]Terraform generated:[/green] {len(tf_result.generated_files)} file(s) "
-        f"in [bold]{tf_dir}[/bold] ({len(tf_result.skipped_files)} skipped)"
+    # Step 8: Create metadata and provider context
+    metadata = create_metadata(definition, workflow_name, stage=stage)
+    ctx = ProviderContext(
+        metadata=metadata,
+        output_dir=output_dir,
+        stage=stage,
+        workflow_path=workflow,
+        definition=definition,
+        auto_approve=auto_approve,
+        stage_var_file=stage_var_file,
     )
 
-    # Step 6: Check terraform binary
+    if code_only:
+        _deploy_code_only(ctx)
+    else:
+        _deploy_full(provider, ctx)
+
+
+def _deploy_full(provider: object, ctx: ProviderContext) -> None:
+    """Run the full provider deploy pipeline: generate -> deploy."""
+    # Generate infrastructure files
+    with Status("[bold]Generating infrastructure files...[/bold]", console=console):
+        provider.generate(ctx)
+
+    console.print(
+        f"[green]Infrastructure generated[/green] in [bold]{ctx.output_dir}[/bold]"
+    )
+
+    # Check provider binary
     if not shutil.which("terraform"):
-        console.print("[red]Error:[/red] terraform binary not found. Install from https://terraform.io")
-        raise typer.Exit(code=1)
-
-    # Step 7: terraform init
-    console.print("\n[bold]Running terraform init...[/bold]")
-    try:
-        subprocess.run(
-            ["terraform", "init"],
-            cwd=tf_dir,
-            check=True,
+        console.print(
+            "[red]Error:[/red] terraform binary not found. "
+            "Install from https://terraform.io"
         )
-    except subprocess.CalledProcessError as exc:
-        console.print(f"[red]Error:[/red] terraform init failed (exit {exc.returncode})")
         raise typer.Exit(code=1)
 
-    # Step 8 + 9: terraform apply
-    apply_cmd = ["terraform", "apply"]
-    if stage_var_file:
-        apply_cmd.extend(["-var-file", str(stage_var_file.resolve())])
-    if auto_approve:
-        apply_cmd.append("-auto-approve")
-
-    console.print("\n[bold]Running terraform apply...[/bold]")
+    # Deploy via provider
+    console.print("\n[bold]Deploying infrastructure...[/bold]")
     try:
-        subprocess.run(apply_cmd, cwd=tf_dir, check=True)
+        provider.deploy(ctx)
     except subprocess.CalledProcessError as exc:
-        console.print(f"[red]Error:[/red] terraform apply failed (exit {exc.returncode})")
+        console.print(
+            f"[red]Error:[/red] Infrastructure deploy failed (exit {exc.returncode})"
+        )
         raise typer.Exit(code=1)
 
-    # Step 11: Success
     console.print("\n[green]Deploy complete[/green]")
 
 
-def _deploy_code_only(
-    definition: object,
-    workflow: Path,
-    workflow_name: str,
-    tf_dir: Path,
-    stage: str | None = None,
-    stage_var_file: Path | None = None,
-) -> None:
-    """Re-package Lambda code and update it via targeted Terraform apply."""
-    # Step 4 (code-only): Check terraform binary
+def _deploy_code_only(ctx: ProviderContext) -> None:
+    """Re-package Lambda code and update it via targeted Terraform apply.
+
+    This remains Terraform-specific since --code-only is only supported
+    with the terraform provider (enforced in deploy() above).
+    """
+    # Check terraform binary
     if not shutil.which("terraform"):
-        console.print("[red]Error:[/red] terraform binary not found. Install from https://terraform.io")
+        console.print(
+            "[red]Error:[/red] terraform binary not found. "
+            "Install from https://terraform.io"
+        )
         raise typer.Exit(code=1)
 
-    # Step 5 (code-only): Check tf_dir has terraform state
-    if not tf_dir.exists():
+    # Check output_dir has terraform state
+    if not ctx.output_dir.exists():
         console.print(
-            f"[red]Error:[/red] Terraform directory not found: [bold]{tf_dir}[/bold]\n"
+            f"[red]Error:[/red] Terraform directory not found: [bold]{ctx.output_dir}[/bold]\n"
             "Run [bold]rsf deploy[/bold] first to initialise the infrastructure."
         )
         raise typer.Exit(code=1)
 
-    # Step 5 (code-only): Run targeted terraform apply for Lambda only
-    console.print("\n[bold]Running targeted terraform apply (Lambda code update)...[/bold]")
+    # Run targeted terraform apply for Lambda only
+    console.print(
+        "\n[bold]Running targeted terraform apply (Lambda code update)...[/bold]"
+    )
     targeted_cmd = [
         "terraform",
         "apply",
         "-target=aws_lambda_function.*",
         "-auto-approve",
     ]
-    if stage_var_file:
-        targeted_cmd.extend(["-var-file", str(stage_var_file.resolve())])
+    if ctx.stage_var_file:
+        targeted_cmd.extend(["-var-file", str(ctx.stage_var_file.resolve())])
     try:
         subprocess.run(
             targeted_cmd,
-            cwd=tf_dir,
+            cwd=ctx.output_dir,
             check=True,
         )
     except subprocess.CalledProcessError as exc:
-        console.print(f"[red]Error:[/red] terraform apply --code-only failed (exit {exc.returncode})")
+        console.print(
+            f"[red]Error:[/red] terraform apply --code-only failed (exit {exc.returncode})"
+        )
         raise typer.Exit(code=1)
 
     console.print("\n[green]Code update complete[/green]")
