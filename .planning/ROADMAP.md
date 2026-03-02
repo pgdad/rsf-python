@@ -277,7 +277,10 @@ Plans:
   2. `rsf test` supports a `--chaos` flag (or equivalent) that activates ChaosFixture injection during local test runs
   3. E2E flow "CI Pipeline" passes with non-default workflow-file path
   4. E2E flow "Chaos Testing via CLI" works end-to-end through `rsf test`
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 50-01-PLAN.md -- Fix GitHub Action entrypoint.sh to forward WORKFLOW_FILE to rsf deploy
+- [ ] 50-02-PLAN.md -- Bridge ChaosFixture to rsf test CLI with --chaos flag
 
 ## Progress
 
