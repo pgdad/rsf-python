@@ -2,7 +2,7 @@
 
 ## What This Is
 
-RSF is a complete replacement for AWS Step Functions built on AWS Lambda Durable Functions (launched at re:Invent 2025). It provides a YAML/JSON-based DSL for defining state machines, a Python code generator that produces Lambda Durable Functions SDK code, a React-based visual graph editor, Terraform infrastructure generation, an ASL JSON importer, a CLI toolchain, and an execution inspector with time machine debugging. Users define workflows in the DSL, generate deployment-ready Lambda code, connect business logic via `@state` decorators, deploy via Terraform, and inspect execution state with a web-based debugger. Five real-world example workflows with automated integration testing prove end-to-end correctness on real AWS.
+RSF is a complete development platform for AWS Lambda Durable Functions (launched at re:Invent 2025), replacing AWS Step Functions. It provides a YAML/JSON DSL for defining state machines with event triggers, sub-workflows, DynamoDB tables, CloudWatch alarms, dead letter queues, and multi-stage deployment. A Python code generator produces Lambda Durable Functions SDK code with OpenTelemetry tracing. The CLI toolchain includes 16 commands covering the full lifecycle: init, validate, generate, deploy, diff, test (with chaos injection), watch, logs, doctor, export, cost, import, ui, inspect, schema, and templated project scaffolding. A React-based graph editor, execution inspector with replay, VS Code extension with LSP, and a reusable GitHub Action round out the ecosystem. Six real-world example workflows with automated integration testing prove end-to-end correctness on real AWS.
 
 ## Core Value
 
@@ -10,7 +10,7 @@ Users can define, visualize, generate, deploy, and debug state machine workflows
 
 ## Current State
 
-v1.7 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. Entire codebase passes strict ruff linting with zero suppressions. All 779 non-AWS tests pass in unified pytest invocation. Optional Lambda Function URL support enables HTTP POST triggers for durable workflow executions. Six real-world example workflows with automated integration testing prove end-to-end correctness on real AWS.
+v2.0 shipped (2026-03-02). RSF is a full development platform installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. 16 CLI commands, 7 DSL extensions, OpenTelemetry tracing, VS Code extension, GitHub Action, and 25 v2.0 requirements satisfied. ~9,900 LOC Python source + 2,300 LOC TypeScript (VS Code extension) + 14,400 LOC tests. 976+ non-AWS tests collected. Six real-world example workflows with automated integration testing prove end-to-end correctness on real AWS.
 
 ## Requirements
 
@@ -58,23 +58,37 @@ v1.7 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled
 - ✓ Lambda Function URL Terraform generation (lambda_url.tf, conditional IAM, conditional outputs) — v1.7
 - ✓ Lambda URL trigger example workflow with 19 local tests and real-AWS integration test — v1.7
 - ✓ Tutorial Steps 12-14 covering Lambda URL YAML config, deploy, and curl POST invocation — v1.7
+- ✓ Optional infrastructure generation (`--no-infra` flag decouples code gen from Terraform) — v2.0
+- ✓ Top-level workflow timeout with DSL validation and orchestrator enforcement — v2.0
+- ✓ EventBridge/SQS/SNS trigger sources with Terraform generation — v2.0
+- ✓ Sub-workflow invocation as nested durable execution — v2.0
+- ✓ DynamoDB table definitions with auto-generated Terraform and IAM — v2.0
+- ✓ CloudWatch alarms (error rate, duration, throttle) with SNS targets — v2.0
+- ✓ Dead letter queues for Lambda functions with SQS DLQ Terraform — v2.0
+- ✓ Multi-stage deployment (`--stage dev/staging/prod`) with variable overrides — v2.0
+- ✓ `rsf diff` for local vs deployed workflow comparison — v2.0
+- ✓ `rsf test` for local execution with chaos injection (`--chaos` flag) — v2.0
+- ✓ `rsf watch` for auto-validate/regenerate with optional `--deploy` — v2.0
+- ✓ `rsf logs` for CloudWatch log tailing correlated by execution ID — v2.0
+- ✓ `rsf doctor` for environment/project health diagnostics — v2.0
+- ✓ `rsf export --format cloudformation` for SAM/CloudFormation templates — v2.0
+- ✓ `rsf cost` for estimated monthly AWS cost breakdown — v2.0
+- ✓ OpenTelemetry trace context injection in generated orchestrator — v2.0
+- ✓ CloudWatch metrics + Grafana dashboard example — v2.0
+- ✓ Inspector execution replay with editable input payload — v2.0
+- ✓ JSON Schema published to SchemaStore for IDE auto-complete — v2.0
+- ✓ Hypothesis property-based tests for I/O pipeline invariants — v2.0
+- ✓ ChaosFixture test utilities for timeout/exception/throttle injection — v2.0
+- ✓ Snapshot tests for generated orchestrator golden files — v2.0
+- ✓ VS Code extension with LSP schema validation, go-to-definition, inline graph preview — v2.0
+- ✓ `rsf init --template` with curated workflow templates (api-gateway-crud, s3-event-pipeline) — v2.0
+- ✓ Reusable `rsf-action` GitHub Action for CI/CD with PR comment plans — v2.0
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-## Current Milestone: v2.0 Comprehensive Enhancement Suite
-
-**Goal:** Expand RSF from a code generation toolkit into a full development platform with new CLI commands, event triggers, observability, testing utilities, IDE integration, and optional infrastructure generation.
-
-**Target features:**
-- 6 new CLI commands (diff, test, watch, logs, doctor, export)
-- 7 DSL extensions (triggers, sub-workflows, DynamoDB, alerts, DLQ, timeout, stages)
-- Optional Terraform generation (infrastructure decoupled from code generation)
-- OpenTelemetry tracing, cost estimation, metrics dashboard
-- Inspector replay, SchemaStore publishing
-- Property-based testing, chaos testing, snapshot testing
-- VS Code extension, workflow templates, GitHub Actions
+(No active requirements — planning next milestone)
 
 ### Out of Scope
 
@@ -83,7 +97,6 @@ v1.7 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled
 - Go or other language runtime support — Python-only implementation
 - Team collaboration features — local-first tool, no multi-user editing
 - Hosted web service with authentication — runs on developer's machine
-- ~~VS Code extension~~ — Moved to Active for v2.0 (ECO-01)
 - Direct AWS Console integration — operates independently
 - Mobile app — desktop developer tool
 - LocalStack / moto mocking of durable functions — Lambda Durable Functions (re:Invent 2025) not supported by either framework
@@ -105,6 +118,7 @@ v1.7 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled
 - Shipped v1.5 with PyPI packaging, CI/CD, and README landing page
 - Shipped v1.6 with zero ruff violations and 744 non-AWS tests passing
 - Shipped v1.7 with Lambda Function URL support (DSL, Terraform, example, tutorial) and 779 non-AWS tests
+- Shipped v2.0 with 12 phases, 34 plans, 25 requirements: full CLI toolchain (16 commands), 7 DSL extensions, observability, advanced testing, VS Code extension, GitHub Action, and workflow templates. 976+ non-AWS tests.
 
 ## Constraints
 
@@ -144,6 +158,13 @@ v1.7 shipped (2026-03-01). RSF is installable via `pip install rsf` with bundled
 | snake_case alias for RSF extension fields | `lambda_url` uses snake_case (matching `rsf_version`), distinguishing RSF extensions from PascalCase ASL fields | ✓ Good |
 | Required enabled + auth_type fields (no defaults) | Forces explicit configuration; prevents accidental public endpoints | ✓ Good |
 | Conditional Terraform file generation | lambda_url.tf skipped entirely when disabled, rather than rendered empty | ✓ Good |
+| `--no-infra` flag for infrastructure decoupling | Separates code generation from Terraform; users who don't want IaC can still use RSF | ✓ Good |
+| Wrapper approach for ChaosFixture in LocalRunner | Chaos-injected failures participate in retry/catch logic rather than bypassing it | ✓ Good |
+| `rsf test --chaos STATE:TYPE` syntax | Repeatable flag with explicit state targeting; intuitive for users | ✓ Good |
+| SchemaStore catalog entry for workflow.yaml | Automatic IDE auto-complete without manual schema configuration | ✓ Good |
+| VS Code LSP-based extension | Reuses Pydantic validation via Python subprocess; consistent with `rsf validate` | ✓ Good |
+| GitHub Action with composite + shell approach | No Docker dependency; faster startup; works on any runner OS | ✓ Good |
+| Milestone audit + gap closure phases (49, 50) | Systematic verification ensured 25/25 requirements satisfied before shipping | ✓ Good |
 
 ---
-*Last updated: 2026-03-01 after v2.0 milestone started*
+*Last updated: 2026-03-02 after v2.0 milestone*

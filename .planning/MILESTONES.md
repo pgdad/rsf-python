@@ -1,5 +1,23 @@
 # Milestones
 
+## v2.0 Comprehensive Enhancement Suite (Shipped: 2026-03-02)
+
+**Phases completed:** 12 phases (39-50), 34 plans, 99 tasks
+**Files changed:** 269 | **Source LOC:** ~9,900 Python + 2,300 TypeScript + 800 Jinja2
+**Timeline:** 2 days (2026-03-01 → 2026-03-02)
+**Git range:** feat(39-01) → feat(50-02)
+
+**Key accomplishments:**
+- Infrastructure decoupling: `--no-infra` flag makes Terraform generation optional; top-level workflow timeout enforcement added to DSL and orchestrator
+- DSL extensions: EventBridge/SQS/SNS triggers, sub-workflow invocation, DynamoDB table definitions, CloudWatch alarms, Lambda DLQs, and multi-stage deployment (`--stage`)
+- 9 new CLI commands: `rsf diff`, `rsf test`, `rsf watch`, `rsf logs`, `rsf doctor`, `rsf export`, `rsf cost`, `rsf init --template`, `rsf schema export`
+- Observability suite: OpenTelemetry trace context injection in generated orchestrator, cost estimation CLI, CloudWatch metrics + Grafana dashboard example
+- Advanced testing: Hypothesis property-based tests for I/O pipeline, ChaosFixture injection (`--chaos` flag on `rsf test`), snapshot golden-file tests for generated code
+- IDE and CI integration: VS Code extension with LSP schema validation, go-to-definition, and inline graph preview; SchemaStore publication; reusable `rsf-action` GitHub Action; curated workflow templates
+- 25/25 requirements satisfied across 7 categories (DSL, CLI, Observability, Testing, UI, Ecosystem, Infrastructure)
+
+---
+
 ## v1.7 Lambda Function URL Support (Shipped: 2026-03-01)
 
 **Phases completed:** 3 phases (36-38), 6 plans
