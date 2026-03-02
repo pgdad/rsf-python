@@ -21,6 +21,43 @@ States:
     End: true
 """
 
+# ── Valid workflow with infrastructure block ──────────────────────────────────
+VALID_WORKFLOW_WITH_INFRA = """\
+rsf_version: "1.0"
+StartAt: ProcessData
+infrastructure:
+  provider: terraform
+States:
+  ProcessData:
+    Type: Task
+    End: true
+"""
+
+# ── Workflow with unknown provider ───────────────────────────────────────────
+UNKNOWN_PROVIDER_WORKFLOW = """\
+rsf_version: "1.0"
+StartAt: ProcessData
+infrastructure:
+  provider: pulumi
+States:
+  ProcessData:
+    Type: Task
+    End: true
+"""
+
+# ── Workflow with unknown infra field (Pydantic extra=forbid catches this) ───
+UNKNOWN_INFRA_FIELD_WORKFLOW = """\
+rsf_version: "1.0"
+StartAt: ProcessData
+infrastructure:
+  provider: terraform
+  bad_field: something
+States:
+  ProcessData:
+    Type: Task
+    End: true
+"""
+
 # ── Invalid YAML (bad indentation / parse error) ──────────────────────────────
 MALFORMED_YAML = """\
 StartAt: Foo
@@ -138,3 +175,95 @@ class TestValidateSubcommand:
         result = runner.invoke(app, ["validate", str(fixture)])
 
         assert result.exit_code == 1
+
+
+class TestInfrastructureValidation:
+    """Tests for infrastructure config validation in rsf validate."""
+
+    def test_validate_with_valid_infra_block_passes(self, tmp_path: Path) -> None:
+        """Workflow with valid infrastructure: {provider: terraform} passes validation."""
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(VALID_WORKFLOW_WITH_INFRA, encoding="utf-8")
+
+        result = runner.invoke(app, ["validate", str(wf)])
+
+        assert result.exit_code == 0, f"Expected exit 0, got {result.exit_code}: {result.output}"
+        assert "Valid" in result.output
+
+    def test_validate_with_unknown_provider_fails(self, tmp_path: Path) -> None:
+        """Workflow with unknown provider name exits 1 with provider error."""
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(UNKNOWN_PROVIDER_WORKFLOW, encoding="utf-8")
+
+        result = runner.invoke(app, ["validate", str(wf)])
+
+        assert result.exit_code == 1
+        assert "pulumi" in result.output
+        assert "infrastructure.provider" in result.output
+
+    def test_validate_with_unknown_infra_field_fails(self, tmp_path: Path) -> None:
+        """Workflow with extra field in infrastructure block exits 1 (Pydantic catches)."""
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(UNKNOWN_INFRA_FIELD_WORKFLOW, encoding="utf-8")
+
+        result = runner.invoke(app, ["validate", str(wf)])
+
+        assert result.exit_code == 1
+
+    def test_validate_no_infra_block_still_passes(self, tmp_path: Path) -> None:
+        """Workflow with no infrastructure block still passes (backward compat)."""
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(VALID_WORKFLOW, encoding="utf-8")
+
+        result = runner.invoke(app, ["validate", str(wf)])
+
+        assert result.exit_code == 0
+        assert "Valid" in result.output
+
+    def test_validate_rsf_toml_valid_passes(self, tmp_path: Path) -> None:
+        """Workflow + valid rsf.toml with [infrastructure] passes validation."""
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(VALID_WORKFLOW, encoding="utf-8")
+        toml = tmp_path / "rsf.toml"
+        toml.write_text('[infrastructure]\nprovider = "terraform"\n', encoding="utf-8")
+
+        result = runner.invoke(app, ["validate", str(wf)])
+
+        assert result.exit_code == 0, f"Expected exit 0, got {result.exit_code}: {result.output}"
+        assert "Valid" in result.output
+
+    def test_validate_rsf_toml_unknown_provider_fails(self, tmp_path: Path) -> None:
+        """rsf.toml with unknown provider exits 1."""
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(VALID_WORKFLOW, encoding="utf-8")
+        toml = tmp_path / "rsf.toml"
+        toml.write_text('[infrastructure]\nprovider = "unknown"\n', encoding="utf-8")
+
+        result = runner.invoke(app, ["validate", str(wf)])
+
+        assert result.exit_code == 1
+        assert "unknown" in result.output
+        assert "infrastructure.provider" in result.output
+
+    def test_validate_rsf_toml_invalid_field_fails(self, tmp_path: Path) -> None:
+        """rsf.toml with extra field in [infrastructure] exits 1."""
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(VALID_WORKFLOW, encoding="utf-8")
+        toml = tmp_path / "rsf.toml"
+        toml.write_text('[infrastructure]\nbad_field = "oops"\n', encoding="utf-8")
+
+        result = runner.invoke(app, ["validate", str(wf)])
+
+        assert result.exit_code == 1
+
+    def test_validate_error_format_uses_field_path(self, tmp_path: Path) -> None:
+        """Error output contains infrastructure.provider field path format."""
+        wf = tmp_path / "workflow.yaml"
+        wf.write_text(UNKNOWN_PROVIDER_WORKFLOW, encoding="utf-8")
+
+        result = runner.invoke(app, ["validate", str(wf)])
+
+        assert result.exit_code == 1
+        assert "infrastructure.provider" in result.output
+        # Should mention available providers
+        assert "terraform" in result.output
