@@ -176,6 +176,7 @@ class LocalRunner:
         json_output: bool = False,
         verbose: bool = False,
         console: Console | None = None,
+        chaos_fixture: Any | None = None,
     ):
         self.definition = definition
         self.workflow_dir = workflow_dir
@@ -184,6 +185,7 @@ class LocalRunner:
         self.verbose = verbose
         self.console = console or Console()
         self.transitions: list[TransitionRecord] = []
+        self.chaos_fixture = chaos_fixture
 
     def run(self, input_data: Any) -> ExecutionResult:
         """Execute the workflow with the given input."""
@@ -297,6 +299,18 @@ class LocalRunner:
     def _call_handler_with_retry(self, name: str, state: TaskState, data: Any) -> Any:
         """Call a handler with retry logic."""
         handler_fn = _load_handler(name, self.workflow_dir)
+
+        # Wrap handler with chaos injection if active
+        if self.chaos_fixture is not None:
+            original_handler = handler_fn
+
+            def chaos_wrapped_handler(d: Any) -> Any:
+                failure = self.chaos_fixture._should_trigger(name)
+                if failure is not None:
+                    return self.chaos_fixture._trigger_failure(failure, d)
+                return original_handler(d)
+
+            handler_fn = chaos_wrapped_handler
 
         retry_policies = state.retry or []
         max_total_attempts = 1
@@ -433,11 +447,20 @@ def test_workflow(
     mock_handlers: bool = typer.Option(False, "--mock-handlers", help="Skip real handler execution"),
     json_output: bool = typer.Option(False, "--json", help="Output JSON lines for each transition"),
     verbose: bool = typer.Option(False, "--verbose", "-v", help="Show input/output at each state"),
+    chaos_specs: list[str] = typer.Option(
+        [],
+        "--chaos",
+        help="Inject chaos failure: STATE_NAME:FAILURE_TYPE (timeout|exception|throttle). Repeatable.",
+    ),
 ) -> None:
     """Execute a workflow locally with trace output.
 
     Calls real Python handler functions and follows state transitions.
     Shows streaming trace output and a summary table.
+
+    Use --chaos to inject failures into specific states for testing error handling:
+
+        rsf test workflow.yaml --chaos ValidateOrder:timeout --chaos ProcessPayment:exception
     """
     # Check workflow file exists
     if not workflow.exists():
@@ -450,6 +473,32 @@ def test_workflow(
     except json.JSONDecodeError as exc:
         console.print(f"[red]Error:[/red] Invalid JSON input: {exc}")
         raise typer.Exit(code=1)
+
+    # Set up chaos injection if requested
+    chaos_fixture = None
+    if chaos_specs:
+        from rsf.testing.chaos import ChaosFixture
+
+        chaos_fixture = ChaosFixture()
+        for spec in chaos_specs:
+            parts = spec.split(":", 1)
+            if len(parts) != 2:
+                console.print(
+                    f"[red]Error:[/red] Invalid --chaos format: '{spec}'. "
+                    "Expected STATE_NAME:FAILURE_TYPE (timeout|exception|throttle)"
+                )
+                raise typer.Exit(code=1)
+            state_name, failure_type = parts
+            try:
+                chaos_fixture.inject_failure(state_name, failure_type)
+            except ValueError as exc:
+                console.print(f"[red]Error:[/red] {exc}")
+                raise typer.Exit(code=1)
+        if not json_output:
+            console.print(
+                f"[bold yellow]Chaos injection active:[/bold yellow] "
+                f"{len(chaos_specs)} failure(s) configured"
+            )
 
     # Load workflow
     try:
@@ -471,6 +520,7 @@ def test_workflow(
         mock_handlers=mock_handlers,
         json_output=json_output,
         verbose=verbose,
+        chaos_fixture=chaos_fixture,
     )
     result = runner.run(parsed_input)
 
