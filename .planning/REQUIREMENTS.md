@@ -12,9 +12,9 @@ Requirements for v2.0 release. Each maps to roadmap phases.
 - [x] **CLI-01**: User can run `rsf diff` to see structural differences between local workflow definition and deployed state
 - [x] **CLI-02**: User can run `rsf test` to execute a workflow locally with a given input payload, printing state transitions and final output
 - [x] **CLI-03**: User can run `rsf watch` to auto-validate and re-generate on file changes, with optional `--deploy` for code-only updates
-- [x] **CLI-04**: User can run `rsf logs` to tail/search CloudWatch logs across all Lambda functions in a workflow, correlated by execution ID
-- [x] **CLI-05**: User can run `rsf doctor` to diagnose Python version, Terraform, AWS credentials, and SDK availability
-- [x] **CLI-06**: User can run `rsf export --format cloudformation` to generate CloudFormation/SAM templates from workflow definitions
+- [ ] **CLI-04**: User can run `rsf logs` to tail/search CloudWatch logs across all Lambda functions in a workflow, correlated by execution ID
+- [ ] **CLI-05**: User can run `rsf doctor` to diagnose Python version, Terraform, AWS credentials, and SDK availability
+- [ ] **CLI-06**: User can run `rsf export --format cloudformation` to generate CloudFormation/SAM templates from workflow definitions
 
 ### DSL & Core
 
@@ -80,37 +80,40 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLI-01 | Phase 42 | Complete |
-| CLI-02 | Phase 42 | Complete |
-| CLI-03 | Phase 42 | Complete |
-| CLI-04 | Phase 43 | Complete |
-| CLI-05 | Phase 43 | Complete |
-| CLI-06 | Phase 43 | Complete |
-| DSL-01 | Phase 40 | Pending |
-| DSL-02 | Phase 40 | Pending |
-| DSL-03 | Phase 40 | Pending |
-| DSL-04 | Phase 41 | Complete |
-| DSL-05 | Phase 41 | Complete |
+| CLI-01 | Phase 42 → 49 | Pending |
+| CLI-02 | Phase 42 → 49 | Pending |
+| CLI-03 | Phase 42 → 49 | Pending |
+| CLI-04 | Phase 43 → 49 | Pending |
+| CLI-05 | Phase 43 → 49 | Pending |
+| CLI-06 | Phase 43 → 49 | Pending |
+| DSL-01 | Phase 40 → 49 | Pending |
+| DSL-02 | Phase 40 → 49 | Pending |
+| DSL-03 | Phase 40 → 49 | Pending |
+| DSL-04 | Phase 41 → 49 | Pending |
+| DSL-05 | Phase 41 → 49 | Pending |
 | DSL-06 | Phase 39 | Complete |
-| DSL-07 | Phase 41 | Complete |
+| DSL-07 | Phase 41 → 49 | Pending |
 | INFRA-01 | Phase 39 | Complete |
-| OBS-01 | Phase 44 | Pending |
-| OBS-02 | Phase 44 | Pending |
-| OBS-03 | Phase 44 | Pending |
-| UI-01 | Phase 46 | Pending |
-| UI-02 | Phase 46 | Pending |
-| TEST-01 | Phase 45 | Pending |
-| TEST-02 | Phase 45 | Pending |
-| TEST-03 | Phase 45 | Pending |
-| ECO-01 | Phase 48 | Complete |
-| ECO-02 | Phase 47 | Pending |
-| ECO-03 | Phase 47 | Pending |
+| OBS-01 | Phase 44 → 49 | Pending |
+| OBS-02 | Phase 44 → 49 | Pending |
+| OBS-03 | Phase 44 → 49 | Pending |
+| UI-01 | Phase 46 → 49 | Pending |
+| UI-02 | Phase 46 → 49 | Pending |
+| TEST-01 | Phase 45 → 49 | Pending |
+| TEST-02 | Phase 45 → 50 | Pending |
+| TEST-03 | Phase 45 → 49 | Pending |
+| ECO-01 | Phase 48 → 49 | Pending |
+| ECO-02 | Phase 47 → 49 | Pending |
+| ECO-03 | Phase 47 → 50 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 25 total
 - Mapped to phases: 25
 - Unmapped: 0 ✓
+- Satisfied: 2 (INFRA-01, DSL-06)
+- Pending verification: 21 (Phase 49)
+- Pending integration fix: 2 (Phase 50: TEST-02, ECO-03)
 
 ---
 *Requirements defined: 2026-03-01*
-*Last updated: 2026-03-01 — traceability complete after v2.0 roadmap creation*
+*Last updated: 2026-03-02 — gap closure phases 49-50 added per milestone audit*

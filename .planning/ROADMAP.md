@@ -10,7 +10,7 @@
 - ✅ **v1.5 PyPI Packaging & Distribution** — Phases 25-27 (shipped 2026-02-28)
 - ✅ **v1.6 Ruff Linting Cleanup** — Phases 28-35 (shipped 2026-03-01)
 - ✅ **v1.7 Lambda Function URL Support** — Phases 36-38 (shipped 2026-03-01)
-- 📋 **v2.0 Comprehensive Enhancement Suite** — Phases 39-48 (planned)
+- 📋 **v2.0 Comprehensive Enhancement Suite** — Phases 39-50 (planned)
 
 ## Phases
 
@@ -113,7 +113,7 @@ Full details: `.planning/milestones/v1.7-ROADMAP.md`
 
 </details>
 
-### 📋 v2.0 Comprehensive Enhancement Suite (Phases 39-48)
+### 📋 v2.0 Comprehensive Enhancement Suite (Phases 39-50)
 
 **Milestone Goal:** Expand RSF from a code generation toolkit into a full development platform with new CLI commands, event triggers, observability, testing utilities, IDE integration, and optional infrastructure generation.
 
@@ -127,6 +127,8 @@ Full details: `.planning/milestones/v1.7-ROADMAP.md`
 - [x] **Phase 46: Inspector Replay and SchemaStore** — Enable execution replay from the inspector UI and publish the DSL schema to SchemaStore (completed 2026-03-02)
 - [x] **Phase 47: Workflow Templates and GitHub Action** — Add `rsf init --template` scaffolding and a reusable `rsf-action` GitHub Action (completed 2026-03-02)
 - [x] **Phase 48: VS Code Extension** — Deliver YAML schema validation, go-to-definition, and inline graph preview in VS Code (completed 2026-03-02)
+- [ ] **Phase 49: Documentation & Verification Remediation** — Create missing VERIFICATION.md files, fix SUMMARY frontmatter, and update REQUIREMENTS.md checkboxes for all completed phases
+- [ ] **Phase 50: Integration Fixes** — Fix GitHub Action WORKFLOW_FILE forwarding and bridge ChaosFixture to rsf test CLI
 
 ## Phase Details
 
@@ -249,10 +251,34 @@ Plans:
   4. The extension is installable from the VS Code Marketplace and works without any local RSF installation
 **Plans**: TBD
 
+### Phase 49: Documentation & Verification Remediation
+**Goal**: All completed phases have VERIFICATION.md files, correct SUMMARY frontmatter, and checked REQUIREMENTS.md boxes — closing all documentation/tracking gaps from the milestone audit
+**Depends on**: Phase 48 (all implementation phases complete)
+**Requirements**: CLI-04, CLI-05, CLI-06, OBS-01, OBS-02, OBS-03, DSL-01, DSL-02, DSL-03, TEST-01, TEST-02, TEST-03, UI-01, UI-02, ECO-02, ECO-03
+**Gap Closure:** Closes 6 unsatisfied + 17 partial requirements from audit
+**Success Criteria** (what must be TRUE):
+  1. Phases 40, 41, 42, 43, 44 each have a VERIFICATION.md confirming all requirements pass
+  2. Phases 43-48 SUMMARY files have correct requirements_completed frontmatter
+  3. All 25 REQUIREMENTS.md checkboxes are checked [x]
+  4. REQUIREMENTS.md coverage shows 25/25 satisfied
+**Plans**: TBD
+
+### Phase 50: Integration Fixes
+**Goal**: Fix the two cross-phase integration issues identified by the milestone audit — GitHub Action workflow-file forwarding and ChaosFixture CLI bridge
+**Depends on**: Phase 49
+**Requirements**: ECO-03, TEST-02
+**Gap Closure:** Closes 2 integration gaps and 2 broken E2E flows from audit
+**Success Criteria** (what must be TRUE):
+  1. `action/entrypoint.sh` forwards `${WORKFLOW_FILE}` to `rsf deploy` so non-default workflow paths work with `deploy: true`
+  2. `rsf test` supports a `--chaos` flag (or equivalent) that activates ChaosFixture injection during local test runs
+  3. E2E flow "CI Pipeline" passes with non-default workflow-file path
+  4. E2E flow "Chaos Testing via CLI" works end-to-end through `rsf test`
+**Plans**: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 39 → 40 → 41 → 42 → 43 → 44 → 45 → 46 → 47 → 48
+Phases execute in numeric order: 39 → 40 → 41 → 42 → 43 → 44 → 45 → 46 → 47 → 48 → 49 → 50
 
 Note: Phase 45 (Testing) depends only on Phase 39 and can be worked in parallel with Phases 40-44 if desired.
 
@@ -268,3 +294,5 @@ Note: Phase 45 (Testing) depends only on Phase 39 and can be worked in parallel 
 | 46. Inspector Replay and SchemaStore | 3/3 | Complete    | 2026-03-02 |
 | 47. Workflow Templates and GitHub Action | 3/3 | Complete   | 2026-03-02 |
 | 48. VS Code Extension | 0/TBD | Complete    | 2026-03-02 |
+| 49. Documentation & Verification Remediation | 0/TBD | Pending    | — |
+| 50. Integration Fixes | 0/TBD | Pending    | — |
