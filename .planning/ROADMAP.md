@@ -124,7 +124,7 @@ Full details: `.planning/milestones/v1.7-ROADMAP.md`
 - [x] **Phase 43: Operational CLI Commands** — Add `rsf logs`, `rsf doctor`, and `rsf export` for deployment and operations support (completed 2026-03-02)
 - [x] **Phase 44: Observability** — Add OpenTelemetry tracing, cost estimation CLI, and a CloudWatch metrics dashboard example (completed 2026-03-02)
 - [x] **Phase 45: Advanced Testing Utilities** — Add property-based, chaos, and snapshot testing capabilities (completed 2026-03-02)
-- [ ] **Phase 46: Inspector Replay and SchemaStore** — Enable execution replay from the inspector UI and publish the DSL schema to SchemaStore
+- [x] **Phase 46: Inspector Replay and SchemaStore** — Enable execution replay from the inspector UI and publish the DSL schema to SchemaStore (completed 2026-03-02)
 - [ ] **Phase 47: Workflow Templates and GitHub Action** — Add `rsf init --template` scaffolding and a reusable `rsf-action` GitHub Action
 - [ ] **Phase 48: VS Code Extension** — Deliver YAML schema validation, go-to-definition, and inline graph preview in VS Code
 
@@ -265,6 +265,6 @@ Note: Phase 45 (Testing) depends only on Phase 39 and can be worked in parallel 
 | 43. Operational CLI Commands | 0/TBD | Complete    | 2026-03-02 |
 | 44. Observability | 3/3 | Complete    | 2026-03-02 |
 | 45. Advanced Testing Utilities | 0/3 | Complete    | 2026-03-02 |
-| 46. Inspector Replay and SchemaStore | 2/3 | In Progress|  |
+| 46. Inspector Replay and SchemaStore | 3/3 | Complete   | 2026-03-02 |
 | 47. Workflow Templates and GitHub Action | 0/TBD | Not started | - |
 | 48. VS Code Extension | 0/TBD | Not started | - |
