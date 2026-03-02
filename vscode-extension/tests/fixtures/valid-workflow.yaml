@@ -1,0 +1,23 @@
+StartAt: ValidateInput
+States:
+  ValidateInput:
+    Type: Task
+    Resource: arn:aws:lambda:us-east-2:123456789:function:validate
+    Next: ProcessOrder
+  ProcessOrder:
+    Type: Task
+    Resource: arn:aws:lambda:us-east-2:123456789:function:process
+    Next: CheckResult
+  CheckResult:
+    Type: Choice
+    Choices:
+      - Variable: "$.status"
+        StringEquals: "success"
+        Next: NotifySuccess
+    Default: NotifyFailure
+  NotifySuccess:
+    Type: Succeed
+  NotifyFailure:
+    Type: Fail
+    Error: ProcessingFailed
+    Cause: Order processing failed

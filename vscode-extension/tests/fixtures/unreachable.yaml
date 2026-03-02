@@ -1,0 +1,10 @@
+StartAt: Start
+States:
+  Start:
+    Type: Task
+    Resource: arn:aws:lambda:us-east-2:123456789:function:start
+    End: true
+  OrphanState:
+    Type: Task
+    Resource: arn:aws:lambda:us-east-2:123456789:function:orphan
+    End: true

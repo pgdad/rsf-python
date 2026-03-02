@@ -1,0 +1,107 @@
+{
+  "name": "rsf-workflows",
+  "displayName": "RSF Workflows",
+  "description": "YAML schema validation, go-to-definition, and live graph preview for RSF workflow files",
+  "version": "0.1.0",
+  "publisher": "rsf-workflows",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/esa/rsf-python"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Programming Languages",
+    "Linters",
+    "Visualization"
+  ],
+  "keywords": [
+    "rsf",
+    "workflow",
+    "state-machine",
+    "yaml",
+    "step-functions"
+  ],
+  "activationEvents": [
+    "onLanguage:yaml"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "yaml",
+        "filenames": [
+          "workflow.yaml",
+          "workflow.yml"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "rsf.openGraphPreview",
+        "title": "RSF: Open Graph Preview",
+        "icon": "$(graph)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "when": "resourceFilename =~ /workflow\\.ya?ml$/",
+          "command": "rsf.openGraphPreview",
+          "group": "navigation"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "rsf.openGraphPreview",
+        "key": "ctrl+shift+v",
+        "mac": "cmd+shift+v",
+        "when": "resourceFilename =~ /workflow\\.ya?ml$/"
+      }
+    ],
+    "configuration": {
+      "title": "RSF Workflows",
+      "properties": {
+        "rsf.validation.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "Enable real-time YAML schema and semantic validation"
+        },
+        "rsf.validation.debounce": {
+          "type": "number",
+          "default": 500,
+          "description": "Debounce delay (ms) before running validation after edits"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "watch": "node esbuild.config.mjs --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit",
+    "package": "vsce package --no-dependencies",
+    "prepublish": "npm run build"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1",
+    "vscode-languageserver": "^9.0.1",
+    "vscode-languageserver-textdocument": "^1.0.11",
+    "yaml": "^2.3.4",
+    "ajv": "^8.12.0",
+    "ajv-formats": "^2.1.1",
+    "dagre": "^0.8.5"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.85.0",
+    "@types/dagre": "^0.7.52",
+    "typescript": "^5.3.3",
+    "esbuild": "^0.20.0",
+    "vitest": "^1.2.0",
+    "@vscode/vsce": "^2.22.0"
+  }
+}

@@ -1,0 +1,20 @@
+StartAt: ParallelProcess
+States:
+  ParallelProcess:
+    Type: Parallel
+    Branches:
+      - StartAt: BranchA1
+        States:
+          BranchA1:
+            Type: Task
+            Resource: arn:aws:lambda:us-east-2:123456789:function:a1
+            End: true
+      - StartAt: BranchB1
+        States:
+          BranchB1:
+            Type: Task
+            Resource: arn:aws:lambda:us-east-2:123456789:function:b1
+            End: true
+    Next: Done
+  Done:
+    Type: Succeed

@@ -1,0 +1,20 @@
+StartAt: RouteOrder
+States:
+  RouteOrder:
+    Type: Choice
+    Choices:
+      - Variable: "$.type"
+        StringEquals: "express"
+        Next: ExpressShip
+      - Variable: "$.type"
+        StringEquals: "standard"
+        Next: StandardShip
+    Default: StandardShip
+  ExpressShip:
+    Type: Task
+    Resource: arn:aws:lambda:us-east-2:123456789:function:express
+    End: true
+  StandardShip:
+    Type: Task
+    Resource: arn:aws:lambda:us-east-2:123456789:function:standard
+    End: true
