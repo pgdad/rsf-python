@@ -149,6 +149,50 @@
 
 ---
 
+## Milestone: v2.0 — Comprehensive Enhancement Suite
+
+**Shipped:** 2026-03-02
+**Phases:** 12 | **Plans:** 34 | **Tasks:** 99
+
+### What Was Built
+- 7 DSL extensions (triggers, sub-workflows, DynamoDB, alarms, DLQ, timeout, multi-stage deploy)
+- 9 new CLI commands (diff, test, watch, logs, doctor, export, cost, init --template, schema export)
+- OpenTelemetry tracing injection in generated orchestrator code
+- Property-based, chaos injection, and snapshot testing utilities
+- Inspector execution replay with editable input
+- VS Code extension with LSP, go-to-definition, and inline graph preview
+- Reusable GitHub Action for CI/CD with PR comment plans
+- SchemaStore catalog entry for automatic IDE auto-complete
+
+### What Worked
+- Wave-based parallel execution of independent plans reduced wall-clock time
+- Milestone audit before completion caught 2 integration gaps and documentation holes — Phases 49 and 50 fixed them systematically
+- Gap closure phases (49, 50) as a pattern: audit identifies issues, new phases close them before shipping
+- Balanced model profile (sonnet for research/checking, inherit for planning/execution) kept costs reasonable
+- Auto-advance (`--auto`) pipeline eliminated manual routing between plan, execute, and verify stages
+
+### What Was Inefficient
+- Earlier phases (39-42) shipped without VERIFICATION.md or SUMMARY frontmatter, requiring Phase 49 to backfill documentation
+- Audit found 6 "unsatisfied" requirements that were actually implemented but had unchecked boxes — documentation discipline should be enforced during execution, not retrofitted
+- Some phases had stale plan counts in ROADMAP.md (e.g., "0/TBD" for completed phases)
+
+### Patterns Established
+- Milestone audit, gap closure phases, re-verification is now the standard pre-ship workflow
+- ChaosFixture wrapper pattern: inject failures inside retry/catch logic rather than bypassing it
+- PRD-to-CONTEXT.md express path for well-defined gap closure phases
+
+### Key Lessons
+1. Documentation gates (VERIFICATION.md, SUMMARY frontmatter, REQUIREMENTS.md checkboxes) should be enforced by the executor, not deferred to a remediation phase
+2. Integration testing across phase boundaries catches issues that per-phase verification misses — milestone audit is essential
+3. Small surgical phases (50: 2 plans, 4 tasks) are highly effective for targeted fixes
+
+### Cost Observations
+- Model mix: ~30% opus (orchestration), ~60% sonnet (research, checking, execution), ~10% haiku (none used)
+- Sessions: ~6 sessions across 2 days
+- Notable: Auto-advance pipeline eliminated manual routing overhead
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -161,6 +205,9 @@
 | v1.3 Tutorial | 3 | 8 | 8 tutorials covering all CLI commands |
 | v1.4 Screenshots | 4 | 5 | 15 automated screenshots in docs |
 | v1.5 PyPI Packaging | 3 | 3 | pip install + CI/CD + README landing page |
+| v1.6 Ruff Linting | 8 | 3 | Zero ruff violations, unified test suite |
+| v1.7 Lambda URL | 3 | 8 | Lambda Function URL DSL + Terraform + example |
+| v2.0 Enhancement Suite | 12 | 34 | Milestone audit + gap closure; auto-advance pipeline |
 
 ### Cumulative Quality
 
@@ -172,6 +219,9 @@
 | v1.3 | 2,753 lines of tutorials | All 7 CLI commands documented |
 | v1.4 | 15 screenshots + 18 image refs | All 5 examples with UI visuals |
 | v1.5 | CI lint + test matrix | pip installable + PyPI publishing |
+| v1.6 | 744 tests unified | Zero ruff suppressions |
+| v1.7 | 779 tests (+35) | Lambda Function URL end-to-end |
+| v2.0 | 976+ tests (+197) | 25/25 requirements verified via audit |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -182,3 +232,5 @@
 5. Mock servers matching production API contracts enable offline tooling without infrastructure cost
 6. PyPI requires absolute URLs for all README images/links — relative paths break on the project page
 7. OIDC trusted publisher eliminates secret management entirely for PyPI publishing
+8. Milestone audit + gap closure phases before shipping catches cross-phase integration issues that per-phase testing misses
+9. Documentation gates should be enforced during execution, not deferred to remediation phases
