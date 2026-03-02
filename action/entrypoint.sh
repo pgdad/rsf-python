@@ -87,7 +87,7 @@ DEPLOY_RESULT="skipped"
 
 if [ "${DEPLOY}" = "true" ] && [ "${GENERATE_RESULT}" = "pass" ]; then
     echo "::group::Deploying workflow"
-    DEPLOY_CMD="rsf deploy"
+    DEPLOY_CMD="rsf deploy ${WORKFLOW_FILE}"
 
     if [ -n "${STAGE:-}" ]; then
         DEPLOY_CMD="${DEPLOY_CMD} --stage ${STAGE}"
