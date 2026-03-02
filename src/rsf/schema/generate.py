@@ -12,18 +12,24 @@ from typing import Any
 
 from rsf.dsl import StateMachineDefinition
 
+_SCHEMA_ID = (
+    "https://raw.githubusercontent.com/esa/rsf-python/main/schemas/rsf-workflow.json"
+)
+
 
 def generate_json_schema() -> dict[str, Any]:
     """Generate JSON Schema (Draft 2020-12) from the StateMachineDefinition model."""
     schema = StateMachineDefinition.model_json_schema(
         mode="serialization",
     )
-    # Add $schema declaration
+    # Add $schema declaration and metadata
     schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+    schema["$id"] = _SCHEMA_ID
     schema["title"] = "RSF Workflow Definition"
     schema["description"] = (
         "Schema for RSF (Replacement for Step Functions) workflow definitions. "
-        "Supports all 8 ASL state types with full feature parity."
+        "Supports all 8 ASL state types, event triggers, sub-workflows, DynamoDB tables, "
+        "CloudWatch alarms, dead letter queues, workflow timeout, and multi-stage deployment."
     )
     return schema
 

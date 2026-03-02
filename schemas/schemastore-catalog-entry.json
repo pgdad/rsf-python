@@ -1,0 +1,6 @@
+{
+  "name": "RSF Workflow",
+  "description": "RSF (Replacement for Step Functions) workflow definition",
+  "fileMatch": ["workflow.yaml", "workflow.yml"],
+  "url": "https://raw.githubusercontent.com/esa/rsf-python/main/schemas/rsf-workflow.json"
+}

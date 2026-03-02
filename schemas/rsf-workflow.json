@@ -1,0 +1,609 @@
+{
+  "$defs": {
+    "DeadLetterQueueConfig": {
+      "additionalProperties": false,
+      "description": "Dead letter queue configuration for the workflow Lambda function.",
+      "properties": {
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "max_receive_count": {
+          "default": 3,
+          "maximum": 1000,
+          "minimum": 1,
+          "title": "Max Receive Count",
+          "type": "integer"
+        },
+        "queue_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Queue Name"
+        }
+      },
+      "title": "DeadLetterQueueConfig",
+      "type": "object"
+    },
+    "DurationAlarm": {
+      "additionalProperties": false,
+      "description": "CloudWatch duration alarm configuration.",
+      "properties": {
+        "type": {
+          "const": "duration",
+          "title": "Type",
+          "type": "string"
+        },
+        "threshold": {
+          "exclusiveMinimum": 0,
+          "title": "Threshold",
+          "type": "number"
+        },
+        "period": {
+          "default": 300,
+          "minimum": 60,
+          "title": "Period",
+          "type": "integer"
+        },
+        "evaluation_periods": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Evaluation Periods",
+          "type": "integer"
+        },
+        "sns_topic_arn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sns Topic Arn"
+        }
+      },
+      "required": [
+        "type",
+        "threshold"
+      ],
+      "title": "DurationAlarm",
+      "type": "object"
+    },
+    "DynamoDBAttribute": {
+      "additionalProperties": false,
+      "description": "A DynamoDB key attribute definition.",
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/DynamoDBAttributeType"
+        }
+      },
+      "required": [
+        "name",
+        "type"
+      ],
+      "title": "DynamoDBAttribute",
+      "type": "object"
+    },
+    "DynamoDBAttributeType": {
+      "description": "DynamoDB attribute types for keys.",
+      "enum": [
+        "S",
+        "N",
+        "B"
+      ],
+      "title": "DynamoDBAttributeType",
+      "type": "string"
+    },
+    "DynamoDBBillingMode": {
+      "description": "DynamoDB billing modes.",
+      "enum": [
+        "PAY_PER_REQUEST",
+        "PROVISIONED"
+      ],
+      "title": "DynamoDBBillingMode",
+      "type": "string"
+    },
+    "DynamoDBTableConfig": {
+      "additionalProperties": false,
+      "description": "DynamoDB table definition.",
+      "properties": {
+        "table_name": {
+          "minLength": 1,
+          "title": "Table Name",
+          "type": "string"
+        },
+        "partition_key": {
+          "$ref": "#/$defs/DynamoDBAttribute"
+        },
+        "sort_key": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/DynamoDBAttribute"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "billing_mode": {
+          "$ref": "#/$defs/DynamoDBBillingMode",
+          "default": "PAY_PER_REQUEST"
+        },
+        "read_capacity": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Read Capacity"
+        },
+        "write_capacity": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Write Capacity"
+        }
+      },
+      "required": [
+        "table_name",
+        "partition_key"
+      ],
+      "title": "DynamoDBTableConfig",
+      "type": "object"
+    },
+    "ErrorRateAlarm": {
+      "additionalProperties": false,
+      "description": "CloudWatch error rate alarm configuration.",
+      "properties": {
+        "type": {
+          "const": "error_rate",
+          "title": "Type",
+          "type": "string"
+        },
+        "threshold": {
+          "exclusiveMinimum": 0,
+          "title": "Threshold",
+          "type": "number"
+        },
+        "period": {
+          "default": 300,
+          "minimum": 60,
+          "title": "Period",
+          "type": "integer"
+        },
+        "evaluation_periods": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Evaluation Periods",
+          "type": "integer"
+        },
+        "sns_topic_arn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sns Topic Arn"
+        }
+      },
+      "required": [
+        "type",
+        "threshold"
+      ],
+      "title": "ErrorRateAlarm",
+      "type": "object"
+    },
+    "EventBridgeTrigger": {
+      "additionalProperties": false,
+      "description": "EventBridge rule trigger configuration.",
+      "properties": {
+        "type": {
+          "const": "eventbridge",
+          "title": "Type",
+          "type": "string"
+        },
+        "schedule_expression": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Schedule Expression"
+        },
+        "event_pattern": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Event Pattern"
+        }
+      },
+      "required": [
+        "type"
+      ],
+      "title": "EventBridgeTrigger",
+      "type": "object"
+    },
+    "LambdaUrlAuthType": {
+      "description": "Authentication types for Lambda Function URL.",
+      "enum": [
+        "NONE",
+        "AWS_IAM"
+      ],
+      "title": "LambdaUrlAuthType",
+      "type": "string"
+    },
+    "LambdaUrlConfig": {
+      "additionalProperties": false,
+      "description": "Configuration for Lambda Function URL.",
+      "properties": {
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "auth_type": {
+          "$ref": "#/$defs/LambdaUrlAuthType"
+        }
+      },
+      "required": [
+        "enabled",
+        "auth_type"
+      ],
+      "title": "LambdaUrlConfig",
+      "type": "object"
+    },
+    "QueryLanguage": {
+      "description": "Supported query languages.",
+      "enum": [
+        "JSONPath",
+        "JSONata"
+      ],
+      "title": "QueryLanguage",
+      "type": "string"
+    },
+    "SNSTrigger": {
+      "additionalProperties": false,
+      "description": "SNS subscription trigger configuration.",
+      "properties": {
+        "type": {
+          "const": "sns",
+          "title": "Type",
+          "type": "string"
+        },
+        "topic_arn": {
+          "title": "Topic Arn",
+          "type": "string"
+        }
+      },
+      "required": [
+        "type",
+        "topic_arn"
+      ],
+      "title": "SNSTrigger",
+      "type": "object"
+    },
+    "SQSTrigger": {
+      "additionalProperties": false,
+      "description": "SQS queue trigger configuration.",
+      "properties": {
+        "type": {
+          "const": "sqs",
+          "title": "Type",
+          "type": "string"
+        },
+        "queue_name": {
+          "title": "Queue Name",
+          "type": "string"
+        },
+        "batch_size": {
+          "default": 10,
+          "maximum": 10000,
+          "minimum": 1,
+          "title": "Batch Size",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "type",
+        "queue_name"
+      ],
+      "title": "SQSTrigger",
+      "type": "object"
+    },
+    "SubWorkflowRef": {
+      "additionalProperties": false,
+      "description": "A reference to a child workflow that can be invoked as a sub-execution.",
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name"
+      ],
+      "title": "SubWorkflowRef",
+      "type": "object"
+    },
+    "ThrottleAlarm": {
+      "additionalProperties": false,
+      "description": "CloudWatch throttle alarm configuration.",
+      "properties": {
+        "type": {
+          "const": "throttle",
+          "title": "Type",
+          "type": "string"
+        },
+        "threshold": {
+          "exclusiveMinimum": 0,
+          "title": "Threshold",
+          "type": "number"
+        },
+        "period": {
+          "default": 300,
+          "minimum": 60,
+          "title": "Period",
+          "type": "integer"
+        },
+        "evaluation_periods": {
+          "default": 1,
+          "minimum": 1,
+          "title": "Evaluation Periods",
+          "type": "integer"
+        },
+        "sns_topic_arn": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sns Topic Arn"
+        }
+      },
+      "required": [
+        "type",
+        "threshold"
+      ],
+      "title": "ThrottleAlarm",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Schema for RSF (Replacement for Step Functions) workflow definitions. Supports all 8 ASL state types, event triggers, sub-workflows, DynamoDB tables, CloudWatch alarms, dead letter queues, workflow timeout, and multi-stage deployment.",
+  "properties": {
+    "rsf_version": {
+      "default": "1.0",
+      "title": "Rsf Version",
+      "type": "string"
+    },
+    "Comment": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Comment"
+    },
+    "StartAt": {
+      "title": "Startat",
+      "type": "string"
+    },
+    "States": {
+      "additionalProperties": true,
+      "title": "States",
+      "type": "object"
+    },
+    "Version": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Version"
+    },
+    "TimeoutSeconds": {
+      "anyOf": [
+        {
+          "exclusiveMinimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Timeoutseconds"
+    },
+    "QueryLanguage": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/QueryLanguage"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "lambda_url": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/LambdaUrlConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "triggers": {
+      "anyOf": [
+        {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "eventbridge": "#/$defs/EventBridgeTrigger",
+                "sns": "#/$defs/SNSTrigger",
+                "sqs": "#/$defs/SQSTrigger"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/EventBridgeTrigger"
+              },
+              {
+                "$ref": "#/$defs/SQSTrigger"
+              },
+              {
+                "$ref": "#/$defs/SNSTrigger"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Triggers"
+    },
+    "sub_workflows": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/SubWorkflowRef"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Sub Workflows"
+    },
+    "dynamodb_tables": {
+      "anyOf": [
+        {
+          "items": {
+            "$ref": "#/$defs/DynamoDBTableConfig"
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Dynamodb Tables"
+    },
+    "alarms": {
+      "anyOf": [
+        {
+          "items": {
+            "discriminator": {
+              "mapping": {
+                "duration": "#/$defs/DurationAlarm",
+                "error_rate": "#/$defs/ErrorRateAlarm",
+                "throttle": "#/$defs/ThrottleAlarm"
+              },
+              "propertyName": "type"
+            },
+            "oneOf": [
+              {
+                "$ref": "#/$defs/ErrorRateAlarm"
+              },
+              {
+                "$ref": "#/$defs/DurationAlarm"
+              },
+              {
+                "$ref": "#/$defs/ThrottleAlarm"
+              }
+            ]
+          },
+          "type": "array"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Alarms"
+    },
+    "dead_letter_queue": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/DeadLetterQueueConfig"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "StartAt",
+    "States"
+  ],
+  "title": "RSF Workflow Definition",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/esa/rsf-python/main/schemas/rsf-workflow.json"
+}
