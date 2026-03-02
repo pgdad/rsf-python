@@ -9,9 +9,9 @@ Requirements for v2.0 release. Each maps to roadmap phases.
 
 ### CLI Enhancements
 
-- [ ] **CLI-01**: User can run `rsf diff` to see structural differences between local workflow definition and deployed state
-- [ ] **CLI-02**: User can run `rsf test` to execute a workflow locally with a given input payload, printing state transitions and final output
-- [ ] **CLI-03**: User can run `rsf watch` to auto-validate and re-generate on file changes, with optional `--deploy` for code-only updates
+- [x] **CLI-01**: User can run `rsf diff` to see structural differences between local workflow definition and deployed state
+- [x] **CLI-02**: User can run `rsf test` to execute a workflow locally with a given input payload, printing state transitions and final output
+- [x] **CLI-03**: User can run `rsf watch` to auto-validate and re-generate on file changes, with optional `--deploy` for code-only updates
 - [ ] **CLI-04**: User can run `rsf logs` to tail/search CloudWatch logs across all Lambda functions in a workflow, correlated by execution ID
 - [ ] **CLI-05**: User can run `rsf doctor` to diagnose Python version, Terraform, AWS credentials, and SDK availability
 - [ ] **CLI-06**: User can run `rsf export --format cloudformation` to generate CloudFormation/SAM templates from workflow definitions
@@ -80,9 +80,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLI-01 | Phase 42 | Pending |
-| CLI-02 | Phase 42 | Pending |
-| CLI-03 | Phase 42 | Pending |
+| CLI-01 | Phase 42 | Complete |
+| CLI-02 | Phase 42 | Complete |
+| CLI-03 | Phase 42 | Complete |
 | CLI-04 | Phase 43 | Pending |
 | CLI-05 | Phase 43 | Pending |
 | CLI-06 | Phase 43 | Pending |

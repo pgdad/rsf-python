@@ -120,7 +120,7 @@ Full details: `.planning/milestones/v1.7-ROADMAP.md`
 - [x] **Phase 39: Infrastructure Decoupling and Workflow Timeout** — Make Terraform generation optional and add top-level workflow timeout to the DSL (completed 2026-03-01)
 - [x] **Phase 40: Event Triggers, Sub-Workflows, and DynamoDB** — Extend the DSL with event source triggers, nested workflow invocation, and DynamoDB table definitions (completed 2026-03-01)
 - [x] **Phase 41: Alerts, Dead Letter Queues, and Multi-Stage Deploy** — Add operational DSL extensions for CloudWatch alarms, Lambda DLQs, and stage-based deployments (completed 2026-03-01)
-- [ ] **Phase 42: Developer CLI Commands** — Add `rsf diff`, `rsf test`, and `rsf watch` for local development iteration
+- [x] **Phase 42: Developer CLI Commands** — Add `rsf diff`, `rsf test`, and `rsf watch` for local development iteration (completed 2026-03-02)
 - [ ] **Phase 43: Operational CLI Commands** — Add `rsf logs`, `rsf doctor`, and `rsf export` for deployment and operations support
 - [ ] **Phase 44: Observability** — Add OpenTelemetry tracing, cost estimation CLI, and a CloudWatch metrics dashboard example
 - [ ] **Phase 45: Advanced Testing Utilities** — Add property-based, chaos, and snapshot testing capabilities
@@ -257,7 +257,7 @@ Note: Phase 45 (Testing) depends only on Phase 39 and can be worked in parallel 
 | 39. Infrastructure Decoupling and Workflow Timeout | 2/2 | Complete    | 2026-03-01 |
 | 40. Event Triggers, Sub-Workflows, and DynamoDB | 2/3 | Complete    | 2026-03-01 |
 | 41. Alerts, Dead Letter Queues, and Multi-Stage Deploy | 3/3 | Complete    | 2026-03-01 |
-| 42. Developer CLI Commands | 0/TBD | Not started | - |
+| 42. Developer CLI Commands | 0/TBD | Complete    | 2026-03-02 |
 | 43. Operational CLI Commands | 0/TBD | Not started | - |
 | 44. Observability | 0/TBD | Not started | - |
 | 45. Advanced Testing Utilities | 0/TBD | Not started | - |
