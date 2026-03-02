@@ -94,41 +94,41 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROV-01 | — | Pending |
-| PROV-02 | — | Pending |
-| PROV-03 | — | Pending |
-| PROV-04 | — | Pending |
-| PROV-05 | — | Pending |
-| META-01 | — | Pending |
-| META-02 | — | Pending |
-| META-03 | — | Pending |
-| META-04 | — | Pending |
-| TFPR-01 | — | Pending |
-| TFPR-02 | — | Pending |
-| TFPR-03 | — | Pending |
-| TFPR-04 | — | Pending |
-| CDKP-01 | — | Pending |
-| CDKP-02 | — | Pending |
-| CDKP-03 | — | Pending |
-| CDKP-04 | — | Pending |
-| CDKP-05 | — | Pending |
-| CUST-01 | — | Pending |
-| CUST-02 | — | Pending |
-| CUST-03 | — | Pending |
-| CONF-01 | — | Pending |
-| CONF-02 | — | Pending |
-| CONF-03 | — | Pending |
-| CONF-04 | — | Pending |
-| CMDI-01 | — | Pending |
-| CMDI-02 | — | Pending |
-| CMDI-03 | — | Pending |
-| CMDI-04 | — | Pending |
+| PROV-01 | Phase 51 | Pending |
+| PROV-02 | Phase 51 | Pending |
+| PROV-03 | Phase 51 | Pending |
+| PROV-04 | Phase 51 | Pending |
+| META-01 | Phase 51 | Pending |
+| META-02 | Phase 51 | Pending |
+| META-03 | Phase 51 | Pending |
+| META-04 | Phase 51 | Pending |
+| PROV-05 | Phase 52 | Pending |
+| TFPR-01 | Phase 52 | Pending |
+| TFPR-02 | Phase 52 | Pending |
+| TFPR-03 | Phase 52 | Pending |
+| TFPR-04 | Phase 52 | Pending |
+| CONF-01 | Phase 52 | Pending |
+| CONF-02 | Phase 52 | Pending |
+| CONF-03 | Phase 52 | Pending |
+| CONF-04 | Phase 52 | Pending |
+| CDKP-01 | Phase 53 | Pending |
+| CDKP-02 | Phase 53 | Pending |
+| CDKP-03 | Phase 53 | Pending |
+| CDKP-04 | Phase 53 | Pending |
+| CDKP-05 | Phase 53 | Pending |
+| CUST-01 | Phase 54 | Pending |
+| CUST-02 | Phase 54 | Pending |
+| CUST-03 | Phase 54 | Pending |
+| CMDI-01 | Phase 55 | Pending |
+| CMDI-02 | Phase 55 | Pending |
+| CMDI-03 | Phase 55 | Pending |
+| CMDI-04 | Phase 55 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 29 total
-- Mapped to phases: 0
-- Unmapped: 29
+- Mapped to phases: 29
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-02*
-*Last updated: 2026-03-02 after initial definition*
+*Last updated: 2026-03-02 after roadmap creation — all 29 requirements mapped to phases 51-55*

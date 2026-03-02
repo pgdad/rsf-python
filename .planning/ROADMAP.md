@@ -11,6 +11,7 @@
 - ✅ **v1.6 Ruff Linting Cleanup** — Phases 28-35 (shipped 2026-03-01)
 - ✅ **v1.7 Lambda Function URL Support** — Phases 36-38 (shipped 2026-03-01)
 - ✅ **v2.0 Comprehensive Enhancement Suite** — Phases 39-50 (shipped 2026-03-02)
+- 🚧 **v3.0 Pluggable Infrastructure Providers** — Phases 51-55 (in progress)
 
 ## Phases
 
@@ -133,18 +134,98 @@ Full details: `.planning/milestones/v2.0-ROADMAP.md`
 
 </details>
 
-## Progress
+### 🚧 v3.0 Pluggable Infrastructure Providers (In Progress)
 
-All milestones shipped. 50 phases, 118 plans complete.
+**Milestone Goal:** Decouple infrastructure creation from Terraform into a pluggable provider system where any external program can handle infrastructure provisioning. Three providers ship: Terraform (default, wraps existing behavior), CDK, and custom (arbitrary program). All v2.0 workflows continue to work with zero configuration changes.
+
+#### Phase Checklist
+
+- [ ] **Phase 51: Provider Interface and Metadata Foundation** - Abstract base class, ProviderContext, WorkflowMetadata schema, and all three metadata transports
+- [ ] **Phase 52: Terraform Provider, deploy_cmd Refactor, and Configuration** - TerraformProvider wrapping existing generator, provider registry, rsf.toml config, deploy_cmd integration, and provider config validation
+- [ ] **Phase 53: CDK Provider** - CDKProvider with Jinja2-generated CDK app template, cdk deploy invocation, bootstrap detection, and doctor check
+- [ ] **Phase 54: Custom Provider** - CustomProvider with shell=False subprocess, all three metadata transport modes, and security hardening
+- [ ] **Phase 55: Provider-Aware Command Audit** - doctor/diff/watch/export updated to be provider-agnostic
+
+## Phase Details
+
+### Phase 51: Provider Interface and Metadata Foundation
+**Goal**: The provider contract and metadata schema exist; all downstream providers have a stable interface to implement against
+**Depends on**: Phase 50 (v2.0 complete)
+**Requirements**: PROV-01, PROV-02, PROV-03, PROV-04, META-01, META-02, META-03, META-04
+**Success Criteria** (what must be TRUE):
+  1. `InfrastructureProvider` ABC exists in `providers/base.py` with `deploy()`, `teardown()`, `check_prerequisites()`, and `validate_config()` abstract methods; instantiating a class that omits any method raises `TypeError`
+  2. `WorkflowMetadata` dataclass captures all DSL infrastructure fields (triggers, dynamodb_tables, alarms, dlq, lambda_url, stage) and `dataclasses.asdict()` produces valid JSON covering all v2.0 DSL features
+  3. User can trigger metadata delivery to an external program via JSON file (file written with mode 0600, path passed as `RSF_METADATA_FILE` env var)
+  4. User can trigger metadata delivery via environment variables (`RSF_WORKFLOW_NAME`, `RSF_STAGE`, `RSF_METADATA_JSON` at minimum)
+  5. User can trigger metadata delivery via CLI arg templates with `{placeholder}` substitution (e.g. `--workflow {workflow_name}`)
+**Plans**: TBD
+
+### Phase 52: Terraform Provider, deploy_cmd Refactor, and Configuration
+**Goal**: `rsf deploy` routes through the provider interface; Terraform is the default with zero-config backward compatibility; provider config can be set in workflow YAML or rsf.toml; provider config errors surface at validate time
+**Depends on**: Phase 51
+**Requirements**: TFPR-01, TFPR-02, TFPR-03, TFPR-04, CONF-01, CONF-02, CONF-03, CONF-04, PROV-05
+**Success Criteria** (what must be TRUE):
+  1. Running `rsf deploy` on a v2.0 workflow YAML with no `infrastructure:` block produces identical Terraform output and behavior as before the refactor — no configuration change required
+  2. `deploy_cmd.py` no longer contains direct Terraform calls; it calls `get_provider()`, `provider.generate()`, and `provider.deploy()` — the ~80-LOC infra extraction block is gone
+  3. User can set provider in workflow YAML via `infrastructure: provider: terraform` and override a project-wide `rsf.toml` default; workflow YAML value takes precedence
+  4. Running `rsf validate` on a workflow with an invalid `infrastructure:` block (e.g. unknown provider name, missing required field) reports the error and exits non-zero — no deploy required to discover the mistake
+  5. Provider registry resolves `"terraform"` to `TerraformProvider`, `"cdk"` to `CDKProvider`, and `"custom"` to `CustomProvider` via dict-dispatch; unknown name raises a clear error
+**Plans**: TBD
+
+### Phase 53: CDK Provider
+**Goal**: Users can deploy infrastructure via AWS CDK through RSF; CDK app is generated from templates; missing prerequisites are caught before deploy begins
+**Depends on**: Phase 52
+**Requirements**: CDKP-01, CDKP-02, CDKP-03, CDKP-04, CDKP-05
+**Success Criteria** (what must be TRUE):
+  1. With `infrastructure: provider: cdk` in workflow YAML, running `rsf generate` produces a CDK app directory (`app.py`, `stack.py`, `cdk.json`, `requirements.txt`) that passes `cdk synth` without modification
+  2. Running `rsf deploy` with the CDK provider invokes `cdk deploy` as a subprocess and streams its output to the terminal in real time; deploy succeeds on a bootstrapped AWS account
+  3. Running `rsf deploy` on an account where `CDKToolkit` CloudFormation stack does not exist produces a clear warning naming the `cdk bootstrap` command the user must run — deploy does not silently fail
+  4. Running `rsf doctor` when CDK provider is configured and the `cdk` binary is absent shows a WARN entry (not FAIL) with the npm install command needed
+  5. The `aws-cdk` npm package is installed or updated to its latest version by RSF when CDK provider operations are triggered
+**Plans**: TBD
+
+### Phase 54: Custom Provider
+**Goal**: Users can configure any external program as an infrastructure provider; metadata reaches the program via the user's chosen transport; subprocess invocation is security-hardened
+**Depends on**: Phase 52
+**Requirements**: CUST-01, CUST-02, CUST-03
+**Success Criteria** (what must be TRUE):
+  1. User can configure `infrastructure: provider: custom` with `program: /path/to/my-script.sh` and `args: [deploy, --env, {stage}]` in workflow YAML; running `rsf deploy` invokes the script with substituted args
+  2. The custom provider subprocess call always uses `shell=False`; the program path is validated as an absolute path and executable before invocation; no string interpolation into shell commands occurs
+  3. User can select which metadata transport (JSON file, env vars, or CLI args) the custom provider receives via a `metadata_transport:` field in the workflow YAML `infrastructure:` block; all three transports work independently
+**Plans**: TBD
+
+### Phase 55: Provider-Aware Command Audit
+**Goal**: All CLI commands that previously assumed Terraform now behave correctly for any configured provider; no command produces false errors or silently does the wrong thing for CDK or custom providers
+**Depends on**: Phase 53, Phase 54
+**Requirements**: CMDI-01, CMDI-02, CMDI-03, CMDI-04
+**Success Criteria** (what must be TRUE):
+  1. Running `rsf doctor` with a CDK or custom provider configured shows the Terraform binary check as WARN (not FAIL); the output distinguishes which checks are relevant to the active provider
+  2. Running `rsf diff` when no Terraform state exists (e.g. CDK or custom provider in use) prints a clear message explaining that diff is not available for the active provider — it does not crash or show a Terraform error
+  3. Running `rsf watch --deploy` with any configured provider triggers a deploy via that provider when file changes are detected; the watch loop does not hard-code Terraform commands
+  4. `rsf export` uses `extract_infra_config()` from `providers/metadata.py` to read infrastructure configuration; the duplicated extraction logic in `export_cmd.py` is removed
+**Plans**: TBD
+
+## Progress
 
 | Milestone | Phases | Plans | Status | Shipped |
 |-----------|--------|-------|--------|---------|
-| v1.0 Core | 1-11 | 39 | ✅ Complete | 2026-02-25 |
-| v1.1 CLI Toolchain | 12 | 4 | ✅ Complete | 2026-02-26 |
-| v1.2 Examples & Integration | 13-17 | 10 | ✅ Complete | 2026-02-26 |
-| v1.3 Tutorial | 18-20 | 8 | ✅ Complete | 2026-02-26 |
-| v1.4 UI Screenshots | 21-24 | 5 | ✅ Complete | 2026-02-27 |
-| v1.5 PyPI Packaging | 25-27 | 3 | ✅ Complete | 2026-02-28 |
-| v1.6 Ruff Linting | 28-35 | 3 | ✅ Complete | 2026-03-01 |
-| v1.7 Lambda URL | 36-38 | 8 | ✅ Complete | 2026-03-01 |
-| v2.0 Enhancement Suite | 39-50 | 34 | ✅ Complete | 2026-03-02 |
+| v1.0 Core | 1-11 | 39 | Complete | 2026-02-25 |
+| v1.1 CLI Toolchain | 12 | 4 | Complete | 2026-02-26 |
+| v1.2 Examples & Integration | 13-17 | 10 | Complete | 2026-02-26 |
+| v1.3 Tutorial | 18-20 | 8 | Complete | 2026-02-26 |
+| v1.4 UI Screenshots | 21-24 | 5 | Complete | 2026-02-27 |
+| v1.5 PyPI Packaging | 25-27 | 3 | Complete | 2026-02-28 |
+| v1.6 Ruff Linting | 28-35 | 3 | Complete | 2026-03-01 |
+| v1.7 Lambda URL | 36-38 | 8 | Complete | 2026-03-01 |
+| v2.0 Enhancement Suite | 39-50 | 34 | Complete | 2026-03-02 |
+| v3.0 Pluggable Providers | 51-55 | TBD | In progress | - |
+
+**v3.0 Phase Progress:**
+
+| Phase | Plans Complete | Status | Completed |
+|-------|----------------|--------|-----------|
+| 51. Provider Interface and Metadata Foundation | 0/TBD | Not started | - |
+| 52. Terraform Provider, deploy_cmd Refactor, and Configuration | 0/TBD | Not started | - |
+| 53. CDK Provider | 0/TBD | Not started | - |
+| 54. Custom Provider | 0/TBD | Not started | - |
+| 55. Provider-Aware Command Audit | 0/TBD | Not started | - |
