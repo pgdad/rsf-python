@@ -88,7 +88,17 @@ v2.0 shipped (2026-03-02). RSF is a full development platform installable via `p
 
 <!-- Current scope. Building toward these. -->
 
-(No active requirements — planning next milestone)
+**Current Milestone: v3.0 Pluggable Infrastructure Providers**
+
+**Goal:** Decouple infrastructure creation from Terraform into a pluggable provider system where any external program can handle infrastructure provisioning.
+
+**Target features:**
+- Abstract infrastructure provider interface replacing hard-coded Terraform integration
+- Terraform provider (sample) — generates HCL from templates, invokes `terraform` CLI
+- AWS CDK provider (sample) — ships CDK template, invokes `cdk` CLI
+- Custom provider support — user-specified programs with user-specified parameters
+- Configurable metadata passing — workflow metadata (JSON file, env vars, CLI args) to external programs
+- Provider configuration in workflow YAML or project config
 
 ### Out of Scope
 
@@ -123,7 +133,7 @@ v2.0 shipped (2026-03-02). RSF is a full development platform installable via `p
 ## Constraints
 
 - **Runtime:** Python 3.13+ — Lambda Durable Functions SDK requirement
-- **Infrastructure:** Terraform for IaC (not CDK/SAM/CloudFormation)
+- **Infrastructure:** Pluggable provider system (Terraform default, CDK and custom providers supported)
 - **UI Framework:** React 19.x with @xyflow/react 12.x for graph visualization
 - **Graph Layout:** elkjs 0.11.x Sugiyama layered algorithm
 - **Import Format:** AWS Step Functions ASL JSON as input format
@@ -167,4 +177,4 @@ v2.0 shipped (2026-03-02). RSF is a full development platform installable via `p
 | Milestone audit + gap closure phases (49, 50) | Systematic verification ensured 25/25 requirements satisfied before shipping | ✓ Good |
 
 ---
-*Last updated: 2026-03-02 after v2.0 milestone*
+*Last updated: 2026-03-02 after v3.0 milestone started*

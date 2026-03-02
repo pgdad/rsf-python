@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: none
-status: complete
+milestone: v3.0
+milestone_name: Pluggable Infrastructure Providers
+status: defining_requirements
 last_updated: "2026-03-02"
 progress:
-  total_phases: 50
-  completed_phases: 50
-  total_plans: 118
-  completed_plans: 118
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -18,13 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-02)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** Planning next milestone
+**Current focus:** v3.0 Pluggable Infrastructure Providers
 
 ## Current Position
 
-Phase: All 50 phases complete
-Status: v2.0 milestone shipped, planning next milestone
-Last activity: 2026-03-02 — Completed v2.0 milestone
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-02 — Milestone v3.0 started
 
 ## Performance Metrics
 
@@ -62,5 +63,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-03-02
-Stopped at: v2.0 milestone completed and archived
+Stopped at: Defining v3.0 requirements
 Resume file: None
