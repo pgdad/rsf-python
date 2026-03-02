@@ -1,0 +1,89 @@
+name: 'RSF Workflow Action'
+description: 'Validate, generate, and optionally deploy RSF workflows. Posts plan summary as PR comment.'
+branding:
+  icon: 'check-circle'
+  color: 'blue'
+
+inputs:
+  rsf-version:
+    description: 'RSF version to install (e.g., "0.5.0"). Defaults to latest from PyPI.'
+    required: false
+    default: 'latest'
+  rsf-install-source:
+    description: 'Override RSF install source (e.g., git+https://... or local path). If set, rsf-version is ignored.'
+    required: false
+    default: ''
+  workflow-file:
+    description: 'Path to workflow.yaml file.'
+    required: false
+    default: 'workflow.yaml'
+  deploy:
+    description: 'Enable deployment after validate+generate. Set to "true" to enable.'
+    required: false
+    default: 'false'
+  stage:
+    description: 'Deployment stage (e.g., dev, staging, prod). Only used when deploy is true.'
+    required: false
+    default: ''
+  auto-approve:
+    description: 'Auto-approve Terraform changes during deploy. Set to "true" to skip confirmation.'
+    required: false
+    default: 'false'
+  post-comment:
+    description: 'Post plan summary as PR comment. Set to "false" to disable.'
+    required: false
+    default: 'true'
+  python-version:
+    description: 'Python version to use.'
+    required: false
+    default: '3.12'
+  github-token:
+    description: 'GitHub token for posting PR comments. Defaults to GITHUB_TOKEN.'
+    required: false
+    default: '${{ github.token }}'
+
+outputs:
+  validate-result:
+    description: 'Validation result: pass or fail'
+    value: ${{ steps.rsf-run.outputs.validate-result }}
+  generate-result:
+    description: 'Generation result: pass or fail'
+    value: ${{ steps.rsf-run.outputs.generate-result }}
+  deploy-result:
+    description: 'Deploy result: pass, fail, or skipped'
+    value: ${{ steps.rsf-run.outputs.deploy-result }}
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Run RSF
+      id: rsf-run
+      shell: bash
+      env:
+        RSF_VERSION: ${{ inputs.rsf-version }}
+        RSF_INSTALL_SOURCE: ${{ inputs.rsf-install-source }}
+        WORKFLOW_FILE: ${{ inputs.workflow-file }}
+        DEPLOY: ${{ inputs.deploy }}
+        STAGE: ${{ inputs.stage }}
+        AUTO_APPROVE: ${{ inputs.auto-approve }}
+      run: bash ${{ github.action_path }}/entrypoint.sh
+
+    - name: Post PR comment
+      if: inputs.post-comment == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        VALIDATE_OUTPUT: ${{ steps.rsf-run.outputs.validate-output }}
+        GENERATE_OUTPUT: ${{ steps.rsf-run.outputs.generate-output }}
+        DEPLOY_OUTPUT: ${{ steps.rsf-run.outputs.deploy-output }}
+        VALIDATE_RESULT: ${{ steps.rsf-run.outputs.validate-result }}
+        GENERATE_RESULT: ${{ steps.rsf-run.outputs.generate-result }}
+        DEPLOY_RESULT: ${{ steps.rsf-run.outputs.deploy-result }}
+        DEPLOY_ENABLED: ${{ inputs.deploy }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+      run: python ${{ github.action_path }}/comment.py
