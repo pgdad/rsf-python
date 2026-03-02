@@ -33,11 +33,27 @@ def workflow_dir(tmp_path: Path) -> Path:
     return tmp_path
 
 
-def _mock_provider():
-    """Create a mock provider with generate and deploy methods."""
+def _mock_provider(*, prereq_pass: bool = True):
+    """Create a mock provider with generate, deploy, and check_prerequisites.
+
+    Args:
+        prereq_pass: When True (default), check_prerequisites returns all-pass.
+                     When False, returns a failing prerequisite check.
+    """
+    from rsf.providers.base import PrerequisiteCheck
+
     mock = MagicMock()
     mock.generate.return_value = None
     mock.deploy.return_value = None
+
+    if prereq_pass:
+        mock.check_prerequisites.return_value = [
+            PrerequisiteCheck("terraform", "pass", "terraform found"),
+        ]
+    else:
+        mock.check_prerequisites.return_value = [
+            PrerequisiteCheck("terraform", "fail", "terraform not found"),
+        ]
     return mock
 
 
@@ -47,7 +63,6 @@ def test_deploy_full_happy_path(workflow_dir: Path, monkeypatch: pytest.MonkeyPa
 
     mock_provider = _mock_provider()
     with (
-        patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
         patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
         patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
     ):
@@ -73,7 +88,6 @@ def test_deploy_auto_approve(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
 
     mock_provider = _mock_provider()
     with (
-        patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
         patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
         patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
     ):
@@ -98,7 +112,6 @@ def test_deploy_auto_approve_short_flag(workflow_dir: Path, monkeypatch: pytest.
 
     mock_provider = _mock_provider()
     with (
-        patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
         patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
         patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
     ):
@@ -161,13 +174,12 @@ def test_deploy_no_workflow_file(tmp_path: Path, monkeypatch: pytest.MonkeyPatch
     assert "workflow.yaml" in result.output
 
 
-def test_deploy_terraform_not_in_path(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
-    """rsf deploy exits 1 and mentions terraform when terraform binary not found."""
+def test_deploy_provider_prerequisite_failure(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """rsf deploy exits 1 when provider prerequisite check fails."""
     monkeypatch.chdir(workflow_dir)
 
-    mock_provider = _mock_provider()
+    mock_provider = _mock_provider(prereq_pass=False)
     with (
-        patch("rsf.cli.deploy_cmd.shutil.which", return_value=None),
         patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
         patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
     ):
@@ -190,7 +202,6 @@ def test_deploy_subprocess_error(workflow_dir: Path, monkeypatch: pytest.MonkeyP
     mock_provider = _mock_provider()
     mock_provider.deploy.side_effect = subprocess.CalledProcessError(1, "terraform apply")
     with (
-        patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
         patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
         patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
     ):
@@ -287,7 +298,6 @@ def test_deploy_without_no_infra_still_calls_provider(
 
     mock_provider = _mock_provider()
     with (
-        patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
         patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
         patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
     ):
@@ -325,7 +335,6 @@ def test_deploy_output_dir_option(workflow_dir: Path, monkeypatch: pytest.Monkey
 
     mock_provider = _mock_provider()
     with (
-        patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
         patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
         patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
     ):
@@ -348,7 +357,6 @@ def test_deploy_tf_dir_alias_still_works(workflow_dir: Path, monkeypatch: pytest
 
     mock_provider = _mock_provider()
     with (
-        patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
         patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
         patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
     ):
@@ -439,7 +447,6 @@ class TestStageDeployment:
 
         mock_provider = _mock_provider()
         with (
-            patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
             patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
             patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
         ):
@@ -465,7 +472,6 @@ class TestStageDeployment:
 
         mock_provider = _mock_provider()
         with (
-            patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
             patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
             patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
         ):
@@ -487,7 +493,6 @@ class TestStageDeployment:
 
         mock_provider = _mock_provider()
         with (
-            patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
             patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
             patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
         ):
@@ -536,7 +541,6 @@ class TestStageDeployment:
 
         mock_provider = _mock_provider()
         with (
-            patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
             patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
             patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
         ):
@@ -565,7 +569,6 @@ class TestStageDeployment:
 
         mock_provider = _mock_provider()
         with (
-            patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
             patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
             patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
         ):
@@ -614,7 +617,6 @@ class TestStageDeployment:
 
         mock_provider = _mock_provider()
         with (
-            patch("rsf.cli.deploy_cmd.shutil.which", return_value="/usr/bin/terraform"),
             patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
             patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
         ):

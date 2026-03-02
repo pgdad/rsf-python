@@ -20,6 +20,7 @@ from rsf.providers.registry import (
     list_providers,
     register_provider,
 )
+from rsf.providers.cdk import CDKProvider
 from rsf.providers.terraform import TerraformProvider
 from rsf.providers.transports import (
     ArgsTransport,
@@ -30,9 +31,11 @@ from rsf.providers.transports import (
 
 # Register built-in providers
 register_provider("terraform", TerraformProvider)
+register_provider("cdk", CDKProvider)
 
 __all__ = [
     "ArgsTransport",
+    "CDKProvider",
     "EnvTransport",
     "FileTransport",
     "InfrastructureProvider",

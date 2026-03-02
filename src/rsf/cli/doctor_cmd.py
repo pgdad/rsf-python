@@ -60,16 +60,30 @@ def _check_python() -> CheckResult:
         )
 
 
-def _check_terraform() -> CheckResult:
-    """Check Terraform binary and version >= 1.0."""
+def _check_terraform(*, is_active: bool = True) -> CheckResult:
+    """Check Terraform binary and version >= 1.0.
+
+    Args:
+        is_active: Whether terraform is the active provider. When False
+            (non-terraform provider configured), missing terraform is
+            WARN instead of FAIL.
+    """
     tf_path = shutil.which("terraform")
     if not tf_path:
-        return CheckResult(
-            name="Terraform",
-            status="FAIL",
-            message="Not found",
-            fix_hint="Install: brew install terraform or https://terraform.io/downloads",
-        )
+        if is_active:
+            return CheckResult(
+                name="Terraform",
+                status="FAIL",
+                message="Not found",
+                fix_hint="Install: brew install terraform or https://terraform.io/downloads",
+            )
+        else:
+            return CheckResult(
+                name="Terraform",
+                status="WARN",
+                message="Not found (not the active provider)",
+                fix_hint="Install: brew install terraform or https://terraform.io/downloads",
+            )
 
     try:
         proc = subprocess.run(
@@ -107,6 +121,53 @@ def _check_terraform() -> CheckResult:
         status="WARN",
         message="Found but could not determine version",
     )
+
+
+def _check_provider_prerequisites(
+    provider_name: str,
+    workflow_path: Path | None = None,
+) -> list[CheckResult]:
+    """Run provider-specific prerequisite checks.
+
+    Gets the provider instance and calls check_prerequisites(),
+    mapping PrerequisiteCheck results to CheckResult format.
+
+    Args:
+        provider_name: Registered provider name (e.g., "cdk").
+        workflow_path: Path to workflow file (for ProviderContext).
+
+    Returns:
+        List of CheckResult from provider's prerequisite checks.
+    """
+    try:
+        from rsf.providers import get_provider
+        from rsf.providers.base import ProviderContext
+        from rsf.providers.metadata import WorkflowMetadata
+
+        provider = get_provider(provider_name)
+        # Create minimal context for prerequisite checks
+        ctx = ProviderContext(
+            metadata=WorkflowMetadata(workflow_name="doctor-check"),
+            output_dir=Path("."),
+            stage=None,
+            workflow_path=workflow_path or Path("workflow.yaml"),
+        )
+        prereq_checks = provider.check_prerequisites(ctx)
+
+        # Map PrerequisiteCheck (pass/warn/fail) to CheckResult (PASS/WARN/FAIL)
+        status_map = {"pass": "PASS", "warn": "WARN", "fail": "FAIL"}
+        results: list[CheckResult] = []
+        for check in prereq_checks:
+            results.append(
+                CheckResult(
+                    name=check.name,
+                    status=status_map.get(check.status, "WARN"),
+                    message=check.message,
+                )
+            )
+        return results
+    except Exception:
+        return []
 
 
 def _check_aws_credentials() -> CheckResult:
@@ -241,20 +302,36 @@ def run_all_checks(
     workflow_path: Path | None = None,
     tf_dir: Path | None = None,
     handlers_dir: Path | None = None,
+    provider_name: str = "terraform",
 ) -> list[CheckResult]:
     """Run all doctor checks and return results.
 
     Environment checks always run. Project checks run when
     workflow_path is provided and the file or parent dir exists.
+    Provider-specific checks run when a non-terraform provider is configured.
+
+    Args:
+        workflow_path: Path to workflow YAML file.
+        tf_dir: Path to Terraform directory.
+        handlers_dir: Path to handlers directory.
+        provider_name: Active infrastructure provider name.
     """
     results: list[CheckResult] = []
 
     # Environment checks (always)
     results.append(_check_python())
-    results.append(_check_terraform())
+    results.append(_check_terraform(is_active=(provider_name == "terraform")))
     results.append(_check_aws_credentials())
     results.append(_check_boto3())
     results.append(_check_aws_cli())
+
+    # Provider-specific checks (when non-terraform provider is configured)
+    if provider_name != "terraform":
+        provider_checks = _check_provider_prerequisites(provider_name, workflow_path)
+        results.extend(provider_checks)
+        # Add provider check names to ENV_CHECK_NAMES dynamically
+        for check in provider_checks:
+            _DYNAMIC_ENV_NAMES.add(check.name)
 
     # Project checks (when in a project directory)
     if workflow_path and (workflow_path.exists() or workflow_path.parent.exists()):
@@ -266,6 +343,9 @@ def run_all_checks(
 
     return results
 
+
+# Dynamic set for provider-specific env check names (populated at runtime)
+_DYNAMIC_ENV_NAMES: set[str] = set()
 
 ENV_CHECK_NAMES = {"Python", "Terraform", "AWS Credentials", "boto3 SDK", "AWS CLI"}
 
@@ -288,8 +368,9 @@ def _render_results(
     no_color: bool = False,
 ) -> None:
     """Render check results as a Rich checklist."""
-    env_checks = [r for r in results if r.name in ENV_CHECK_NAMES]
-    project_checks = [r for r in results if r.name not in ENV_CHECK_NAMES]
+    all_env_names = ENV_CHECK_NAMES | _DYNAMIC_ENV_NAMES
+    env_checks = [r for r in results if r.name in all_env_names]
+    project_checks = [r for r in results if r.name not in all_env_names]
 
     symbols = STATUS_SYMBOLS_PLAIN if no_color else STATUS_SYMBOLS
 
@@ -355,6 +436,25 @@ def _render_results(
         )
 
 
+def _detect_provider(workflow_path: Path) -> str:
+    """Detect the configured infrastructure provider from workflow.
+
+    Attempts to load the workflow and resolve infrastructure config.
+    Returns "terraform" as default if detection fails.
+    """
+    try:
+        from rsf.config import resolve_infra_config
+        from rsf.dsl.parser import load_definition
+
+        if not workflow_path.exists():
+            return "terraform"
+        definition = load_definition(workflow_path)
+        infra_config = resolve_infra_config(definition, workflow_path.parent)
+        return infra_config.provider
+    except Exception:
+        return "terraform"
+
+
 def doctor(
     workflow: Path = typer.Argument(
         "workflow.yaml", exists=False, help="Path to workflow YAML file"
@@ -373,13 +473,18 @@ def doctor(
 
     Checks Python version, Terraform binary, AWS credentials, and SDK availability.
     When run inside a project directory, also validates workflow.yaml and directory structure.
+    Provider-specific checks are shown when a non-default provider is configured.
     """
     handlers_dir = workflow.parent / "handlers" if workflow else None
+
+    # Detect configured provider
+    provider_name = _detect_provider(workflow)
 
     results = run_all_checks(
         workflow_path=workflow,
         tf_dir=tf_dir,
         handlers_dir=handlers_dir,
+        provider_name=provider_name,
     )
 
     if output_json:

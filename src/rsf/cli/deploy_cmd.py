@@ -147,7 +147,15 @@ def deploy(
 
 
 def _deploy_full(provider: object, ctx: ProviderContext) -> None:
-    """Run the full provider deploy pipeline: generate -> deploy."""
+    """Run the full provider deploy pipeline: check prerequisites -> generate -> deploy."""
+    # Check provider prerequisites (replaces hardcoded terraform binary check)
+    prereq_checks = provider.check_prerequisites(ctx)
+    failed_checks = [c for c in prereq_checks if c.status == "fail"]
+    if failed_checks:
+        for check in failed_checks:
+            console.print(f"[red]Error:[/red] {check.name}: {check.message}")
+        raise typer.Exit(code=1)
+
     # Generate infrastructure files
     with Status("[bold]Generating infrastructure files...[/bold]", console=console):
         provider.generate(ctx)
@@ -155,14 +163,6 @@ def _deploy_full(provider: object, ctx: ProviderContext) -> None:
     console.print(
         f"[green]Infrastructure generated[/green] in [bold]{ctx.output_dir}[/bold]"
     )
-
-    # Check provider binary
-    if not shutil.which("terraform"):
-        console.print(
-            "[red]Error:[/red] terraform binary not found. "
-            "Install from https://terraform.io"
-        )
-        raise typer.Exit(code=1)
 
     # Deploy via provider
     console.print("\n[bold]Deploying infrastructure...[/bold]")
