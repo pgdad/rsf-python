@@ -1,0 +1,134 @@
+# Requirements: RSF v3.0 Pluggable Infrastructure Providers
+
+**Defined:** 2026-03-02
+**Core Value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
+
+## v3.0 Requirements
+
+Requirements for pluggable infrastructure provider system. Each maps to roadmap phases.
+
+### Provider Abstraction
+
+- [ ] **PROV-01**: User can deploy with any registered infrastructure provider via a common interface
+- [ ] **PROV-02**: Provider context (workflow metadata, output dir, stage) is passed as structured dataclass
+- [ ] **PROV-03**: Provider registry resolves provider name to implementation via dict-dispatch factory
+- [ ] **PROV-04**: All providers use shared `run_provider_command()` helper for subprocess invocation
+- [ ] **PROV-05**: Provider configuration errors surface at `rsf validate` time, not at deploy time
+
+### Metadata
+
+- [ ] **META-01**: Canonical `WorkflowMetadata` schema captures all DSL infrastructure fields (triggers, tables, alarms, DLQ, lambda_url, stage)
+- [ ] **META-02**: User can pass workflow metadata to external provider via JSON file
+- [ ] **META-03**: User can pass workflow metadata to external provider via environment variables
+- [ ] **META-04**: User can pass workflow metadata to external provider via CLI arg templates with `{placeholder}` substitution
+
+### Terraform Provider
+
+- [ ] **TFPR-01**: `TerraformProvider` wraps existing generator.py and Jinja2 templates with zero behavior change
+- [ ] **TFPR-02**: `rsf deploy` delegates to provider interface (generate → deploy) instead of direct Terraform calls
+- [ ] **TFPR-03**: Existing v2.0 workflows (no `infrastructure:` block) continue to deploy via Terraform unchanged
+- [ ] **TFPR-04**: Terraform is the default provider when no provider is configured
+
+### CDK Provider
+
+- [ ] **CDKP-01**: `CDKProvider` generates a Python CDK app (app.py, stack.py, cdk.json) via Jinja2 with Generation Gap pattern
+- [ ] **CDKP-02**: User can deploy infrastructure via `cdk deploy` invoked by RSF
+- [ ] **CDKP-03**: RSF detects missing CDK bootstrap and warns user before deploy
+- [ ] **CDKP-04**: CDK CLI (npm package `aws-cdk`) is installed/updated to latest on local machine
+- [ ] **CDKP-05**: `rsf doctor` checks for CDK CLI binary when CDK provider is configured
+
+### Custom Provider
+
+- [ ] **CUST-01**: User can configure an arbitrary program as infrastructure provider with specified arguments
+- [ ] **CUST-02**: Custom provider invocation uses `shell=False` with security-hardened subprocess
+- [ ] **CUST-03**: User can select which metadata transport (JSON file, env vars, CLI args) to use per provider
+
+### Configuration
+
+- [ ] **CONF-01**: User can configure provider in workflow YAML via `infrastructure:` block
+- [ ] **CONF-02**: User can configure project-wide provider defaults in `rsf.toml`
+- [ ] **CONF-03**: Workflow YAML `infrastructure:` overrides `rsf.toml` defaults
+- [ ] **CONF-04**: DSL Pydantic model validates `InfrastructureConfig` block
+
+### Command Integration
+
+- [ ] **CMDI-01**: `rsf doctor` shows provider binary as WARN (not FAIL) for non-Terraform providers
+- [ ] **CMDI-02**: `rsf diff` gracefully degrades when no Terraform state exists (non-Terraform providers)
+- [ ] **CMDI-03**: `rsf watch --deploy` works with the configured provider
+- [ ] **CMDI-04**: `rsf export` uses shared `extract_infra_config()` eliminating code duplication
+
+## Future Requirements
+
+Deferred to future release. Tracked but not in current roadmap.
+
+### Additional Providers
+
+- **PULM-01**: Pulumi provider using Automation API
+- **CFNP-01**: CloudFormation/SAM provider using `aws cloudformation deploy`
+
+### Enhanced CDK
+
+- **CDKP-06**: CDK hotswap for `--code-only` equivalent (targeted Lambda code update)
+- **CDKP-07**: CDK diff integration with `rsf diff`
+
+### Plugin Discovery
+
+- **PLUG-01**: Entry-point-based plugin discovery for third-party providers
+
+## Out of Scope
+
+Explicitly excluded. Documented to prevent scope creep.
+
+| Feature | Reason |
+|---------|--------|
+| Dynamic provider discovery via `entry_points` | Makes provider authoring unnecessarily complex; subprocess + env vars is the correct extension model for v3.0 |
+| Provider SDK / Python base class users must subclass | Forces Python-only providers; breaks polyglot use (bash, Go, etc.) |
+| Auto-detect provider from installed binaries | Ambiguous when multiple providers installed; explicit config required |
+| Provider-specific CLI flags on `rsf deploy` | Flag explosion; provider-specific config belongs in workflow YAML `infrastructure.options` |
+| Terraform state management built-in to RSF | Already solved by Terraform S3 backend; RSF owning this adds complexity with no return |
+| `aws-cdk-lib` as RSF dependency | Would add ~200MB transitive deps for all users; CDK goes in generated app only |
+
+## Traceability
+
+Which phases cover which requirements. Updated during roadmap creation.
+
+| Requirement | Phase | Status |
+|-------------|-------|--------|
+| PROV-01 | — | Pending |
+| PROV-02 | — | Pending |
+| PROV-03 | — | Pending |
+| PROV-04 | — | Pending |
+| PROV-05 | — | Pending |
+| META-01 | — | Pending |
+| META-02 | — | Pending |
+| META-03 | — | Pending |
+| META-04 | — | Pending |
+| TFPR-01 | — | Pending |
+| TFPR-02 | — | Pending |
+| TFPR-03 | — | Pending |
+| TFPR-04 | — | Pending |
+| CDKP-01 | — | Pending |
+| CDKP-02 | — | Pending |
+| CDKP-03 | — | Pending |
+| CDKP-04 | — | Pending |
+| CDKP-05 | — | Pending |
+| CUST-01 | — | Pending |
+| CUST-02 | — | Pending |
+| CUST-03 | — | Pending |
+| CONF-01 | — | Pending |
+| CONF-02 | — | Pending |
+| CONF-03 | — | Pending |
+| CONF-04 | — | Pending |
+| CMDI-01 | — | Pending |
+| CMDI-02 | — | Pending |
+| CMDI-03 | — | Pending |
+| CMDI-04 | — | Pending |
+
+**Coverage:**
+- v3.0 requirements: 29 total
+- Mapped to phases: 0
+- Unmapped: 29
+
+---
+*Requirements defined: 2026-03-02*
+*Last updated: 2026-03-02 after initial definition*
