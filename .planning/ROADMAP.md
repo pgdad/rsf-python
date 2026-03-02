@@ -128,7 +128,7 @@ Full details: `.planning/milestones/v1.7-ROADMAP.md`
 - [x] **Phase 47: Workflow Templates and GitHub Action** — Add `rsf init --template` scaffolding and a reusable `rsf-action` GitHub Action (completed 2026-03-02)
 - [x] **Phase 48: VS Code Extension** — Deliver YAML schema validation, go-to-definition, and inline graph preview in VS Code (completed 2026-03-02)
 - [x] **Phase 49: Documentation & Verification Remediation** — Create missing VERIFICATION.md files, fix SUMMARY frontmatter, and update REQUIREMENTS.md checkboxes for all completed phases (completed 2026-03-02)
-- [ ] **Phase 50: Integration Fixes** — Fix GitHub Action WORKFLOW_FILE forwarding and bridge ChaosFixture to rsf test CLI
+- [x] **Phase 50: Integration Fixes** — Fix GitHub Action WORKFLOW_FILE forwarding and bridge ChaosFixture to rsf test CLI (completed 2026-03-02)
 
 ## Phase Details
 
@@ -279,8 +279,8 @@ Plans:
   4. E2E flow "Chaos Testing via CLI" works end-to-end through `rsf test`
 **Plans**: 2 plans
 Plans:
-- [ ] 50-01-PLAN.md -- Fix GitHub Action entrypoint.sh to forward WORKFLOW_FILE to rsf deploy
-- [ ] 50-02-PLAN.md -- Bridge ChaosFixture to rsf test CLI with --chaos flag
+- [x] 50-01-PLAN.md -- Fix GitHub Action entrypoint.sh to forward WORKFLOW_FILE to rsf deploy
+- [x] 50-02-PLAN.md -- Bridge ChaosFixture to rsf test CLI with --chaos flag
 
 ## Progress
 
@@ -302,4 +302,4 @@ Note: Phase 45 (Testing) depends only on Phase 39 and can be worked in parallel 
 | 47. Workflow Templates and GitHub Action | 3/3 | Complete   | 2026-03-02 |
 | 48. VS Code Extension | 0/TBD | Complete    | 2026-03-02 |
 | 49. Documentation & Verification Remediation | 3/3 | Complete    | 2026-03-02 |
-| 50. Integration Fixes | 0/TBD | Pending    | — |
+| 50. Integration Fixes | 2/2 | Complete   | 2026-03-02 |
