@@ -40,9 +40,10 @@ def main(
 
 
 # Import and register subcommands
-from rsf.cli import deploy_cmd, diff_cmd, doctor_cmd, export_cmd, generate_cmd, import_cmd, init_cmd, inspect_cmd, logs_cmd, test_cmd, ui_cmd, validate_cmd, watch_cmd  # noqa: E402
+from rsf.cli import cost_cmd, deploy_cmd, diff_cmd, doctor_cmd, export_cmd, generate_cmd, import_cmd, init_cmd, inspect_cmd, logs_cmd, test_cmd, ui_cmd, validate_cmd, watch_cmd  # noqa: E402
 
 app.command(name="init")(init_cmd.init)
+app.command(name="cost")(cost_cmd.cost)
 app.command(name="deploy")(deploy_cmd.deploy)
 app.command(name="diff")(diff_cmd.diff)
 app.command(name="doctor")(doctor_cmd.doctor)
