@@ -127,7 +127,7 @@ Full details: `.planning/milestones/v1.7-ROADMAP.md`
 - [x] **Phase 46: Inspector Replay and SchemaStore** — Enable execution replay from the inspector UI and publish the DSL schema to SchemaStore (completed 2026-03-02)
 - [x] **Phase 47: Workflow Templates and GitHub Action** — Add `rsf init --template` scaffolding and a reusable `rsf-action` GitHub Action (completed 2026-03-02)
 - [x] **Phase 48: VS Code Extension** — Deliver YAML schema validation, go-to-definition, and inline graph preview in VS Code (completed 2026-03-02)
-- [ ] **Phase 49: Documentation & Verification Remediation** — Create missing VERIFICATION.md files, fix SUMMARY frontmatter, and update REQUIREMENTS.md checkboxes for all completed phases
+- [x] **Phase 49: Documentation & Verification Remediation** — Create missing VERIFICATION.md files, fix SUMMARY frontmatter, and update REQUIREMENTS.md checkboxes for all completed phases (completed 2026-03-02)
 - [ ] **Phase 50: Integration Fixes** — Fix GitHub Action WORKFLOW_FILE forwarding and bridge ChaosFixture to rsf test CLI
 
 ## Phase Details
@@ -261,7 +261,11 @@ Plans:
   2. Phases 43-48 SUMMARY files have correct requirements_completed frontmatter
   3. All 25 REQUIREMENTS.md checkboxes are checked [x]
   4. REQUIREMENTS.md coverage shows 25/25 satisfied
-**Plans**: TBD
+**Plans**: 3/3 plans complete
+Plans:
+- [x] 49-01-PLAN.md -- Create missing VERIFICATION.md files for phases 40 and 44
+- [x] 49-02-PLAN.md -- Add requirements_completed frontmatter to SUMMARY files for phases 43-48
+- [x] 49-03-PLAN.md -- Update REQUIREMENTS.md checkboxes, traceability, STATE.md, and ROADMAP.md
 
 ### Phase 50: Integration Fixes
 **Goal**: Fix the two cross-phase integration issues identified by the milestone audit — GitHub Action workflow-file forwarding and ChaosFixture CLI bridge
@@ -294,5 +298,5 @@ Note: Phase 45 (Testing) depends only on Phase 39 and can be worked in parallel 
 | 46. Inspector Replay and SchemaStore | 3/3 | Complete    | 2026-03-02 |
 | 47. Workflow Templates and GitHub Action | 3/3 | Complete   | 2026-03-02 |
 | 48. VS Code Extension | 0/TBD | Complete    | 2026-03-02 |
-| 49. Documentation & Verification Remediation | 0/TBD | Pending    | — |
+| 49. Documentation & Verification Remediation | 3/3 | Complete    | 2026-03-02 |
 | 50. Integration Fixes | 0/TBD | Pending    | — |
