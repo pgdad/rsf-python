@@ -139,6 +139,9 @@ def render_orchestrator(
     has_sub_workflows = any(m.sub_workflow for m in mappings)
     sub_workflow_names = sorted({m.sub_workflow for m in mappings if m.sub_workflow})
 
+    # Derive workflow name from DSL path stem
+    workflow_name = dsl_path.stem if dsl_path.stem != "workflow" else dsl_path.parent.name
+
     return render_template(
         "orchestrator.py.j2",
         rsf_version=rsf_version,
@@ -152,6 +155,8 @@ def render_orchestrator(
         timeout_seconds=definition.timeout_seconds,
         has_sub_workflows=has_sub_workflows,
         sub_workflow_names=sub_workflow_names,
+        tracing=True,
+        workflow_name=workflow_name,
     )
 
 

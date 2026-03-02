@@ -18,6 +18,20 @@ RSF_NAME_PREFIX = os.environ.get("RSF_NAME_PREFIX", "rsf")
 {% for handler_import in handler_imports %}
 import {{ handler_import }}
 {% endfor %}
+{% if tracing %}
+
+# OpenTelemetry tracing (optional — no-op if not installed)
+try:
+    from opentelemetry import trace as _otel_trace
+    from opentelemetry.trace import StatusCode as _OtelStatusCode
+{% if has_sub_workflows %}
+    from opentelemetry import propagate as _otel_propagate
+{% endif %}
+    _tracer = _otel_trace.get_tracer("rsf.workflow")
+    _OTEL_AVAILABLE = True
+except ImportError:
+    _OTEL_AVAILABLE = False
+{% endif %}
 
 
 class WorkflowError(Exception):
@@ -56,12 +70,46 @@ def lambda_handler(context: DurableContext, event: dict) -> dict:
 {% if timeout_seconds %}
     _workflow_start_time = time.monotonic()
 {% endif %}
+{% if tracing %}
 
+    # Extract parent trace context from sub-workflow invocation
+{% if has_sub_workflows %}
+    _parent_ctx = None
+    if _OTEL_AVAILABLE and "_trace_context" in event:
+        _parent_ctx = _otel_propagate.extract(event["_trace_context"])
+{% endif %}
+
+    # Start parent workflow span
+    _wf_span = None
+    if _OTEL_AVAILABLE:
+        _wf_span = _tracer.start_span(
+            "workflow.execute",
+            attributes={
+                "workflow.name": {{ workflow_name | topyrepr }},
+                "workflow.start_at": {{ start_at | topyrepr }},
+            },
+        )
+        _wf_span.__enter__()
+{% endif %}
+
+{% if tracing %}
+    try:
+{% endif %}
     while current_state is not None:
 {% if timeout_seconds %}
         _elapsed = time.monotonic() - _workflow_start_time
         if _elapsed > {{ timeout_seconds }}:
             raise WorkflowTimeoutError({{ timeout_seconds }}, _elapsed)
+{% endif %}
+{% if tracing %}
+        _state_span = None
+        if _OTEL_AVAILABLE:
+            _state_span = _tracer.start_span(
+                current_state,
+                attributes={"state.name": current_state},
+            )
+            _state_span.__enter__()
+        try:
 {% endif %}
 {% for block in state_blocks %}
         {{ "el" if not loop.first }}if current_state == {{ block.name | topyrepr }}:
@@ -70,6 +118,21 @@ def lambda_handler(context: DurableContext, event: dict) -> dict:
 {% endfor %}
         else:
             raise RuntimeError(f"Unknown state: {current_state}")
+{% if tracing %}
+        finally:
+            if _state_span is not None:
+                _state_span.__exit__(None, None, None)
+{% endif %}
+
+{% if tracing %}
+    except Exception as _wf_err:
+        if _OTEL_AVAILABLE and _wf_span is not None:
+            _wf_span.set_status(_OtelStatusCode.ERROR, str(_wf_err))
+        raise
+    finally:
+        if _wf_span is not None:
+            _wf_span.__exit__(None, None, None)
+{% endif %}
 
     return input_data
 
