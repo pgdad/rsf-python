@@ -122,7 +122,7 @@ Full details: `.planning/milestones/v1.7-ROADMAP.md`
 - [x] **Phase 41: Alerts, Dead Letter Queues, and Multi-Stage Deploy** — Add operational DSL extensions for CloudWatch alarms, Lambda DLQs, and stage-based deployments (completed 2026-03-01)
 - [x] **Phase 42: Developer CLI Commands** — Add `rsf diff`, `rsf test`, and `rsf watch` for local development iteration (completed 2026-03-02)
 - [x] **Phase 43: Operational CLI Commands** — Add `rsf logs`, `rsf doctor`, and `rsf export` for deployment and operations support (completed 2026-03-02)
-- [ ] **Phase 44: Observability** — Add OpenTelemetry tracing, cost estimation CLI, and a CloudWatch metrics dashboard example
+- [x] **Phase 44: Observability** — Add OpenTelemetry tracing, cost estimation CLI, and a CloudWatch metrics dashboard example (completed 2026-03-02)
 - [ ] **Phase 45: Advanced Testing Utilities** — Add property-based, chaos, and snapshot testing capabilities
 - [ ] **Phase 46: Inspector Replay and SchemaStore** — Enable execution replay from the inspector UI and publish the DSL schema to SchemaStore
 - [ ] **Phase 47: Workflow Templates and GitHub Action** — Add `rsf init --template` scaffolding and a reusable `rsf-action` GitHub Action
@@ -201,7 +201,11 @@ Plans:
   1. Generated orchestrator.py includes OpenTelemetry context injection so distributed traces appear in any compatible backend (Jaeger, X-Ray, etc.) when the workflow executes
   2. User can run `rsf cost --invocations 10000` and receive an estimated monthly cost breakdown by Lambda invocations, DynamoDB reads/writes, and data transfer
   3. An example workflow ships with CloudWatch custom metric emissions and a Grafana dashboard JSON that can be imported to visualize execution counts, durations, and error rates
-**Plans**: TBD
+**Plans**: 3/3 plans complete
+Plans:
+- [x] 44-01-PLAN.md -- OpenTelemetry tracing injection in generated orchestrator code
+- [x] 44-02-PLAN.md -- rsf cost CLI command for workflow cost estimation
+- [x] 44-03-PLAN.md -- CloudWatch custom metrics example with Grafana dashboard JSON
 
 ### Phase 45: Advanced Testing Utilities
 **Goal**: The RSF test suite covers I/O pipeline invariants with property-based tests, supports chaos injection for state failures, and snapshots generated orchestrator code to catch regressions
@@ -259,7 +263,7 @@ Note: Phase 45 (Testing) depends only on Phase 39 and can be worked in parallel 
 | 41. Alerts, Dead Letter Queues, and Multi-Stage Deploy | 3/3 | Complete    | 2026-03-01 |
 | 42. Developer CLI Commands | 0/TBD | Complete    | 2026-03-02 |
 | 43. Operational CLI Commands | 0/TBD | Complete    | 2026-03-02 |
-| 44. Observability | 0/TBD | Not started | - |
+| 44. Observability | 3/3 | Complete    | 2026-03-02 |
 | 45. Advanced Testing Utilities | 0/TBD | Not started | - |
 | 46. Inspector Replay and SchemaStore | 0/TBD | Not started | - |
 | 47. Workflow Templates and GitHub Action | 0/TBD | Not started | - |
