@@ -224,7 +224,7 @@ Full details: `.planning/milestones/v2.0-ROADMAP.md`
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 51. Provider Interface and Metadata Foundation | 0/TBD | Not started | - |
+| 51. Provider Interface and Metadata Foundation | 2/3 | In Progress|  |
 | 52. Terraform Provider, deploy_cmd Refactor, and Configuration | 0/TBD | Not started | - |
 | 53. CDK Provider | 0/TBD | Not started | - |
 | 54. Custom Provider | 0/TBD | Not started | - |
