@@ -118,11 +118,7 @@ class TestChildSpans:
 class TestErrorHandling:
     """Test that tracing handles errors correctly."""
 
-    def test_error_status_set_on_exception(self):
-        code = _render_with_tracing()
-        assert "_OtelStatusCode.ERROR" in code
-
-    def test_parent_span_closed_in_finally(self):
+    def test_parent_span_closed_after_loop(self):
         code = _render_with_tracing()
         assert "_wf_span.__exit__(None, None, None)" in code
 

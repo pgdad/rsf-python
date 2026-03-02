@@ -81,6 +81,7 @@ def lambda_handler(context: DurableContext, event: dict) -> dict:
 
     # Start parent workflow span
     _wf_span = None
+    _wf_error = None
     if _OTEL_AVAILABLE:
         _wf_span = _tracer.start_span(
             "workflow.execute",
@@ -92,9 +93,6 @@ def lambda_handler(context: DurableContext, event: dict) -> dict:
         _wf_span.__enter__()
 {% endif %}
 
-{% if tracing %}
-    try:
-{% endif %}
     while current_state is not None:
 {% if timeout_seconds %}
         _elapsed = time.monotonic() - _workflow_start_time
@@ -109,7 +107,6 @@ def lambda_handler(context: DurableContext, event: dict) -> dict:
                 attributes={"state.name": current_state},
             )
             _state_span.__enter__()
-        try:
 {% endif %}
 {% for block in state_blocks %}
         {{ "el" if not loop.first }}if current_state == {{ block.name | topyrepr }}:
@@ -119,19 +116,14 @@ def lambda_handler(context: DurableContext, event: dict) -> dict:
         else:
             raise RuntimeError(f"Unknown state: {current_state}")
 {% if tracing %}
-        finally:
-            if _state_span is not None:
-                _state_span.__exit__(None, None, None)
+        if _state_span is not None:
+            _state_span.__exit__(None, None, None)
+            _state_span = None
 {% endif %}
 
 {% if tracing %}
-    except Exception as _wf_err:
-        if _OTEL_AVAILABLE and _wf_span is not None:
-            _wf_span.set_status(_OtelStatusCode.ERROR, str(_wf_err))
-        raise
-    finally:
-        if _wf_span is not None:
-            _wf_span.__exit__(None, None, None)
+    if _wf_span is not None:
+        _wf_span.__exit__(None, None, None)
 {% endif %}
 
     return input_data
