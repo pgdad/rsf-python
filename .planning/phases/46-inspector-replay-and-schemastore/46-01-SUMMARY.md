@@ -2,6 +2,7 @@
 plan: 46-01
 status: complete
 completed: 2026-03-02
+requirements_completed: [UI-01]
 ---
 
 # Plan 46-01: Replay Backend API — Summary

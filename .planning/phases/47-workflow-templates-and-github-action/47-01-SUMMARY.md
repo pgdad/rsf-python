@@ -4,6 +4,7 @@ plan: 01
 status: complete
 started: 2026-03-02
 completed: 2026-03-02
+requirements_completed: [ECO-02]
 ---
 
 # Plan 47-01 Summary: Template Infrastructure + API Gateway CRUD

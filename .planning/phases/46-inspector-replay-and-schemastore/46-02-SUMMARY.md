@@ -2,6 +2,7 @@
 plan: 46-02
 status: complete
 completed: 2026-03-02
+requirements_completed: [UI-02]
 ---
 
 # Plan 46-02: Schema Export CLI + SchemaStore — Summary

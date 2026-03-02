@@ -1,3 +1,10 @@
+---
+plan: 43-01
+status: complete
+completed: 2026-03-02
+requirements_completed: [CLI-04]
+---
+
 # Plan 43-01 Summary: rsf logs command
 
 ## Status: COMPLETE
