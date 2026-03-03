@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
 import pytest
+import yaml
 
 from rsf.dsl.parser import parse_definition
 from rsf.cli.diff_cmd import DiffEntry, compute_diff
@@ -175,3 +179,83 @@ class TestWorkflowDiffEngine:
         assert config_diffs[0].change == "changed"
         assert "300" in config_diffs[0].local
         assert "600" in config_diffs[0].deployed
+
+
+# --- Helper for CLI tests ---
+
+
+def _write_diff_workflow(tmp_path: Path) -> Path:
+    """Write a minimal workflow.yaml file and return the path."""
+    workflow = tmp_path / "workflow.yaml"
+    data = {"StartAt": "Start", "States": {"Start": {"Type": "Task", "End": True}}}
+    workflow.write_text(yaml.dump(data), encoding="utf-8")
+    return workflow
+
+
+# --- Provider-aware diff tests ---
+
+
+class TestProviderAwareDiff:
+    """Tests for provider-aware diff behavior."""
+
+    def test_non_terraform_provider_shows_message_and_exits_0(self, tmp_path: Path) -> None:
+        """Non-terraform provider shows message and exits 0."""
+        workflow = _write_diff_workflow(tmp_path)
+
+        mock_config = MagicMock()
+        mock_config.provider = "cdk"
+
+        from typer.testing import CliRunner
+        from rsf.cli.main import app
+
+        with patch("rsf.cli.diff_cmd.resolve_infra_config", return_value=mock_config):
+            runner = CliRunner()
+            result = runner.invoke(app, ["diff", str(workflow)])
+            assert result.exit_code == 0
+            assert "not available" in result.output.lower()
+            assert "cdk" in result.output
+
+    def test_terraform_provider_proceeds_normally(self, tmp_path: Path) -> None:
+        """Terraform provider proceeds normally (shows all as new)."""
+        workflow = _write_diff_workflow(tmp_path)
+
+        mock_config = MagicMock()
+        mock_config.provider = "terraform"
+
+        from typer.testing import CliRunner
+        from rsf.cli.main import app
+
+        with patch("rsf.cli.diff_cmd.resolve_infra_config", return_value=mock_config):
+            runner = CliRunner()
+            result = runner.invoke(app, ["diff", str(workflow)])
+            assert result.exit_code == 1  # Differences found (all new)
+            assert "not available" not in result.output.lower()
+
+    def test_provider_detection_failure_defaults_to_terraform(self, tmp_path: Path) -> None:
+        """Provider detection failure defaults to terraform behavior."""
+        workflow = _write_diff_workflow(tmp_path)
+
+        from typer.testing import CliRunner
+        from rsf.cli.main import app
+
+        with patch("rsf.cli.diff_cmd.resolve_infra_config", side_effect=Exception("config error")):
+            runner = CliRunner()
+            result = runner.invoke(app, ["diff", str(workflow)])
+            assert result.exit_code == 1  # Proceeds as terraform
+            assert "not available" not in result.output.lower()
+
+    def test_custom_provider_shows_provider_name_in_message(self, tmp_path: Path) -> None:
+        """Custom provider name appears in the not-available message."""
+        workflow = _write_diff_workflow(tmp_path)
+
+        mock_config = MagicMock()
+        mock_config.provider = "custom"
+
+        from typer.testing import CliRunner
+        from rsf.cli.main import app
+
+        with patch("rsf.cli.diff_cmd.resolve_infra_config", return_value=mock_config):
+            runner = CliRunner()
+            result = runner.invoke(app, ["diff", str(workflow)])
+            assert result.exit_code == 0
+            assert "custom" in result.output

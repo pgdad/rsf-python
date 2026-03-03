@@ -12,6 +12,7 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
+from rsf.config import resolve_infra_config
 from rsf.dsl.models import StateMachineDefinition, TaskState
 from rsf.dsl.parser import load_definition
 
@@ -303,6 +304,22 @@ def diff(
     except Exception as exc:
         console.print(f"[red]Error:[/red] Invalid local workflow: {exc}")
         raise typer.Exit(code=1)
+
+    # Detect configured provider
+    try:
+        infra_config = resolve_infra_config(local_def, workflow.parent)
+        provider_name = infra_config.provider
+    except Exception:
+        provider_name = "terraform"
+
+    # Diff only works with Terraform state -- gracefully decline for other providers
+    if provider_name != "terraform":
+        console.print(
+            f"[yellow]Diff is not available for the {provider_name} provider.[/yellow]\n"
+            f"The diff command compares local workflow definitions against Terraform state.\n"
+            f"Your active provider ({provider_name}) does not use Terraform state."
+        )
+        raise typer.Exit(code=0)
 
     # Raw diff mode
     if raw:
