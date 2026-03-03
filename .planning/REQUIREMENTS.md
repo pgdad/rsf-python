@@ -39,9 +39,9 @@ Requirements for pluggable infrastructure provider system. Each maps to roadmap 
 
 ### Custom Provider
 
-- [ ] **CUST-01**: User can configure an arbitrary program as infrastructure provider with specified arguments
-- [ ] **CUST-02**: Custom provider invocation uses `shell=False` with security-hardened subprocess
-- [ ] **CUST-03**: User can select which metadata transport (JSON file, env vars, CLI args) to use per provider
+- [x] **CUST-01**: User can configure an arbitrary program as infrastructure provider with specified arguments
+- [x] **CUST-02**: Custom provider invocation uses `shell=False` with security-hardened subprocess
+- [x] **CUST-03**: User can select which metadata transport (JSON file, env vars, CLI args) to use per provider
 
 ### Configuration
 
@@ -116,9 +116,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CDKP-03 | Phase 53 | Done |
 | CDKP-04 | Phase 53 | Done |
 | CDKP-05 | Phase 53 | Done |
-| CUST-01 | Phase 54 | Pending |
-| CUST-02 | Phase 54 | Pending |
-| CUST-03 | Phase 54 | Pending |
+| CUST-01 | Phase 54 | Done |
+| CUST-02 | Phase 54 | Done |
+| CUST-03 | Phase 54 | Done |
 | CMDI-01 | Phase 55 | Pending |
 | CMDI-02 | Phase 55 | Pending |
 | CMDI-03 | Phase 55 | Pending |
