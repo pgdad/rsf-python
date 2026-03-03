@@ -38,6 +38,7 @@
 
 ## v1.7 Lambda Function URL Support (Shipped: 2026-03-01)
 
+
 **Phases completed:** 3 phases (36-38), 6 plans
 **Files changed:** 35 | **Insertions:** 1,325
 **Timeline:** 2026-03-01
@@ -50,6 +51,22 @@
 - Working lambda-url-trigger example with 3-state webhook workflow, 19 local tests, and real-AWS integration test
 - Tutorial Steps 12-14 extending docs/tutorial.md with Lambda URL YAML config, deploy, and curl POST walkthrough
 - 779 total non-integration tests passing (16 new for Lambda URL features)
+
+---
+
+## v1.6 Ruff Linting Cleanup (Shipped: 2026-03-01)
+
+**Phases completed:** 8 phases (28-35), 3 plans
+**Timeline:** 2026-02-28 → 2026-03-01
+**Git range:** d4cef53..5b7e7a9
+
+**Key accomplishments:**
+- Fixed all 61 F401 (unused import) violations across src/, tests/, examples/
+- Fixed all F841, F541, E402, E741, E501 violations in single bulk pass (phases 29-34)
+- Removed examples/ exclusion and all ignored rules from pyproject.toml ruff config
+- Unified pytest configuration for 744 non-AWS tests in single invocation
+- Applied ruff format to examples/ for consistent code style
+- Zero ruff violations across entire codebase with no suppressions (except 2 intentional `noqa: F401` for side-effect imports)
 
 ---
 
@@ -142,3 +159,20 @@
 
 ---
 
+## v1.0 Core (Shipped: 2026-02-25)
+
+**Phases completed:** 10 phases (1-11, no Phase 5), 39 plans
+**Timeline:** 2026-02-24 → 2026-02-25
+**Git range:** 2cd8309..35df889
+
+**Key accomplishments:**
+- YAML/JSON DSL with full ASL feature parity: 8 state types, 39 comparison operators, error handling, I/O processing, intrinsic functions, variables, context object — all with Pydantic v2 models and semantic BFS validation
+- Python code generator (Jinja2) producing Lambda Durable Functions SDK orchestrator code with handler registry (`@state`, `@startup` decorators) and Generation Gap pattern
+- 5-stage I/O processing pipeline (InputPath → Parameters → ResultSelector → ResultPath → OutputPath) with 18 intrinsic functions via recursive descent parser
+- Terraform HCL generation with custom Jinja2 delimiters, IAM derivation, and ASL JSON importer
+- React graph editor with bidirectional YAML↔graph sync, per-state-type nodes, ELK.js auto-layout, and AST-merge strategy
+- React execution inspector with time machine scrubbing, live SSE updates, precomputed snapshots, and structural data diffs
+- Comprehensive test suite: unit tests, integration tests, golden fixtures, vitest UI tests, 24 YAML fixtures
+- Full documentation: README, MkDocs site, tutorial, DSL reference, migration guide
+
+---
