@@ -18,7 +18,7 @@ from rsf.dsl import parser as dsl_parser
 from rsf.dsl.validator import validate_definition
 from rsf.providers import ProviderNotFoundError, get_provider
 from rsf.providers.base import ProviderContext
-from rsf.providers.metadata import create_metadata
+from rsf.providers.metadata import create_metadata, derive_workflow_name
 
 console = Console()
 
@@ -93,7 +93,7 @@ def run_cycle(
         except ProviderNotFoundError as exc:
             return False, f"{ts} Valid + regenerated, but deploy failed: {exc}"
 
-        workflow_name = definition.comment or workflow.stem.replace("_", "-").replace(" ", "-")
+        workflow_name = derive_workflow_name(definition, workflow)
         metadata = create_metadata(definition, workflow_name, stage=stage)
 
         effective_output_dir = tf_dir or (workflow.parent / "terraform")

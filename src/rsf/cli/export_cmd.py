@@ -12,7 +12,7 @@ import yaml
 from rich.console import Console
 
 from rsf.dsl.parser import load_definition
-from rsf.providers.metadata import create_metadata
+from rsf.providers.metadata import create_metadata, derive_workflow_name
 
 console = Console()
 
@@ -344,11 +344,7 @@ def export_workflow(
         raise typer.Exit(code=1)
 
     # Derive workflow name
-    workflow_name = (
-        definition.comment
-        if definition.comment
-        else workflow.stem.replace("_", "-").replace(" ", "-")
-    )
+    workflow_name = derive_workflow_name(definition, workflow)
 
     # Extract infrastructure metadata and build template
     metadata = create_metadata(definition, workflow_name)

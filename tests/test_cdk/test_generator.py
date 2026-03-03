@@ -1,13 +1,11 @@
 """Tests for CDK app generator."""
 
 import json
-from pathlib import Path
 
 import pytest
 
 from rsf.cdk.generator import (
     CDKConfig,
-    CDKResult,
     GENERATED_MARKER,
     generate_cdk,
     sanitize_stack_name,

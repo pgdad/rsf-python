@@ -2,18 +2,14 @@
 
 from __future__ import annotations
 
-import json
 from pathlib import Path
-from typing import Any
 
-import pytest
 import yaml
 
 from dataclasses import asdict
 
 from rsf.cli.export_cmd import (
     _build_sam_template,
-    _sanitize_logical_id,
 )
 from rsf.dsl.parser import load_definition
 from rsf.providers.metadata import create_metadata

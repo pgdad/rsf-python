@@ -7,7 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from rsf.providers.base import PrerequisiteCheck, ProviderContext
+from rsf.providers.base import ProviderContext
 from rsf.providers.metadata import WorkflowMetadata
 from rsf.providers.terraform import TerraformProvider
 

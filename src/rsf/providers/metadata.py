@@ -8,9 +8,21 @@ dataclasses.asdict() to produce valid JSON.
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 from rsf.dsl.models import StateMachineDefinition, TaskState
+
+
+def derive_workflow_name(definition: StateMachineDefinition, workflow_path: Path) -> str:
+    """Derive a human-readable workflow name from a definition and path.
+
+    Uses ``definition.comment`` if set, otherwise derives from the
+    workflow file stem (replacing underscores/spaces with hyphens).
+    """
+    if definition.comment:
+        return definition.comment
+    return workflow_path.stem.replace("_", "-").replace(" ", "-")
 
 
 @dataclass
@@ -23,8 +35,8 @@ class WorkflowMetadata:
     This is a data-transfer object (DTO), not a validation model.
     Validation happens in the DSL layer (Pydantic models).
 
-    Fields mirror the output of
-    ``export_cmd._extract_infrastructure_from_definition()``.
+    All CLI commands that need infrastructure metadata should use
+    ``create_metadata()`` to produce an instance of this class.
     """
 
     workflow_name: str
@@ -47,9 +59,6 @@ def create_metadata(
     stage: str | None = None,
 ) -> WorkflowMetadata:
     """Extract infrastructure metadata from a DSL definition.
-
-    Mirrors the logic of ``export_cmd._extract_infrastructure_from_definition()``
-    but returns a typed ``WorkflowMetadata`` instead of an untyped dict.
 
     Args:
         definition: Parsed and validated DSL workflow definition.

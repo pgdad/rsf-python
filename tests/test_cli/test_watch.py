@@ -6,7 +6,6 @@ import re
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 import yaml
 
 from rsf.cli.watch_cmd import _format_timestamp, _get_watch_paths, run_cycle

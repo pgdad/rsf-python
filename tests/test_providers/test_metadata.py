@@ -6,7 +6,6 @@ import json
 from dataclasses import asdict
 from typing import Any
 
-import pytest
 
 # Import dsl package to initialize state validators
 import rsf.dsl  # noqa: F401
@@ -378,44 +377,3 @@ class TestCreateMetadata:
         assert meta.lambda_url_enabled is False
         assert meta.lambda_url_auth_type == "NONE"
 
-    def test_matches_export_cmd_output(self) -> None:
-        """create_metadata() output matches export_cmd._extract_infrastructure_from_definition()."""
-        from rsf.cli.export_cmd import _extract_infrastructure_from_definition
-
-        defn = _make_definition(
-            states={
-                "Step1": {"Type": "Task", "Next": "Step2"},
-                "Step2": {"Type": "Pass", "End": True},
-            },
-            triggers=[
-                {"type": "eventbridge", "schedule_expression": "rate(5 minutes)"}
-            ],
-            dynamodb_tables=[
-                {
-                    "table_name": "orders",
-                    "partition_key": {"name": "order_id", "type": "S"},
-                }
-            ],
-            alarms=[{"type": "error_rate", "threshold": 10.0}],
-            dead_letter_queue={"enabled": True, "max_receive_count": 7},
-            lambda_url={"enabled": True, "auth_type": "NONE"},
-            timeout_seconds=600,
-        )
-
-        # Get output from both implementations
-        export_dict = _extract_infrastructure_from_definition(defn, "test-wf")
-        meta = create_metadata(defn, "test-wf")
-        meta_dict = asdict(meta)
-
-        # Compare field by field (export_dict has workflow_name too)
-        assert meta_dict["workflow_name"] == export_dict["workflow_name"]
-        assert meta_dict["handler_count"] == export_dict["handler_count"]
-        assert meta_dict["timeout_seconds"] == export_dict["timeout_seconds"]
-        assert meta_dict["triggers"] == export_dict["triggers"]
-        assert meta_dict["dynamodb_tables"] == export_dict["dynamodb_tables"]
-        assert meta_dict["alarms"] == export_dict["alarms"]
-        assert meta_dict["dlq_enabled"] == export_dict["dlq_enabled"]
-        assert meta_dict["dlq_max_receive_count"] == export_dict["dlq_max_receive_count"]
-        assert meta_dict["dlq_queue_name"] == export_dict["dlq_queue_name"]
-        assert meta_dict["lambda_url_enabled"] == export_dict["lambda_url_enabled"]
-        assert meta_dict["lambda_url_auth_type"] == export_dict["lambda_url_auth_type"]

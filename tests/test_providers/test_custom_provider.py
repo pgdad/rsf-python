@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-import os
 import stat
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pytest
 
-from rsf.dsl.models import CustomProviderConfig, InfrastructureConfig, StateMachineDefinition
-from rsf.providers.base import InfrastructureProvider, PrerequisiteCheck, ProviderContext
+from rsf.dsl.models import CustomProviderConfig, InfrastructureConfig
+from rsf.providers.base import InfrastructureProvider, ProviderContext
 from rsf.providers.custom import CustomProvider
 from rsf.providers.metadata import WorkflowMetadata
 from rsf.providers.transports import ArgsTransport, EnvTransport, FileTransport

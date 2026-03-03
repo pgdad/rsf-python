@@ -21,7 +21,7 @@ from rsf.config import resolve_infra_config
 from rsf.dsl.parser import load_definition
 from rsf.providers import ProviderNotFoundError, get_provider
 from rsf.providers.base import ProviderContext
-from rsf.providers.metadata import create_metadata
+from rsf.providers.metadata import create_metadata, derive_workflow_name
 
 console = Console()
 
@@ -107,11 +107,7 @@ def deploy(
         raise typer.Exit(code=1)
 
     # Step 7: Derive workflow name
-    workflow_name = (
-        definition.comment
-        if definition.comment
-        else workflow.stem.replace("_", "-").replace(" ", "-")
-    )
+    workflow_name = derive_workflow_name(definition, workflow)
 
     # Stage handling: isolate output_dir and resolve stage variable file
     stage_var_file: Path | None = None

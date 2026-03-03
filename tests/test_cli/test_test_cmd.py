@@ -2,14 +2,9 @@
 
 from __future__ import annotations
 
-import json
-import os
 import textwrap
 from io import StringIO
-from pathlib import Path
-from unittest.mock import patch
 
-import pytest
 from rich.console import Console
 
 from rsf.cli.test_cmd import ExecutionResult, LocalRunner, TransitionRecord, _render_summary

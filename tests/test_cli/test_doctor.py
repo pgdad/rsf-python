@@ -7,7 +7,6 @@ import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from rsf.cli.doctor_cmd import (
     CheckResult,

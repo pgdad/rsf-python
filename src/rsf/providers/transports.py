@@ -12,7 +12,6 @@ import string
 import tempfile
 from abc import ABC, abstractmethod
 from dataclasses import asdict
-from typing import Any
 
 from rsf.providers.metadata import WorkflowMetadata
 

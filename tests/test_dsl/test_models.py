@@ -4,8 +4,6 @@ import pytest
 from pydantic import ValidationError
 
 from rsf.dsl import (
-    AlarmConfig,
-    DeadLetterQueueConfig,
     DurationAlarm,
     ErrorRateAlarm,
     StateMachineDefinition,

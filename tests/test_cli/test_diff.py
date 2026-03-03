@@ -5,11 +5,10 @@ from __future__ import annotations
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 import yaml
 
 from rsf.dsl.parser import parse_definition
-from rsf.cli.diff_cmd import DiffEntry, compute_diff
+from rsf.cli.diff_cmd import compute_diff
 
 
 def _make_definition(states_yaml: dict, start_at: str = "Start", **kwargs):

@@ -3,12 +3,10 @@
 from __future__ import annotations
 
 import json
-import time
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
-import pytest
 
 from rsf.cli.logs_cmd import (
     _discover_log_groups,

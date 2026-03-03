@@ -8,7 +8,6 @@ Tests cover:
 
 from __future__ import annotations
 
-import asyncio
 import json
 from datetime import datetime, timezone
 from typing import Any
