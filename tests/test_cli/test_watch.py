@@ -103,27 +103,29 @@ class TestWatchCycle:
         assert success is True
         assert (tmp_path / "orchestrator.py").exists()
 
-    def test_deploy_calls_subprocess(self, tmp_path):
-        """run_cycle with --deploy calls subprocess for terraform apply."""
+    def test_deploy_calls_provider_interface(self, tmp_path):
+        """run_cycle with --deploy routes through the provider interface."""
         workflow = tmp_path / "workflow.yaml"
         _write_valid_workflow(workflow)
 
         tf_dir = tmp_path / "terraform"
         tf_dir.mkdir()
 
-        with (
-            patch("rsf.cli.watch_cmd.subprocess.run") as mock_run,
-            patch("rsf.cli.watch_cmd.shutil.which", return_value="/usr/bin/terraform"),
-        ):
-            mock_run.return_value = MagicMock(returncode=0)
+        mock_config = MagicMock()
+        mock_config.provider = "terraform"
 
+        mock_provider = MagicMock()
+
+        with (
+            patch("rsf.cli.watch_cmd.resolve_infra_config", return_value=mock_config),
+            patch("rsf.cli.watch_cmd.get_provider", return_value=mock_provider),
+        ):
             success, message = run_cycle(workflow, deploy=True, tf_dir=tf_dir)
 
             assert success is True
             assert "deployed" in message
-            mock_run.assert_called_once()
-            call_args = mock_run.call_args
-            assert "-target=aws_lambda_function.*" in call_args[0][0]
+            mock_provider.generate.assert_called_once()
+            mock_provider.deploy.assert_called_once()
 
     def test_deploy_failure_returns_error(self, tmp_path):
         """run_cycle with --deploy failure returns deploy error."""
@@ -135,16 +137,89 @@ class TestWatchCycle:
 
         import subprocess
 
-        with (
-            patch("rsf.cli.watch_cmd.subprocess.run") as mock_run,
-            patch("rsf.cli.watch_cmd.shutil.which", return_value="/usr/bin/terraform"),
-        ):
-            mock_run.side_effect = subprocess.CalledProcessError(1, "terraform")
+        mock_config = MagicMock()
+        mock_config.provider = "terraform"
 
+        mock_provider = MagicMock()
+        mock_provider.deploy.side_effect = subprocess.CalledProcessError(1, "terraform")
+
+        with (
+            patch("rsf.cli.watch_cmd.resolve_infra_config", return_value=mock_config),
+            patch("rsf.cli.watch_cmd.get_provider", return_value=mock_provider),
+        ):
             success, message = run_cycle(workflow, deploy=True, tf_dir=tf_dir)
 
             assert success is False
             assert "deploy failed" in message
+
+    def test_deploy_with_cdk_provider(self, tmp_path):
+        """run_cycle with --deploy works with CDK provider."""
+        workflow = tmp_path / "workflow.yaml"
+        _write_valid_workflow(workflow)
+
+        tf_dir = tmp_path / "terraform"
+        tf_dir.mkdir()
+
+        mock_config = MagicMock()
+        mock_config.provider = "cdk"
+
+        mock_provider = MagicMock()
+
+        with (
+            patch("rsf.cli.watch_cmd.resolve_infra_config", return_value=mock_config),
+            patch("rsf.cli.watch_cmd.get_provider", return_value=mock_provider),
+        ):
+            success, message = run_cycle(workflow, deploy=True, tf_dir=tf_dir)
+
+            assert success is True
+            assert "cdk" in message
+            mock_provider.generate.assert_called_once()
+            mock_provider.deploy.assert_called_once()
+
+    def test_deploy_provider_not_found_returns_error(self, tmp_path):
+        """run_cycle with unknown provider returns error."""
+        from rsf.providers import ProviderNotFoundError
+
+        workflow = tmp_path / "workflow.yaml"
+        _write_valid_workflow(workflow)
+
+        tf_dir = tmp_path / "terraform"
+        tf_dir.mkdir()
+
+        mock_config = MagicMock()
+        mock_config.provider = "nonexistent"
+
+        with (
+            patch("rsf.cli.watch_cmd.resolve_infra_config", return_value=mock_config),
+            patch("rsf.cli.watch_cmd.get_provider", side_effect=ProviderNotFoundError("nonexistent")),
+        ):
+            success, message = run_cycle(workflow, deploy=True, tf_dir=tf_dir)
+
+            assert success is False
+            assert "deploy failed" in message
+
+    def test_deploy_creates_provider_context_with_auto_approve(self, tmp_path):
+        """run_cycle deploy creates ProviderContext with auto_approve=True."""
+        workflow = tmp_path / "workflow.yaml"
+        _write_valid_workflow(workflow)
+
+        tf_dir = tmp_path / "terraform"
+        tf_dir.mkdir()
+
+        mock_config = MagicMock()
+        mock_config.provider = "terraform"
+
+        mock_provider = MagicMock()
+
+        with (
+            patch("rsf.cli.watch_cmd.resolve_infra_config", return_value=mock_config),
+            patch("rsf.cli.watch_cmd.get_provider", return_value=mock_provider),
+        ):
+            run_cycle(workflow, deploy=True, tf_dir=tf_dir)
+
+            # Get the ProviderContext passed to deploy
+            ctx = mock_provider.deploy.call_args[0][0]
+            assert ctx.auto_approve is True
 
     def test_format_timestamp_returns_bracketed_time(self):
         """_format_timestamp returns [HH:MM:SS] format."""

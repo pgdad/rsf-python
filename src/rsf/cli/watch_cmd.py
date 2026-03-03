@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import shutil
 import subprocess
 import time
 from datetime import datetime
@@ -14,8 +13,12 @@ from pydantic import ValidationError as PydanticValidationError
 from rich.console import Console
 
 from rsf.codegen.generator import generate as codegen_generate
+from rsf.config import resolve_infra_config
 from rsf.dsl import parser as dsl_parser
 from rsf.dsl.validator import validate_definition
+from rsf.providers import ProviderNotFoundError, get_provider
+from rsf.providers.base import ProviderContext
+from rsf.providers.metadata import create_metadata
 
 console = Console()
 
@@ -78,42 +81,47 @@ def run_cycle(
     except Exception as exc:
         return False, f"{ts} Generation failed: {exc}"
 
-    # Step 5: Optional deploy
+    # Step 5: Optional deploy via provider interface
     if deploy:
-        effective_tf_dir = tf_dir or (workflow.parent / "terraform")
+        try:
+            infra_config = resolve_infra_config(definition, workflow.parent)
+        except Exception as exc:
+            return False, f"{ts} Valid + regenerated, but deploy failed: could not resolve provider config: {exc}"
+
+        try:
+            provider = get_provider(infra_config.provider)
+        except ProviderNotFoundError as exc:
+            return False, f"{ts} Valid + regenerated, but deploy failed: {exc}"
+
+        workflow_name = definition.comment or workflow.stem.replace("_", "-").replace(" ", "-")
+        metadata = create_metadata(definition, workflow_name, stage=stage)
+
+        effective_output_dir = tf_dir or (workflow.parent / "terraform")
         if stage:
-            effective_tf_dir = effective_tf_dir / stage
-
-        if not shutil.which("terraform"):
-            return False, f"{ts} Valid + regenerated, but deploy failed: terraform not found"
-
-        if not effective_tf_dir.exists():
-            return False, f"{ts} Valid + regenerated, but deploy failed: {effective_tf_dir} not found"
+            effective_output_dir = effective_output_dir / stage
 
         stage_var_file = None
         if stage:
             stage_var_file = workflow.parent / "stages" / f"{stage}.tfvars"
 
-        try:
-            targeted_cmd = [
-                "terraform",
-                "apply",
-                "-target=aws_lambda_function.*",
-                "-auto-approve",
-            ]
-            if stage_var_file and stage_var_file.exists():
-                targeted_cmd.extend(["-var-file", str(stage_var_file.resolve())])
+        ctx = ProviderContext(
+            metadata=metadata,
+            output_dir=effective_output_dir,
+            stage=stage,
+            workflow_path=workflow,
+            definition=definition,
+            auto_approve=True,
+            stage_var_file=stage_var_file,
+        )
 
-            subprocess.run(
-                targeted_cmd,
-                cwd=effective_tf_dir,
-                check=True,
-                capture_output=True,
-                text=True,
-            )
-            return True, f"{ts} Valid + regenerated + deployed"
+        try:
+            provider.generate(ctx)
+            provider.deploy(ctx)
+            return True, f"{ts} Valid + regenerated + deployed ({infra_config.provider})"
         except subprocess.CalledProcessError as exc:
             return False, f"{ts} Valid + regenerated, but deploy failed (exit {exc.returncode})"
+        except Exception as exc:
+            return False, f"{ts} Valid + regenerated, but deploy failed: {exc}"
 
     return True, f"{ts} Valid + regenerated"
 
