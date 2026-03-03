@@ -2,7 +2,7 @@
 
 [![PyPI version](https://img.shields.io/pypi/v/rsf)](https://pypi.org/project/rsf/)
 [![CI](https://github.com/pgdad/rsf-python/actions/workflows/ci.yml/badge.svg)](https://github.com/pgdad/rsf-python/actions/workflows/ci.yml)
-[![License](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
 A complete Python toolkit for defining, visualizing, generating, deploying, and debugging AWS Lambda Durable Functions workflows — with full AWS Step Functions feature parity.
 
@@ -179,4 +179,4 @@ rsf ui --dev
 
 ## License
 
-Apache-2.0
+MIT

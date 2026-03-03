@@ -137,7 +137,7 @@ v3.0 shipped (2026-03-03). RSF is a full development platform installable via `p
 - **Import Format:** AWS Step Functions ASL JSON as input format
 - **Feature Parity:** All AWS Step Functions features in the DSL
 - **Local-first:** No hosted service, no authentication
-- **License:** Apache-2.0
+- **License:** MIT
 
 ## Key Decisions
 
