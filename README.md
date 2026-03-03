@@ -36,7 +36,7 @@ States:
 
 | Graph Editor | Execution Inspector |
 |:---:|:---:|
-| ![Graph Editor](https://raw.githubusercontent.com/pgdad/rsf-python/main/docs/images/order-processing-graph.png) | ![Execution Inspector](https://raw.githubusercontent.com/pgdad/rsf-python/main/docs/images/order-processing-inspector.png) |
+| ![Graph Editor](https://raw.githubusercontent.com/pgdad/rsf-python/master/docs/images/order-processing-graph.png) | ![Execution Inspector](https://raw.githubusercontent.com/pgdad/rsf-python/master/docs/images/order-processing-inspector.png) |
 
 ## Quickstart
 
@@ -133,12 +133,12 @@ Opens the execution inspector at http://localhost:8001
 
 ## Documentation
 
-Full documentation is available at the [docs site](https://github.com/pgdad/rsf-python/tree/main/docs):
+Full documentation is available at the [docs site](https://github.com/pgdad/rsf-python/tree/master/docs):
 
-- [Tutorial](https://github.com/pgdad/rsf-python/blob/main/docs/tutorial.md) — From install through deploy and inspect
-- [DSL Reference](https://github.com/pgdad/rsf-python/blob/main/docs/reference/dsl.md) — Complete field reference for all state types
-- [State Types Guide](https://github.com/pgdad/rsf-python/blob/main/docs/reference/state-types.md) — Detailed examples with YAML + Python
-- [Migration Guide](https://github.com/pgdad/rsf-python/blob/main/docs/migration-guide.md) — Import existing Step Functions workflows
+- [Tutorial](https://github.com/pgdad/rsf-python/blob/master/docs/tutorial.md) — From install through deploy and inspect
+- [DSL Reference](https://github.com/pgdad/rsf-python/blob/master/docs/reference/dsl.md) — Complete field reference for all state types
+- [State Types Guide](https://github.com/pgdad/rsf-python/blob/master/docs/reference/state-types.md) — Detailed examples with YAML + Python
+- [Migration Guide](https://github.com/pgdad/rsf-python/blob/master/docs/migration-guide.md) — Import existing Step Functions workflows
 
 ## Technical Stack
 
