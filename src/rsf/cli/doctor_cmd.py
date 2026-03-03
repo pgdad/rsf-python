@@ -336,7 +336,7 @@ def run_all_checks(
     # Project checks (when in a project directory)
     if workflow_path and (workflow_path.exists() or workflow_path.parent.exists()):
         results.append(_check_workflow(workflow_path))
-        if tf_dir:
+        if tf_dir and provider_name == "terraform":
             results.append(_check_directory("terraform/", tf_dir))
         if handlers_dir:
             results.append(_check_directory("handlers/", handlers_dir))
@@ -366,6 +366,7 @@ def _render_results(
     results: list[CheckResult],
     *,
     no_color: bool = False,
+    provider_name: str = "terraform",
 ) -> None:
     """Render check results as a Rich checklist."""
     all_env_names = ENV_CHECK_NAMES | _DYNAMIC_ENV_NAMES
@@ -374,7 +375,15 @@ def _render_results(
 
     symbols = STATUS_SYMBOLS_PLAIN if no_color else STATUS_SYMBOLS
 
-    console.print("\n[bold]Environment[/bold]" if not no_color else "\nEnvironment")
+    if provider_name != "terraform":
+        label = (
+            f"\n[bold]Environment[/bold] [dim](provider: {provider_name})[/dim]"
+            if not no_color
+            else f"\nEnvironment (provider: {provider_name})"
+        )
+    else:
+        label = "\n[bold]Environment[/bold]" if not no_color else "\nEnvironment"
+    console.print(label)
     for check in env_checks:
         sym = symbols[check.status]
         version = f" ({check.version})" if check.version else ""
@@ -489,6 +498,7 @@ def doctor(
 
     if output_json:
         report = {
+            "provider": provider_name,
             "checks": [
                 {
                     "name": r.name,
@@ -508,7 +518,7 @@ def doctor(
         }
         typer.echo(json.dumps(report, indent=2))
     else:
-        _render_results(results, no_color=no_color)
+        _render_results(results, no_color=no_color, provider_name=provider_name)
 
     # Exit code: 1 if any FAIL, 0 otherwise
     has_failures = any(r.status == "FAIL" for r in results)

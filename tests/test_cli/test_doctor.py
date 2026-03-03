@@ -393,3 +393,97 @@ class TestDoctorCommand:
             result = runner.invoke(app, ["doctor", "--no-color"])
             assert "Environment" in result.output
             assert "Project" in result.output
+
+
+# --- Provider-aware doctor tests ---
+
+
+class TestProviderAwareDoctor:
+    """Tests for provider-aware doctor behavior."""
+
+    def test_terraform_check_warn_when_not_active_provider(self) -> None:
+        """Terraform check returns WARN (not FAIL) when not the active provider."""
+        with patch("shutil.which", return_value=None):
+            result = _check_terraform(is_active=False)
+            assert result.status == "WARN"
+            assert "not the active provider" in result.message
+
+    def test_terraform_dir_skipped_for_non_terraform_provider(self, tmp_path: Path) -> None:
+        """terraform/ directory check is skipped when provider is not terraform."""
+        workflow = tmp_path / "workflow.yaml"
+        workflow.write_text(
+            "StartAt: First\nStates:\n  First:\n    Type: Task\n    End: true\n"
+        )
+        tf_dir = tmp_path / "terraform"
+        tf_dir.mkdir()
+
+        results = run_all_checks(
+            workflow_path=workflow,
+            tf_dir=tf_dir,
+            handlers_dir=tmp_path / "handlers",
+            provider_name="cdk",
+        )
+        names = {r.name for r in results}
+        assert "terraform/" not in names
+
+    def test_terraform_dir_included_for_terraform_provider(self, tmp_path: Path) -> None:
+        """terraform/ directory check is included when provider is terraform."""
+        workflow = tmp_path / "workflow.yaml"
+        workflow.write_text(
+            "StartAt: First\nStates:\n  First:\n    Type: Task\n    End: true\n"
+        )
+        tf_dir = tmp_path / "terraform"
+        tf_dir.mkdir()
+
+        results = run_all_checks(
+            workflow_path=workflow,
+            tf_dir=tf_dir,
+            handlers_dir=tmp_path / "handlers",
+            provider_name="terraform",
+        )
+        names = {r.name for r in results}
+        assert "terraform/" in names
+
+    def test_json_output_includes_provider_field(self) -> None:
+        """JSON output includes a 'provider' field."""
+        from typer.testing import CliRunner
+        from rsf.cli.main import app
+
+        results = [
+            CheckResult(name="Python", status="PASS", version="3.12.3"),
+            CheckResult(name="Terraform", status="WARN", message="Not found (not the active provider)"),
+            CheckResult(name="AWS Credentials", status="PASS"),
+            CheckResult(name="boto3 SDK", status="PASS"),
+            CheckResult(name="AWS CLI", status="PASS"),
+        ]
+
+        with (
+            patch("rsf.cli.doctor_cmd.run_all_checks", return_value=results),
+            patch("rsf.cli.doctor_cmd._detect_provider", return_value="cdk"),
+        ):
+            runner = CliRunner()
+            result = runner.invoke(app, ["doctor", "--json"])
+            parsed = json.loads(result.output)
+            assert "provider" in parsed
+            assert parsed["provider"] == "cdk"
+
+    def test_provider_label_shown_for_non_terraform(self) -> None:
+        """Provider label is shown in output for non-terraform providers."""
+        from typer.testing import CliRunner
+        from rsf.cli.main import app
+
+        results = [
+            CheckResult(name="Python", status="PASS", version="3.12.3"),
+            CheckResult(name="Terraform", status="WARN", message="Not found (not the active provider)"),
+            CheckResult(name="AWS Credentials", status="PASS"),
+            CheckResult(name="boto3 SDK", status="PASS"),
+            CheckResult(name="AWS CLI", status="PASS"),
+        ]
+
+        with (
+            patch("rsf.cli.doctor_cmd.run_all_checks", return_value=results),
+            patch("rsf.cli.doctor_cmd._detect_provider", return_value="cdk"),
+        ):
+            runner = CliRunner()
+            result = runner.invoke(app, ["doctor", "--no-color"])
+            assert "provider: cdk" in result.output
