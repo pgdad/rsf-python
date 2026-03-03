@@ -52,10 +52,10 @@ Requirements for pluggable infrastructure provider system. Each maps to roadmap 
 
 ### Command Integration
 
-- [ ] **CMDI-01**: `rsf doctor` shows provider binary as WARN (not FAIL) for non-Terraform providers
-- [ ] **CMDI-02**: `rsf diff` gracefully degrades when no Terraform state exists (non-Terraform providers)
-- [ ] **CMDI-03**: `rsf watch --deploy` works with the configured provider
-- [ ] **CMDI-04**: `rsf export` uses shared `extract_infra_config()` eliminating code duplication
+- [x] **CMDI-01**: `rsf doctor` shows provider binary as WARN (not FAIL) for non-Terraform providers
+- [x] **CMDI-02**: `rsf diff` gracefully degrades when no Terraform state exists (non-Terraform providers)
+- [x] **CMDI-03**: `rsf watch --deploy` works with the configured provider
+- [x] **CMDI-04**: `rsf export` uses shared `extract_infra_config()` eliminating code duplication
 
 ## Future Requirements
 
@@ -119,10 +119,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | CUST-01 | Phase 54 | Done |
 | CUST-02 | Phase 54 | Done |
 | CUST-03 | Phase 54 | Done |
-| CMDI-01 | Phase 55 | Pending |
-| CMDI-02 | Phase 55 | Pending |
-| CMDI-03 | Phase 55 | Pending |
-| CMDI-04 | Phase 55 | Pending |
+| CMDI-01 | Phase 55 | Done |
+| CMDI-02 | Phase 55 | Done |
+| CMDI-03 | Phase 55 | Done |
+| CMDI-04 | Phase 55 | Done |
 
 **Coverage:**
 - v3.0 requirements: 29 total

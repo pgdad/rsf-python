@@ -144,7 +144,7 @@ Full details: `.planning/milestones/v2.0-ROADMAP.md`
 - [x] **Phase 52: Terraform Provider, deploy_cmd Refactor, and Configuration** - TerraformProvider wrapping existing generator, provider registry, rsf.toml config, deploy_cmd integration, and provider config validation (completed 2026-03-02)
 - [x] **Phase 53: CDK Provider** - CDKProvider with Jinja2-generated CDK app template, cdk deploy invocation, bootstrap detection, and doctor check (completed 2026-03-02)
 - [x] **Phase 54: Custom Provider** - CustomProvider with shell=False subprocess, all three metadata transport modes, and security hardening (completed 2026-03-03)
-- [ ] **Phase 55: Provider-Aware Command Audit** - doctor/diff/watch/export updated to be provider-agnostic
+- [x] **Phase 55: Provider-Aware Command Audit** - doctor/diff/watch/export updated to be provider-agnostic (completed 2026-03-03)
 
 ## Phase Details
 
@@ -218,7 +218,7 @@ Full details: `.planning/milestones/v2.0-ROADMAP.md`
 | v1.6 Ruff Linting | 28-35 | 3 | Complete | 2026-03-01 |
 | v1.7 Lambda URL | 36-38 | 8 | Complete | 2026-03-01 |
 | v2.0 Enhancement Suite | 39-50 | 34 | Complete | 2026-03-02 |
-| v3.0 Pluggable Providers | 51-55 | TBD | In progress | - |
+| v3.0 Pluggable Providers | 51-55 | 20 | Complete | 2026-03-02 |
 
 **v3.0 Phase Progress:**
 
@@ -228,4 +228,4 @@ Full details: `.planning/milestones/v2.0-ROADMAP.md`
 | 52. Terraform Provider, deploy_cmd Refactor, and Configuration | 4/4 | Complete   | 2026-03-02 |
 | 53. CDK Provider | 3/3 | Complete    | 2026-03-02 |
 | 54. Custom Provider | 0/TBD | Complete    | 2026-03-03 |
-| 55. Provider-Aware Command Audit | 0/TBD | Not started | - |
+| 55. Provider-Aware Command Audit | 4/4 | Complete    | 2026-03-03 |
