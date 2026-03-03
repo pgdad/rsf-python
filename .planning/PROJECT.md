@@ -2,7 +2,7 @@
 
 ## What This Is
 
-RSF is a complete development platform for AWS Lambda Durable Functions (launched at re:Invent 2025), replacing AWS Step Functions. It provides a YAML/JSON DSL for defining state machines with event triggers, sub-workflows, DynamoDB tables, CloudWatch alarms, dead letter queues, and multi-stage deployment. A Python code generator produces Lambda Durable Functions SDK code with OpenTelemetry tracing. The CLI toolchain includes 16 commands covering the full lifecycle: init, validate, generate, deploy, diff, test (with chaos injection), watch, logs, doctor, export, cost, import, ui, inspect, schema, and templated project scaffolding. A React-based graph editor, execution inspector with replay, VS Code extension with LSP, and a reusable GitHub Action round out the ecosystem. Six real-world example workflows with automated integration testing prove end-to-end correctness on real AWS.
+RSF is a complete development platform for AWS Lambda Durable Functions (launched at re:Invent 2025), replacing AWS Step Functions. It provides a YAML/JSON DSL for defining state machines with event triggers, sub-workflows, DynamoDB tables, CloudWatch alarms, dead letter queues, and multi-stage deployment. Infrastructure provisioning is handled by a pluggable provider system (Terraform default, CDK and custom providers supported) — any external program can serve as an infrastructure provider via structured metadata passing. A Python code generator produces Lambda Durable Functions SDK code with OpenTelemetry tracing. The CLI toolchain includes 16 commands covering the full lifecycle: init, validate, generate, deploy, diff, test (with chaos injection), watch, logs, doctor, export, cost, import, ui, inspect, schema, and templated project scaffolding. A React-based graph editor, execution inspector with replay, VS Code extension with LSP, and a reusable GitHub Action round out the ecosystem. Six real-world example workflows with automated integration testing prove end-to-end correctness on real AWS.
 
 ## Core Value
 
@@ -10,7 +10,7 @@ Users can define, visualize, generate, deploy, and debug state machine workflows
 
 ## Current State
 
-v2.0 shipped (2026-03-02). RSF is a full development platform installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. 16 CLI commands, 7 DSL extensions, OpenTelemetry tracing, VS Code extension, GitHub Action, and 25 v2.0 requirements satisfied. ~9,900 LOC Python source + 2,300 LOC TypeScript (VS Code extension) + 14,400 LOC tests. 976+ non-AWS tests collected. Six real-world example workflows with automated integration testing prove end-to-end correctness on real AWS.
+v3.0 shipped (2026-03-03). RSF is a full development platform installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. 16 CLI commands, 7 DSL extensions, pluggable infrastructure providers (Terraform, CDK, custom), OpenTelemetry tracing, VS Code extension, GitHub Action, and all requirements satisfied through v3.0. ~36,400 LOC Python source + 8,900 LOC TypeScript + comprehensive test suite. Six real-world example workflows with automated integration testing prove end-to-end correctness on real AWS.
 
 ## Requirements
 
@@ -83,22 +83,19 @@ v2.0 shipped (2026-03-02). RSF is a full development platform installable via `p
 - ✓ VS Code extension with LSP schema validation, go-to-definition, inline graph preview — v2.0
 - ✓ `rsf init --template` with curated workflow templates (api-gateway-crud, s3-event-pipeline) — v2.0
 - ✓ Reusable `rsf-action` GitHub Action for CI/CD with PR comment plans — v2.0
+- ✓ Abstract infrastructure provider interface (InfrastructureProvider ABC) with pluggable registry — v3.0
+- ✓ WorkflowMetadata dataclass + 3 metadata transports (JSON file, env vars, CLI arg templates) — v3.0
+- ✓ TerraformProvider wrapping existing generator with zero behavior change; deploy_cmd refactored to provider interface — v3.0
+- ✓ CDK provider with Jinja2-generated CDK apps, bootstrap detection, and `npx aws-cdk@latest` invocation — v3.0
+- ✓ Custom provider with security-hardened subprocess (`shell=False`, absolute path validation) and configurable metadata transport — v3.0
+- ✓ Provider configuration in workflow YAML `infrastructure:` block and project-wide `rsf.toml` with cascade — v3.0
+- ✓ Provider-aware CLI: doctor/diff/watch/export handle any provider gracefully — v3.0
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-**Current Milestone: v3.0 Pluggable Infrastructure Providers**
-
-**Goal:** Decouple infrastructure creation from Terraform into a pluggable provider system where any external program can handle infrastructure provisioning.
-
-**Target features:**
-- Abstract infrastructure provider interface replacing hard-coded Terraform integration
-- Terraform provider (sample) — generates HCL from templates, invokes `terraform` CLI
-- AWS CDK provider (sample) — ships CDK template, invokes `cdk` CLI
-- Custom provider support — user-specified programs with user-specified parameters
-- Configurable metadata passing — workflow metadata (JSON file, env vars, CLI args) to external programs
-- Provider configuration in workflow YAML or project config
+(No active milestone — planning next)
 
 ### Out of Scope
 
@@ -129,6 +126,7 @@ v2.0 shipped (2026-03-02). RSF is a full development platform installable via `p
 - Shipped v1.6 with zero ruff violations and 744 non-AWS tests passing
 - Shipped v1.7 with Lambda Function URL support (DSL, Terraform, example, tutorial) and 779 non-AWS tests
 - Shipped v2.0 with 12 phases, 34 plans, 25 requirements: full CLI toolchain (16 commands), 7 DSL extensions, observability, advanced testing, VS Code extension, GitHub Action, and workflow templates. 976+ non-AWS tests.
+- Shipped v3.0 with 5 phases, 17 plans, 29 requirements: pluggable infrastructure providers (Terraform, CDK, custom), metadata transport system, provider-aware CLI commands, rsf.toml project config.
 
 ## Constraints
 
@@ -175,6 +173,13 @@ v2.0 shipped (2026-03-02). RSF is a full development platform installable via `p
 | VS Code LSP-based extension | Reuses Pydantic validation via Python subprocess; consistent with `rsf validate` | ✓ Good |
 | GitHub Action with composite + shell approach | No Docker dependency; faster startup; works on any runner OS | ✓ Good |
 | Milestone audit + gap closure phases (49, 50) | Systematic verification ensured 25/25 requirements satisfied before shipping | ✓ Good |
+| `abc.ABC` over `typing.Protocol` for provider interface | RSF owns all providers; ABC gives runtime TypeError on missing methods vs silent failure | ✓ Good |
+| WorkflowMetadata in DSL/workflow semantics, not IaC tool semantics | Prevents leaky abstraction; providers translate to their own concepts | ✓ Good |
+| Default provider `"terraform"` with zero config | v2.0 workflows work unchanged; no migration required | ✓ Good |
+| Config cascade: workflow YAML > rsf.toml > hardcoded default | Explicit per-workflow overrides with project-wide defaults; stdlib `tomllib` for toml | ✓ Good |
+| `npx aws-cdk@latest` instead of global CDK binary | No global install needed; always uses latest CDK version | ✓ Good |
+| Custom provider `shell=False` + absolute path validation | Security hardened: no shell injection, program must exist and be executable | ✓ Good |
+| Terraform doctor check WARN (not FAIL) for non-TF providers | Informational only; missing terraform is not an error when using CDK or custom | ✓ Good |
 
 ---
-*Last updated: 2026-03-02 after v3.0 milestone started*
+*Last updated: 2026-03-03 after v3.0 milestone*

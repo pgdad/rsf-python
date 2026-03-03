@@ -193,6 +193,52 @@
 
 ---
 
+## Milestone: v3.0 — Pluggable Infrastructure Providers
+
+**Shipped:** 2026-03-03
+**Phases:** 5 | **Plans:** 17
+
+### What Was Built
+- InfrastructureProvider ABC with 5 abstract methods, ProviderContext, PrerequisiteCheck, and dict-dispatch registry
+- WorkflowMetadata dataclass + 3 metadata transports (JSON file, env vars, CLI arg templates)
+- TerraformProvider wrapping existing generator with full backward compatibility
+- deploy_cmd refactored from ~80 LOC inline extraction to provider interface routing
+- CDKProvider with Jinja2-generated CDK apps, bootstrap detection, and `npx aws-cdk@latest` invocation
+- CustomProvider with security-hardened subprocess (`shell=False`, absolute path validation)
+- Provider configuration via workflow YAML `infrastructure:` block and project-wide `rsf.toml`
+- Provider-aware CLI: doctor/diff/watch/export handle any provider gracefully
+
+### What Worked
+- ABC + registry pattern cleanly separated interface from implementation — adding CDK and custom providers was straightforward once Phase 51 shipped
+- Phase dependency chain (51 → 52 → 53/54 → 55) was correct — no circular dependencies or integration surprises
+- `npx aws-cdk@latest` approach eliminated the need for users to manage CDK global install
+- Security hardening (shell=False, absolute paths) was easy to test with subprocess mock fixtures
+- Config cascade (YAML > rsf.toml > default "terraform") provided zero-config backward compat while enabling per-workflow overrides
+
+### What Was Inefficient
+- 17 of 29 requirements in REQUIREMENTS.md were never checked off during phases 51-52 — same documentation discipline issue as v2.0
+- summary-extract one_liner field still returns null — recurring across all milestones, field format is not populated
+- No milestone audit was performed before completion — audit recommended but skipped
+
+### Patterns Established
+- Provider pattern: ABC defines contract, each provider implements 5 methods (generate, deploy, teardown, check_prerequisites, validate_config)
+- Metadata transport pattern: separate transport classes (File, Env, Args) for delivering structured data to external programs
+- Config cascade pattern: workflow YAML > project config file > hardcoded default
+- CLI graceful degradation pattern: detect active provider before executing provider-specific logic
+
+### Key Lessons
+1. Provider abstraction over infrastructure tools enables polyglot extensibility — custom provider + metadata transports let users use any language/tool
+2. `shell=False` should be the default for all subprocess calls — explicit about what's being executed
+3. Config cascade with explicit precedence (workflow > project > default) is the right pattern for tool configuration
+4. Requirements checkbox discipline remains an issue — should be part of the executor's commit protocol, not a manual step
+
+### Cost Observations
+- Model mix: ~30% opus (orchestration), ~60% sonnet (research, checking, execution), ~10% haiku
+- Sessions: ~4 sessions across 2 days
+- Notable: 5-phase milestone completed quickly due to clear dependency chain and well-scoped phases
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -208,6 +254,7 @@
 | v1.6 Ruff Linting | 8 | 3 | Zero ruff violations, unified test suite |
 | v1.7 Lambda URL | 3 | 8 | Lambda Function URL DSL + Terraform + example |
 | v2.0 Enhancement Suite | 12 | 34 | Milestone audit + gap closure; auto-advance pipeline |
+| v3.0 Pluggable Providers | 5 | 17 | Provider abstraction; config cascade; graceful CLI degradation |
 
 ### Cumulative Quality
 
@@ -222,6 +269,7 @@
 | v1.6 | 744 tests unified | Zero ruff suppressions |
 | v1.7 | 779 tests (+35) | Lambda Function URL end-to-end |
 | v2.0 | 976+ tests (+197) | 25/25 requirements verified via audit |
+| v3.0 | ~1,100+ tests | 29/29 provider requirements delivered |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -234,3 +282,4 @@
 7. OIDC trusted publisher eliminates secret management entirely for PyPI publishing
 8. Milestone audit + gap closure phases before shipping catches cross-phase integration issues that per-phase testing misses
 9. Documentation gates should be enforced during execution, not deferred to remediation phases
+10. Provider abstraction (ABC + registry + config cascade) cleanly separates interface from implementation and enables polyglot extensibility

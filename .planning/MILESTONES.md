@@ -1,5 +1,23 @@
 # Milestones
 
+## v3.0 Pluggable Infrastructure Providers (Shipped: 2026-03-03)
+
+**Phases completed:** 5 phases (51-55), 17 plans
+**Files changed:** 89 | **Net change:** +11,624 / -486 lines | **Source LOC:** ~36,400 Python + 8,900 TypeScript
+**Timeline:** 6 days (2026-02-24 → 2026-03-02)
+**Git range:** feat(51-01) → feat(55-04)
+
+**Key accomplishments:**
+- Abstract provider interface: InfrastructureProvider ABC with 5 abstract methods, ProviderContext dataclass, dict-dispatch registry, and shared `run_provider_command()` subprocess helper
+- Metadata transport system: WorkflowMetadata dataclass capturing all DSL infrastructure fields + 3 transport mechanisms (JSON file with mode 0600, environment variables, CLI arg templates with `{placeholder}` substitution)
+- Terraform provider refactor: TerraformProvider wrapping existing generator with zero behavior change; deploy_cmd refactored from ~80 LOC inline extraction to provider interface routing; `rsf.toml` project-wide config with YAML > toml > default cascade
+- CDK provider: Full AWS CDK support with Jinja2-generated CDK apps (app.py, stack.py, cdk.json), bootstrap detection via boto3, and `npx aws-cdk@latest` invocation — no global CDK install required
+- Custom provider: Security-hardened subprocess execution (`shell=False`, absolute path validation) for arbitrary external programs with configurable metadata transport selection per workflow
+- Provider-aware CLI audit: doctor/diff/watch/export commands updated to handle any provider gracefully — Terraform checks become WARN for non-TF providers, diff gracefully declines, watch routes deploys through provider interface, export uses shared `create_metadata()` eliminating ~90 LOC duplication
+- 29/29 requirements satisfied across 6 categories (Provider Abstraction, Metadata, Terraform Provider, CDK Provider, Custom Provider, Command Integration)
+
+---
+
 ## v2.0 Comprehensive Enhancement Suite (Shipped: 2026-03-02)
 
 **Phases completed:** 12 phases (39-50), 34 plans, 99 tasks
