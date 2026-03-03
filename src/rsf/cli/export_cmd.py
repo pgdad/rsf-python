@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import re
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
@@ -10,8 +11,8 @@ import typer
 import yaml
 from rich.console import Console
 
-from rsf.dsl.models import StateMachineDefinition, TaskState
 from rsf.dsl.parser import load_definition
+from rsf.providers.metadata import create_metadata
 
 console = Console()
 
@@ -21,98 +22,6 @@ def _sanitize_logical_id(name: str) -> str:
     # Replace non-alphanumeric with space, title case, remove spaces
     cleaned = re.sub(r"[^a-zA-Z0-9]", " ", name)
     return "".join(word.capitalize() for word in cleaned.split())
-
-
-def _extract_infrastructure_from_definition(
-    definition: StateMachineDefinition,
-    workflow_name: str,
-) -> dict[str, Any]:
-    """Extract infrastructure configuration from a DSL definition.
-
-    Returns a dict with all infrastructure features detected:
-    triggers, dynamodb_tables, alarms, dlq, lambda_url, handler_count.
-    """
-    infra: dict[str, Any] = {
-        "workflow_name": workflow_name,
-        "handler_count": sum(
-            1 for s in definition.states.values() if isinstance(s, TaskState)
-        ),
-        "triggers": [],
-        "dynamodb_tables": [],
-        "alarms": [],
-        "dlq_enabled": False,
-        "dlq_max_receive_count": 3,
-        "dlq_queue_name": None,
-        "lambda_url_enabled": False,
-        "lambda_url_auth_type": "NONE",
-        "timeout_seconds": definition.timeout_seconds,
-    }
-
-    # Triggers
-    if definition.triggers:
-        for trigger in definition.triggers:
-            trigger_dict: dict[str, Any] = {"type": trigger.type}
-            if trigger.type == "eventbridge":
-                trigger_dict["schedule_expression"] = trigger.schedule_expression
-                trigger_dict["event_pattern"] = trigger.event_pattern
-            elif trigger.type == "sqs":
-                trigger_dict["queue_name"] = trigger.queue_name
-                trigger_dict["batch_size"] = trigger.batch_size
-            elif trigger.type == "sns":
-                trigger_dict["topic_arn"] = trigger.topic_arn
-            infra["triggers"].append(trigger_dict)
-
-    # DynamoDB
-    if definition.dynamodb_tables:
-        for table in definition.dynamodb_tables:
-            table_dict: dict[str, Any] = {
-                "table_name": table.table_name,
-                "partition_key": {
-                    "name": table.partition_key.name,
-                    "type": table.partition_key.type.value,
-                },
-                "billing_mode": table.billing_mode.value,
-            }
-            if table.sort_key:
-                table_dict["sort_key"] = {
-                    "name": table.sort_key.name,
-                    "type": table.sort_key.type.value,
-                }
-            if table.read_capacity is not None:
-                table_dict["read_capacity"] = table.read_capacity
-            if table.write_capacity is not None:
-                table_dict["write_capacity"] = table.write_capacity
-            infra["dynamodb_tables"].append(table_dict)
-
-    # Alarms
-    if definition.alarms:
-        for alarm in definition.alarms:
-            infra["alarms"].append(
-                {
-                    "type": alarm.type,
-                    "threshold": alarm.threshold,
-                    "period": alarm.period,
-                    "evaluation_periods": alarm.evaluation_periods,
-                    "sns_topic_arn": alarm.sns_topic_arn,
-                }
-            )
-
-    # DLQ
-    if definition.dead_letter_queue and definition.dead_letter_queue.enabled:
-        infra["dlq_enabled"] = True
-        infra["dlq_max_receive_count"] = definition.dead_letter_queue.max_receive_count
-        infra["dlq_queue_name"] = definition.dead_letter_queue.queue_name
-
-    # Lambda URL
-    if (
-        hasattr(definition, "lambda_url")
-        and definition.lambda_url
-        and definition.lambda_url.enabled
-    ):
-        infra["lambda_url_enabled"] = True
-        infra["lambda_url_auth_type"] = definition.lambda_url.auth_type.value
-
-    return infra
 
 
 def _build_sam_template(infra: dict[str, Any]) -> dict[str, Any]:
@@ -441,8 +350,9 @@ def export_workflow(
         else workflow.stem.replace("_", "-").replace(" ", "-")
     )
 
-    # Extract infrastructure and build template
-    infra = _extract_infrastructure_from_definition(definition, workflow_name)
+    # Extract infrastructure metadata and build template
+    metadata = create_metadata(definition, workflow_name)
+    infra = asdict(metadata)
     template = _build_sam_template(infra)
 
     # Serialize to YAML

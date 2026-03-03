@@ -9,12 +9,14 @@ from typing import Any
 import pytest
 import yaml
 
+from dataclasses import asdict
+
 from rsf.cli.export_cmd import (
     _build_sam_template,
-    _extract_infrastructure_from_definition,
     _sanitize_logical_id,
 )
 from rsf.dsl.parser import load_definition
+from rsf.providers.metadata import create_metadata
 
 
 # --- Helper to create workflow files ---
@@ -116,7 +118,7 @@ class TestBuildSamTemplate:
         """Test 1: Minimal workflow produces valid SAM template."""
         workflow = _write_workflow(tmp_path, MINIMAL_WORKFLOW)
         definition = load_definition(workflow)
-        infra = _extract_infrastructure_from_definition(definition, "my-workflow")
+        infra = asdict(create_metadata(definition, "my-workflow"))
         template = _build_sam_template(infra)
 
         assert template["AWSTemplateFormatVersion"] == "2010-09-09"
@@ -131,7 +133,7 @@ class TestBuildSamTemplate:
         """Test 2: SAM template includes required IAM policy statements."""
         workflow = _write_workflow(tmp_path, MINIMAL_WORKFLOW)
         definition = load_definition(workflow)
-        infra = _extract_infrastructure_from_definition(definition, "my-workflow")
+        infra = asdict(create_metadata(definition, "my-workflow"))
         template = _build_sam_template(infra)
 
         resources = template["Resources"]
@@ -152,7 +154,7 @@ class TestBuildSamTemplate:
         """Test 3: SAM template includes CloudWatch LogGroup with 14-day retention."""
         workflow = _write_workflow(tmp_path, MINIMAL_WORKFLOW)
         definition = load_definition(workflow)
-        infra = _extract_infrastructure_from_definition(definition, "my-workflow")
+        infra = asdict(create_metadata(definition, "my-workflow"))
         template = _build_sam_template(infra)
 
         resources = template["Resources"]
@@ -166,7 +168,7 @@ class TestBuildSamTemplate:
         """Test 4: EventBridge trigger produces Events section."""
         workflow = _write_workflow(tmp_path, WORKFLOW_WITH_TRIGGERS)
         definition = load_definition(workflow)
-        infra = _extract_infrastructure_from_definition(definition, "my-workflow")
+        infra = asdict(create_metadata(definition, "my-workflow"))
         template = _build_sam_template(infra)
 
         resources = template["Resources"]
@@ -182,7 +184,7 @@ class TestBuildSamTemplate:
         """Test 5: SQS trigger produces Events section with SQS event type."""
         workflow = _write_workflow(tmp_path, WORKFLOW_WITH_TRIGGERS)
         definition = load_definition(workflow)
-        infra = _extract_infrastructure_from_definition(definition, "my-workflow")
+        infra = asdict(create_metadata(definition, "my-workflow"))
         template = _build_sam_template(infra)
 
         resources = template["Resources"]
@@ -197,7 +199,7 @@ class TestBuildSamTemplate:
         """Test 6: SNS trigger produces Events section with SNS event type."""
         workflow = _write_workflow(tmp_path, WORKFLOW_WITH_TRIGGERS)
         definition = load_definition(workflow)
-        infra = _extract_infrastructure_from_definition(definition, "my-workflow")
+        infra = asdict(create_metadata(definition, "my-workflow"))
         template = _build_sam_template(infra)
 
         resources = template["Resources"]
@@ -212,7 +214,7 @@ class TestBuildSamTemplate:
         """Test 7: DynamoDB tables produce AWS::DynamoDB::Table resources and IAM permissions."""
         workflow = _write_workflow(tmp_path, WORKFLOW_WITH_DYNAMODB)
         definition = load_definition(workflow)
-        infra = _extract_infrastructure_from_definition(definition, "my-workflow")
+        infra = asdict(create_metadata(definition, "my-workflow"))
         template = _build_sam_template(infra)
 
         resources = template["Resources"]
@@ -237,7 +239,7 @@ class TestBuildSamTemplate:
         """Test 8: Alarms produce AWS::CloudWatch::Alarm resources."""
         workflow = _write_workflow(tmp_path, WORKFLOW_WITH_ALARMS)
         definition = load_definition(workflow)
-        infra = _extract_infrastructure_from_definition(definition, "my-workflow")
+        infra = asdict(create_metadata(definition, "my-workflow"))
         template = _build_sam_template(infra)
 
         resources = template["Resources"]
@@ -255,7 +257,7 @@ class TestBuildSamTemplate:
         """Test 9: DLQ produces AWS::SQS::Queue resource and DeadLetterQueue config."""
         workflow = _write_workflow(tmp_path, WORKFLOW_WITH_DLQ)
         definition = load_definition(workflow)
-        infra = _extract_infrastructure_from_definition(definition, "my-workflow")
+        infra = asdict(create_metadata(definition, "my-workflow"))
         template = _build_sam_template(infra)
 
         resources = template["Resources"]
@@ -274,7 +276,7 @@ class TestBuildSamTemplate:
         """Test 10: Lambda URL produces FunctionUrlConfig."""
         workflow = _write_workflow(tmp_path, WORKFLOW_WITH_LAMBDA_URL)
         definition = load_definition(workflow)
-        infra = _extract_infrastructure_from_definition(definition, "my-workflow")
+        infra = asdict(create_metadata(definition, "my-workflow"))
         template = _build_sam_template(infra)
 
         resources = template["Resources"]
@@ -286,7 +288,7 @@ class TestBuildSamTemplate:
         """Test 11: Generated YAML is valid and parseable."""
         workflow = _write_workflow(tmp_path, MINIMAL_WORKFLOW)
         definition = load_definition(workflow)
-        infra = _extract_infrastructure_from_definition(definition, "my-workflow")
+        infra = asdict(create_metadata(definition, "my-workflow"))
         template = _build_sam_template(infra)
 
         yaml_output = yaml.dump(template, default_flow_style=False)
@@ -294,15 +296,16 @@ class TestBuildSamTemplate:
         assert parsed["AWSTemplateFormatVersion"] == "2010-09-09"
         assert "Resources" in parsed
 
-    def test_extract_infrastructure(self, tmp_path: Path) -> None:
-        """Test 12: _extract_infrastructure_from_definition extracts all DSL features."""
+    def test_create_metadata_extracts_all_features(self, tmp_path: Path) -> None:
+        """Test 12: create_metadata extracts all DSL features."""
         workflow = _write_workflow(tmp_path, WORKFLOW_WITH_TRIGGERS)
         definition = load_definition(workflow)
-        infra = _extract_infrastructure_from_definition(definition, "my-workflow")
+        infra = asdict(create_metadata(definition, "my-workflow"))
 
         assert infra["workflow_name"] == "my-workflow"
         assert infra["handler_count"] == 1
         assert len(infra["triggers"]) == 3
+        assert "stage" in infra  # WorkflowMetadata includes stage field
 
 
 # --- CLI command tests ---
