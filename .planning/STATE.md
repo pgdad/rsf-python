@@ -27,6 +27,11 @@ All 5 phases (51-55) complete, 17 plans executed, 29 requirements delivered.
 
 Progress: [██████████] 100% — SHIPPED
 
+**Active work (post-milestone):** Phase 28 F401 Unused Imports Cleanup
+Phase 28, Plan 02/02 — COMPLETE (2026-03-03)
+- Plan 01: Fixed 61 F401 violations across 30 files in src/, tests/, examples/
+- Plan 02: Removed examples/ exclusion and F401 from ruff ignore list; fixed 34 new violations from v3.0 development
+
 ## Performance Metrics
 
 **Velocity:**
@@ -46,12 +51,19 @@ Progress: [██████████] 100% — SHIPPED
 | v1.7 Lambda Function URL | 3 | 8 | 2026-03-01 |
 | v2.0 Enhancement Suite | 12 | 34 | 2026-03-01 → 2026-03-02 |
 | v3.0 Pluggable Providers | 5 | 17 | 2026-03-02 → 2026-03-03 |
+| Phase 28 F401 Cleanup | 1 | 2 | 2026-03-03 |
 
 ## Accumulated Context
 
 ### Decisions
 
 All decisions logged in PROJECT.md Key Decisions table.
+
+**Phase 28 decisions:**
+- Side-effect imports in functions/__init__.py annotated with noqa: F401 to preserve @intrinsic decorator registration (Plan 01)
+- Generated code noqa: F401 string in codegen/generator.py preserved as output code pattern, not source-level suppression (Plan 01)
+- pyproject.toml ruff config: remove examples/ exclusion and F401 from ignore list to enforce lint coverage on all code (Plan 02)
+- 34 F401 violations from v3.0 development auto-fixed with ruff --fix (Plan 02)
 
 ### Pending Todos
 
@@ -64,5 +76,5 @@ None — milestone shipped.
 ## Session Continuity
 
 Last session: 2026-03-03
-Stopped at: v3.0 milestone archived and shipped
+Stopped at: Phase 28 Plan 02 complete — zero F401 violations, ruff config enforced on full codebase
 Resume file: None
