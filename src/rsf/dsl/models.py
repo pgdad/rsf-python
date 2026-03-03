@@ -388,6 +388,24 @@ class TerraformProviderConfig(BaseModel):
     backend_dynamodb_table: str | None = None
 
 
+class CustomProviderConfig(BaseModel):
+    """Custom provider configuration block.
+
+    Allows users to configure any external program as an infrastructure
+    provider. The program receives workflow metadata via the selected
+    transport mechanism (JSON file, env vars, or CLI arg templates).
+    """
+
+    model_config = {"extra": "forbid", "populate_by_name": True}
+
+    program: str  # Absolute path to the executable (required)
+    args: list[str] = []  # Arg templates with {placeholder} substitution
+    teardown_args: list[str] | None = None  # Optional separate teardown arg templates
+    metadata_transport: Literal["file", "env", "args"] = "file"
+    env: dict[str, str] | None = None  # Optional extra environment variables
+    timeout: int | None = None  # Optional timeout in seconds
+
+
 class InfrastructureConfig(BaseModel):
     """Infrastructure provider configuration block.
 
@@ -400,7 +418,7 @@ class InfrastructureConfig(BaseModel):
     provider: str = "terraform"
     terraform: TerraformProviderConfig | None = None
     cdk: dict[str, Any] | None = None  # Phase 53
-    custom: dict[str, Any] | None = None  # Phase 54
+    custom: CustomProviderConfig | None = None
 
 
 class StateMachineDefinition(BaseModel):
