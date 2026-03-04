@@ -80,33 +80,33 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROV-01 | — | Pending |
-| PROV-02 | — | Pending |
-| PROV-03 | — | Pending |
-| PROV-04 | — | Pending |
-| REG-01 | — | Pending |
-| REG-02 | — | Pending |
-| REG-03 | — | Pending |
-| REG-04 | — | Pending |
-| REG-05 | — | Pending |
-| REG-06 | — | Pending |
-| EXAM-01 | — | Pending |
-| EXAM-02 | — | Pending |
-| EXAM-03 | — | Pending |
-| TEST-01 | — | Pending |
-| TEST-02 | — | Pending |
-| TEST-03 | — | Pending |
-| TUT-01 | — | Pending |
-| TUT-02 | — | Pending |
-| TUT-03 | — | Pending |
-| TUT-04 | — | Pending |
-| TOOL-01 | — | Pending |
+| PROV-01 | Phase 57 | Pending |
+| PROV-02 | Phase 57 | Pending |
+| PROV-03 | Phase 57 | Pending |
+| PROV-04 | Phase 57 | Pending |
+| REG-01 | Phase 57 | Pending |
+| REG-02 | Phase 58 | Pending |
+| REG-03 | Phase 58 | Pending |
+| REG-04 | Phase 58 | Pending |
+| REG-05 | Phase 58 | Pending |
+| REG-06 | Phase 56 | Pending |
+| EXAM-01 | Phase 57 | Pending |
+| EXAM-02 | Phase 57 | Pending |
+| EXAM-03 | Phase 57 | Pending |
+| TEST-01 | Phase 59 | Pending |
+| TEST-02 | Phase 59 | Pending |
+| TEST-03 | Phase 59 | Pending |
+| TUT-01 | Phase 60 | Pending |
+| TUT-02 | Phase 60 | Pending |
+| TUT-03 | Phase 60 | Pending |
+| TUT-04 | Phase 60 | Pending |
+| TOOL-01 | Phase 57 | Pending |
 
 **Coverage:**
 - v3.2 requirements: 21 total
-- Mapped to phases: 0
-- Unmapped: 21 ⚠️
+- Mapped to phases: 21
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-03*
-*Last updated: 2026-03-03 after initial definition*
+*Last updated: 2026-03-03 after roadmap creation — all 21 requirements mapped to phases 56-60*
