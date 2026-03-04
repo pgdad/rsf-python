@@ -58,7 +58,7 @@ case "${CMD}" in
     # -----------------------------------------------------------------------
     mkdir -p "${BUILD_DIR}"
     cd "${SCRIPT_DIR}"
-    zip -r "${BUILD_DIR}/function.zip" src/generated/ handlers/ \
+    zip -r "${BUILD_DIR}/function.zip" orchestrator.py handlers/ \
       -x "**/__pycache__/*" "**/*.pyc"
     echo "Packaged: ${BUILD_DIR}/function.zip"
     echo ""
