@@ -25,9 +25,9 @@ Requirements for the Terraform Registry Modules Tutorial milestone. Each maps to
 
 ### Example
 
-- [ ] **EXAM-01**: New example workflow YAML with Task states, DynamoDB table, and DLQ configuration
-- [ ] **EXAM-02**: Example follows RSF directory convention (workflow.yaml, handlers/, tests/, terraform/, README.md)
-- [ ] **EXAM-03**: Example handlers implement business logic with structured logging
+- [x] **EXAM-01**: New example workflow YAML with Task states, DynamoDB table, and DLQ configuration
+- [x] **EXAM-02**: Example follows RSF directory convention (workflow.yaml, handlers/, tests/, terraform/, README.md)
+- [x] **EXAM-03**: Example handlers implement business logic with structured logging
 
 ### Testing
 
@@ -44,7 +44,7 @@ Requirements for the Terraform Registry Modules Tutorial milestone. Each maps to
 
 ### Tooling
 
-- [ ] **TOOL-01**: Fix custom provider friction points discovered during tutorial development (if any)
+- [x] **TOOL-01**: Fix custom provider friction points discovered during tutorial development (if any)
 
 ## Future Requirements
 
@@ -90,9 +90,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REG-04 | Phase 58 | Pending |
 | REG-05 | Phase 58 | Pending |
 | REG-06 | Phase 56 | Complete |
-| EXAM-01 | Phase 57 | Pending |
-| EXAM-02 | Phase 57 | Pending |
-| EXAM-03 | Phase 57 | Pending |
+| EXAM-01 | Phase 57 | Complete |
+| EXAM-02 | Phase 57 | Complete |
+| EXAM-03 | Phase 57 | Complete |
 | TEST-01 | Phase 59 | Pending |
 | TEST-02 | Phase 59 | Pending |
 | TEST-03 | Phase 59 | Pending |
@@ -100,7 +100,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TUT-02 | Phase 60 | Pending |
 | TUT-03 | Phase 60 | Pending |
 | TUT-04 | Phase 60 | Pending |
-| TOOL-01 | Phase 57 | Pending |
+| TOOL-01 | Phase 57 | Complete |
 
 **Coverage:**
 - v3.2 requirements: 21 total

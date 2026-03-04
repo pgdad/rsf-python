@@ -244,7 +244,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 56. Schema Verification | 1/1 | Complete    | 2026-03-04 |
-| 57. Core Lambda Example | 0/3 | Not started | - |
+| 57. Core Lambda Example | 1/3 | In Progress|  |
 | 58. Full-Stack Registry Modules | 0/TBD | Not started | - |
 | 59. Tests | 0/TBD | Not started | - |
 | 60. Tutorial Document | 0/TBD | Not started | - |
