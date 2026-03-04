@@ -184,7 +184,11 @@ Plans:
   3. `rsf deploy --teardown` (or equivalent teardown path) destroys all AWS resources with no orphaned state
   4. The example directory follows RSF conventions (workflow.yaml, handlers/, tests/, terraform/, README.md, deploy.sh) and rsf.toml configures provider="custom" with absolute path and FileTransport
   5. deploy.sh starts with `set -euo pipefail` and a failed Terraform invocation causes rsf deploy to exit non-zero
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 57-01-PLAN.md — CLI --teardown flag + workflow YAML, handlers, and handler tests
+- [ ] 57-02-PLAN.md — Terraform files (main.tf, iam_durable.tf, variables.tf, outputs.tf, backend.tf)
+- [ ] 57-03-PLAN.md — deploy.sh, rsf.toml, and README.md integration layer
 
 ### Phase 58: Full-Stack Registry Modules
 **Goal**: The registry-modules-demo example exercises all RSF infrastructure features — DynamoDB table, SQS DLQ, CloudWatch alarms, SNS topic — each deployed via the corresponding terraform-aws-modules registry module
@@ -233,14 +237,14 @@ Plans:
 | v1.7 Lambda URL | 36-38 | 8 | Complete | 2026-03-01 |
 | v2.0 Enhancement Suite | 39-50 | 34 | Complete | 2026-03-02 |
 | v3.0 Pluggable Providers | 51-55 | 17 | Complete | 2026-03-03 |
-| v3.2 Registry Modules Tutorial | 56-60 | 1+ | In progress | - |
+| v3.2 Registry Modules Tutorial | 56-60 | 4+ | In progress | - |
 
 **v3.2 Phase Progress:**
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 56. Schema Verification | 1/1 | Complete    | 2026-03-04 |
-| 57. Core Lambda Example | 0/TBD | Not started | - |
+| 57. Core Lambda Example | 0/3 | Not started | - |
 | 58. Full-Stack Registry Modules | 0/TBD | Not started | - |
 | 59. Tests | 0/TBD | Not started | - |
 | 60. Tutorial Document | 0/TBD | Not started | - |
