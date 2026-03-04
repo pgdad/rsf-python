@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: Terraform Registry Modules Tutorial
 status: planning
-stopped_at: Completed 58-01-PLAN.md
-last_updated: "2026-03-04T14:45:17.132Z"
+stopped_at: Completed 58-02-PLAN.md
+last_updated: "2026-03-04T14:53:20.875Z"
 last_activity: 2026-03-03 — Roadmap created, v3.2 phases 56-60 defined
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 6
-  completed_plans: 5
+  completed_plans: 6
   percent: 0
 ---
 
@@ -56,6 +56,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 57-core-lambda-example P02 | 13min | 2 tasks | 5 files |
 | Phase 57-core-lambda-example P03 | 5min | 2 tasks | 3 files |
 | Phase 58-full-stack-registry-modules P01 | 2 | 2 tasks | 7 files |
+| Phase 58 P02 | 8min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -81,6 +82,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 57-core-lambda-example]: rsf.toml program field uses obvious /REPLACE/... placeholder to prevent silent wrong-path failures
 - [Phase 58-01]: concat() with conditional list arrays used for IAM policy_json — single policy_json block, empty list [] for false branches (not null), DynamoDB/SQS statements included only when resources exist
 - [Phase 58-01]: locals alarm_by_type map (for a in var.alarms : a.type => a) used for count gating in alarm modules — O(1) lookup, readable state keys
+- [Phase 58-02]: generate_tfvars() called before both deploy and destroy — tfvars.json must exist for destroy even when build artifacts are absent (Pitfall 5)
+- [Phase 58-02]: jq strips sns_topic_arn from each alarm object in tfvars.json — Terraform variable type does not include it, SNS handled by module wiring
 
 ### Pending Todos
 
@@ -99,6 +102,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T14:45:17.131Z
-Stopped at: Completed 58-01-PLAN.md
+Last session: 2026-03-04T14:53:20.874Z
+Stopped at: Completed 58-02-PLAN.md
 Resume file: None
