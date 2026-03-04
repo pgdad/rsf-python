@@ -170,7 +170,9 @@ Full details: `.planning/milestones/v3.0-ROADMAP.md`
   3. IAM approach decision (managed policy AWSLambdaBasicDurableExecutionRolePolicy vs. inline policy) is made with verification evidence
   4. All five registry module versions are pinned to exact version strings in a versions.tf skeleton with rationale for exact pinning over range constraints
   5. Lambda zip path convention (where deploy.sh creates the zip relative to generated source) is established and documented
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 56-01-PLAN.md — Example directory scaffold with versions.tf skeleton and verification findings document
 
 ### Phase 57: Core Lambda Example
 **Goal**: Users can run `rsf deploy` on a real workflow and have RSF invoke a custom provider script that zips generated source and deploys a working Lambda Durable Function via terraform-aws-modules/lambda
@@ -231,13 +233,13 @@ Full details: `.planning/milestones/v3.0-ROADMAP.md`
 | v1.7 Lambda URL | 36-38 | 8 | Complete | 2026-03-01 |
 | v2.0 Enhancement Suite | 39-50 | 34 | Complete | 2026-03-02 |
 | v3.0 Pluggable Providers | 51-55 | 17 | Complete | 2026-03-03 |
-| v3.2 Registry Modules Tutorial | 56-60 | TBD | Not started | - |
+| v3.2 Registry Modules Tutorial | 56-60 | 1+ | In progress | - |
 
 **v3.2 Phase Progress:**
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 56. Schema Verification | 0/TBD | Not started | - |
+| 56. Schema Verification | 0/1 | Planned | - |
 | 57. Core Lambda Example | 0/TBD | Not started | - |
 | 58. Full-Stack Registry Modules | 0/TBD | Not started | - |
 | 59. Tests | 0/TBD | Not started | - |
