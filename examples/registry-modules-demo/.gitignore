@@ -1,0 +1,17 @@
+# Build artifacts (deploy.sh creates build/function.zip)
+build/
+
+# Terraform working directory
+.terraform/
+.terraform.lock.hcl
+
+# Terraform state (local state for tutorial simplicity)
+*.tfstate
+*.tfstate.backup
+
+# RSF generated source (recreated by rsf generate)
+src/generated/
+
+# Python bytecode
+__pycache__/
+*.pyc
