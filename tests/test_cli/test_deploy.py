@@ -632,3 +632,114 @@ class TestStageDeployment:
         # Verify provider received output_dir ending in /prod
         ctx = mock_provider.generate.call_args[0][0]
         assert str(ctx.output_dir).endswith("prod"), f"Expected output_dir to end with 'prod', got: {ctx.output_dir}"
+
+
+# -- --teardown flag tests --
+
+
+def test_deploy_teardown_calls_provider_teardown(
+    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """rsf deploy --teardown calls provider.teardown(ctx) and exits 0 with 'Teardown complete'."""
+    monkeypatch.chdir(workflow_dir)
+
+    mock_provider = _mock_provider()
+    mock_provider.teardown.return_value = None
+    with (
+        patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
+        patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+    ):
+        mock_codegen.return_value = MagicMock(
+            orchestrator_path=workflow_dir / "orchestrator.py",
+            handler_paths=[],
+            skipped_handlers=[],
+        )
+
+        result = runner.invoke(app, ["deploy", "--teardown", "workflow.yaml"])
+
+    assert result.exit_code == 0, f"Unexpected exit: {result.output}"
+    assert "Teardown complete" in result.output
+    mock_provider.teardown.assert_called_once()
+
+
+def test_deploy_teardown_exits_nonzero_on_subprocess_error(
+    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """provider.teardown() raises CalledProcessError -> exit 1 with 'Infrastructure teardown failed'."""
+    monkeypatch.chdir(workflow_dir)
+
+    mock_provider = _mock_provider()
+    mock_provider.teardown.side_effect = subprocess.CalledProcessError(1, "terraform destroy")
+    with (
+        patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
+        patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+    ):
+        mock_codegen.return_value = MagicMock(
+            orchestrator_path=workflow_dir / "orchestrator.py",
+            handler_paths=[],
+            skipped_handlers=[],
+        )
+
+        result = runner.invoke(app, ["deploy", "--teardown", "workflow.yaml"])
+
+    assert result.exit_code == 1, f"Expected exit 1, got: {result.exit_code}"
+    assert "teardown failed" in result.output.lower() or "Infrastructure teardown failed" in result.output
+
+
+def test_deploy_teardown_not_implemented_errors_gracefully(
+    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """provider.teardown() raises NotImplementedError -> exit 1 with error message."""
+    monkeypatch.chdir(workflow_dir)
+
+    mock_provider = _mock_provider()
+    mock_provider.teardown.side_effect = NotImplementedError("teardown not supported")
+    with (
+        patch("rsf.cli.deploy_cmd.get_provider", return_value=mock_provider),
+        patch("rsf.cli.deploy_cmd.codegen_generate") as mock_codegen,
+    ):
+        mock_codegen.return_value = MagicMock(
+            orchestrator_path=workflow_dir / "orchestrator.py",
+            handler_paths=[],
+            skipped_handlers=[],
+        )
+
+        result = runner.invoke(app, ["deploy", "--teardown", "workflow.yaml"])
+
+    assert result.exit_code == 1, f"Expected exit 1, got: {result.exit_code}"
+    assert "Error" in result.output or "not supported" in result.output.lower()
+
+
+def test_deploy_teardown_mutually_exclusive_with_code_only(
+    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """rsf deploy --teardown --code-only -> exit 1 with mutual exclusion error."""
+    monkeypatch.chdir(workflow_dir)
+
+    result = runner.invoke(app, ["deploy", "--teardown", "--code-only", "workflow.yaml"])
+
+    assert result.exit_code == 1, f"Expected exit 1, got: {result.exit_code}"
+    assert "mutually exclusive" in result.output.lower() or "teardown" in result.output.lower()
+
+
+def test_deploy_teardown_mutually_exclusive_with_no_infra(
+    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """rsf deploy --teardown --no-infra -> exit 1 with mutual exclusion error."""
+    monkeypatch.chdir(workflow_dir)
+
+    result = runner.invoke(app, ["deploy", "--teardown", "--no-infra", "workflow.yaml"])
+
+    assert result.exit_code == 1, f"Expected exit 1, got: {result.exit_code}"
+    assert "mutually exclusive" in result.output.lower() or "teardown" in result.output.lower()
+
+
+def test_deploy_help_shows_teardown_option() -> None:
+    """rsf deploy --help output contains '--teardown'."""
+    result = runner.invoke(app, ["deploy", "--help"])
+
+    assert result.exit_code == 0
+    import re
+
+    plain = re.sub(r"\x1b\[[0-9;]*m", "", result.output)
+    assert "--teardown" in plain

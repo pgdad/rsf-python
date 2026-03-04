@@ -34,6 +34,7 @@ def deploy(
     tf_dir: Path = typer.Option(None, "--tf-dir", hidden=True, help="[deprecated] Alias for --output-dir"),
     no_infra: bool = typer.Option(False, "--no-infra", help="Generate and deploy code only, skip infrastructure"),
     stage: str | None = typer.Option(None, "--stage", help="Deployment stage (e.g., dev, staging, prod)"),
+    teardown: bool = typer.Option(False, "--teardown", help="Destroy all deployed infrastructure (runs provider teardown)"),
 ) -> None:
     """Deploy an RSF workflow to AWS via the configured infrastructure provider.
 
@@ -41,10 +42,16 @@ def deploy(
     Use --code-only to re-package Lambda code without a full infrastructure deploy.
     Use --no-infra to skip infrastructure generation entirely.
     Use --stage to deploy to a named stage with stage-specific variable overrides.
+    Use --teardown to destroy all deployed infrastructure.
     """
     # Handle --tf-dir alias (deprecated, hidden)
     if tf_dir is not None:
         output_dir = tf_dir
+
+    # Check mutual exclusion: --teardown with --code-only or --no-infra
+    if teardown and (code_only or no_infra):
+        console.print("[red]Error:[/red] --teardown is mutually exclusive with --code-only and --no-infra")
+        raise typer.Exit(code=1)
 
     # Check mutual exclusion: --no-infra and --code-only
     if no_infra and code_only:
@@ -136,6 +143,11 @@ def deploy(
         stage_var_file=stage_var_file,
     )
 
+    # Teardown dispatch (must be after ctx creation, before deploy)
+    if teardown:
+        _teardown_infra(provider, ctx)
+        return
+
     if code_only:
         _deploy_code_only(ctx)
     else:
@@ -171,6 +183,22 @@ def _deploy_full(provider: object, ctx: ProviderContext) -> None:
         raise typer.Exit(code=1)
 
     console.print("\n[green]Deploy complete[/green]")
+
+
+def _teardown_infra(provider: object, ctx: ProviderContext) -> None:
+    """Destroy all deployed infrastructure via the provider's teardown method."""
+    console.print("[bold]Tearing down infrastructure...[/bold]")
+    try:
+        provider.teardown(ctx)
+    except subprocess.CalledProcessError as exc:
+        console.print(
+            f"[red]Error:[/red] Infrastructure teardown failed (exit {exc.returncode})"
+        )
+        raise typer.Exit(code=1)
+    except NotImplementedError as exc:
+        console.print(f"[red]Error:[/red] {exc}")
+        raise typer.Exit(code=1)
+    console.print("[green]Teardown complete[/green]")
 
 
 def _deploy_code_only(ctx: ProviderContext) -> None:
