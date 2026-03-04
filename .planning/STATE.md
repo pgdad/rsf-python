@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.0
-milestone_name: Pluggable Infrastructure Providers
-status: shipped
+milestone: v3.2
+milestone_name: Terraform Registry Modules Tutorial
+status: planning
 last_updated: "2026-03-03"
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 17
-  completed_plans: 17
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -18,19 +18,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-03)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** Planning next milestone
+**Current focus:** v3.2 Terraform Registry Modules Tutorial
 
 ## Current Position
 
-Milestone: v3.0 Pluggable Infrastructure Providers — SHIPPED 2026-03-03
-All 5 phases (51-55) complete, 17 plans executed, 29 requirements delivered.
-
-Progress: [██████████] 100% — SHIPPED
-
-**Active work (post-milestone):** Phase 28 F401 Unused Imports Cleanup
-Phase 28, Plan 02/02 — COMPLETE (2026-03-03)
-- Plan 01: Fixed 61 F401 violations across 30 files in src/, tests/, examples/
-- Plan 02: Removed examples/ exclusion and F401 from ruff ignore list; fixed 34 new violations from v3.0 development
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-03 — Milestone v3.2 started
 
 ## Performance Metrics
 

@@ -95,7 +95,15 @@ v3.0 shipped (2026-03-03). RSF is a full development platform installable via `p
 
 <!-- Current scope. Building toward these. -->
 
-(No active milestone — planning next)
+## Current Milestone: v3.2 Terraform Registry Modules Tutorial
+
+**Goal:** Tutorial and example showing how to create alternate infrastructure using HashiCorp's official Terraform registry modules with RSF's custom provider system, plus tooling enhancements where beneficial.
+
+**Target features:**
+- Tutorial walking students through creating a custom provider implementation using Terraform registry modules
+- New dedicated example workflow deployed via registry modules (terraform-aws-modules/lambda/aws, etc.)
+- Full-stack coverage: Lambda, IAM, CloudWatch, DynamoDB, SQS — mapping all RSF infra features to registry modules
+- Tooling enhancements to the custom provider system where the tutorial reveals friction points
 
 ### Out of Scope
 
@@ -182,4 +190,4 @@ v3.0 shipped (2026-03-03). RSF is a full development platform installable via `p
 | Terraform doctor check WARN (not FAIL) for non-TF providers | Informational only; missing terraform is not an error when using CDK or custom | ✓ Good |
 
 ---
-*Last updated: 2026-03-03 after v3.0 milestone*
+*Last updated: 2026-03-03 after v3.2 milestone start*
