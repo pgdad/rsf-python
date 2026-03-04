@@ -248,6 +248,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 56. Schema Verification | 1/1 | Complete    | 2026-03-04 |
 | 57. Core Lambda Example | 3/3 | Complete    | 2026-03-04 |
-| 58. Full-Stack Registry Modules | 2/2 | Complete   | 2026-03-04 |
+| 58. Full-Stack Registry Modules | 2/2 | Complete    | 2026-03-04 |
 | 59. Tests | 0/TBD | Not started | - |
 | 60. Tutorial Document | 0/TBD | Not started | - |
