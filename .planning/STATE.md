@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: Terraform Registry Modules Tutorial
 status: planning
-stopped_at: Phase 58 context gathered
-last_updated: "2026-03-04T14:29:10.000Z"
+stopped_at: Completed 58-01-PLAN.md
+last_updated: "2026-03-04T14:45:17.132Z"
 last_activity: 2026-03-03 — Roadmap created, v3.2 phases 56-60 defined
 progress:
   total_phases: 5
   completed_phases: 2
-  total_plans: 4
-  completed_plans: 4
+  total_plans: 6
+  completed_plans: 5
   percent: 0
 ---
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 57-core-lambda-example P01 | 20 | 2 tasks | 10 files |
 | Phase 57-core-lambda-example P02 | 13min | 2 tasks | 5 files |
 | Phase 57-core-lambda-example P03 | 5min | 2 tasks | 3 files |
+| Phase 58-full-stack-registry-modules P01 | 2 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -78,6 +79,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 57-core-lambda-example]: Local backend chosen for tutorial simplicity — no S3/DynamoDB lock table required, state gitignored
 - [Phase 57-core-lambda-example]: deploy.sh uses jq // alternative operator for null fallback on timeout_seconds (handles absent keys and null values)
 - [Phase 57-core-lambda-example]: rsf.toml program field uses obvious /REPLACE/... placeholder to prevent silent wrong-path failures
+- [Phase 58-01]: concat() with conditional list arrays used for IAM policy_json — single policy_json block, empty list [] for false branches (not null), DynamoDB/SQS statements included only when resources exist
+- [Phase 58-01]: locals alarm_by_type map (for a in var.alarms : a.type => a) used for count gating in alarm modules — O(1) lookup, readable state keys
 
 ### Pending Todos
 
@@ -96,6 +99,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T14:29:09.999Z
-Stopped at: Phase 58 context gathered
-Resume file: .planning/phases/58-full-stack-registry-modules/58-CONTEXT.md
+Last session: 2026-03-04T14:45:17.131Z
+Stopped at: Completed 58-01-PLAN.md
+Resume file: None
