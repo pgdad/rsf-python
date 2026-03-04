@@ -200,7 +200,10 @@ Plans:
   3. CloudWatch alarms (error_rate, duration, throttle) are deployed via the metric-alarm submodule of terraform-aws-modules/cloudwatch/aws
   4. SNS topic is deployed via terraform-aws-modules/sns/aws and feeds alarm_actions on all CloudWatch alarms
   5. A single `rsf deploy` followed by manual AWS Console verification confirms all five resource types exist and are correctly wired
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 58-01-PLAN.md — DynamoDB, SQS, SNS, CloudWatch Terraform modules + variables/outputs + IAM expansion
+- [ ] 58-02-PLAN.md — deploy.sh tfvars.json refactor + workflow.yaml alarms + validation
 
 ### Phase 59: Tests
 **Goal**: Users can validate the example locally without AWS and verify end-to-end correctness on real AWS including a live durable execution polling to SUCCEEDED
@@ -245,6 +248,6 @@ Plans:
 |-------|----------------|--------|-----------|
 | 56. Schema Verification | 1/1 | Complete    | 2026-03-04 |
 | 57. Core Lambda Example | 3/3 | Complete    | 2026-03-04 |
-| 58. Full-Stack Registry Modules | 0/TBD | Not started | - |
+| 58. Full-Stack Registry Modules | 0/2 | Not started | - |
 | 59. Tests | 0/TBD | Not started | - |
 | 60. Tutorial Document | 0/TBD | Not started | - |
