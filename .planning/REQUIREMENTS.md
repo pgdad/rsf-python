@@ -21,7 +21,7 @@ Requirements for the Terraform Registry Modules Tutorial milestone. Each maps to
 - [ ] **REG-03**: SQS DLQ deployed via terraform-aws-modules/sqs/aws conditionally based on dlq_enabled
 - [ ] **REG-04**: CloudWatch alarms deployed via terraform-aws-modules/cloudwatch metric-alarm submodule
 - [ ] **REG-05**: SNS topic deployed via terraform-aws-modules/sns/aws for alarm notifications
-- [ ] **REG-06**: All registry module versions pinned to exact versions in versions.tf
+- [x] **REG-06**: All registry module versions pinned to exact versions in versions.tf
 
 ### Example
 
@@ -89,7 +89,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | REG-03 | Phase 58 | Pending |
 | REG-04 | Phase 58 | Pending |
 | REG-05 | Phase 58 | Pending |
-| REG-06 | Phase 56 | Pending |
+| REG-06 | Phase 56 | Complete |
 | EXAM-01 | Phase 57 | Pending |
 | EXAM-02 | Phase 57 | Pending |
 | EXAM-03 | Phase 57 | Pending |

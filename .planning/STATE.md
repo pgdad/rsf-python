@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: Terraform Registry Modules Tutorial
 status: planning
-stopped_at: Phase 56 context gathered
-last_updated: "2026-03-04T10:22:02.062Z"
+stopped_at: Completed 56-01-PLAN.md
+last_updated: "2026-03-04T10:47:22.016Z"
 last_activity: 2026-03-03 — Roadmap created, v3.2 phases 56-60 defined
 progress:
   total_phases: 5
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  completed_phases: 1
+  total_plans: 1
+  completed_plans: 1
   percent: 0
 ---
 
@@ -51,6 +51,7 @@ Progress: [░░░░░░░░░░] 0%
 | v1.7 Lambda Function URL | 3 | 8 | 2026-03-01 |
 | v2.0 Enhancement Suite | 12 | 34 | 2026-03-01 → 2026-03-02 |
 | v3.0 Pluggable Providers | 5 | 17 | 2026-03-02 → 2026-03-03 |
+| Phase 56-schema-verification P01 | 3 | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -63,6 +64,10 @@ All decisions logged in PROJECT.md Key Decisions table.
 - All registry module versions pinned to exact strings (not ~> ranges) — Terraform does not lock module versions in .terraform.lock.hcl
 - FileTransport (RSF_METADATA_FILE) chosen as canonical transport for all tutorial examples — ArgsTransport cannot handle list/dict metadata fields reliably
 - Lambda alias convention (never $LATEST) required as workaround for Terraform provider issue #45800 (AllowInvokeLatest unresolved)
+- [Phase 56-schema-verification]: durable_config variables confirmed: durable_config_execution_timeout and durable_config_retention_period from v8.7.0 tag (HIGH confidence)
+- [Phase 56-schema-verification]: Lambda alias convention mandatory: issue #45800 (AllowInvokeLatest) open as of Jan 7 2026 — always use live alias, never $LATEST
+- [Phase 56-schema-verification]: IAM approach: managed AWSLambdaBasicDurableExecutionRolePolicy + inline supplement for InvokeFunction, ListDurableExecutionsByFunction, GetDurableExecution
+- [Phase 56-schema-verification]: Zip path: build/function.zip at example root, referenced as ${path.module}/../build/function.zip; no pip dependencies bundled
 
 ### Pending Todos
 
@@ -81,6 +86,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T10:22:02.060Z
-Stopped at: Phase 56 context gathered
-Resume file: .planning/phases/56-schema-verification/56-CONTEXT.md
+Last session: 2026-03-04T10:47:22.015Z
+Stopped at: Completed 56-01-PLAN.md
+Resume file: None
