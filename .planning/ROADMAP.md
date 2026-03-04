@@ -213,7 +213,10 @@ Plans:
   1. Local unit tests (examples/registry-modules-demo/tests/test_local.py) pass with `pytest` — no AWS credentials needed — covering workflow YAML parsing, handler registration, and handler business logic
   2. Integration test in tests/test_examples/test_registry_modules_demo.py deploys to AWS, invokes a durable execution by name, polls list_durable_executions_by_function until status is SUCCEEDED, and asserts expected CloudWatch log output
   3. Integration test teardown path exercises the custom provider's destroy command, and after teardown `terraform state list` returns empty — no orphaned resources
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 59-01-PLAN.md — Local unit tests (test_local.py) + pyproject.toml testpaths update
+- [ ] 59-02-PLAN.md — Real-AWS integration test with rsf deploy subprocess, durable execution, and teardown verification
 
 ### Phase 60: Tutorial Document
 **Goal**: A developer new to RSF's custom provider system can follow tutorials/09-custom-provider-registry-modules.md from prerequisites to a working real-AWS deployment, understanding why every design choice was made
@@ -249,5 +252,5 @@ Plans:
 | 56. Schema Verification | 1/1 | Complete    | 2026-03-04 |
 | 57. Core Lambda Example | 3/3 | Complete    | 2026-03-04 |
 | 58. Full-Stack Registry Modules | 2/2 | Complete    | 2026-03-04 |
-| 59. Tests | 0/TBD | Not started | - |
+| 59. Tests | 0/2 | Not started | - |
 | 60. Tutorial Document | 0/TBD | Not started | - |
