@@ -73,6 +73,12 @@ None.
 
 None — milestone shipped.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 1 | Add MIT license and push v3.1 release tag | 2026-03-03 | 3fef358 | [1-add-mit-license-to-this-project-and-push](./quick/1-add-mit-license-to-this-project-and-push/) |
+
 ## Session Continuity
 
 Last session: 2026-03-03
