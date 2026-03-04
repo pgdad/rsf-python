@@ -131,7 +131,13 @@ def deploy(
             )
             raise typer.Exit(code=1)
 
-    # Step 8: Create metadata and provider context
+    # Step 8: Ensure resolved infra config is available on definition
+    # (rsf.toml config must be accessible via ctx.definition.infrastructure
+    # for providers like CustomProvider that read their config from it)
+    if definition.infrastructure is None:
+        definition.infrastructure = infra_config
+
+    # Step 9: Create metadata and provider context
     metadata = create_metadata(definition, workflow_name, stage=stage)
     ctx = ProviderContext(
         metadata=metadata,
