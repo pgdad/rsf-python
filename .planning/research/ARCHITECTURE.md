@@ -1,672 +1,725 @@
 # Architecture Research
 
-**Domain:** Pluggable Infrastructure Provider System for RSF CLI tool
-**Researched:** 2026-03-02
-**Confidence:** HIGH — based on direct source code analysis of the existing RSF codebase
+**Domain:** Terraform Registry Modules Tutorial — Custom Provider Script Integration with RSF
+**Researched:** 2026-03-03
+**Confidence:** HIGH — based on direct source code analysis of existing RSF codebase + verified registry module documentation
 
 ---
 
 ## Standard Architecture
 
-### System Overview: Current State (v2.0)
+### System Overview: RSF v3.0 Provider System (Existing)
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                         CLI Layer                               │
-│  ┌────────────┐  ┌──────────────┐  ┌───────────┐  ┌─────────┐  │
-│  │ deploy_cmd │  │ generate_cmd │  │  diff_cmd │  │ doctor  │  │
-│  │  279 LOC   │  │  --no-infra  │  │  tf_dir   │  │ _check_ │  │
-│  └─────┬──────┘  └──────────────┘  └─────┬─────┘  │terraform│  │
-│        │                                  │        └─────────┘  │
-├────────┼──────────────────────────────────┼─────────────────────┤
-│        │         Terraform Layer          │                     │
-│  ┌─────▼──────────────────────┐          │                     │
-│  │  TerraformConfig dataclass │          │                     │
-│  │  generate_terraform()      │          │                     │
-│  │  Jinja2 HCL engine         │          │                     │
-│  │  11 .j2 templates          │          │                     │
-│  └────────────────────────────┘          │                     │
-│                                           │                     │
-│  deploy_cmd.py extracts infra fields ─────┘                     │
-│  from StateMachineDefinition manually                           │
-│  (~80 LOC of hasattr/dict-building)                             │
-└─────────────────────────────────────────────────────────────────┘
-                              │
-┌─────────────────────────────▼─────────────────────────────────┐
-│                         DSL Layer                             │
-│  StateMachineDefinition (Pydantic v2)                         │
-│    triggers, dynamodb_tables, alarms,                         │
-│    dead_letter_queue, lambda_url, sub_workflows               │
-└───────────────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────────────────────────────┐
+│                           CLI Layer                                  │
+│                       rsf deploy workflow.yaml                       │
+└────────────────────────────┬─────────────────────────────────────────┘
+                             │
+                             ▼
+┌──────────────────────────────────────────────────────────────────────┐
+│                    deploy_cmd.py pipeline                            │
+│                                                                      │
+│  load_definition() → codegen_generate() → resolve_infra_config()    │
+│      → get_provider() → provider.generate() → provider.deploy()     │
+└────────────────────────────┬─────────────────────────────────────────┘
+                             │
+              ┌──────────────┼───────────────┐
+              ▼              ▼               ▼
+    ┌──────────────┐ ┌────────────┐ ┌───────────────┐
+    │ Terraform    │ │ CDK        │ │ Custom        │
+    │ Provider     │ │ Provider   │ │ Provider      │
+    │              │ │            │ │               │
+    │ generate()   │ │ generate() │ │ generate()    │
+    │   → HCL      │ │   → CDK    │ │   → no-op     │
+    │ deploy()     │ │ deploy()   │ │ deploy()      │
+    │   → tf apply │ │   → cdk    │ │   → exec      │
+    └──────────────┘ └────────────┘ │   user script │
+                                    └───────┬───────┘
+                                            │
+                    ┌───────────────────────┤
+                    ▼                       ▼
+           ┌─────────────┐        ┌─────────────────┐
+           │ FileTransport│        │ EnvTransport /  │
+           │             │        │ ArgsTransport   │
+           │ RSF_METADATA│        │ RSF_WORKFLOW_   │
+           │ _FILE=       │        │ NAME, etc.      │
+           └─────────────┘        └─────────────────┘
 ```
 
-### System Overview: Target State (v3.0)
+### What the Custom Provider Script Receives
+
+When RSF invokes a custom provider script, `WorkflowMetadata` is delivered via the chosen transport. The script is a free-standing executable — shell script, Python script, or any binary.
+
+**WorkflowMetadata fields (as of v3.0):**
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                          CLI Layer                               │
-│  ┌──────────────┐  ┌──────────────┐  ┌──────────┐  ┌─────────┐  │
-│  │  deploy_cmd  │  │ generate_cmd │  │ diff_cmd │  │ doctor  │  │
-│  │  (slimmed)   │  │  --provider  │  │(provider │  │(provider│  │
-│  └──────┬───────┘  └──────────────┘  │ aware)   │  │ checks) │  │
-│         │                            └──────────┘  └─────────┘  │
-├─────────┼────────────────────────────────────────────────────────┤
-│         │         Provider Abstraction Layer (NEW)               │
-│  ┌──────▼──────────────────────────────────────────────────┐    │
-│  │              InfraProvider Protocol / ABC               │    │
-│  │   generate(definition, output_dir, config) -> Result    │    │
-│  │   deploy(output_dir, options) -> None                   │    │
-│  │   code_only(output_dir, options) -> None                │    │
-│  └──────┬──────────────┬───────────────────┬──────────────┘    │
-│         │              │                   │                    │
-│  ┌──────▼─────┐  ┌─────▼──────┐  ┌────────▼──────────┐        │
-│  │ Terraform  │  │  CDK (new) │  │  Custom (new)     │        │
-│  │  Provider  │  │  Provider  │  │  Provider         │        │
-│  │(refactored)│  │            │  │  (exec arbitrary  │        │
-│  └────────────┘  └────────────┘  │   program)        │        │
-│                                   └───────────────────┘        │
-└──────────────────────────────────────────────────────────────────┘
-                              │
-┌─────────────────────────────▼──────────────────────────────────┐
-│                          DSL Layer                             │
-│   StateMachineDefinition — unchanged                           │
-│   + optional: infrastructure.provider config field             │
-└────────────────────────────────────────────────────────────────┘
+workflow_name           str           — derived from Comment or file stem
+stage                   str | None    — --stage flag value
+handler_count           int           — number of Task states
+timeout_seconds         int | None    — DSL TimeoutSeconds
+triggers                list[dict]    — [{type, schedule_expression, ...}]
+dynamodb_tables         list[dict]    — [{table_name, partition_key, ...}]
+alarms                  list[dict]    — [{type, threshold, period, ...}]
+dlq_enabled             bool
+dlq_max_receive_count   int
+dlq_queue_name          str | None
+lambda_url_enabled      bool
+lambda_url_auth_type    str           — "NONE" or "AWS_IAM"
 ```
 
----
-
-## Component Responsibilities
-
-### Current Components
-
-| Component | Responsibility | Status |
-|-----------|----------------|--------|
-| `deploy_cmd.py` | Load DSL → extract infra fields → call TerraformConfig → run terraform CLI | Modified |
-| `terraform/generator.py` | TerraformConfig dataclass + generate_terraform() → write HCL files | Modified |
-| `terraform/engine.py` | Jinja2 environment with custom HCL delimiters | Unchanged |
-| `terraform/templates/*.j2` | 11 HCL template files | Unchanged (moved to provider) |
-| `dsl/models.py` | StateMachineDefinition with all infra fields | Unchanged |
-| `generate_cmd.py` | `--no-infra` flag (currently a no-op aside from a print) | Minor change |
-| `doctor_cmd.py` | Hardcoded Terraform check (`_check_terraform()`) | Modified |
-| `diff_cmd.py` | Hardcoded `--tf-dir` option | Modified |
-| `export_cmd.py` | Duplicates infra extraction logic from deploy_cmd | Unchanged |
-
-### New Components
-
-| Component | Responsibility | Notes |
-|-----------|----------------|-------|
-| `providers/__init__.py` | Provider registry + `get_provider()` factory | New module |
-| `providers/base.py` | `InfraProvider` abstract base class or Protocol | New |
-| `providers/terraform.py` | Terraform provider (wraps existing generator + CLI) | New, extracts from deploy_cmd |
-| `providers/cdk.py` | CDK provider (ships CDK template, invokes cdk CLI) | New |
-| `providers/custom.py` | Custom provider (exec user-specified program) | New |
-| `providers/metadata.py` | Workflow metadata serializer (JSON file, env vars, CLI args) | New |
-
----
-
-## What Changes vs. What Stays
-
-### Unchanged
-
-- `src/rsf/dsl/` — All DSL models, parser, validator. The `StateMachineDefinition` with its infra fields is the input contract to providers. Zero changes needed.
-- `src/rsf/codegen/` — Orchestrator + handler code generation is completely independent of infrastructure. Unchanged.
-- `src/rsf/terraform/engine.py` — The Jinja2 HCL engine stays. The TerraformProvider will use it.
-- `src/rsf/terraform/templates/` — The 11 .j2 templates stay. Owned by TerraformProvider.
-- `src/rsf/testing/`, `src/rsf/io/`, `src/rsf/functions/` — Not infrastructure related.
-- `src/rsf/inspect/`, `src/rsf/editor/` — Not infrastructure related.
-- `src/rsf/cli/export_cmd.py` — CloudFormation export is a distinct code path; not part of provider system.
-
-### Modified
-
-**`src/rsf/cli/deploy_cmd.py`** — The primary change site. The ~80 LOC block that manually extracts infra fields from `StateMachineDefinition` and builds a `TerraformConfig` dict is replaced by:
-
-```python
-provider = get_provider(definition, project_config)
-provider.generate(definition, output_dir=tf_dir, stage=stage)
-provider.deploy(output_dir=tf_dir, auto_approve=auto_approve, stage=stage)
-```
-
-The `--tf-dir` option becomes `--infra-dir` (or stays as `--tf-dir` for backward compat with a deprecation warning). The `--code-only` path becomes `provider.code_only(...)`.
-
-**`src/rsf/cli/doctor_cmd.py`** — `_check_terraform()` becomes `_check_provider_binary(provider_name)` that dispatches based on the configured provider. Terraform remains the default.
-
-**`src/rsf/cli/diff_cmd.py`** — The `--tf-dir` flag can stay; diff is about workflow definitions, not provider output. Low impact.
-
-**`src/rsf/cli/generate_cmd.py`** — Adds `--provider` option that wires into `provider.generate()`. Currently `--no-infra` is a print-only no-op here; stays as is.
-
-**`src/rsf/terraform/generator.py`** — `TerraformConfig` and `generate_terraform()` move into the TerraformProvider class or are wrapped by it. The public API of `generator.py` may be preserved for backward compatibility.
-
-### New
-
-**`src/rsf/providers/`** — New package. Build order:
+**With FileTransport (recommended for Terraform scripts):**
 
 ```
-providers/base.py       ← define the protocol/ABC first
-providers/metadata.py   ← workflow metadata serialization (shared utility)
-providers/terraform.py  ← wraps existing generator.py + CLI invocation
-providers/cdk.py        ← CDK template + cdk CLI invocation
-providers/custom.py     ← arbitrary program execution
-providers/__init__.py   ← registry + get_provider() factory
+RSF_METADATA_FILE=/tmp/rsf_metadata_XXXX.json   (JSON file path, mode 0600)
+
+JSON structure mirrors WorkflowMetadata fields exactly:
+{
+  "workflow_name": "registry-modules-demo",
+  "stage": "dev",
+  "handler_count": 3,
+  "timeout_seconds": null,
+  "triggers": [],
+  "dynamodb_tables": [...],
+  "alarms": [],
+  "dlq_enabled": false,
+  ...
+}
 ```
 
----
+**With EnvTransport:**
 
-## Architectural Patterns
-
-### Pattern 1: Protocol-Based Provider Interface
-
-**What:** Define `InfraProvider` as a Python `Protocol` (structural subtyping) rather than an ABC. Providers are duck-typed — any object with the right methods satisfies the interface.
-
-**When to use:** When the provider implementations live in different files and you want to avoid mandatory inheritance. Protocol is more Pythonic and allows external providers without depending on RSF internals.
-
-**Trade-offs:** Protocol gives flexibility and no inheritance coupling. ABC (`abstractmethod`) gives clearer errors at class definition time (fails at instantiation if a method is missing). Given RSF is a closed tool with 3 known providers, either works — Protocol is the leaner choice.
-
-**Example:**
-
-```python
-# src/rsf/providers/base.py
-from typing import Protocol, runtime_checkable
-from pathlib import Path
-from dataclasses import dataclass
-
-@dataclass
-class ProviderResult:
-    """Result returned from provider.generate()."""
-    generated_files: list[Path]
-    skipped_files: list[Path]
-    output_dir: Path
-
-@runtime_checkable
-class InfraProvider(Protocol):
-    """Contract all infrastructure providers must satisfy."""
-
-    def generate(
-        self,
-        definition: "StateMachineDefinition",
-        output_dir: Path,
-        stage: str | None = None,
-    ) -> ProviderResult:
-        """Generate infrastructure artifacts (HCL, CDK app, config file, etc.)."""
-        ...
-
-    def deploy(
-        self,
-        output_dir: Path,
-        auto_approve: bool = False,
-        stage: str | None = None,
-        stage_var_file: Path | None = None,
-    ) -> None:
-        """Invoke the provider's deployment tool."""
-        ...
-
-    def code_only(
-        self,
-        output_dir: Path,
-        stage: str | None = None,
-        stage_var_file: Path | None = None,
-    ) -> None:
-        """Update Lambda code without full infrastructure re-deploy."""
-        ...
-
-    def check_binary(self) -> tuple[bool, str]:
-        """Return (available, version_or_error) for doctor checks."""
-        ...
+```
+RSF_WORKFLOW_NAME=registry-modules-demo
+RSF_STAGE=dev
+RSF_METADATA_JSON={"workflow_name": ...}     (full JSON blob)
 ```
 
-### Pattern 2: Provider Configuration via Project Config File
+### Custom Provider Script Interface Contract
 
-**What:** Provider selection lives in a project-level config file (`rsf.toml` or `rsf.yaml`), not in the workflow YAML. The workflow YAML stays provider-agnostic and describes what infrastructure is needed (triggers, tables, alarms), not how to provision it.
+A custom provider script must:
 
-**When to use:** Always. Conflating provisioning tool choice with workflow definition creates coupling — a team switching from Terraform to CDK would need to edit every workflow file.
+1. Accept being called with `[program] + args + transport_extra_args`
+2. Exit 0 on success, non-zero on failure (RSF raises CalledProcessError)
+3. Write stdout/stderr freely — RSF streams it live to terminal
+4. Read metadata from the transport mechanism configured in workflow YAML
 
-**Trade-offs:** Requires a separate config file lookup on CLI invocation. The tradeoff is clean separation of concerns: workflow YAML = "what", project config = "how and with what tool".
+A custom provider script must NOT:
+- Rely on shell interpolation (RSF always uses `shell=False`)
+- Expect interactive TTY input (subprocess has no tty)
+- Return data back to RSF (one-way communication only)
 
-**Example:**
-
-```toml
-# rsf.toml (project root)
-[infrastructure]
-provider = "terraform"        # terraform | cdk | custom
-output_dir = "terraform"      # default infra output directory
-
-[infrastructure.terraform]
-# Terraform-specific options (passed through to existing TerraformConfig)
-aws_region = "us-east-1"
-name_prefix = "rsf"
-
-[infrastructure.cdk]
-app_dir = "cdk"
-
-[infrastructure.custom]
-program = "./scripts/deploy-infra.sh"
-args = ["--workflow", "{workflow_path}", "--stage", "{stage}"]
-metadata_format = "json_file"  # json_file | env_vars | cli_args
-metadata_file = ".rsf-metadata.json"
-```
-
-Alternatively, the workflow YAML can carry an optional top-level `infrastructure` key:
+### Workflow YAML Configuration for Custom Provider
 
 ```yaml
-# workflow.yaml (optional override)
+# workflow.yaml
+rsf_version: "1.0"
+Comment: "Registry modules demo workflow"
+StartAt: ProcessOrder
+
 infrastructure:
-  provider: terraform
+  provider: custom
+  custom:
+    program: /absolute/path/to/examples/registry-modules-demo/deploy.sh
+    args:
+      - deploy
+    teardown_args:
+      - destroy
+    metadata_transport: file   # file | env | args
+    env:
+      TF_VAR_name_prefix: rsf-registry
 ```
-
-Both approaches are valid. The project config file is preferred for multi-workflow projects. The workflow YAML field is an escape hatch for per-workflow overrides.
-
-### Pattern 3: Metadata Passing to External Programs
-
-**What:** When a custom provider is invoked, RSF serializes workflow metadata (workflow name, stage, infra fields, output dir) in the format the external program expects: a JSON file, environment variables, or extra CLI args.
-
-**When to use:** Custom provider only. Terraform and CDK providers handle this internally via their own config formats.
-
-**Trade-offs:** Adds a serialization step before exec. The payoff is that arbitrary programs (shell scripts, Pulumi, Ansible, custom Python) can integrate without knowing RSF internals.
-
-**Example:**
-
-```python
-# src/rsf/providers/metadata.py
-import json
-import os
-from pathlib import Path
-from dataclasses import dataclass, asdict
-
-@dataclass
-class WorkflowMetadata:
-    workflow_name: str
-    workflow_path: str
-    output_dir: str
-    stage: str | None
-    triggers: list[dict]
-    dynamodb_tables: list[dict]
-    alarms: list[dict]
-    dlq_enabled: bool
-    lambda_url_enabled: bool
-
-def write_json_file(metadata: WorkflowMetadata, path: Path) -> None:
-    path.write_text(json.dumps(asdict(metadata), indent=2))
-
-def to_env_vars(metadata: WorkflowMetadata) -> dict[str, str]:
-    return {
-        "RSF_WORKFLOW_NAME": metadata.workflow_name,
-        "RSF_WORKFLOW_PATH": metadata.workflow_path,
-        "RSF_OUTPUT_DIR": metadata.output_dir,
-        "RSF_STAGE": metadata.stage or "",
-        "RSF_METADATA_JSON": json.dumps(asdict(metadata)),
-    }
-```
-
-### Pattern 4: Infra Extraction as Shared Utility
-
-**What:** The `~80 LOC` block in `deploy_cmd.py` that extracts `StateMachineDefinition` fields into dicts (triggers, DynamoDB, alarms, DLQ, lambda_url) is currently duplicated in `export_cmd.py` (`_extract_infrastructure_from_definition()`). This extraction logic should move to a single shared utility used by all providers.
-
-**When to use:** All providers need the same normalized dict representation of the DSL's infrastructure fields. Centralizing avoids the existing duplication.
-
-**Do this:**
-
-```python
-# src/rsf/providers/metadata.py (or providers/extractor.py)
-
-def extract_infra_config(definition: StateMachineDefinition) -> InfraConfig:
-    """Single source of truth for extracting infra fields from DSL definition."""
-    # ... consolidate the logic currently in deploy_cmd._deploy_full()
-    # ... and export_cmd._extract_infrastructure_from_definition()
-```
-
-This eliminates the drift between deploy and export paths.
 
 ---
 
-## Data Flow
+## New Components for v3.2
 
-### Deploy Flow — Current (v2.0)
+### What is New vs. Modified vs. Unchanged
 
-```
-rsf deploy workflow.yaml
-    │
-    ▼
-load_definition(workflow.yaml) → StateMachineDefinition
-    │
-    ▼
-codegen_generate(definition) → orchestrator.py + handlers/
-    │
-    ▼
-[Manual extraction loop in deploy_cmd.py ~80 LOC]
-    │
-    ├─ triggers → list[dict]
-    ├─ dynamodb_tables → list[dict]
-    ├─ alarms → list[dict]
-    ├─ dlq → dlq_enabled, dlq_max_receive_count, dlq_queue_name
-    └─ lambda_url → lambda_url_enabled, lambda_url_auth_type
-    │
-    ▼
-TerraformConfig(workflow_name, ...) → generate_terraform() → HCL files
-    │
-    ▼
-subprocess.run(["terraform", "init"]) → subprocess.run(["terraform", "apply"])
-```
+**Unchanged (zero changes needed):**
 
-### Deploy Flow — Target (v3.0)
+| Component | Why Unchanged |
+|-----------|---------------|
+| `src/rsf/providers/` — all files | Provider system is already complete and correct |
+| `src/rsf/dsl/models.py` | CustomProviderConfig already has all needed fields |
+| `src/rsf/cli/deploy_cmd.py` | Already routes through provider system correctly |
+| `src/rsf/providers/metadata.py` | WorkflowMetadata already carries all needed fields |
+| All existing examples | Not modified by this milestone |
+| All existing tutorials | Not modified; new tutorial is additive |
 
-```
-rsf deploy workflow.yaml [--provider terraform|cdk|custom]
-    │
-    ▼
-load_definition(workflow.yaml) → StateMachineDefinition
-    │
-    ▼
-load_project_config("rsf.toml") → provider_name, provider_options
-    │
-    ▼
-get_provider(provider_name, provider_options) → InfraProvider instance
-    │
-    ▼
-codegen_generate(definition) → orchestrator.py + handlers/
-    │
-    ▼
-provider.generate(definition, output_dir, stage) → ProviderResult
-    │  [internal: extract_infra_config(definition) → normalized InfraConfig]
-    │  [TerraformProvider: InfraConfig → TerraformConfig → generate_terraform()]
-    │  [CDKProvider: InfraConfig → CDK app synthesis]
-    │  [CustomProvider: InfraConfig → JSON/env/args → exec program]
-    │
-    ▼
-provider.deploy(output_dir, auto_approve, stage) → None
-    │  [TerraformProvider: subprocess terraform init + apply]
-    │  [CDKProvider: subprocess cdk deploy]
-    │  [CustomProvider: subprocess user_program with metadata]
-```
+**New (created fresh for v3.2):**
 
-### Provider Selection Flow
+| Component | Description |
+|-----------|-------------|
+| `examples/registry-modules-demo/` | New example directory — complete self-contained workflow |
+| `examples/registry-modules-demo/workflow.yaml` | Workflow with `infrastructure.custom` block |
+| `examples/registry-modules-demo/deploy.sh` | Custom provider script — Terraform using registry modules |
+| `examples/registry-modules-demo/terraform/main.tf` | Root module using terraform-aws-modules/lambda/aws |
+| `examples/registry-modules-demo/terraform/dynamodb.tf` | Using terraform-aws-modules/dynamodb-table/aws |
+| `examples/registry-modules-demo/terraform/sqs.tf` | DLQ using terraform-aws-modules/sqs/aws |
+| `examples/registry-modules-demo/terraform/variables.tf` | Input variables for registry module parameters |
+| `examples/registry-modules-demo/terraform/outputs.tf` | Outputs (function_arn, function_name, etc.) |
+| `examples/registry-modules-demo/terraform/versions.tf` | Required providers with pinned versions |
+| `examples/registry-modules-demo/handlers/` | Python handler functions |
+| `examples/registry-modules-demo/tests/test_local.py` | Local unit tests (no AWS) |
+| `examples/registry-modules-demo/README.md` | Example documentation |
+| `tutorials/09-custom-provider-registry-modules.md` | Step-by-step tutorial |
+| `tests/test_examples/test_registry_modules_demo.py` | Integration test (real AWS) |
 
-```
-CLI flag --provider (highest priority)
-    │
-    ▼ (if not set)
-workflow.yaml infrastructure.provider field
-    │
-    ▼ (if not set)
-rsf.toml [infrastructure] provider
-    │
-    ▼ (if not set)
-Default: "terraform"
-```
+**Potentially modified (only if friction points found during build):**
 
-### Metadata Passing Flow (Custom Provider)
-
-```
-StateMachineDefinition
-    │
-    ▼
-extract_infra_config() → InfraConfig
-    │
-    ▼
-WorkflowMetadata(workflow_name, output_dir, stage, infra_config)
-    │
-    ├─ metadata_format = "json_file"  → write .rsf-metadata.json
-    ├─ metadata_format = "env_vars"   → os.environ update before exec
-    └─ metadata_format = "cli_args"   → append --rsf-metadata=... to args
-    │
-    ▼
-subprocess.run([user_program, ...args])
-```
+| Component | Possible Change | Trigger |
+|-----------|-----------------|---------|
+| `src/rsf/providers/metadata.py` | Add `source_dir` or `zip_path` field to WorkflowMetadata | If custom scripts need the output_dir to find the Lambda zip |
+| `src/rsf/providers/custom.py` | Add `cwd` config option to CustomProviderConfig | If scripts need to run from the example directory rather than workflow directory |
 
 ---
 
 ## Recommended Project Structure
 
 ```
-src/rsf/
-├── providers/                    # NEW — provider abstraction layer
-│   ├── __init__.py               # get_provider() factory + registry
-│   ├── base.py                   # InfraProvider Protocol + ProviderResult
-│   ├── metadata.py               # extract_infra_config() + WorkflowMetadata
-│   ├── config.py                 # load_project_config() → rsf.toml parsing
-│   ├── terraform.py              # TerraformProvider (wraps existing generator)
-│   ├── cdk.py                    # CDKProvider (new)
-│   └── custom.py                 # CustomProvider (new)
-│
-├── terraform/                    # KEPT — owned by TerraformProvider
-│   ├── engine.py                 # unchanged
-│   ├── generator.py              # unchanged (called by TerraformProvider)
-│   └── templates/                # unchanged (11 .j2 files)
-│
-├── cli/
-│   ├── deploy_cmd.py             # MODIFIED — slimmed, delegates to provider
-│   ├── generate_cmd.py           # MINOR — --provider flag wiring
-│   ├── doctor_cmd.py             # MODIFIED — provider-aware binary check
-│   ├── diff_cmd.py               # MINOR — --infra-dir replaces --tf-dir
-│   └── [all others unchanged]
-│
-├── dsl/                          # UNCHANGED
-├── codegen/                      # UNCHANGED
-└── [all other packages]          # UNCHANGED
+examples/
+└── registry-modules-demo/          # NEW example directory
+    ├── workflow.yaml               # RSF DSL + infrastructure.custom block
+    ├── deploy.sh                   # Custom provider entry point (chmod +x)
+    ├── handlers/                   # Python @state-decorated handlers
+    │   ├── __init__.py
+    │   ├── validate_input.py
+    │   ├── process_record.py
+    │   └── store_result.py
+    ├── src/                        # Auto-generated code lives here
+    │   └── generated/
+    │       └── orchestrator.py     # Generated by rsf generate
+    ├── terraform/                  # Registry-modules-based HCL
+    │   ├── main.tf                 # module "lambda" { source = "terraform-aws-modules/lambda/aws" }
+    │   ├── dynamodb.tf             # module "table" { source = "terraform-aws-modules/dynamodb-table/aws" }
+    │   ├── sqs.tf                  # module "dlq" { source = "terraform-aws-modules/sqs/aws" }
+    │   ├── variables.tf            # Input vars (name_prefix, aws_region, workflow_name, ...)
+    │   ├── outputs.tf              # function_arn, function_name, role_arn, log_group_name
+    │   ├── versions.tf             # terraform { required_providers { aws >= 6.25.0 } }
+    │   └── backend.tf              # Local state (same as existing examples)
+    ├── tests/
+    │   ├── conftest.py             # Mock SDK fixtures
+    │   └── test_local.py           # Unit tests (no AWS required)
+    └── README.md                   # Example documentation
+
+tutorials/
+└── 09-custom-provider-registry-modules.md   # NEW tutorial
+
+tests/
+└── test_examples/
+    └── test_registry_modules_demo.py        # NEW integration test
 ```
 
 ### Structure Rationale
 
-- **`providers/` as a peer to `terraform/`:** The Terraform implementation is just one provider. The `terraform/` package stays because it contains the HCL engine and templates; the new `providers/terraform.py` wraps it.
-- **`providers/metadata.py` for extraction:** Consolidates the infra extraction logic currently duplicated between `deploy_cmd.py` and `export_cmd.py`.
-- **`providers/config.py` for project config:** Isolates `rsf.toml` parsing. Keeps deploy_cmd from growing more config-reading logic.
-- **`terraform/` package unchanged:** No need to move or rename the existing HCL generation infrastructure.
+- **`examples/registry-modules-demo/`** follows the identical layout as the five existing examples (`order-processing`, `data-pipeline`, etc.). Users navigating examples see a consistent structure. The README documents the registry modules approach specifically.
+- **`deploy.sh` at example root (not inside terraform/)** — the script is the RSF-facing entry point. It is in the workflow's directory so the `program` path in workflow.yaml can be resolved relative to it. The script cd's into `terraform/` internally.
+- **`terraform/` subdirectory** — mirrors the existing examples. The distinction from existing examples is the HCL content: registry module `source` blocks instead of direct `aws_lambda_function` resources.
+- **Tutorial at `tutorials/09-custom-provider-registry-modules.md`** — continues the tutorial numbering sequence (08 is execution inspector). There is no `tutorials/` subdirectory for examples; tutorials are flat markdown files.
+- **No `tutorials/registry-modules/` subdirectory** — existing tutorials are single flat files. Creating a subdirectory breaks the numbering convention and makes navigation harder.
+
+---
+
+## Architectural Patterns
+
+### Pattern 1: Custom Provider Script as Thin Terraform Wrapper
+
+**What:** The deploy script is not a replacement for RSF's Terraform provider — it is a user-space Terraform wrapper that reads RSF metadata and passes it to Terraform as `-var` flags or a `.tfvars` file. This is the pedagogically correct pattern: show students that any program can be a provider.
+
+**When to use:** When showing how custom providers integrate with Terraform registry modules.
+
+**Trade-offs:** Slightly more indirection than the built-in TerraformProvider, but that is intentional — the point is to show the interface.
+
+**Example:**
+
+```bash
+#!/usr/bin/env bash
+# deploy.sh — custom provider script for registry-modules-demo
+# Reads RSF metadata via RSF_METADATA_FILE and runs terraform apply.
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+TF_DIR="${SCRIPT_DIR}/terraform"
+COMMAND="${1:-deploy}"
+
+# Read metadata from RSF_METADATA_FILE (FileTransport)
+METADATA_FILE="${RSF_METADATA_FILE:?RSF_METADATA_FILE not set}"
+WORKFLOW_NAME="$(python3 -c "import json,sys; d=json.load(open('${METADATA_FILE}')); print(d['workflow_name'])")"
+STAGE="$(python3 -c "import json,sys; d=json.load(open('${METADATA_FILE}')); print(d['stage'] or '')")"
+
+case "${COMMAND}" in
+  deploy)
+    terraform -chdir="${TF_DIR}" init -upgrade
+    terraform -chdir="${TF_DIR}" apply \
+      -var="workflow_name=${WORKFLOW_NAME}" \
+      -var="stage=${STAGE}" \
+      -auto-approve
+    ;;
+  destroy)
+    terraform -chdir="${TF_DIR}" destroy \
+      -var="workflow_name=${WORKFLOW_NAME}" \
+      -var="stage=${STAGE}" \
+      -auto-approve
+    ;;
+  *)
+    echo "Unknown command: ${COMMAND}" >&2
+    exit 1
+    ;;
+esac
+```
+
+### Pattern 2: Registry Module HCL Instead of Direct Resources
+
+**What:** Replace `resource "aws_lambda_function"` with `module "lambda"` using `terraform-aws-modules/lambda/aws`. This is the structural difference between the existing examples and the new example.
+
+**When to use:** When demonstrating HashiCorp's registry module ecosystem.
+
+**Trade-offs:** Registry modules abstract away boilerplate (IAM, packaging, CloudWatch) at the cost of less visible resource definitions. The trade-off is acceptable for a tutorial — students learn the module interface, not raw HCL.
+
+**Example:**
+
+```hcl
+# terraform/main.tf (registry modules approach)
+
+module "lambda" {
+  source  = "terraform-aws-modules/lambda/aws"
+  version = "~> 7.0"
+
+  function_name = "${var.name_prefix}-${var.workflow_name}"
+  handler       = "generated.orchestrator.lambda_handler"
+  runtime       = "python3.13"
+
+  # Pre-built package: RSF generates the zip, we point the module at it
+  create_package        = false
+  local_existing_package = "${path.module}/../src/generated.zip"
+
+  # Lambda Durable Functions support (added in module ~7.x)
+  durable_config_execution_timeout = 86400
+  durable_config_retention_period  = 14
+
+  # IAM — module creates the role automatically
+  attach_cloudwatch_logs_policy = true
+  cloudwatch_logs_retention_in_days = 14
+
+  # DLQ (if dlq_enabled in metadata)
+  dead_letter_target_arn = var.dlq_enabled ? module.dlq[0].queue_arn : null
+  attach_dead_letter_policy = var.dlq_enabled
+
+  environment_variables = {
+    RSF_WORKFLOW_NAME = var.workflow_name
+    RSF_STAGE         = var.stage
+  }
+}
+
+module "dynamodb_table" {
+  source  = "terraform-aws-modules/dynamodb-table/aws"
+  version = "~> 4.0"
+
+  name         = "${var.name_prefix}-${var.workflow_name}-store"
+  hash_key     = "pk"
+  billing_mode = "PAY_PER_REQUEST"
+
+  attributes = [
+    { name = "pk", type = "S" }
+  ]
+}
+
+module "dlq" {
+  source  = "terraform-aws-modules/sqs/aws"
+  version = "~> 4.0"
+
+  count = var.dlq_enabled ? 1 : 0
+  name  = "${var.name_prefix}-${var.workflow_name}-dlq"
+}
+```
+
+### Pattern 3: Split Deploy/Destroy Commands in One Script
+
+**What:** The RSF `CustomProviderConfig` supports `args` (deploy) and `teardown_args` (teardown) as separate argument lists. Both invoke the same `program`. The script dispatches on its first argument.
+
+**When to use:** Always for custom provider scripts that manage Terraform state. Teardown must be supported for integration tests to clean up.
+
+**Trade-offs:** Single script with `$1` dispatch is simpler than two separate scripts. Integration tests require teardown to work correctly.
+
+**The workflow YAML configuration:**
+
+```yaml
+infrastructure:
+  provider: custom
+  custom:
+    program: /path/to/examples/registry-modules-demo/deploy.sh
+    args:
+      - deploy
+    teardown_args:
+      - destroy
+    metadata_transport: file
+```
+
+### Pattern 4: No Changes to RSF Core — Pure User-Space Integration
+
+**What:** The tutorial demonstrates that adding a new Terraform approach requires zero changes to RSF itself. The custom provider system was designed to be extensible at the user level.
+
+**When to use:** This is the architectural proof that the v3.0 provider system works as intended.
+
+**Implication for build order:** The example and tutorial are built entirely outside of `src/rsf/`. No RSF source files are modified. All work is in `examples/registry-modules-demo/` and `tutorials/`.
+
+---
+
+## Data Flow
+
+### Deploy Flow — Custom Provider with Registry Modules
+
+```
+rsf deploy examples/registry-modules-demo/workflow.yaml
+    │
+    ▼
+load_definition(workflow.yaml)
+    → StateMachineDefinition
+    → infrastructure.provider = "custom"
+    → infrastructure.custom.program = "/path/to/deploy.sh"
+    → infrastructure.custom.metadata_transport = "file"
+    │
+    ▼
+codegen_generate(definition)
+    → src/generated/orchestrator.py
+    → handlers/validate_input.py (created if not exists)
+    │
+    ▼
+resolve_infra_config(definition, workflow.parent)
+    → InfrastructureConfig(provider="custom", custom=CustomProviderConfig(...))
+    │
+    ▼
+get_provider("custom")
+    → CustomProvider instance
+    │
+    ▼
+CustomProvider.check_prerequisites(ctx)
+    → checks deploy.sh exists and is executable
+    │
+    ▼
+CustomProvider.generate(ctx)   [no-op — custom providers don't generate code]
+    │
+    ▼
+CustomProvider.deploy(ctx)
+    │
+    ├── _get_config(ctx) → CustomProviderConfig
+    ├── _validate_program(config.program) → Path (absolute, exists, executable)
+    ├── _create_transport(config) → FileTransport
+    │
+    ├── FileTransport.prepare(metadata, env)
+    │   → writes /tmp/rsf_metadata_XXXX.json
+    │   → sets env["RSF_METADATA_FILE"] = "/tmp/rsf_metadata_XXXX.json"
+    │
+    ├── cmd = ["/path/to/deploy.sh", "deploy"]
+    │
+    └── run_provider_command_streaming(cmd, cwd=workflow.parent, env=env)
+        │
+        └── subprocess.run(cmd, shell=False, ...)   [streams to terminal]
+                │
+                ▼
+        deploy.sh receives RSF_METADATA_FILE in environment
+                │
+                ▼
+        deploy.sh reads metadata JSON → extracts workflow_name, stage
+                │
+                ▼
+        terraform init → terraform apply
+        (using registry module HCL in terraform/)
+```
+
+### Teardown Flow
+
+```
+rsf teardown (or integration test cleanup)
+    │
+    ▼
+CustomProvider.teardown(ctx)
+    │
+    ├── config.teardown_args = ["destroy"]
+    ├── cmd = ["/path/to/deploy.sh", "destroy"]
+    └── run_provider_command_streaming(cmd, ...)
+            │
+            ▼
+    deploy.sh "destroy" → terraform destroy -auto-approve
+```
+
+### Integration Test Flow
+
+```
+pytest tests/test_examples/test_registry_modules_demo.py -m integration
+    │
+    ▼
+@pytest.fixture(scope="class") setup
+    → subprocess.run(["rsf", "deploy", ..., "--auto-approve"])
+    → poll_execution() until complete
+    → query_logs() for CloudWatch assertions
+    │
+    ▼
+test assertions (same pattern as existing integration tests)
+    │
+    ▼
+@pytest.fixture teardown
+    → subprocess.run(["rsf", "teardown", ...])   OR
+    → deploy.sh destroy (direct invocation)
+    → delete_log_group() for orphaned logs
+```
 
 ---
 
 ## Integration Points
 
-### deploy_cmd.py — Primary Integration Point
+### Integration Point 1: workflow.yaml `infrastructure.custom` Block
 
-`deploy_cmd.py` is the heart of the change. The `_deploy_full()` function's infra extraction block (~lines 114-195) becomes:
+This is the primary integration seam. The workflow YAML declares what RSF needs to do; the `custom` block tells RSF how to do it.
 
-```python
-from rsf.providers import get_provider
+**Key field:** `program` must be an absolute path. Since the example ships inside the repository, the tutorial must show students how to use `$(pwd)` or `realpath` to construct the absolute path before running `rsf deploy`.
 
-provider = get_provider(definition, project_config)
+**Resolution:** Two approaches are viable:
+1. Teach students to set `program` in `rsf.toml` (project-wide) using an absolute path derived from their environment.
+2. Show a setup step: `echo "program = \"$(pwd)/deploy.sh\"" >> rsf.toml`.
 
-with Status("[bold]Generating infrastructure...[/bold]", console=console):
-    infra_result = provider.generate(definition, output_dir=infra_dir, stage=stage)
+Approach 2 is more tutorial-friendly.
 
-console.print(
-    f"[green]Infrastructure generated:[/green] {len(infra_result.generated_files)} file(s)"
-)
+### Integration Point 2: WorkflowMetadata JSON Schema
 
-provider.deploy(infra_dir, auto_approve=auto_approve, stage=stage, stage_var_file=stage_var_file)
+The custom script must parse `RSF_METADATA_FILE`. The metadata schema is stable and defined in `src/rsf/providers/metadata.py`. The tutorial should show the exact JSON shape students can expect and explain each field.
+
+**Key concern:** `handler_count` is the number of Task states, not the number of handler Python files. The script may use this to set Lambda memory or concurrency, but it should not use it to count files on disk.
+
+### Integration Point 3: Lambda Zip Packaging
+
+The terraform-aws-modules/lambda/aws module has two deployment modes:
+- `create_package = true` — module builds the zip itself (uses Python/pip internally)
+- `create_package = false` + `local_existing_package = "path/to/file.zip"` — module deploys a pre-built zip
+
+RSF generates the orchestrator and handler Python files but does not produce a zip. The deploy script must zip the source before Terraform runs. This is a step the custom script handles, not RSF.
+
+**The deploy script must:**
+
+```bash
+# Before terraform apply
+cd "${SCRIPT_DIR}/src"
+zip -r generated.zip generated/ handlers/ -x "*.pyc" -x "__pycache__/*"
+cd "${SCRIPT_DIR}"
 ```
 
-The `_deploy_code_only()` function similarly becomes `provider.code_only(...)`.
+Then the Terraform `local_existing_package` points to this zip.
 
-### doctor_cmd.py — Provider Binary Check
+**Alternative:** Use `create_package = true` with `source_path` pointing to the `src/` directory. The module will use pip to install dependencies. Simpler for the tutorial but requires pip in the Terraform environment.
 
-Currently hardcoded:
+Recommendation: Use `create_package = false` with an explicit zip step in the deploy script. This gives students full visibility into the packaging process and matches how production deployments work.
 
-```python
-results.append(_check_terraform())
+### Integration Point 4: durable_config in terraform-aws-modules/lambda/aws
+
+The module supports Lambda Durable Functions via:
+
+```hcl
+durable_config_execution_timeout = var.execution_timeout   # seconds, 1–31622400
+durable_config_retention_period  = var.retention_period    # days, 1–90
 ```
 
-Target:
+This was confirmed from the module's `variables.tf` (GitHub source). The module wraps the `durable_config` block in the `aws_lambda_function` resource.
 
-```python
-provider_name = load_project_config().infrastructure.provider  # default: "terraform"
-provider = get_provider_instance(provider_name)
-results.append(_check_provider_binary(provider))
+**Confidence: HIGH** — verified directly from `terraform-aws-modules/terraform-aws-lambda` `variables.tf`.
+
+### Integration Point 5: IAM Permissions for Durable Execution
+
+The terraform-aws-modules/lambda/aws module creates an IAM role automatically. However, it may not include the durable execution permissions by default. The deploy script's Terraform must attach an additional inline policy:
+
+```hcl
+resource "aws_iam_role_policy" "durable_execution" {
+  name = "${module.lambda.lambda_function_name}-durable"
+  role = module.lambda.lambda_role_name
+
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [{
+      Effect = "Allow"
+      Action = [
+        "lambda:CheckpointDurableExecution",
+        "lambda:GetDurableExecution",
+        "lambda:ListDurableExecutionsByFunction",
+        "lambda:InvokeFunction"
+      ]
+      Resource = module.lambda.lambda_function_arn
+    }]
+  })
+}
 ```
 
-The `_check_terraform()` function becomes `TerraformProvider.check_binary()` — returning `(available: bool, version: str)`. Each provider implements `check_binary()`.
+**Note:** This is the same IAM grant that RSF's built-in TerraformProvider generates in `iam.tf`. The tutorial must show students they are responsible for this permission when using a custom provider.
 
-### generate_cmd.py — Optional Provider Hook
+### Integration Point 6: Tests for the New Example
 
-`generate_cmd.py` currently prints a message when `--no-infra` is set and generates nothing. With providers, it can optionally call `provider.generate()` (without `provider.deploy()`):
+The new example follows the exact same test pattern as existing examples:
 
-```python
-if not no_infra:
-    provider = get_provider(definition, project_config)
-    provider.generate(definition, output_dir=infra_dir, stage=stage)
+```
+examples/registry-modules-demo/tests/test_local.py   — unit tests, no AWS
+tests/test_examples/test_registry_modules_demo.py    — integration test, real AWS
 ```
 
-The `--no-infra` flag remains as the way to skip this step.
-
-### export_cmd.py — Infra Extraction Unification
-
-`export_cmd._extract_infrastructure_from_definition()` and the extraction block in `deploy_cmd._deploy_full()` both do the same work. After this milestone, both call `providers.metadata.extract_infra_config(definition)` instead. The export command itself is unchanged in behavior.
-
-### DSL (dsl/models.py) — Optional Provider Field
-
-`StateMachineDefinition` can gain an optional `infrastructure` field for per-workflow provider overrides:
-
-```python
-class InfrastructureConfig(BaseModel):
-    model_config = {"extra": "forbid"}
-    provider: Literal["terraform", "cdk", "custom"] | None = None
-
-class StateMachineDefinition(BaseModel):
-    # ... existing fields ...
-    infrastructure: InfrastructureConfig | None = Field(default=None, alias="infrastructure")
-```
-
-This is optional — if absent, the project config or CLI flag governs.
+The integration test uses the same `poll_execution()`, `query_logs()`, and teardown helpers as existing integration tests. No new test infrastructure is needed.
 
 ---
 
-## Build Order (Phase Dependencies)
+## Suggested Build Order
 
-The dependency graph is straightforward — the protocol must exist before any provider implements it:
+Dependencies determine the order. Since no RSF core files change, all work is in the example directory and tutorial.
 
 ```
-1. providers/base.py
-   └── InfraProvider Protocol + ProviderResult + ProviderOptions
-       (no dependencies on other RSF modules)
+Phase 1: Core example files (deploy + Terraform)
+  1. examples/registry-modules-demo/workflow.yaml
+     — defines the workflow and custom provider config
+  2. examples/registry-modules-demo/deploy.sh
+     — the provider script; drives everything else
+  3. examples/registry-modules-demo/terraform/versions.tf
+     — pinned provider versions first (gates everything else)
+  4. examples/registry-modules-demo/terraform/variables.tf
+     — input vars needed by all other .tf files
+  5. examples/registry-modules-demo/terraform/main.tf
+     — lambda module + durable_config + IAM
+  6. examples/registry-modules-demo/terraform/outputs.tf
+     — integration test needs function_name output
 
-2. providers/metadata.py
-   └── extract_infra_config() + WorkflowMetadata
-       (depends on: dsl/models.py — already exists)
+Phase 2: Optional infra (DynamoDB, DLQ, alarms)
+  7. examples/registry-modules-demo/terraform/dynamodb.tf
+     — optional; include if workflow uses dynamodb_tables
+  8. examples/registry-modules-demo/terraform/sqs.tf
+     — optional; include if workflow uses dead_letter_queue
 
-3. providers/config.py
-   └── load_project_config() + ProjectConfig
-       (depends on: nothing RSF-specific, just TOML parsing)
+Phase 3: Python application code
+  9. examples/registry-modules-demo/handlers/*.py
+     — handler functions that make the example meaningful
+ 10. rsf generate examples/registry-modules-demo/workflow.yaml
+     — generates src/generated/orchestrator.py
 
-4. providers/terraform.py
-   └── TerraformProvider implementing InfraProvider
-       (depends on: base.py, metadata.py, terraform/generator.py — all exist)
+Phase 4: Tests
+ 11. examples/registry-modules-demo/tests/conftest.py
+     — mock SDK fixtures (copy pattern from existing examples)
+ 12. examples/registry-modules-demo/tests/test_local.py
+     — unit tests (no AWS)
+ 13. tests/test_examples/test_registry_modules_demo.py
+     — integration test (real AWS, last because it requires all above)
 
-5. providers/cdk.py
-   └── CDKProvider implementing InfraProvider
-       (depends on: base.py, metadata.py)
-
-6. providers/custom.py
-   └── CustomProvider implementing InfraProvider
-       (depends on: base.py, metadata.py)
-
-7. providers/__init__.py
-   └── get_provider() factory + registration
-       (depends on: terraform.py, cdk.py, custom.py)
-
-8. deploy_cmd.py refactor
-   └── replace extraction block with provider.generate() + provider.deploy()
-       (depends on: providers/__init__.py)
-
-9. generate_cmd.py, doctor_cmd.py, diff_cmd.py updates
-   └── provider-aware options
-       (depends on: providers/__init__.py, providers/config.py)
-
-10. dsl/models.py — optional InfrastructureConfig field
-    └── (depends on: nothing new, but must happen before deploy_cmd tests)
-
-11. Tests for all providers
-    └── mock provider, terraform provider, custom provider test
-        (depends on: all above)
+Phase 5: Documentation
+ 14. examples/registry-modules-demo/README.md
+     — what the example demonstrates, how to run it
+ 15. tutorials/09-custom-provider-registry-modules.md
+     — step-by-step tutorial for students
 ```
+
+### Build Order Rationale
+
+- `versions.tf` before `main.tf` — Terraform fails if provider version constraints are missing during `init`.
+- `variables.tf` before all other `.tf` files — variables are referenced everywhere.
+- Handler code before `rsf generate` — generate creates stubs only for missing handlers; existing handlers are preserved.
+- Integration test last — it depends on all other pieces being correct and the AWS provider being >= 6.25.0.
+- Tutorial last — it describes what was built; writing it last ensures accuracy.
+
+---
+
+## New vs. Modified Components (Explicit Summary)
+
+| Component | Status | Notes |
+|-----------|--------|-------|
+| `src/rsf/providers/` | UNCHANGED | No modifications needed |
+| `src/rsf/dsl/models.py` | UNCHANGED | CustomProviderConfig is complete |
+| `src/rsf/cli/deploy_cmd.py` | UNCHANGED | Already handles custom provider |
+| `src/rsf/providers/metadata.py` | UNCHANGED | WorkflowMetadata is sufficient |
+| `examples/registry-modules-demo/` | NEW | Full example directory |
+| `examples/registry-modules-demo/deploy.sh` | NEW | Core deliverable: provider script |
+| `examples/registry-modules-demo/terraform/` | NEW | Registry modules HCL (not generated by RSF) |
+| `examples/registry-modules-demo/workflow.yaml` | NEW | Workflow with custom provider config |
+| `examples/registry-modules-demo/handlers/` | NEW | Python handler stubs (then implemented) |
+| `examples/registry-modules-demo/tests/` | NEW | Unit + integration tests |
+| `examples/registry-modules-demo/README.md` | NEW | Example documentation |
+| `tutorials/09-custom-provider-registry-modules.md` | NEW | Tutorial document |
+| `tests/test_examples/test_registry_modules_demo.py` | NEW | Integration test |
 
 ---
 
 ## Anti-Patterns
 
-### Anti-Pattern 1: Provider Config in the Workflow YAML as the Primary Location
+### Anti-Pattern 1: Using a Relative Path for `program` in workflow.yaml
 
-**What people do:** Put `provider: terraform` at the top of `workflow.yaml`.
+**What people do:** Set `program: ./deploy.sh` in the workflow YAML.
 
-**Why it's wrong:** A team of 5 engineers has 20 workflow files. They decide to switch from Terraform to CDK. They must edit all 20 workflow files. The workflow YAML describes the business process; the provisioning tool is an operational concern.
+**Why it's wrong:** CustomProvider validates that `program` is an absolute path and raises `ValueError` before the script runs. The cwd at execution time is the workflow's parent directory, which varies per user installation.
 
-**Do this instead:** Provider selection in `rsf.toml` (project-level) with optional per-workflow override in workflow.yaml.
+**Do this instead:** Show students to use an absolute path derived at setup time:
+```bash
+EXAMPLE_DIR="$(cd examples/registry-modules-demo && pwd)"
+# Then set program: in workflow.yaml or rsf.toml using the absolute path
+```
 
-### Anti-Pattern 2: Making deploy_cmd.py Grow to Handle Provider Logic
+Or configure via `rsf.toml` (which allows environment-specific configuration without editing the versioned `workflow.yaml`).
 
-**What people do:** Add `if provider == "cdk":` branches directly in `deploy_cmd.py`.
+### Anti-Pattern 2: Generating Terraform HCL in the Custom Script
 
-**Why it's wrong:** `deploy_cmd.py` is already 279 LOC with the single Terraform path. Adding CDK and custom provider paths inline will make it unreadable and untestable.
+**What people do:** Have the deploy script use Python/Jinja2 to generate `.tf` files before running `terraform apply`.
 
-**Do this instead:** deploy_cmd.py calls `provider.generate()` and `provider.deploy()`. The provider object encapsulates all tool-specific logic.
+**Why it's wrong:** This duplicates RSF's existing TerraformProvider behavior. It conflates code generation with deployment. The tutorial's purpose is to show registry modules as an *alternative* to RSF's generated HCL — not to recreate RSF's generator in a script.
 
-### Anti-Pattern 3: Duplicating the Infra Extraction Logic Again
+**Do this instead:** Write the registry module `.tf` files statically in `terraform/`. The deploy script only invokes `terraform init` and `terraform apply`. The Terraform files are version-controlled, human-readable, and never regenerated.
 
-**What people do:** Each new provider (CDK, custom) re-implements the logic that reads `definition.triggers`, `definition.dynamodb_tables`, etc.
+### Anti-Pattern 3: Putting the Script Inside `terraform/`
 
-**Why it's wrong:** This logic is already duplicated between `deploy_cmd.py` and `export_cmd.py`. Adding a third and fourth copy creates three places to update when a new DSL field is added.
+**What people do:** Place `deploy.sh` inside `examples/registry-modules-demo/terraform/deploy.sh`.
 
-**Do this instead:** `providers/metadata.py` owns a single `extract_infra_config()` function. All providers call it. `export_cmd.py` switches to it too.
+**Why it's wrong:** The script is the RSF-facing interface; it belongs at the workflow root. The `terraform/` directory is an artifact directory (HCL files, `.terraform/`, state). Mixing the provider script with Terraform artifacts confuses the structure.
 
-### Anti-Pattern 4: Hard-Coding the Terraform Binary Check in doctor_cmd
+**Do this instead:** `deploy.sh` at `examples/registry-modules-demo/deploy.sh`. It `cd`s into `terraform/` internally.
 
-**What people do:** Leave `_check_terraform()` as-is and add separate `_check_cdk()`, `_check_custom()` as new if-branches.
+### Anti-Pattern 4: Hardcoding AWS Region and Account in Terraform
 
-**Why it's wrong:** The doctor command would always check all tools, even ones not used by this project.
+**What people do:** Set `aws_region = "us-east-2"` directly in `main.tf`.
 
-**Do this instead:** Doctor reads project config, calls `provider.check_binary()` for the configured provider only. Falls back to Terraform check when no config is present.
+**Why it's wrong:** The existing RSF examples use variables for region. Hardcoding region makes the example non-portable and breaks for users in other regions.
 
-### Anti-Pattern 5: Blocking on Missing CDK App Before Terraform Provider Works
+**Do this instead:** Use `variable "aws_region"` with a default, and show students how to override it via `TF_VAR_aws_region` or `terraform.tfvars`.
 
-**What people do:** Try to implement CDK provider and Terraform provider in the same phase.
+### Anti-Pattern 5: Skipping `teardown_args` in CustomProviderConfig
 
-**Why it's wrong:** The CDK provider requires writing a CDK app template, testing CDK CLI integration, and understanding the CDK synthesis/deployment lifecycle — all of which are independent of the abstraction layer. Blocking Terraform working-behind-a-provider on CDK completion delays value.
+**What people do:** Only configure `args` for deploy, omitting `teardown_args`.
 
-**Do this instead:** Phase 1 = base + metadata + terraform provider (existing Terraform behavior now behind the interface). Phase 2 = CDK provider. Phase 3 = custom provider. Each phase is independently shippable.
+**Why it's wrong:** Without `teardown_args`, `CustomProvider.teardown()` raises `NotImplementedError`. The integration test teardown fixture calls teardown unconditionally — if it fails, AWS resources are orphaned and the test harness reports a cryptic error.
+
+**Do this instead:** Always configure both `args` and `teardown_args`. The tutorial must show both. The deploy script dispatches on `$1` to handle both.
 
 ---
 
 ## Scaling Considerations
 
-This is a local CLI tool, not a server. "Scale" here means code complexity as the number of providers grows.
+This is a local developer tool. Scaling concerns are code maintainability, not user load.
 
-| Number of Providers | Architecture Adjustments |
-|---------------------|--------------------------|
-| 2-3 (Terraform, CDK, Custom) | Simple factory function with if-elif or dict dispatch is sufficient |
-| 4-6 (adding Pulumi, CloudFormation native, etc.) | Plugin-style registration: dict of `{name: ProviderClass}` initialized at module load |
-| 7+ | Entry point-based plugin system (`importlib.metadata` entry_points); external packages can register providers |
-
-For v3.0 with 3 providers, a dict dispatch factory is the right level of complexity:
-
-```python
-# providers/__init__.py
-_PROVIDERS: dict[str, type[InfraProvider]] = {
-    "terraform": TerraformProvider,
-    "cdk": CDKProvider,
-    "custom": CustomProvider,
-}
-
-def get_provider(name: str, options: dict) -> InfraProvider:
-    if name not in _PROVIDERS:
-        raise ValueError(f"Unknown provider: {name!r}. Available: {list(_PROVIDERS)}")
-    return _PROVIDERS[name](options)
-```
-
-Entry-point-based plugins are out of scope for v3.0 but the dict-dispatch pattern makes migration to entry points trivial later.
+| Concern | Implication |
+|---------|-------------|
+| Adding more registry module examples | Each is independent; no shared state. Pattern established here is reusable. |
+| Terraform module version upgrades | Pin versions in `versions.tf` with `~>` constraints. Tutorial should show how to upgrade. |
+| Multi-module Terraform root | Starting with one root module per example keeps state management simple. |
+| Lambda zip size | Use `source_path` with `pip_requirements` in the module if dependencies are large. Out of scope for initial tutorial. |
 
 ---
 
 ## Sources
 
-- Direct source code analysis: `src/rsf/cli/deploy_cmd.py` (279 LOC)
-- Direct source code analysis: `src/rsf/terraform/generator.py` (217 LOC)
-- Direct source code analysis: `src/rsf/terraform/engine.py`
-- Direct source code analysis: `src/rsf/dsl/models.py` (404 LOC)
-- Direct source code analysis: `src/rsf/cli/export_cmd.py` — reveals duplication of infra extraction
-- Direct source code analysis: `src/rsf/cli/doctor_cmd.py` — reveals hardcoded terraform check
-- Direct source code analysis: `src/rsf/cli/diff_cmd.py` — reveals tf_dir coupling
-- `.planning/PROJECT.md` — v3.0 milestone requirements
-- Python `typing.Protocol` — standard library, Python 3.8+, no external dependency
-- Python `tomllib` — standard library, Python 3.11+; `tomli` backport for 3.10
+- Direct source analysis: `src/rsf/providers/custom.py` — CustomProvider.deploy(), validate_program(), _create_transport()
+- Direct source analysis: `src/rsf/providers/metadata.py` — WorkflowMetadata fields (11 fields confirmed)
+- Direct source analysis: `src/rsf/providers/transports.py` — FileTransport, EnvTransport, ArgsTransport
+- Direct source analysis: `src/rsf/providers/base.py` — ProviderContext, InfrastructureProvider ABC
+- Direct source analysis: `src/rsf/dsl/models.py` — CustomProviderConfig fields confirmed
+- Direct source analysis: `src/rsf/cli/deploy_cmd.py` — deploy pipeline confirmed; routes correctly to custom provider
+- Direct source analysis: `examples/order-processing/` — example directory structure (canonical reference)
+- Direct source analysis: `tests/test_providers/test_custom_integration.py` — confirms security hardening and interface contract
+- GitHub: `terraform-aws-modules/terraform-aws-lambda` `variables.tf` — confirmed `durable_config_execution_timeout` and `durable_config_retention_period` inputs ([terraform-aws-modules/lambda/aws](https://registry.terraform.io/modules/terraform-aws-modules/lambda/aws/latest))
+- GitHub: `terraform-aws-modules/terraform-aws-lambda` complete example — confirmed `create_package = false` + `local_existing_package` pattern
+- Terraform Registry: [terraform-aws-modules/dynamodb-table/aws](https://registry.terraform.io/modules/terraform-aws-modules/dynamodb-table/aws/latest)
+- Terraform Registry: [terraform-aws-modules/sqs/aws](https://registry.terraform.io/modules/terraform-aws-modules/sqs/aws/latest)
+- `.planning/PROJECT.md` — v3.2 milestone scope and constraints
 
 ---
 
-*Architecture research for: RSF v3.0 Pluggable Infrastructure Providers*
-*Researched: 2026-03-02*
+*Architecture research for: RSF v3.2 Terraform Registry Modules Tutorial*
+*Researched: 2026-03-03*

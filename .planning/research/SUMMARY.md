@@ -1,199 +1,189 @@
 # Project Research Summary
 
-**Project:** RSF v3.0 — Pluggable Infrastructure Providers
-**Domain:** Pluggable infrastructure provider abstraction for Python CLI deployment tool
-**Researched:** 2026-03-02
-**Confidence:** HIGH
+**Project:** RSF v3.2 — Terraform Registry Modules Tutorial
+**Domain:** Tutorial and example demonstrating RSF custom provider integration with HashiCorp Terraform registry modules
+**Researched:** 2026-03-03
+**Confidence:** HIGH (stack/architecture verified from source); MEDIUM on durable_config module internals due to newness of feature (lambda module v8.7.0 released February 18, 2026)
 
 ## Executive Summary
 
-RSF v3.0 adds a pluggable infrastructure provider system to a mature Python CLI tool that currently hard-codes Terraform as its sole deployment backend. The challenge is introducing a provider abstraction layer without regressing existing Terraform users, without adding RSF runtime dependencies, and without leaking Terraform-specific concepts into the shared interface. Research confirms this is a well-understood "driver pattern" in Python — an `abc.ABC` or `typing.Protocol` interface with a dict-dispatch factory is the correct choice for 3 known providers, with a clear upgrade path to entry-point-based plugins if more providers are added later. All new capability is implemented using stdlib modules only (`abc`, `json`, `os`, `tempfile`, `subprocess`, `shutil`); no new RSF runtime dependencies are required.
+RSF v3.2 is a documentation and example milestone, not a code milestone. The RSF provider system (CustomProvider, transports, WorkflowMetadata) was completed in v3.0 and requires zero changes. The entire v3.2 scope lives in one new example directory (`examples/registry-modules-demo/`) and one new tutorial (`tutorials/09-custom-provider-registry-modules.md`). The deliverable teaches users to write a custom provider script that deploys Lambda Durable Functions via HashiCorp's official terraform-aws-modules instead of RSF's raw HCL generator — demonstrating the provider system's IaC-agnosticism in practice.
 
-The recommended architecture introduces a `src/rsf/providers/` package that sits between the CLI commands and the existing `terraform/` package. The `deploy_cmd.py` infra extraction block (~80 LOC of manual field extraction) is replaced by `provider.generate()` and `provider.deploy()` calls. The existing `TerraformConfig` and `generate_terraform()` stay intact and are wrapped — not replaced — by `TerraformProvider`. A new `providers/metadata.py` module consolidates the infra extraction logic that is currently duplicated between `deploy_cmd.py` and `export_cmd.py`, yielding a single `extract_infra_config()` function used by all providers. The CDK provider generates a Python CDK app directory via Jinja2 (the same template engine already in the stack) and invokes the `cdk` CLI as a subprocess, matching the Terraform provider model exactly.
+The recommended approach is a self-contained bash deploy script that reads WorkflowMetadata via FileTransport, then runs `terraform apply` against a static HCL directory using five registry modules: lambda (v8.7.0+), dynamodb-table (v5.5.0), sqs (v5.2.1), cloudwatch metric-alarm (v5.7.2), and sns (v7.1.0). The lambda module version is a hard dependency: terraform-aws-modules/lambda/aws only added native durable Lambda support in v8.7.0 (February 18, 2026). The tutorial must pin all modules to exact versions, not range constraints, because Terraform does not lock module versions in `.terraform.lock.hcl`.
 
-The dominant risk is the leaky abstraction: defining the provider interface around Terraform's mental model (`TerraformConfig` fields, `tf_dir`, `backend_bucket`) and then papering over it for CDK and custom providers. Prevention requires defining the interface in DSL/workflow semantics — `WorkflowMetadata` with `workflow_name`, `stage`, `triggers`, `dynamodb_tables`, `alarms`, etc. — and requiring all providers to translate internally. A secondary risk is breaking existing Terraform users during the refactor; this is mitigated by a hard default of `"terraform"` when no provider is configured, and a regression test that verifies a v2.0-style `workflow.yaml` (no `infrastructure:` block) continues to invoke Terraform unchanged.
+The primary risks are all IAM-related and specific to Lambda Durable Functions, a feature that launched at re:Invent 2025. The Terraform AWS provider (GitHub issue #45800) does not yet support the `AllowInvokeLatest` durable_config field, requiring all invocations to use a Lambda alias rather than `$LATEST`. Additionally, the durable execution IAM permissions (checkpoint, get, list, self-invoke) are not included in the registry lambda module's auto-created role and must be manually attached. Both issues are well-understood and have clear workarounds; neither blocks the tutorial.
 
 ## Key Findings
 
 ### Recommended Stack
 
-The entire feature is implemented with existing dependencies plus stdlib. No new packages are added to RSF's `pyproject.toml`. The provider interface uses `abc.ABC` (chosen over `typing.Protocol` because RSF owns all provider implementations and ABC gives runtime `TypeError` on missing methods — safer when users can register custom providers via config). Workflow metadata serialization uses `json`, `os`, and `tempfile` from stdlib. The CDK provider ships a Jinja2-generated CDK app template (Jinja2 already in the stack); the `aws-cdk-lib` package goes only into the generated CDK app's own `requirements.txt`, not into RSF itself.
+The stack adds no new Python dependencies to RSF. All additions are Terraform-only and are downloaded automatically by `terraform init`. The only tooling prerequisite beyond what RSF already requires is Terraform >= 1.5.7 (required by the sqs and sns modules) and optionally `jq` for bash-based metadata parsing. The existing AWS provider constraint (`>= 6.25.0`) satisfies all module requirements without a version bump.
 
 **Core technologies:**
-- `abc.ABC` (stdlib): `InfrastructureProvider` abstract base class — forces `deploy()`, `teardown()`, and `check_prerequisites()` to be implemented; raises `TypeError` at instantiation if missing
-- `dataclasses` (stdlib): `ProviderContext` and `ProviderResult` data types — consistent with existing `TerraformConfig`/`TerraformResult` pattern; `dataclasses.asdict()` gives free JSON serialization
-- `json` + `tempfile` + `os` (stdlib): Three metadata transport modes — JSON file, environment variables, CLI args — all without new dependencies
-- `aws-cdk-lib >= 2.241.0` + `constructs >= 10.0.0`: Goes into the generated CDK app's `requirements.txt` only; never imported by RSF
-- `cdk` CLI (Node.js, globally installed): Invoked via `subprocess.run(["cdk", "deploy", ...])` — same model as the Terraform binary; user prerequisite, not RSF dependency
-
-**What NOT to add:**
-- `pluggy`: Hook-broadcast semantics don't fit the single-provider-per-deploy model; ABC factory is simpler and correct
-- `aws-cdk-lib` in RSF's own dependencies: Would add ~200MB of transitive dependencies for all users, including those who only use Terraform
-- `shell=True` in any subprocess call: Already correctly avoided in the codebase; must stay avoided
+- `terraform-aws-modules/lambda/aws` v8.7.0 — Lambda + IAM role + CloudWatch log group as an integrated unit; first version with native durable_config support; use `create_package = false` + `local_existing_package` to avoid conflicting with RSF's own zip workflow
+- `terraform-aws-modules/dynamodb-table/aws` v5.5.0 — direct 1:1 mapping to RSF's `dynamodb_tables` WorkflowMetadata field; use with `for_each` over the list
+- `terraform-aws-modules/sqs/aws` v5.2.1 — DLQ; wires to lambda module's `dead_letter_target_arn`; gated by `count = var.dlq_enabled ? 1 : 0`
+- `terraform-aws-modules/cloudwatch/aws` (metric-alarm submodule) v5.7.2 — maps to RSF's three alarm types (error_rate, duration, throttle); requires `//modules/metric-alarm` submodule path
+- `terraform-aws-modules/sns/aws` v7.1.0 — SNS topic for alarm notifications; feeds `alarm_actions`
+- Bash (`deploy.sh`) — custom provider entry point invoked by RSF CustomProvider; must be `chmod +x` with absolute path; dispatches on `$1` for deploy/destroy
+- FileTransport (`RSF_METADATA_FILE`) — recommended metadata transport for Terraform scripts; persists JSON for inspection; supports nested structures (dynamodb_tables, alarms) that ArgsTransport cannot handle reliably
 
 ### Expected Features
 
-**Must have (table stakes — v3.0 launch):**
-- Abstract provider interface (`abc.ABC`) — defines the contract; all providers implement it
-- Terraform provider — wraps existing deploy flow behind the interface with zero behavior change
-- Custom provider — `program: <path>` + `args: [...]` with env var metadata injection; any language, any tool
-- Provider selection in workflow YAML (`infrastructure.provider`) and project config (`rsf.toml`)
-- Metadata passing via environment variables (`RSF_WORKFLOW_NAME`, `RSF_STAGE`, `RSF_METADATA_JSON`)
-- Metadata passing via JSON file (written before provider invocation; path passed as `RSF_METADATA_FILE`)
-- CDK provider with generated CDK app template — ships ready-to-use; invokes `cdk deploy` via subprocess
+The tutorial is the product. Features are tutorial coverage goals, not new RSF runtime capabilities.
 
-**Should have (add after core validates):**
-- Metadata passing via CLI arg templates — for providers that don't read env vars
-- `rsf doctor` provider-aware binary checks — Terraform check becomes WARN (not FAIL) for CDK/custom users
-- CDK hotswap (`--code-only` equivalent) — targeted Lambda code update without full CDK synth
+**Must have (table stakes):**
+- Custom provider script that reads WorkflowMetadata via `RSF_METADATA_FILE` and runs `terraform apply`
+- `rsf.toml` wiring for `provider = "custom"` with absolute path to provider script
+- Lambda deployed via registry module with `create_package = false` and `local_existing_package` pointing to RSF-built zip
+- `durable_config` block wired through the lambda module (v8.7.0 required)
+- Durable execution IAM: module auto-creates base role; separate inline policy adds CheckpointDurableExecution, GetDurableExecution, ListDurableExecutionsByFunction, self-invoke permissions
+- Lambda alias created and used for all invocations (workaround for Terraform provider issue #45800)
+- `teardown_args` configuration with matching destroy path in deploy script
+- Example workflow YAML with DynamoDB table, DLQ, and Task states (exercises all RSF infrastructure features)
+- End-to-end `rsf deploy` verification against real AWS
+- Integration test that invokes a real durable execution (not just exit code check)
 
-**Defer to v2+:**
-- Pulumi provider — Automation API exists in Python but adds SDK weight
-- CloudFormation/SAM provider — RSF already exports CF; a deploy path is a v2+ concern
-- Entry-point-based plugin discovery — dict-dispatch factory is sufficient for 3 providers; upgrade path is clear
+**Should have (differentiators):**
+- Side-by-side comparison of raw HCL (RSF TerraformProvider output) vs. registry module HCL
+- Python script variant of the custom provider (not just bash) — matches RSF's ecosystem
+- Annotated WorkflowMetadata schema table in tutorial prose
+- Debug step showing how to print and inspect the metadata JSON before Terraform runs
+- `rsf doctor` output callout at the provider path configuration step
+- Local test of provider script in isolation before wiring to RSF
 
-**Confirmed anti-features (do not build):**
-- Dynamic provider discovery via `entry_points` — makes provider authoring unnecessarily complex for v3.0
-- Provider SDK / Python base class that users must subclass — breaks polyglot use; subprocess + env vars is the correct extension model
-- Auto-detect provider from installed binaries — ambiguous when both Terraform and CDK are installed; explicit config is required
-- Provider-specific CLI flags on `rsf deploy` — flag explosion; provider-specific config belongs in `infrastructure.options` in the workflow YAML
+**Defer (future milestones):**
+- Pulumi or CDK registry equivalents
+- New RSF DSL syntax or SDK for custom providers
+- Multi-provider workflow composition
+- Coverage of all three metadata transports in depth (FileTransport is sufficient)
+- Custom Terraform module authoring or publishing to Terraform Registry
 
 ### Architecture Approach
 
-The architecture introduces a `providers/` package as a peer to the existing `terraform/` package. The build order is strictly bottom-up: `base.py` (interface) → `metadata.py` (shared extraction) → `config.py` (project config loading) → `terraform.py`, `cdk.py`, `custom.py` (providers) → `__init__.py` (registry/factory). The CLI commands slim down: `deploy_cmd.py` replaces its ~80-LOC infra extraction block with three lines (`get_provider()`, `provider.generate()`, `provider.deploy()`). Provider selection follows a four-level cascade: CLI flag → workflow YAML field → project config → hardcoded default `"terraform"`.
+This is a pure user-space integration. Zero RSF core files are modified. The custom provider system was designed for exactly this use case: an external executable receives WorkflowMetadata and handles deployment autonomously. The deploy script is a thin Terraform wrapper — it reads RSF metadata, passes values to Terraform as `-var` flags, and calls `terraform apply`. The Terraform HCL files in `terraform/` are static and version-controlled; the deploy script never generates or modifies them. Split deploy/destroy commands in a single script dispatching on `$1` is the canonical pattern supported by `args` / `teardown_args` in CustomProviderConfig.
 
 **Major components:**
-1. `providers/base.py` — `InfrastructureProvider` ABC with `deploy()`, `teardown()`, `check_prerequisites()`, and `validate_config()` abstract methods; `ProviderContext` and `ProviderResult` dataclasses
-2. `providers/metadata.py` — `extract_infra_config()` (single source of truth, eliminates duplication between `deploy_cmd` and `export_cmd`); `WorkflowMetadata` dataclass; JSON file, env var, and CLI arg serializers
-3. `providers/config.py` — `load_project_config()` parsing `rsf.toml`; provider selection cascade logic
-4. `providers/terraform.py` — `TerraformProvider` wrapping existing `generator.py` + `terraform/` package; no changes to HCL templates or Jinja2 engine
-5. `providers/cdk.py` — `CDKProvider` generating CDK app via Jinja2; CDK bootstrap check; `subprocess.run(["cdk", "deploy", ...])`
-6. `providers/custom.py` — `CustomProvider` executing user-specified program with metadata via chosen transport; security-hardened subprocess invocation
-7. `providers/__init__.py` — dict-dispatch factory: `_PROVIDERS = {"terraform": TerraformProvider, "cdk": CDKProvider, "custom": CustomProvider}`
+1. `examples/registry-modules-demo/deploy.sh` — RSF-facing entry point; reads RSF_METADATA_FILE, zips source, dispatches to terraform init/apply/destroy based on `$1`
+2. `examples/registry-modules-demo/terraform/` — static HCL using registry modules (main.tf, dynamodb.tf, sqs.tf, variables.tf, outputs.tf, versions.tf, backend.tf)
+3. `examples/registry-modules-demo/workflow.yaml` — RSF DSL with `infrastructure.custom` block and FileTransport config
+4. `tutorials/09-custom-provider-registry-modules.md` — step-by-step tutorial document
+5. `tests/test_examples/test_registry_modules_demo.py` — integration test (real AWS, follows existing example test pattern)
 
 ### Critical Pitfalls
 
-1. **Leaky abstraction (Terraform-shaped interface)** — Define the interface in workflow/DSL semantics (`WorkflowMetadata` with `triggers`, `dynamodb_tables`, etc.), not IaC tool semantics. Warning sign: the words `terraform`, `tf_dir`, `hcl`, or `backend` appear in `providers/base.py`. Prevention: write a CDK provider stub in the same phase as the interface to validate it is genuinely tool-agnostic.
+1. **Lambda module durable_config variable names unverified** — terraform-aws-modules/lambda v8.7.0 was released February 18, 2026. The exact input variable names for durable config must be confirmed from the live module schema before writing tutorial Terraform code. A silently omitted durable_config means the tutorial deploys a non-durable Lambda with no error. Prevention: pin to `version = "8.7.0"` (exact), verify with `aws lambda get-function --query Configuration.DurableConfig` after deploy.
 
-2. **Breaking existing Terraform users** — Default provider must be `"terraform"` with zero config required. The detection cascade (`workflow.yaml` → project config → `"terraform"`) must be verified by a regression test that runs `rsf deploy` against a v2.0-style `workflow.yaml` with no `infrastructure:` block. This test is a success criterion, not an afterthought.
+2. **AllowInvokeLatest missing from Terraform AWS provider (issue #45800)** — invoking durable functions via `$LATEST` may fail. All invocation examples must use a Lambda alias ARN. Establish this convention in Phase 1 design before writing any invocation code.
 
-3. **Subprocess deadlock on long-running `terraform apply` / `cdk deploy`** — Use passthrough mode (`subprocess.run(cmd, check=True)` with no PIPE) for interactive, user-facing deploys. Never use `Popen` with sequential `stdout.read()` then `stderr.read()`. Build a shared `run_provider_command()` helper in `base.py` that all providers use; no provider calls `subprocess` directly.
+3. **IAM action name mismatch between RSF generator and AWS managed policy** — `AWSLambdaBasicDurableExecutionRolePolicy` may use different action names than RSF's existing inline policy (durable_config launched December 2025; IAM actions were still stabilizing). Prevention: verify the managed policy with `aws iam get-policy-version` before finalizing IAM; validate with a live durable invocation, not just `terraform apply` success.
 
-4. **Silent failure — swallowing provider error messages** — On `CalledProcessError`, always re-print `exc.stderr` (and `exc.stdout` for CDK, which mixes error streams) before raising. The `run_provider_command()` helper must handle this; providers must not catch it silently.
+4. **Module version not pinned — silent upgrades** — `~>` version constraints on registry modules silently upgrade on `terraform init` because module versions are not in `.terraform.lock.hcl`. Pin all modules to exact versions (`version = "8.7.0"`, not `~> 8.7`).
 
-5. **Metadata format mismatch across providers** — Define a single canonical `WorkflowMetadata` JSON schema (snake_case, mirrors DSL YAML structure) before implementing any provider. Write serialization tests covering all DSL features (triggers, DynamoDB, alarms, DLQ, lambda_url) before any provider is written. Providers receive the JSON file path as a single argument and parse it themselves.
+5. **Lambda packaging conflict** — the lambda module's built-in packaging system (`source_path`, `create_package = true`) conflicts with RSF's own zip workflow. Always use `create_package = false` + `local_existing_package`. The deploy script must zip the RSF-generated source before `terraform apply`.
 
-6. **Provider config validated too late** — Each provider implements `validate_config(config: dict) -> list[str]`; `rsf validate` calls it. Errors must surface at `rsf validate` time, not at `rsf deploy` time mid-execution.
+6. **ArgsTransport fails on complex metadata fields** — `dynamodb_tables`, `triggers`, and `alarms` are list/dict types that ArgsTransport serializes as Python repr strings (not JSON). Tutorial must use FileTransport for any workflow with non-scalar metadata fields.
 
-7. **Terraform-coupled non-deploy commands left behind** — `diff_cmd.py`, `doctor_cmd.py`, and `watch_cmd.py` all have Terraform-specific paths. `doctor_cmd.py` must make the Terraform check a WARN (not FAIL) for CDK/custom users. A dedicated command audit phase is required.
-
-8. **Shell injection via custom provider path** — Always `shell=False`; program path must be absolute and executable before invocation; metadata passed via JSON file with restricted permissions (mode 0600), never via string interpolation into env vars.
+7. **Provider script exit code swallowing** — bash scripts do not propagate errors by default. `set -euo pipefail` must be the first substantive line of every provider script. Without it, RSF reports success when Terraform partially failed.
 
 ## Implications for Roadmap
 
-Based on the research, the build order is strictly constrained by dependencies. The interface must exist before any provider; metadata serialization must be tested before any provider consumes it; the Terraform provider (wrapping existing behavior) must work before CDK or custom providers are added. The existing commands (`doctor`, `diff`, `watch`) need a provider-aware audit pass that is a distinct phase, not bundled into provider implementation.
+The work is purely additive with no RSF core changes. The architectural pattern is well-defined and all hard blockers are IAM/durable_config verification steps that must happen before code is finalized. The build order is driven by two constraints: (1) module schema must be confirmed before writing Terraform, and (2) the core Lambda-only example must work end-to-end before optional components are added.
 
-### Phase 1: Provider Interface and Metadata Foundation
+### Phase 1: Scaffolding and Schema Verification
 
-**Rationale:** The ABC interface and metadata schema are the foundation everything else depends on. Nothing can be built until the contract is defined. Writing a CDK stub in this phase (without implementing it) validates the interface is not Terraform-shaped. Metadata schema tests must pass before any provider is written.
-**Delivers:** `providers/base.py` (InfrastructureProvider ABC, ProviderContext, ProviderResult), `providers/metadata.py` (WorkflowMetadata, extract_infra_config, JSON serializer), metadata schema tests covering all DSL features.
-**Addresses:** Provider interface (P1), metadata passing JSON file (P1), metadata passing env vars (P1).
-**Avoids:** Leaky abstraction pitfall (Pitfall 1), metadata format mismatch pitfall (Pitfall 5), provider config validated too late (Pitfall 6).
+**Rationale:** All subsequent Terraform code depends on confirmed module variable names (durable_config inputs) and the "always use alias" invocation convention. These must be resolved before writing a single line of Terraform. This is the highest-risk phase because terraform-aws-modules/lambda v8.7.0 is three weeks old and documentation is sparse.
+**Delivers:** Confirmed lambda module input schema at v8.7.0, `versions.tf` with exact version pins, Lambda alias convention decision, IAM approach decision (managed policy vs. inline policy)
+**Addresses:** Pitfalls 1, 2, 3, 4 (durable_config verification, AllowInvokeLatest workaround, IAM action names, version pinning)
+**Research flag:** Yes — verify live module schema from v8.7.0 `variables.tf`; verify `AWSLambdaBasicDurableExecutionRolePolicy` availability in target AWS account
 
-### Phase 2: Terraform Provider and deploy_cmd Refactor
+### Phase 2: Core Example — Lambda Only
 
-**Rationale:** Terraform is the existing behavior. Wrapping it behind the new interface first proves the abstraction works and that no regression has been introduced, before any new provider is built. The `deploy_cmd.py` refactor is the primary integration point and must be done in this phase — it is what validates the interface design is complete.
-**Delivers:** `providers/terraform.py` (TerraformProvider wrapping existing generator), `providers/config.py` (project config loading, provider selection cascade), `providers/__init__.py` (dict-dispatch factory), `deploy_cmd.py` refactored. Regression test confirming v2.0 workflow.yaml continues to invoke Terraform with zero config changes.
-**Uses:** Existing `terraform/generator.py`, `terraform/engine.py`, 11 Jinja2 HCL templates — all unchanged.
-**Implements:** TerraformProvider, provider registry, deploy command integration.
-**Avoids:** Breaking existing Terraform users (Pitfall 2), subprocess deadlock (Pitfall 3).
+**Rationale:** Build the smallest working end-to-end first. workflow.yaml + deploy.sh + terraform/main.tf (lambda module only). Verify `rsf deploy` invokes the script, the script reads metadata, Terraform deploys a working durable Lambda, and teardown destroys it cleanly. No DynamoDB, SQS, or alarms yet. This validates the entire provider system integration before adding optional components.
+**Delivers:** Working `examples/registry-modules-demo/` with Lambda-only deploy/teardown; first AWS integration verification
+**Implements:** deploy.sh (dispatch pattern), versions.tf + variables.tf + main.tf + outputs.tf, workflow.yaml with custom provider config, deploy script zipping source before apply
+**Avoids:** Packaging conflict (Pitfall 5), exit code swallowing (Pitfall 7), absolute path validation
+**Research flag:** No — established patterns from RSF source and existing examples
 
-### Phase 3: CDK Provider
+### Phase 3: Full Example — DynamoDB, SQS DLQ, CloudWatch Alarms
 
-**Rationale:** CDK is the #2 AWS infrastructure choice and the most-requested addition. It has the highest implementation complexity (CDK app template generation, bootstrap check, CDK-specific subprocess behavior, mixed stdout/stderr). It is isolated behind the interface established in Phase 1, so it can be built and tested without touching existing code paths.
-**Delivers:** `providers/cdk.py` (CDKProvider with Jinja2-generated CDK app, bootstrap check, `cdk deploy` invocation), CDK app template files, `rsf doctor` CDK binary check.
-**Uses:** Jinja2 (already in stack), `aws-cdk-lib >= 2.241.0` in generated app's `requirements.txt` (not in RSF), `cdk` CLI via subprocess.
-**Implements:** CDKProvider, CDK app template generation (Generation Gap pattern).
-**Avoids:** Silent error swallowing for CDK mixed streams (Pitfall 4), CDK bootstrap prerequisite (integration gotcha).
+**Rationale:** Extend the working Lambda-only example with optional infrastructure components. Each module is independent and can be added sequentially. DynamoDB via `for_each` demonstrates multi-module composition. DLQ demonstrates conditional infrastructure. CloudWatch alarms demonstrate the metric-alarm submodule pattern and the SNS topic output chaining.
+**Delivers:** Complete `examples/registry-modules-demo/terraform/` with all five registry modules; full WorkflowMetadata field mapping demonstrated
+**Uses:** dynamodb-table v5.5.0, sqs v5.2.1, cloudwatch metric-alarm v5.7.2, sns v7.1.0 from STACK.md
+**Avoids:** ArgsTransport for complex fields (Pitfall 6) — FileTransport is required when DynamoDB tables or alarms are present
 
-### Phase 4: Custom Provider
+### Phase 4: Tests
 
-**Rationale:** The custom provider (arbitrary program execution with metadata injection) is the simplest provider to implement but has the most security surface area. It should be built after the interface and subprocess helper are proven by the Terraform and CDK providers.
-**Delivers:** `providers/custom.py` (CustomProvider with shell=False subprocess, security-hardened invocation), all three metadata transports (JSON file, env vars, CLI args), security review checklist.
-**Uses:** `subprocess` (stdlib, existing pattern), `tempfile` with 0o600 permissions.
-**Implements:** CustomProvider, metadata transport modes, security controls.
-**Avoids:** Shell injection via custom provider path (Pitfall 8), silent failure (Pitfall 4).
+**Rationale:** Unit tests and integration tests are written after the implementation is verified manually. Integration test follows the identical pattern to existing RSF integration tests — no new test infrastructure is needed. The critical quality gate is that the integration test invokes a real durable execution and polls for completion, not just checks `rsf deploy` exit code.
+**Delivers:** `examples/registry-modules-demo/tests/test_local.py` (unit, no AWS) + `tests/test_examples/test_registry_modules_demo.py` (real AWS, real durable invocation, teardown verification)
+**Research flag:** No — established patterns from existing RSF test suite
 
-### Phase 5: Provider-Aware Command Audit
+### Phase 5: Tutorial Document
 
-**Rationale:** `diff_cmd.py`, `doctor_cmd.py`, and `watch_cmd.py` retain Terraform-specific paths after the provider abstraction is applied to `deploy_cmd.py`. This is a distinct audit phase — each command requires a design decision about what non-Terraform behavior means, which cannot be made as an afterthought within provider implementation phases.
-**Delivers:** `doctor_cmd.py` provider-aware binary check (Terraform check is WARN not FAIL for CDK/custom users), `diff_cmd.py` graceful degradation when no Terraform state exists, `watch_cmd.py` provider-aware hot deploy, `export_cmd.py` using shared `extract_infra_config()` to eliminate duplication.
-**Avoids:** Terraform-coupled non-deploy commands left behind (Pitfall 7), `rsf doctor` false FAIL for CDK users (UX pitfall).
+**Rationale:** Written last so it accurately describes what was built. Working code is the source of truth; the tutorial prose describes it. All differentiator features (side-by-side comparison, annotated metadata schema, debug steps) are documentation polish that belongs here.
+**Delivers:** `tutorials/09-custom-provider-registry-modules.md` with step-by-step narrative, annotated WorkflowMetadata schema, side-by-side HCL comparison (raw vs. registry module), debug tips, prerequisite list
+**Research flag:** No — content is derived from the working implementation
 
 ### Phase Ordering Rationale
 
-- Phase 1 before all others: The interface contract cannot be designed by examining only Terraform. The CDK stub in Phase 1 forces the interface to be DSL-semantic, not tool-semantic.
-- Phase 2 before Phase 3/4: Wrap existing behavior first; regression coverage is the safety net for subsequent provider additions.
-- Phase 3 before Phase 4: CDK is higher-complexity and exercises the subprocess helper more thoroughly; this reveals bugs before the security-critical custom provider path is built.
-- Phase 5 last: The command audit makes design decisions that depend on knowing what the provider interface looks like fully implemented (Phases 1-4).
-- No cross-phase dependencies: Each phase delivers independently shippable value. If Phase 3 is deferred, Phases 1-2 and 4-5 still ship a working tool with Terraform and custom providers.
+- Phase 1 before Phase 2: Module variable names must be confirmed before any Terraform code is written. Discovering wrong variable names after Terraform files are written means rewriting everything downstream.
+- Phase 2 before Phase 3: Validate the core integration path (RSF CLI → CustomProvider → deploy.sh → terraform apply → working Lambda) before adding optional complexity. DynamoDB, SQS, and alarms are additive; a broken core is masked by additional complexity.
+- Phase 3 before Phase 4: Integration tests target a complete implementation. Writing tests against partial implementation creates churn.
+- Phase 4 before Phase 5: The tutorial must describe the final implementation accurately. Writing prose about code that will change is waste.
+- No RSF core changes in any phase: The example and tutorial are built entirely outside `src/rsf/`. Any discovery that core changes are needed (e.g., adding `source_dir` to WorkflowMetadata) would be surfaced in Phase 2 and addressed before proceeding.
 
 ### Research Flags
 
 Phases likely needing deeper research during planning:
-- **Phase 3 (CDK Provider):** CDK bootstrap detection logic, CDK context value passing conventions, and CDK synthesis output structure are not fully specified in research. Phase planning should include a CDK CLI invocation experiment before committing to the template structure.
-- **Phase 5 (Command Audit):** The `watch_cmd.py` provider-aware hot deploy path requires understanding how CDK Hotswap works vs. Terraform `-target`; this is domain-specific and has limited documentation in research.
+- **Phase 1:** High-priority. Confirm exact durable_config variable names in terraform-aws-modules/lambda v8.7.0 `variables.tf`. Verify `AWSLambdaBasicDurableExecutionRolePolicy` is available in the target AWS account (policy was still rolling out to regions in early 2026 per Pulumi issue #6100). Verify Terraform provider issue #45800 resolution status.
 
 Phases with standard patterns (skip research-phase):
-- **Phase 1 (Interface and Metadata):** ABC vs. Protocol tradeoffs are well-documented; metadata serialization is pure stdlib; no unknowns.
-- **Phase 2 (Terraform Provider + deploy_cmd):** Wrapping existing code behind an interface is a standard refactor; existing tests provide regression coverage.
-- **Phase 4 (Custom Provider):** subprocess with `shell=False` is a well-understood pattern; security requirements are documented in research.
+- **Phase 2:** CustomProvider system fully analyzed from RSF source; deploy/destroy dispatch pattern is established; file structure mirrors existing examples
+- **Phase 3:** All module interfaces verified from GitHub source; `for_each` over list metadata is standard Terraform; SQS `count` gate pattern is well-documented
+- **Phase 4:** RSF integration test pattern is directly reusable from existing examples with no new test infrastructure
+- **Phase 5:** Tutorial follows existing `tutorials/` flat-file conventions; no research needed
 
 ## Confidence Assessment
 
 | Area | Confidence | Notes |
 |------|------------|-------|
-| Stack | HIGH | All recommendations are stdlib or existing dependencies; no version conflicts; CDK v2.241.0 confirmed current on PyPI as of 2026-03-02 |
-| Features | HIGH | Core features (interface, Terraform wrapper, custom provider, metadata) are well-understood; CDK-specific integration details are MEDIUM |
-| Architecture | HIGH | Based on direct source code analysis of the existing codebase (279-LOC `deploy_cmd.py`, 217-LOC `generator.py`, 404-LOC `dsl/models.py`, `export_cmd.py`, `doctor_cmd.py`) |
-| Pitfalls | HIGH | Pitfalls are derived from direct codebase analysis plus verified Python documentation and CDK/Terraform GitHub issue references |
+| Stack | HIGH | All 5 module versions verified from GitHub releases pages; provider version compatibility cross-checked; RSF AWS provider constraint (>= 6.25.0) satisfies all module requirements |
+| Features | HIGH | Custom provider system analyzed from source (custom.py, transports.py, metadata.py); WorkflowMetadata fields confirmed; dependency order verified; anti-features clearly reasoned |
+| Architecture | HIGH | Based on direct source analysis of all RSF provider files and existing examples; build order has clear dependency rationale; file structure follows established conventions |
+| Pitfalls | MEDIUM | durable_config is three weeks old (lambda module v8.7.0, Feb 18 2026); IAM managed policy (`AWSLambdaBasicDurableExecutionRolePolicy`) confirmed in AWS docs but regional availability verified only via Pulumi issue, not direct API call; Terraform provider issue #45800 is open and unresolved as of research date |
 
-**Overall confidence:** HIGH
+**Overall confidence:** HIGH for scope, architecture, and build order. MEDIUM for durable_config-specific implementation details that require live verification in Phase 1.
 
 ### Gaps to Address
 
-- **CDK app template structure:** Research specifies that a Jinja2-generated CDK Python app is the right approach, but the exact template structure (`app.py`, `stack.py`, `cdk.json` contents) needs to be defined during Phase 3 planning. Recommend a CDK CLI experiment (`cdk init app --language python`) before template authoring.
-- **CDK bootstrap detection:** Research notes that RSF should check for the `CDKToolkit` CloudFormation stack before running `cdk deploy`, but the exact AWS API call or CLI invocation to detect this is not specified. This is a Phase 3 planning detail.
-- **`watch_cmd.py` provider behavior:** The `watch --deploy` interaction with a slow provider (CDK deploy takes minutes) is noted as a UX pitfall but the solution (debounce, disable for slow providers, or provider timeout) is not decided. Needs a design decision in Phase 5.
-- **`rsf.toml` vs. `pyproject.toml [tool.rsf]`:** Research mentions both as options for project config. Which to support (or both) needs a decision before Phase 2; `tomllib` (stdlib, Python 3.11+) handles TOML parsing for both.
+- **Exact durable_config input variable names in lambda module v8.7.0:** Research confirmed the module supports durable_config but the precise Terraform variable names (e.g., `durable_config_execution_timeout` vs. a nested map input) must be verified from the live v8.7.0 `variables.tf` before finalizing Phase 2 Terraform. Handle in Phase 1 schema verification step.
+
+- **AWSLambdaBasicDurableExecutionRolePolicy availability:** The managed policy exists per AWS docs but was still rolling out to regions in early 2026. Before Phase 2 deploys, run `aws iam get-policy --policy-arn arn:aws:iam::aws:policy/service-role/AWSLambdaBasicDurableExecutionRolePolicy` in the target account. If absent, fall back to the inline policy approach used in RSF's existing Terraform generator.
+
+- **Terraform provider issue #45800 resolution status:** Check whether `AllowInvokeLatest` has been added to the AWS Terraform provider before tutorial publication. If resolved, show `AllowInvokeLatest = true` in the tutorial. If still unresolved, maintain the "always use alias" convention throughout.
+
+- **Lambda zip path convention:** RSF generates code to `src/generated/` but does not produce a zip. The deploy script must create the zip before `terraform apply`. The exact path (`src/generated.zip` vs. `src/generated/source.zip`) must be established in Phase 1 and used consistently in `local_existing_package` and all documentation.
 
 ## Sources
 
 ### Primary (HIGH confidence)
-
-- Direct codebase analysis: `src/rsf/cli/deploy_cmd.py` (279 LOC), `src/rsf/terraform/generator.py` (217 LOC), `src/rsf/dsl/models.py` (404 LOC), `src/rsf/cli/export_cmd.py`, `src/rsf/cli/doctor_cmd.py`, `src/rsf/cli/watch_cmd.py`
-- [aws-cdk-lib on PyPI](https://pypi.org/project/aws-cdk-lib/) — version 2.241.0 current as of 2026-03-02
-- [AWS CDK CLI reference](https://docs.aws.amazon.com/cdk/v2/guide/cli.html) — cdk deploy flags, `--context`, `--require-approval`
-- [AWS CDK bootstrapping guide](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping-env.html) — bootstrap required before first deploy
-- [Python subprocess documentation](https://docs.python.org/3/library/subprocess.html) — deadlock risks, `capture_output` behavior, `communicate()` contract
-- [Python abc module documentation](https://docs.python.org/3/library/abc.html) — ABC vs. Protocol tradeoffs
-- [PEP 544 Protocols](https://peps.python.org/pep-0544/) — structural subtyping; `isinstance` behavior with `@runtime_checkable`
+- GitHub: `terraform-aws-modules/terraform-aws-lambda` releases + `variables.tf` source — v8.7.0 durable_config support confirmed
+- GitHub: `terraform-aws-modules/terraform-aws-{dynamodb-table,sqs,sns,cloudwatch}` releases + `variables.tf` — module inputs/outputs verified
+- RSF source: `src/rsf/providers/custom.py`, `transports.py`, `metadata.py`, `base.py`, `src/rsf/dsl/models.py` — provider system interface confirmed
+- RSF source: `src/rsf/cli/deploy_cmd.py` — deploy pipeline routing verified
+- RSF source: `examples/order-processing/` — canonical example directory structure
+- RSF source: `tests/test_providers/test_custom_integration.py` — interface contract and security hardening confirmed
+- AWS docs: Lambda Durable Functions IaC guide — durable_config block schema, `AWSLambdaBasicDurableExecutionRolePolicy`
 
 ### Secondary (MEDIUM confidence)
+- Terraform Registry: terraform-aws-modules/lambda, dynamodb-table, sqs, sns (JS-rendered; supplemented with GitHub source reads)
+- DeepWiki: terraform-aws-modules/terraform-aws-lambda module variables — confirmed durable_config inputs
+- GitHub issue #45800: AllowInvokeLatest missing from Terraform AWS provider — open as of research date
 
-- [AWS CDK GitHub: "Subprocess exited with error null"](https://github.com/aws/aws-cdk/issues/28637) — CDK exit code opacity
-- [Sourcery: Python subprocess tainted env args vulnerability](https://www.sourcery.ai/vulnerabilities/python-lang-security-audit-dangerous-subprocess-use-tainted-env-args) — injection via env
-- [Branch by Abstraction pattern (AWS Prescriptive Guidance)](https://docs.aws.amazon.com/prescriptive-guidance/latest/modernization-decomposing-monoliths/branch-by-abstraction.html) — migration without breakage
-- [Real-time subprocess output — Eli Bendersky](https://eli.thegreenplace.net/2017/interacting-with-a-long-running-child-process-in-python/) — correct Popen streaming patterns
-- [WebSearch: ABC vs Protocol 2025-2026](https://jellis18.github.io/post/2022-01-11-abc-vs-protocol/) — recommendation for internal plugin systems
-- [Serverless Framework plugin architecture](https://www.serverless.com/framework/docs/guides/plugins/creating-plugins) — comparison reference
-
-### Tertiary (LOW confidence)
-
-- [SST move from CDK to Pulumi](https://sst.dev/blog/moving-away-from-cdk/) — CDK limitations; informs what RSF should route around
-- [CDKTF sunset notice (December 2025)](https://github.com/hashicorp/terraform-cdk) — confirms native AWS CDK (`aws-cdk-lib`) is the correct CDK target (not CDKTF)
-- IaC tool comparison 2026 — confirms Terraform + CDK as the top two AWS IaC choices for the target audience
+### Tertiary (LOW confidence — needs live verification)
+- Pulumi issue #6100: `AWSLambdaBasicDurableExecutionRolePolicy` regional rollout timing — confirms the policy exists but not current availability in specific accounts
+- STACK.md note on `dlq_max_receive_count` not being a SQS queue attribute — inferred from WorkflowMetadata field semantics, not directly tested against the SQS module
 
 ---
-*Research completed: 2026-03-02*
+*Research completed: 2026-03-03*
 *Ready for roadmap: yes*

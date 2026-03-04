@@ -1,118 +1,286 @@
 # Stack Research
 
-**Domain:** Pluggable infrastructure providers for Python CLI tool
-**Researched:** 2026-03-02
-**Confidence:** HIGH
+**Domain:** Terraform Registry Modules Tutorial (RSF v3.2)
+**Researched:** 2026-03-03
+**Confidence:** HIGH (all versions verified from GitHub releases pages, source files fetched directly)
+
+## Context
+
+RSF v3.2 adds a tutorial and example showing how to implement an RSF custom provider backed by
+HashiCorp's official terraform-aws-modules. The tutorial teaches users to replace RSF's raw HCL
+resource generation with curated registry modules. No new Python dependencies. No RSF core changes.
+The stack additions live entirely inside the tutorial's bash deploy script and Terraform configuration.
+
+**Existing RSF custom provider interface (already shipped in v3.0):**
+- `CustomProvider` invokes an external program (`shell=False`, absolute path, executable)
+- Metadata delivered via one of three transports: JSON file, env vars, or CLI arg templates
+- `WorkflowMetadata` fields: `workflow_name`, `stage`, `handler_count`, `timeout_seconds`,
+  `triggers`, `dynamodb_tables`, `alarms`, `dlq_enabled`, `dlq_max_receive_count`,
+  `dlq_queue_name`, `lambda_url_enabled`, `lambda_url_auth_type`
+
+**What the tutorial demonstrates:** A `deploy.sh` that RSF's `CustomProvider` invokes, which in
+turn runs `terraform apply` on a configuration that uses terraform-aws-modules instead of raw HCL.
 
 ---
 
-## Context: What Already Exists (Do Not Change)
+## Recommended Stack — Registry Modules
 
-The existing validated stack for v2.0:
-
-| Technology | Version | Role |
-|------------|---------|------|
-| Python | 3.13+ | Runtime (SDK requirement) |
-| Pydantic v2 | >=2.0 | DSL models, validation |
-| Typer | >=0.9 | CLI framework |
-| Jinja2 | >=3.1 | HCL template rendering |
-| PyYAML | >=6.0 | Workflow file parsing |
-| Rich | >=13.0 | Console output |
-| subprocess (stdlib) | stdlib | Terraform CLI invocation |
-| shutil (stdlib) | stdlib | Binary detection (`shutil.which`) |
-| dataclasses (stdlib) | stdlib | TerraformConfig, TerraformResult |
-
-The `deploy_cmd.py` uses `subprocess.run()` with list-style args (no `shell=True`), `shutil.which()` for binary detection, and `dataclasses.dataclass` for configuration objects. These patterns must be extended — not replaced.
-
----
-
-## New Stack Requirements
-
-Three new capabilities are needed:
-
-1. **Provider abstraction** — A typed interface so Terraform, CDK, and custom providers are interchangeable
-2. **AWS CDK provider** — Ships a CDK app template, invokes the `cdk` CLI via subprocess
-3. **Metadata passing** — Workflow data sent to external programs as JSON file, env vars, or CLI args
-
----
-
-## Recommended Stack — New Additions
-
-### Core: Provider Abstraction
+### Core Technologies
 
 | Technology | Version | Purpose | Why Recommended |
 |------------|---------|---------|-----------------|
-| `abc` (stdlib) | stdlib | `InfrastructureProvider` abstract base class | Nominal subtyping: providers must explicitly implement the interface. Cleaner than Protocol for this case because providers are internal code we control, not third-party duck-typed objects. Forces `deploy()` and `teardown()` to be implemented. No external dependencies. |
-| `dataclasses` (stdlib) | stdlib | `ProviderConfig` and `ProviderResult` data types | Already used for `TerraformConfig`/`TerraformResult`. Consistent pattern. Zero dependencies. `dataclasses.asdict()` gives free JSON serialisation for metadata passing. |
-| `json` (stdlib) | stdlib | Workflow metadata serialisation | `json.dumps()` produces the JSON file or env var payload that external programs consume. Already available. |
-| `os` (stdlib) | stdlib | Environment variable construction for subprocess | `{**os.environ, "RSF_METADATA": json_str}` — merge pattern for subprocess `env` argument. |
+| terraform-aws-modules/lambda/aws | 8.7.0 | Lambda function + built-in IAM role + package management | Only official module with native `durable_config` support (v8.7.0, Feb 18, 2026). Handles archive creation, IAM role, CloudWatch log group, and DLQ wiring as an integrated unit. Eliminates the need for separate raw HCL iam.tf, cloudwatch.tf, main.tf files. `durable_config_execution_timeout` and `durable_config_retention_period` variables map directly from `WorkflowMetadata.timeout_seconds`. |
+| terraform-aws-modules/dynamodb-table/aws | 5.5.0 | DynamoDB table with billing mode, keys, attributes | Direct 1:1 mapping to RSF `dynamodb_tables` WorkflowMetadata fields (name, billing_mode, hash_key, range_key, attributes). `PAY_PER_REQUEST` default matches RSF's generated raw HCL default. Use with `for_each` to provision one module per table entry. |
+| terraform-aws-modules/sqs/aws | 5.2.1 | SQS queue for Lambda DLQ | `dead_letter_queue_arn` output connects cleanly to lambda module's `dead_letter_target_arn`. AWS provider >= 6.0 requirement already satisfied by RSF's `>= 6.25.0` constraint. `message_retention_seconds = 1209600` matches RSF's dlq.tf.j2 default (14 days). |
+| terraform-aws-modules/cloudwatch/aws (metric-alarm submodule) | 5.7.2 | CloudWatch metric alarms for error rate, duration, throttles | The `//modules/metric-alarm` submodule maps directly to RSF's three alarm types (error_rate, duration, throttle) in `WorkflowMetadata.alarms`. `dimensions = { FunctionName = ... }` pattern is identical to RSF's raw alarms.tf.j2 template. |
+| terraform-aws-modules/sns/aws | 7.1.0 | SNS topic for alarm notifications | Simple wrapper around `aws_sns_topic`. Requires AWS provider >= 6.9; RSF's existing `>= 6.25.0` satisfies this (6.25 > 6.9). `topic_arn` output feeds directly into `alarm_actions` for all CloudWatch metric alarms. |
 
-**Why ABC over Protocol here:** The provider interface is defined and consumed by RSF itself. ABCs enforce implementation at instantiation time (raises `TypeError` on missing methods), not just at type-check time. This gives runtime safety when users register custom providers via config. Protocol requires `@runtime_checkable` and `isinstance()` checks are shallow (no signature validation). ABC is the right tool when you own both the interface and the implementations.
+### Supporting — Tutorial Infrastructure
 
-**Why not pluggy:** Pluggy is designed for hook-based plugin systems where many plugins may all respond to the same hook (pytest-style). RSF needs a single selected provider per deploy invocation — a "driver" pattern, not a "broadcast" pattern. Pluggy adds indirection without benefit here. One ABC with a factory function is sufficient.
+| Library | Version | Purpose | When to Use |
+|---------|---------|---------|-------------|
+| hashicorp/archive provider | >= 2.7.1 | Zip the generated Lambda source directory | When RSF generates code to `src/` and the tutorial needs a `source.zip` as input to the lambda module's `local_existing_package`. Already used in all RSF examples' `versions.tf`. |
+| hashicorp/aws provider | >= 6.25.0 | AWS resource provisioning | Already required by RSF for `durable_config` block. Satisfies all module requirements: lambda >= 6.0, sqs >= 6.0, sns >= 6.9. No version bump required. |
+| jq | system tool | Parse `WorkflowMetadata` JSON inside `deploy.sh` | Used in the custom provider bash script to extract `workflow_name`, `stage`, `dlq_enabled`, `dynamodb_tables` etc. from the metadata file transport payload. Standard on Linux/macOS. |
 
-### AWS CDK Provider
+### Development Tools
 
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| `aws-cdk-lib` | >=2.241.0 | CDK constructs for Lambda, IAM, DynamoDB in the shipped CDK app template | CDK v2 consolidated all constructs into one package. 2.241.0 is current (released 2026-03-02). Required only in the generated CDK app's `requirements.txt`, NOT in RSF's own `pyproject.toml`. |
-| `constructs` | >=10.0.0 | Base class for all CDK constructs | Required companion to `aws-cdk-lib`. Same scoping: goes into the generated CDK app's dependencies, not RSF itself. |
-| `aws-cdk` CLI | installed globally via npm | `cdk synth`, `cdk deploy`, `cdk bootstrap` invocation | The CDK CLI is a Node.js tool installed separately (`npm install --global aws-cdk`). RSF invokes it via `subprocess.run(["cdk", "deploy", ...])` with `shutil.which("cdk")` pre-check. RSF does not depend on it at install time — it is a user prerequisite like `terraform`. |
-
-**Critical CDK bootstrap requirement:** CDK requires a one-time `cdk bootstrap` per AWS account/region before any `cdk deploy` can succeed. This creates the `CDKToolkit` CloudFormation stack (S3 bucket for assets, ECR repo, IAM roles). The CDK provider's `deploy()` must either run `cdk bootstrap` automatically or document it as a prerequisite. Recommendation: detect whether bootstrap has been run (check for `CDKToolkit` stack), warn if missing, and offer `--bootstrap` flag.
-
-**CDK app template approach:** RSF generates a complete CDK Python app directory (with `app.py`, `cdk.json`, `requirements.txt`) via Jinja2, then invokes `cdk deploy`. This is the same template-then-invoke pattern as the Terraform provider. The CDK app receives workflow metadata via CDK context values (`--context key=value`) or via a JSON file written to the app directory before synthesis.
-
-### Metadata Passing
-
-| Technology | Version | Purpose | Why Recommended |
-|------------|---------|---------|-----------------|
-| `json` (stdlib) | stdlib | Serialize workflow metadata dict to JSON string/file | `json.dumps(metadata, indent=2)` for file, `json.dumps(metadata)` for compact env var value. Already in stdlib, no dependency. |
-| `tempfile` (stdlib) | stdlib | Write ephemeral metadata JSON file to temp location | `tempfile.NamedTemporaryFile` or `Path(tempdir) / "rsf-metadata.json"` — ephemeral file that custom programs read. Avoids polluting the workflow directory. |
-| `os.environ` (stdlib) | stdlib | Construct merged env dict for subprocess | `{**os.environ, "RSF_WORKFLOW_NAME": name, "RSF_METADATA_FILE": path}` — standard subprocess env merging pattern. |
-
-**Three metadata transport modes (all needed):**
-
-1. **JSON file** (`--metadata-file`): RSF writes `rsf-metadata.json` with full workflow dict, passes path via `RSF_METADATA_FILE` env var. Best for rich data (nested DynamoDB tables, alarm configs).
-2. **Environment variables** (`--metadata-env`): RSF sets `RSF_WORKFLOW_NAME`, `RSF_STAGE`, `RSF_METADATA` (full JSON as single env var). Best for simple values and shell scripts.
-3. **CLI args** (`--metadata-args`): RSF passes `--rsf-workflow-name NAME --rsf-stage STAGE` as extra CLI arguments. Best for programs that only accept CLI flags.
-
-All three are implemented with stdlib only. No new dependencies.
+| Tool | Purpose | Notes |
+|------|---------|-------|
+| Bash (deploy.sh) | Custom provider program invoked by RSF `CustomProvider` | Must be absolute path, `chmod +x`. Receives `WorkflowMetadata` via file transport. Calls `terraform apply`. This is the tutorial's primary teaching artifact. |
+| terraform CLI >= 1.5.7 | Apply the registry module configuration | Required by sqs v5.0+ and sns v7.0+. RSF already requires terraform >= 1.0 generally; this tutorial's `versions.tf` must specify >= 1.5.7. |
 
 ---
 
-## Supporting Libraries — No New Additions Needed
+## Module Interface Details
 
-| Considered | Decision | Reason |
-|------------|----------|--------|
-| `pluggy` >=1.6.0 | **DO NOT ADD** | Hook-broadcast model is wrong for single-provider-per-deploy. ABC is simpler and correct. |
-| `stevedore` | **DO NOT ADD** | Entry-point-based plugin discovery for third-party packages. RSF providers are first-party code configured by name string, not pip-installed packages. |
-| `aws-cdk-lib` in RSF deps | **DO NOT ADD to RSF** | CDK constructs belong in the generated CDK app's `requirements.txt`, not in RSF's own `pyproject.toml`. Installing CDK in RSF would pull in ~200MB of dependencies for all users, including those who never use CDK. |
-| `dataclasses-json` | **DO NOT ADD** | `dataclasses.asdict()` + `json.dumps()` is sufficient. No marshmallow overhead needed. |
-| `orjson` | **DO NOT ADD** | Serialisation speed is not a bottleneck for metadata objects. |
-| `invoke` / `fabric` | **DO NOT ADD** | subprocess.run() with list args is adequate. Adding `invoke` adds indirection with no benefit for 3-5 CLI invocations. |
+### terraform-aws-modules/lambda/aws v8.7.0
+
+**Key inputs for RSF use case:**
+
+```hcl
+module "lambda" {
+  source  = "terraform-aws-modules/lambda/aws"
+  version = "~> 8.7"
+
+  function_name = var.workflow_name
+  handler       = "generated.orchestrator.lambda_handler"
+  runtime       = "python3.13"
+
+  # Use RSF-generated zip — do not let module build it
+  create_package          = false
+  local_existing_package  = "${path.module}/source.zip"
+  ignore_source_code_hash = true  # zip is managed by RSF CLI externally
+
+  # Durable Lambda — maps from WorkflowMetadata
+  durable_config_execution_timeout = var.execution_timeout   # from timeout_seconds
+  durable_config_retention_period  = var.retention_period    # 1-90 days, default 14
+
+  # Built-in IAM role — replaces RSF's raw iam.tf entirely
+  create_role               = true
+  attach_dead_letter_policy = var.dlq_enabled
+  dead_letter_target_arn    = var.dlq_enabled ? module.dlq[0].queue_arn : null
+
+  # CloudWatch Logs policy is attached by default (attach_cloudwatch_logs_policy = true)
+  # Durable execution API requires a separate custom policy (see critical note below)
+  policies = [aws_iam_policy.durable_execution.arn]
+}
+```
+
+**Key outputs:**
+- `module.lambda.lambda_function_arn` — for IAM policy resources, alarm dimensions
+- `module.lambda.lambda_function_name` — for CloudWatch alarm dimensions
+- `module.lambda.lambda_role_arn` — to reference the auto-created execution role
+- `module.lambda.lambda_role_name` — to attach additional inline policies if needed
+
+**CRITICAL — Durable execution IAM permissions not built-in:** The lambda module does NOT
+include `lambda:CheckpointDurableExecution`, `lambda:GetDurableExecution`,
+`lambda:ListDurableExecutionsByFunction`, or `lambda:InvokeFunction` (self-invoke). These must
+be added as a separate `aws_iam_policy` resource and attached via the `policies` variable. This
+is a primary teaching point in the tutorial: registry modules handle most of the IAM boilerplate
+but durable-specific permissions remain manual.
+
+```hcl
+resource "aws_iam_policy" "durable_execution" {
+  name = "${var.workflow_name}-durable-execution"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect   = "Allow"
+        Action   = [
+          "lambda:InvokeFunction",
+          "lambda:CheckpointDurableExecution",
+          "lambda:GetDurableExecution",
+          "lambda:ListDurableExecutionsByFunction"
+        ]
+        Resource = module.lambda.lambda_function_arn
+      }
+    ]
+  })
+}
+```
+
+### terraform-aws-modules/dynamodb-table/aws v5.5.0
+
+**Key inputs for RSF use case:**
+
+```hcl
+module "dynamodb_table" {
+  for_each = { for t in var.dynamodb_tables : t.table_name => t }
+
+  source  = "terraform-aws-modules/dynamodb-table/aws"
+  version = "~> 5.5"
+
+  name         = each.value.table_name
+  billing_mode = each.value.billing_mode  # "PAY_PER_REQUEST" or "PROVISIONED"
+  hash_key     = each.value.partition_key.name
+  range_key    = try(each.value.sort_key.name, null)  # optional
+
+  attributes = concat(
+    [{ name = each.value.partition_key.name, type = each.value.partition_key.type }],
+    each.value.sort_key != null ? [{ name = each.value.sort_key.name, type = each.value.sort_key.type }] : []
+  )
+}
+```
+
+**Key outputs:**
+- `module.dynamodb_table[*].dynamodb_table_arn` — for IAM policy `Resource` (DynamoDB access)
+- `module.dynamodb_table[*].dynamodb_table_id` — table name for application config
+
+**WorkflowMetadata mapping:** `dynamodb_tables[*]` → one module instance per table entry via
+`for_each`. `billing_mode` from metadata maps directly. `partition_key.name` → `hash_key`.
+`sort_key` (optional) → `range_key`. Both keys must appear in `attributes` list.
+
+### terraform-aws-modules/sqs/aws v5.2.1
+
+**Key inputs for RSF DLQ use case:**
+
+```hcl
+module "dlq" {
+  count = var.dlq_enabled ? 1 : 0
+
+  source  = "terraform-aws-modules/sqs/aws"
+  version = "~> 5.2"
+
+  name                       = coalesce(var.dlq_queue_name, "${var.workflow_name}-dlq")
+  message_retention_seconds  = 1209600  # 14 days — matches RSF dlq.tf.j2 default
+  visibility_timeout_seconds = 30
+}
+```
+
+**Key outputs:**
+- `module.dlq[0].queue_arn` — used as `dead_letter_target_arn` in lambda module
+- `module.dlq[0].queue_url` — for application config output
+
+**WorkflowMetadata mapping:** `dlq_enabled` → `count` gate. `dlq_queue_name` → `name` with
+`coalesce` fallback. Note: `dlq_max_receive_count` is the Lambda retry count, NOT a SQS queue
+property — it is not configurable via this module and does not need to be set here.
+
+### terraform-aws-modules/cloudwatch/aws metric-alarm submodule v5.7.2
+
+**Key inputs for RSF alarm use case:**
+
+```hcl
+module "alarm_error_rate" {
+  source  = "terraform-aws-modules/cloudwatch/aws//modules/metric-alarm"
+  version = "~> 5.7"
+
+  alarm_name          = "${var.workflow_name}-error-rate"
+  comparison_operator = "GreaterThanOrEqualToThreshold"
+  evaluation_periods  = 2
+  metric_name         = "Errors"        # error_rate alarm type
+  namespace           = "AWS/Lambda"
+  period              = 300
+  statistic           = "Sum"
+  threshold           = var.error_threshold
+  treat_missing_data  = "notBreaching"
+
+  dimensions = {
+    FunctionName = module.lambda.lambda_function_name
+  }
+
+  alarm_actions = [module.sns_alarms.topic_arn]
+}
+```
+
+**WorkflowMetadata alarm type → metric mapping:**
+
+| RSF `alarm.type` | `metric_name` | `statistic` |
+|-----------------|---------------|-------------|
+| `error_rate`    | `"Errors"`    | `"Sum"`     |
+| `duration`      | `"Duration"`  | `"Average"` |
+| `throttle`      | `"Throttles"` | `"Sum"`     |
+
+**Note:** Module source path uses `//modules/metric-alarm` double-slash syntax for submodule
+selection. This is a Terraform convention. Calling the root module directly fails with "no root
+configuration" error.
+
+### terraform-aws-modules/sns/aws v7.1.0
+
+**Key inputs for alarm topic use case:**
+
+```hcl
+module "sns_alarms" {
+  source  = "terraform-aws-modules/sns/aws"
+  version = "~> 7.1"
+
+  name = "${var.workflow_name}-alarm-notifications"
+}
+```
+
+**Key outputs:**
+- `module.sns_alarms.topic_arn` — used in `alarm_actions` for all CloudWatch metric alarms
 
 ---
 
 ## Installation
 
-No new RSF runtime dependencies are required. All new capabilities use stdlib modules (`abc`, `json`, `os`, `tempfile`, `dataclasses`, `subprocess`, `shutil`).
-
-The CDK app template ships its own `requirements.txt`:
-
 ```bash
-# Inside generated CDK app directory (not RSF itself)
-pip install aws-cdk-lib>=2.241.0 constructs>=10.0.0
+# No new Python packages required — all changes are Terraform-only.
+# Registry modules are downloaded by Terraform init automatically.
+# Run inside the tutorial example's terraform/ directory:
+
+terraform init    # Downloads all modules from registry.terraform.io
+terraform plan    # Preview
+terraform apply   # Deploy
 ```
 
-Users who want the CDK provider also need the CDK CLI (Node.js prerequisite, identical to how Terraform users need the `terraform` binary):
+The tutorial's `deploy.sh` (the RSF custom provider program) must:
 
 ```bash
-npm install --global aws-cdk
-cdk --version  # verify: 2.x
+#!/usr/bin/env bash
+# deploy.sh — RSF custom provider program for registry-modules tutorial
+set -euo pipefail
+
+# RSF CustomProvider writes WorkflowMetadata JSON to a temp file
+# and passes the path via the RSF_METADATA_FILE env var (file transport)
+METADATA_FILE="${RSF_METADATA_FILE}"
+WORKFLOW_NAME=$(jq -r '.workflow_name' "${METADATA_FILE}")
+STAGE=$(jq -r '.stage // "dev"' "${METADATA_FILE}")
+DLQ_ENABLED=$(jq -r '.dlq_enabled' "${METADATA_FILE}")
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "${SCRIPT_DIR}/terraform"
+
+terraform init -input=false
+terraform apply -auto-approve \
+  -var="workflow_name=${WORKFLOW_NAME}" \
+  -var="stage=${STAGE}" \
+  -var="dlq_enabled=${DLQ_ENABLED}"
 ```
 
-The `rsf doctor` command should check for both `cdk` and `terraform` binaries and report their presence.
+The RSF workflow YAML configures this via:
+
+```yaml
+infrastructure:
+  provider: custom
+  custom:
+    program: /absolute/path/to/deploy.sh
+    metadata_transport: file
+    args: []
+    teardown_args: ["--destroy"]
+```
 
 ---
 
@@ -120,11 +288,11 @@ The `rsf doctor` command should check for both `cdk` and `terraform` binaries an
 
 | Recommended | Alternative | When to Use Alternative |
 |-------------|-------------|-------------------------|
-| `abc.ABC` for provider interface | `typing.Protocol` | Use Protocol when accepting third-party objects you don't control. For RSF's internal providers (Terraform, CDK), ABC's runtime TypeError on missing methods is the better safety guarantee. |
-| Subprocess invocation of `cdk` CLI | `aws-cdk-lib` Python constructs directly in RSF | Never: importing CDK constructs in RSF means CDK is always installed. The CLI invocation keeps CDK optional and user-installed, matching the Terraform provider model exactly. |
-| JSON file for rich metadata | Only env vars | Use JSON file when metadata contains nested structures (DynamoDB configs, alarm configs). Env vars work for scalar values only. Support both modes. |
-| Jinja2 for CDK app template | Cookiecutter / copier | Jinja2 is already in the stack for HCL generation. Same rendering engine, same custom delimiter skill set. No new templating dependency. |
-| `tempfile.mkdtemp()` for metadata JSON | Write to `./rsf-metadata.json` | Use temp dir when metadata is ephemeral and shouldn't appear in VCS. Write to workflow dir only if user requests a persistent artifact. |
+| lambda module built-in `create_role = true` | Separate `terraform-aws-modules/iam/aws//modules/iam-role` | Never for this use case. The iam-role module v6.x was redesigned for OIDC/SAML use cases and removed `trusted_role_services`. Configuring a Lambda execution role via the iam-role module requires complex `trust_policy_permissions` maps, which are harder to understand than letting the lambda module create the role automatically. |
+| `local_existing_package` + `create_package = false` | `source_path` (module builds the zip via pip) | Only if the tutorial explicitly demonstrates module-driven Python packaging. For RSF, code is already generated and the zip built separately, making `local_existing_package` correct. `source_path` would create a competing packaging step that conflicts with RSF's code generation pipeline. |
+| `//modules/metric-alarm` submodule | Raw `aws_cloudwatch_metric_alarm` resource | Either works. The submodule adds minimal value for simple alarms. Use the module to demonstrate the registry pattern consistently. If the tutorial already has three alarm module blocks (error, duration, throttle), use a `for_each` loop over a list to reduce repetition. |
+| terraform-aws-modules/sqs/aws for DLQ | Raw `aws_sqs_queue` | Raw resource is simpler for a single DLQ queue. Use the module to demonstrate the registry pattern. Overhead is negligible. |
+| File transport for metadata | Env transport or args transport | File transport is recommended for tutorial because: (1) the JSON file persists after the run for easy inspection and debugging; (2) nested structures like `dynamodb_tables` and `alarms` are straightforward to read with `jq`; (3) the `RSF_METADATA_FILE` env var name makes the mechanism self-documenting. |
 
 ---
 
@@ -132,48 +300,36 @@ The `rsf doctor` command should check for both `cdk` and `terraform` binaries an
 
 | Avoid | Why | Use Instead |
 |-------|-----|-------------|
-| `pluggy` | Hook-broadcast semantics don't match single-provider-per-invocation model. Adds plugin manager indirection and hook specification boilerplate for no benefit. | `abc.ABC` with a `get_provider(name)` factory function |
-| `aws-cdk-lib` in RSF `pyproject.toml` | Adds ~200MB of transitive dependencies (jsii, typing-extensions pins, etc.) for all RSF users, including those who only use Terraform | Generate CDK app with its own `requirements.txt`; invoke via subprocess |
-| `shell=True` in subprocess | Shell injection risk; also breaks on Windows. The existing codebase correctly uses list args. | `subprocess.run(["cdk", "deploy", "--context", f"key={val}"], ...)` |
-| Hardcoded provider selection in `deploy_cmd.py` | The current Terraform-only code is the anti-pattern being replaced | `ProviderRegistry.get(config.provider)` dispatching to the ABC implementation |
-| Modifying `TerraformConfig` | It is the Terraform provider's private config. The new `ProviderConfig` base dataclass should be separate. | New `ProviderConfig` dataclass with `provider: str` field; `TerraformConfig` inherits from it or sits alongside it |
+| terraform-aws-modules/lambda/aws version < 8.7.0 | No native `durable_config` support before v8.7.0 (Feb 18, 2026). Earlier versions require patching the module or using a raw `aws_lambda_function` resource alongside the module, defeating the purpose. | Pin to `~> 8.7` |
+| terraform-aws-modules/iam/aws for Lambda execution role | v6.x redesigned for OIDC/SAML; removed `trusted_role_services`. Configuring `lambda.amazonaws.com` as a trusted service requires undocumented `trust_policy_permissions` map syntax. More complex than letting the lambda module handle IAM. | lambda module's built-in `create_role = true` (the default) |
+| `source_path` variable in lambda module | Triggers module-internal python packaging logic (pip install, zip creation) which conflicts with RSF's own code generation pipeline. RSF already generates the orchestrator; the zip must be built separately. | `create_package = false` + `local_existing_package` |
+| cloudwatch module root (no submodule path) | v5.7.2 has no root configuration — calling it without `//modules/metric-alarm` fails with an error. Must use submodule path. | `terraform-aws-modules/cloudwatch/aws//modules/metric-alarm` |
+| terraform-aws-modules/iam/aws for DynamoDB access policy | Adds abstraction overhead for what is a single targeted IAM policy statement. Cleaner as a raw `aws_iam_policy` + reference via the lambda module's `policies` variable. | Raw `aws_iam_policy` resource attached to lambda module via `policies` |
+| `lambda_url_enabled` via lambda module | The lambda module does not expose `aws_lambda_function_url`. Lambda URLs must be created as a raw `aws_lambda_function_url` resource referencing the module's function ARN output. | Raw `aws_lambda_function_url` resource (use `module.lambda.lambda_function_name` as qualifier) |
 
 ---
 
 ## Stack Patterns by Variant
 
-**If provider is Terraform (default, existing behaviour):**
-- Use existing `TerraformConfig` / `generate_terraform()` / `subprocess.run(["terraform", ...])`
-- No change to existing code path
-- `TerraformProvider(InfrastructureProvider)` wraps the existing logic
+**If the workflow has no DynamoDB tables:**
+- Omit all `module "dynamodb_table"` blocks
+- Lambda module's `policies` list has no DynamoDB ARN entries
 
-**If provider is CDK:**
-- Generate CDK app directory via Jinja2 templates (same pattern as HCL generation)
-- Write `rsf-metadata.json` to the CDK app dir (CDK app reads it in `app.py`)
-- Check `shutil.which("cdk")` — fail with install instructions if missing
-- Run `cdk bootstrap` check / warn
-- `subprocess.run(["cdk", "deploy", "--require-approval=never", "--context", f"stage={stage}"])`
-- CDK app's own `requirements.txt` lists `aws-cdk-lib>=2.241.0`
+**If the workflow has no CloudWatch alarms:**
+- Omit `module "alarm_*"` and `module "sns_alarms"` blocks
+- Reduces the tutorial scope significantly — consider a workflow with at least one alarm to demonstrate the pattern
 
-**If provider is custom (user-specified program):**
-- Config provides: `program: "/path/to/my-provisioner"` and `metadata_transport: file|env|args`
-- RSF serialises workflow metadata via chosen transport
-- `subprocess.run([program, ...extra_args], env={**os.environ, ...metadata_env})`
-- Provider invokes program, captures exit code, propagates failure
+**If the workflow has no DLQ:**
+- Omit `module "dlq"` block
+- Set `attach_dead_letter_policy = false` on lambda module (already the default)
 
-**If metadata transport is `file`:**
-- `json.dumps(metadata_dict, indent=2)` → write to temp file
-- Pass `RSF_METADATA_FILE=/tmp/rsf-abc123/metadata.json` as env var
-- Clean up after subprocess exits
+**If multiple alarm types are needed:**
+- Use a `for_each` loop over `var.alarms` rather than one module block per alarm
+- Map `alarm.type` → `{ metric_name, statistic }` via a `local` lookup map
 
-**If metadata transport is `env`:**
-- Flatten scalar fields to `RSF_WORKFLOW_NAME`, `RSF_STAGE`, `RSF_AWS_REGION`
-- Full JSON blob in `RSF_METADATA` (compact, no indent)
-- Nested structures available only via `RSF_METADATA`
-
-**If metadata transport is `args`:**
-- Append `["--rsf-workflow-name", name, "--rsf-stage", stage]` to subprocess command list
-- Only scalar values; nested structures require `file` or `env` transport
+**If the custom provider needs teardown support:**
+- Add `teardown_args: ["--destroy"]` to the workflow YAML custom provider config
+- Add a `--destroy` flag to `deploy.sh` that runs `terraform destroy -auto-approve`
 
 ---
 
@@ -181,77 +337,93 @@ The `rsf doctor` command should check for both `cdk` and `terraform` binaries an
 
 | Package | Compatible With | Notes |
 |---------|-----------------|-------|
-| `aws-cdk-lib>=2.241.0` | `constructs>=10.0.0,<11.0.0` | CDK v2 requires constructs ^10. Never use CDK v1 (`aws-cdk.core`) — deprecated and unmaintained. |
-| `aws-cdk-lib>=2.241.0` | Python `~=3.9` | CDK supports Python 3.9+. RSF requires 3.13+, which is a superset — no conflict. |
-| `cdk` CLI (Node.js) | `aws-cdk-lib` same major version | CLI major version must match library major version. Both v2. |
-| `abc.ABC` | Python 3.3+ | stdlib, always available in Python 3.13+ |
-| `dataclasses` | Python 3.7+ | stdlib, always available |
+| terraform-aws-modules/lambda/aws ~> 8.7 | hashicorp/aws >= 6.0, terraform >= 1.0 | RSF already requires >= 6.25.0 and >= 1.0. No constraint conflict. |
+| terraform-aws-modules/sqs/aws ~> 5.2 | hashicorp/aws >= 6.0, terraform >= 1.5.7 | v5.0.0 (Jun 2025) introduced the 1.5.7 requirement. Tutorial's `versions.tf` must specify `required_version = ">= 1.5.7"`. |
+| terraform-aws-modules/sns/aws ~> 7.1 | hashicorp/aws >= 6.9, terraform >= 1.5.7 | v7.0.0 (Oct 2025) bumped requirements. RSF's >= 6.25.0 satisfies >= 6.9. |
+| terraform-aws-modules/cloudwatch/aws ~> 5.7 | hashicorp/aws >= 4.0 | No conflict with RSF's constraints. |
+| terraform-aws-modules/dynamodb-table/aws ~> 5.5 | hashicorp/aws >= 5.0 | No conflict with RSF's constraints. |
+| hashicorp/archive ~> 2.7 | terraform >= 1.0 | Already in all RSF example versions.tf files. |
+
+**Tutorial's versions.tf:**
+
+```hcl
+terraform {
+  required_version = ">= 1.5.7"  # Required by sqs v5.x and sns v7.x
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 6.25.0"  # RSF durable_config requirement; also satisfies sns >= 6.9
+    }
+    archive = {
+      source  = "hashicorp/archive"
+      version = ">= 2.7"
+    }
+  }
+}
+```
 
 ---
 
-## Provider Interface Design (Concrete Recommendation)
+## WorkflowMetadata → Registry Module Mapping
 
-```python
-# src/rsf/providers/base.py
-from abc import ABC, abstractmethod
-from dataclasses import dataclass
-from pathlib import Path
-
-
-@dataclass
-class ProviderContext:
-    """Workflow metadata passed to every provider."""
-    workflow_name: str
-    workflow_path: Path
-    stage: str | None
-    aws_region: str
-    metadata: dict  # full workflow definition as dict
-
-
-@dataclass
-class ProviderResult:
-    """Result returned by every provider."""
-    success: bool
-    message: str
-    outputs: dict  # provider-specific key-value outputs
-
-
-class InfrastructureProvider(ABC):
-    """Abstract base for all infrastructure providers."""
-
-    @abstractmethod
-    def deploy(self, context: ProviderContext) -> ProviderResult:
-        """Provision or update infrastructure for a workflow."""
-        ...
-
-    @abstractmethod
-    def teardown(self, context: ProviderContext) -> ProviderResult:
-        """Destroy infrastructure for a workflow."""
-        ...
-
-    @abstractmethod
-    def check_prerequisites(self) -> list[str]:
-        """Return list of error strings if prerequisites are missing."""
-        ...
-```
-
-This interface requires no external dependencies. The `check_prerequisites()` method uses `shutil.which()` internally. `ProviderContext.metadata` is serialised by the provider using `json.dumps()` when needed.
+| WorkflowMetadata Field | Registry Module Variable | Notes |
+|------------------------|--------------------------|-------|
+| `workflow_name` | `module.lambda.function_name` | Direct mapping via Terraform variable |
+| `stage` | Terraform variable suffix or workspace | Used as naming convention for multi-stage |
+| `timeout_seconds` | `module.lambda.durable_config_execution_timeout` | In seconds |
+| `dlq_enabled` | `count = var.dlq_enabled ? 1 : 0` on dlq module | Gates the SQS module creation |
+| `dlq_queue_name` | `module.dlq[0].name` with `coalesce` fallback | Falls back to `"${workflow_name}-dlq"` |
+| `dlq_max_receive_count` | Not applicable to SQS queue module | This is a Lambda retry count, not a queue attribute |
+| `dynamodb_tables[*]` | `module.dynamodb_table` with `for_each` | One module instance per table in the list |
+| `dynamodb_tables[*].billing_mode` | `module.dynamodb_table.billing_mode` | "PAY_PER_REQUEST" or "PROVISIONED" |
+| `dynamodb_tables[*].partition_key.name` | `module.dynamodb_table.hash_key` + `attributes[0].name` | Must appear in both `hash_key` and `attributes` |
+| `dynamodb_tables[*].sort_key` (optional) | `module.dynamodb_table.range_key` + `attributes[1]` | Only when sort key is defined |
+| `alarms[*].type` | Determines `metric_name` + `statistic` | error_rate→Errors/Sum, duration→Duration/Average, throttle→Throttles/Sum |
+| `alarms[*].threshold` | `module.alarm_*.threshold` | Direct mapping |
+| `alarms[*].period` | `module.alarm_*.period` | In seconds |
+| `alarms[*].evaluation_periods` | `module.alarm_*.evaluation_periods` | Direct mapping |
+| `alarms[*].sns_topic_arn` | `module.alarm_*.alarm_actions[0]` | When set, skip creating the SNS module |
+| `lambda_url_enabled` | Raw `aws_lambda_function_url` resource | Lambda module does not expose function URL |
+| `lambda_url_auth_type` | Raw `aws_lambda_function_url.authorization_type` | "NONE" or "AWS_IAM" |
+| `triggers[*].type == "sqs"` | Not addressed by tutorial scope | Tutorial focuses on deployment pattern, not all trigger types |
 
 ---
 
 ## Sources
 
-- [aws-cdk-lib on PyPI](https://pypi.org/project/aws-cdk-lib/) — version 2.241.0 current as of 2026-03-02 (HIGH confidence)
-- [AWS CDK CLI reference](https://docs.aws.amazon.com/cdk/v2/guide/cli.html) — cdk deploy flags, --context, --require-approval (HIGH confidence)
-- [AWS CDK bootstrapping](https://docs.aws.amazon.com/cdk/v2/guide/bootstrapping-env.html) — bootstrap required before first deploy (HIGH confidence)
-- [Python subprocess documentation](https://docs.python.org/3/library/subprocess.html) — env merging pattern, list-style args (HIGH confidence)
-- [Python abc module documentation](https://docs.python.org/3/library/abc.html) — ABC vs Protocol tradeoffs (HIGH confidence)
-- [Python typing Protocol spec](https://typing.python.org/en/latest/spec/protocol.html) — structural subtyping limitations (HIGH confidence)
-- [pluggy on PyPI](https://pypi.org/project/pluggy/) — version 1.6.0, hook-broadcast semantics (MEDIUM confidence — version via local pip show)
-- [WebSearch: ABC vs Protocol 2025-2026](https://jellis18.github.io/post/2022-01-11-abc-vs-protocol/) — recommendation for internal plugin systems (MEDIUM confidence)
-- [WebSearch: Python plugin architecture patterns 2026](https://oneuptime.com/blog/post/2026-01-30-python-plugin-systems/view) — driver vs dispatcher vs iterator patterns (MEDIUM confidence)
+- GitHub releases — terraform-aws-modules/terraform-aws-lambda v8.7.0 (Feb 18, 2026):
+  https://github.com/terraform-aws-modules/terraform-aws-lambda/releases
+- GitHub releases — terraform-aws-modules/terraform-aws-iam v6.4.0 (Jan 23, 2026):
+  https://github.com/terraform-aws-modules/terraform-aws-iam/releases
+- GitHub releases — terraform-aws-modules/terraform-aws-dynamodb-table v5.5.0 (Jan 8, 2026):
+  https://github.com/terraform-aws-modules/terraform-aws-dynamodb-table/releases
+- GitHub releases — terraform-aws-modules/terraform-aws-sqs v5.2.1 (Jan 21, 2026):
+  https://github.com/terraform-aws-modules/terraform-aws-sqs/releases
+- GitHub releases — terraform-aws-modules/terraform-aws-sns v7.1.0 (Jan 8, 2026):
+  https://github.com/terraform-aws-modules/terraform-aws-sns/releases
+- GitHub releases — terraform-aws-modules/terraform-aws-cloudwatch v5.7.2 (Oct 21, 2025):
+  https://github.com/terraform-aws-modules/terraform-aws-cloudwatch/releases
+- GitHub source — lambda variables.tf (durable_config_execution_timeout, local_existing_package verified):
+  https://raw.githubusercontent.com/terraform-aws-modules/terraform-aws-lambda/master/variables.tf
+- GitHub source — lambda main.tf (dynamic durable_config block implementation verified):
+  https://github.com/terraform-aws-modules/terraform-aws-lambda/blob/master/main.tf
+- GitHub source — lambda iam.tf (trust policy lambda.amazonaws.com, attach_dead_letter_policy verified):
+  https://github.com/terraform-aws-modules/terraform-aws-lambda/blob/master/iam.tf
+- GitHub source — dynamodb-table variables.tf (name, billing_mode, hash_key, range_key, attributes verified):
+  https://github.com/terraform-aws-modules/terraform-aws-dynamodb-table/blob/master/variables.tf
+- GitHub source — sqs variables.tf (name, create_dlq, message_retention_seconds verified):
+  https://github.com/terraform-aws-modules/terraform-aws-sqs/blob/master/variables.tf
+- GitHub source — cloudwatch metric-alarm variables.tf (alarm_name, metric_name, namespace, dimensions verified):
+  https://github.com/terraform-aws-modules/terraform-aws-cloudwatch/blob/master/modules/metric-alarm/variables.tf
+- RSF source — WorkflowMetadata fields verified:
+  /home/esa/git/rsf-python/src/rsf/providers/metadata.py
+- RSF source — CustomProvider interface verified:
+  /home/esa/git/rsf-python/src/rsf/providers/custom.py
+- RSF source — existing raw HCL templates (iam.tf.j2, alarms.tf.j2, dlq.tf.j2, dynamodb.tf.j2):
+  /home/esa/git/rsf-python/src/rsf/terraform/templates/
 
 ---
 
-*Stack research for: Pluggable infrastructure providers (RSF v3.0)*
-*Researched: 2026-03-02*
+*Stack research for: Terraform Registry Modules Tutorial (RSF v3.2)*
+*Researched: 2026-03-03*
