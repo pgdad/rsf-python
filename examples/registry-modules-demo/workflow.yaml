@@ -1,0 +1,60 @@
+rsf_version: "1.0"
+Comment: "image-processing"
+StartAt: ValidateImage
+
+dynamodb_tables:
+  - table_name: image-catalogue
+    partition_key:
+      name: image_id
+      type: S
+    billing_mode: PAY_PER_REQUEST
+
+dead_letter_queue:
+  enabled: true
+  max_receive_count: 3
+  queue_name: image-processing-dlq
+
+States:
+  ValidateImage:
+    Type: Task
+    ResultPath: "$.validation"
+    Retry:
+      - ErrorEquals:
+          - States.TaskFailed
+        IntervalSeconds: 1
+        MaxAttempts: 2
+        BackoffRate: 2.0
+    Catch:
+      - ErrorEquals:
+          - InvalidImageError
+        Next: ProcessingFailed
+    Next: ResizeImage
+
+  ResizeImage:
+    Type: Task
+    ResultPath: "$.resize"
+    Retry:
+      - ErrorEquals:
+          - ResizeServiceError
+        IntervalSeconds: 2
+        MaxAttempts: 3
+        BackoffRate: 1.5
+    Next: AnalyzeContent
+
+  AnalyzeContent:
+    Type: Task
+    ResultPath: "$.analysis"
+    Next: CatalogueImage
+
+  CatalogueImage:
+    Type: Task
+    ResultPath: "$.catalogue"
+    Next: ProcessingComplete
+
+  ProcessingComplete:
+    Type: Succeed
+
+  ProcessingFailed:
+    Type: Fail
+    Error: ImageProcessingFailed
+    Cause: "Image could not be processed"
