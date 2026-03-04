@@ -86,6 +86,7 @@ testpaths = [
     "examples/approval-workflow/tests",
     "examples/retry-and-recovery/tests",
     "examples/lambda-url-trigger/tests",
+    "examples/registry-modules-demo/tests",
 ]
 pythonpath = ["src"]
 addopts = "--import-mode=importlib"
