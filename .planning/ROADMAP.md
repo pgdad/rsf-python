@@ -153,7 +153,7 @@ Full details: `.planning/milestones/v3.0-ROADMAP.md`
 **Milestone Goal:** Tutorial and example showing how to deploy Lambda Durable Functions via HashiCorp Terraform registry modules using RSF's custom provider system, demonstrating IaC-agnosticism in practice.
 
 - [x] **Phase 56: Schema Verification** — Confirm lambda module v8.7.0 durable_config variable names, alias convention, and IAM approach before writing Terraform (completed 2026-03-04)
-- [ ] **Phase 57: Core Lambda Example** — Working example with deploy.sh, Lambda-only Terraform, workflow.yaml, and rsf.toml wiring
+- [x] **Phase 57: Core Lambda Example** — Working example with deploy.sh, Lambda-only Terraform, workflow.yaml, and rsf.toml wiring (completed 2026-03-04)
 - [ ] **Phase 58: Full-Stack Registry Modules** — Extend example with DynamoDB, SQS DLQ, CloudWatch alarms, and SNS modules
 - [ ] **Phase 59: Tests** — Local unit tests and real-AWS integration test with durable execution and teardown
 - [ ] **Phase 60: Tutorial Document** — Step-by-step tutorial with side-by-side HCL comparison, annotated schema, and pitfall coverage
@@ -244,7 +244,7 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 56. Schema Verification | 1/1 | Complete    | 2026-03-04 |
-| 57. Core Lambda Example | 2/3 | In Progress|  |
+| 57. Core Lambda Example | 3/3 | Complete   | 2026-03-04 |
 | 58. Full-Stack Registry Modules | 0/TBD | Not started | - |
 | 59. Tests | 0/TBD | Not started | - |
 | 60. Tutorial Document | 0/TBD | Not started | - |

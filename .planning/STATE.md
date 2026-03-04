@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: Terraform Registry Modules Tutorial
 status: planning
-stopped_at: Completed 57-02-PLAN.md
-last_updated: "2026-03-04T13:48:41.759Z"
+stopped_at: Completed 57-03-PLAN.md
+last_updated: "2026-03-04T13:56:28.797Z"
 last_activity: 2026-03-03 — Roadmap created, v3.2 phases 56-60 defined
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -54,6 +54,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 56-schema-verification P01 | 3 | 2 tasks | 3 files |
 | Phase 57-core-lambda-example P01 | 20 | 2 tasks | 10 files |
 | Phase 57-core-lambda-example P02 | 13min | 2 tasks | 5 files |
+| Phase 57-core-lambda-example P03 | 5min | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -75,6 +76,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 57-core-lambda-example]: AWSLambdaBasicDurableExecutionRolePolicy confirmed available in us-east-2 (v3, live check) — hybrid IAM approach used with three-field attachment pattern
 - [Phase 57-core-lambda-example]: Both GetDurableExecution (describe) and GetDurableExecutionState (replay-state) included: managed policy covers GetDurableExecutionState, inline covers GetDurableExecution
 - [Phase 57-core-lambda-example]: Local backend chosen for tutorial simplicity — no S3/DynamoDB lock table required, state gitignored
+- [Phase 57-core-lambda-example]: deploy.sh uses jq // alternative operator for null fallback on timeout_seconds (handles absent keys and null values)
+- [Phase 57-core-lambda-example]: rsf.toml program field uses obvious /REPLACE/... placeholder to prevent silent wrong-path failures
 
 ### Pending Todos
 
@@ -93,6 +96,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-04T13:48:41.758Z
-Stopped at: Completed 57-02-PLAN.md
+Last session: 2026-03-04T13:56:28.796Z
+Stopped at: Completed 57-03-PLAN.md
 Resume file: None

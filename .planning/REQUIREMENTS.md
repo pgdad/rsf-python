@@ -9,10 +9,10 @@ Requirements for the Terraform Registry Modules Tutorial milestone. Each maps to
 
 ### Custom Provider Script
 
-- [ ] **PROV-01**: Custom provider Python script reads WorkflowMetadata via FileTransport and invokes terraform apply
-- [ ] **PROV-02**: rsf.toml configures provider="custom" with absolute path, FileTransport, and teardown_args
-- [ ] **PROV-03**: Deploy script handles both deploy and teardown via command dispatch argument
-- [ ] **PROV-04**: Deploy script zips RSF-generated source before terraform apply (resolves packaging conflict)
+- [x] **PROV-01**: Custom provider Python script reads WorkflowMetadata via FileTransport and invokes terraform apply
+- [x] **PROV-02**: rsf.toml configures provider="custom" with absolute path, FileTransport, and teardown_args
+- [x] **PROV-03**: Deploy script handles both deploy and teardown via command dispatch argument
+- [x] **PROV-04**: Deploy script zips RSF-generated source before terraform apply (resolves packaging conflict)
 
 ### Registry Modules
 
@@ -80,10 +80,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| PROV-01 | Phase 57 | Pending |
-| PROV-02 | Phase 57 | Pending |
-| PROV-03 | Phase 57 | Pending |
-| PROV-04 | Phase 57 | Pending |
+| PROV-01 | Phase 57 | Complete |
+| PROV-02 | Phase 57 | Complete |
+| PROV-03 | Phase 57 | Complete |
+| PROV-04 | Phase 57 | Complete |
 | REG-01 | Phase 57 | Complete |
 | REG-02 | Phase 58 | Pending |
 | REG-03 | Phase 58 | Pending |
