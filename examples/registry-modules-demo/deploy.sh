@@ -14,6 +14,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TF_DIR="${SCRIPT_DIR}/terraform"
 BUILD_DIR="${SCRIPT_DIR}/build"
 METADATA_FILE="${RSF_METADATA_FILE}"
+TFVARS_FILE="${TF_DIR}/terraform.tfvars.json"
 
 # ---------------------------------------------------------------------------
 # Command dispatch
@@ -21,16 +22,34 @@ METADATA_FILE="${RSF_METADATA_FILE}"
 CMD="${1:-deploy}"
 
 # ---------------------------------------------------------------------------
-# Metadata extraction via jq (FileTransport writes WorkflowMetadata as JSON)
+# Banner — extract workflow_name from metadata for display only
 # ---------------------------------------------------------------------------
 WORKFLOW_NAME="$(jq -r '.workflow_name' "${METADATA_FILE}")"
-EXECUTION_TIMEOUT="$(jq -r '.timeout_seconds // 86400' "${METADATA_FILE}")"
 
 echo "=== registry-modules-demo deploy.sh ==="
 echo "Command          : ${CMD}"
 echo "Workflow name    : ${WORKFLOW_NAME}"
-echo "Execution timeout: ${EXECUTION_TIMEOUT}s"
 echo ""
+
+# ---------------------------------------------------------------------------
+# generate_tfvars — generate terraform.tfvars.json from RSF_METADATA_FILE.
+# Called from BOTH deploy and destroy branches (Pitfall 5: tfvars must exist
+# for destroy even when build artifacts are absent).
+# ---------------------------------------------------------------------------
+generate_tfvars() {
+  jq -n \
+    --argjson metadata "$(cat "${METADATA_FILE}")" \
+    '{
+      workflow_name:         $metadata.workflow_name,
+      execution_timeout:     ($metadata.timeout_seconds // 86400),
+      dynamodb_tables:       ($metadata.dynamodb_tables // []),
+      dlq_enabled:           ($metadata.dlq_enabled // false),
+      dlq_queue_name:        $metadata.dlq_queue_name,
+      dlq_max_receive_count: ($metadata.dlq_max_receive_count // 3),
+      alarms:                [($metadata.alarms // [])[] | {type, threshold, period, evaluation_periods}]
+    }' > "${TFVARS_FILE}"
+  echo "Generated: ${TFVARS_FILE}"
+}
 
 case "${CMD}" in
   deploy)
@@ -45,16 +64,20 @@ case "${CMD}" in
     echo ""
 
     # -----------------------------------------------------------------------
-    # Step 2: Terraform — init + apply
+    # Step 2: Generate terraform.tfvars.json from RSF metadata
+    # -----------------------------------------------------------------------
+    generate_tfvars
+
+    # -----------------------------------------------------------------------
+    # Step 3: Terraform — init + apply
     # -----------------------------------------------------------------------
     cd "${TF_DIR}"
     terraform init -input=false
     terraform apply -auto-approve \
-      -var="workflow_name=${WORKFLOW_NAME}" \
-      -var="execution_timeout=${EXECUTION_TIMEOUT}"
+      -var-file="${TFVARS_FILE}"
 
     # -----------------------------------------------------------------------
-    # Step 3: Print alias ARN with sample invocation command
+    # Step 4: Print alias ARN with sample invocation command
     # -----------------------------------------------------------------------
     ALIAS_ARN="$(terraform output -raw alias_arn)"
     echo ""
@@ -71,13 +94,18 @@ case "${CMD}" in
 
   destroy)
     # -----------------------------------------------------------------------
-    # Terraform — init + destroy
+    # Step 1: Generate terraform.tfvars.json from RSF metadata
+    # (required even for destroy — Terraform needs variable values)
+    # -----------------------------------------------------------------------
+    generate_tfvars
+
+    # -----------------------------------------------------------------------
+    # Step 2: Terraform — init + destroy
     # -----------------------------------------------------------------------
     cd "${TF_DIR}"
     terraform init -input=false
     terraform destroy -auto-approve \
-      -var="workflow_name=${WORKFLOW_NAME}" \
-      -var="execution_timeout=${EXECUTION_TIMEOUT}"
+      -var-file="${TFVARS_FILE}"
     echo ""
     echo "Teardown complete."
     ;;

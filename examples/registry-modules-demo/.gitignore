@@ -9,6 +9,9 @@ build/
 *.tfstate
 *.tfstate.backup
 
+# Generated at deploy time by deploy.sh
+terraform/terraform.tfvars.json
+
 # RSF generated source (recreated by rsf generate)
 src/generated/
 

@@ -14,6 +14,28 @@ dead_letter_queue:
   max_receive_count: 3
   queue_name: image-processing-dlq
 
+alarms:
+  - type: error_rate
+    # Alert when Lambda errors exceed 1 in a 5-minute window.
+    # Tutorial threshold: 1 error is enough to alarm on in a demo workflow.
+    threshold: 1
+    period: 300
+    evaluation_periods: 1
+
+  - type: duration
+    # Alert when average Lambda duration exceeds 10 seconds in a 5-minute window.
+    # Tutorial threshold: image-processing workflow has a 30s handler timeout.
+    threshold: 10000
+    period: 300
+    evaluation_periods: 1
+
+  - type: throttle
+    # Alert when Lambda throttles occur at all in a 5-minute window.
+    # Tutorial threshold: 1 throttle is worth investigating.
+    threshold: 1
+    period: 300
+    evaluation_periods: 1
+
 States:
   ValidateImage:
     Type: Task
