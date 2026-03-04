@@ -16,7 +16,7 @@ Requirements for the Terraform Registry Modules Tutorial milestone. Each maps to
 
 ### Registry Modules
 
-- [ ] **REG-01**: Lambda deployed via terraform-aws-modules/lambda/aws with durable_config and create_package=false
+- [x] **REG-01**: Lambda deployed via terraform-aws-modules/lambda/aws with durable_config and create_package=false
 - [ ] **REG-02**: DynamoDB table deployed via terraform-aws-modules/dynamodb-table/aws
 - [ ] **REG-03**: SQS DLQ deployed via terraform-aws-modules/sqs/aws conditionally based on dlq_enabled
 - [ ] **REG-04**: CloudWatch alarms deployed via terraform-aws-modules/cloudwatch metric-alarm submodule
@@ -84,7 +84,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | PROV-02 | Phase 57 | Pending |
 | PROV-03 | Phase 57 | Pending |
 | PROV-04 | Phase 57 | Pending |
-| REG-01 | Phase 57 | Pending |
+| REG-01 | Phase 57 | Complete |
 | REG-02 | Phase 58 | Pending |
 | REG-03 | Phase 58 | Pending |
 | REG-04 | Phase 58 | Pending |
