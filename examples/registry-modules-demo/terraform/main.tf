@@ -42,20 +42,48 @@ module "lambda" {
     "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicDurableExecutionRolePolicy"
   ]
 
+  # Dead-letter queue wiring. Conditional on dlq_enabled — when false, Terraform omits the
+  # attribute entirely (null is the module's default). Requires sqs.tf module to be applied first.
+  dead_letter_target_arn = var.dlq_enabled ? module.sqs_dlq[0].queue_arn : null
+
   # Inline supplement for actions not covered by the managed policy.
+  # Uses concat() to build the Statement list from conditional arrays.
+  # IMPORTANT: empty list [] is used for false branches, NEVER null —
+  # concat() accepts lists but not null (would cause a type error at plan time).
   attach_policy_json = true
   policy_json = jsonencode({
     Version = "2012-10-17"
-    Statement = [{
-      Sid    = "DurableExtraPermissions"
-      Effect = "Allow"
-      Action = [
-        "lambda:InvokeFunction",
-        "lambda:ListDurableExecutionsByFunction",
-        "lambda:GetDurableExecution"
-      ]
-      Resource = "*"
-    }]
+    Statement = concat(
+      [{
+        Sid    = "DurableExtraPermissions"
+        Effect = "Allow"
+        Action = [
+          "lambda:InvokeFunction",
+          "lambda:ListDurableExecutionsByFunction",
+          "lambda:GetDurableExecution"
+        ]
+        Resource = "*"
+      }],
+      length(var.dynamodb_tables) > 0 ? [{
+        Sid    = "DynamoDBTableAccess"
+        Effect = "Allow"
+        Action = [
+          "dynamodb:PutItem",
+          "dynamodb:GetItem",
+          "dynamodb:UpdateItem",
+          "dynamodb:DeleteItem",
+          "dynamodb:Query",
+          "dynamodb:Scan"
+        ]
+        Resource = [for t in module.dynamodb_table : t.dynamodb_table_arn]
+      }] : [],
+      var.dlq_enabled ? [{
+        Sid      = "SQSDLQAccess"
+        Effect   = "Allow"
+        Action   = ["sqs:SendMessage"]
+        Resource = [module.sqs_dlq[0].queue_arn]
+      }] : []
+    )
   })
 
   tags = {
