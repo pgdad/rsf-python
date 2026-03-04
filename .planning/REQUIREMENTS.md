@@ -31,9 +31,9 @@ Requirements for the Terraform Registry Modules Tutorial milestone. Each maps to
 
 ### Testing
 
-- [ ] **TEST-01**: Local unit tests verify workflow parsing, handler registration, and handler execution
-- [ ] **TEST-02**: Integration test deploys to AWS, invokes durable execution, polls for SUCCEEDED, verifies logs
-- [ ] **TEST-03**: Integration test performs clean teardown via custom provider teardown path
+- [x] **TEST-01**: Local unit tests verify workflow parsing, handler registration, and handler execution
+- [x] **TEST-02**: Integration test deploys to AWS, invokes durable execution, polls for SUCCEEDED, verifies logs
+- [x] **TEST-03**: Integration test performs clean teardown via custom provider teardown path
 
 ### Tutorial
 
@@ -93,9 +93,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EXAM-01 | Phase 57 | Complete |
 | EXAM-02 | Phase 57 | Complete |
 | EXAM-03 | Phase 57 | Complete |
-| TEST-01 | Phase 59 | Pending |
-| TEST-02 | Phase 59 | Pending |
-| TEST-03 | Phase 59 | Pending |
+| TEST-01 | Phase 59 | Complete |
+| TEST-02 | Phase 59 | Complete |
+| TEST-03 | Phase 59 | Complete |
 | TUT-01 | Phase 60 | Pending |
 | TUT-02 | Phase 60 | Pending |
 | TUT-03 | Phase 60 | Pending |
