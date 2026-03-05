@@ -24,6 +24,11 @@ resource "aws_lambda_function" "<< resource_id >>" {
     execution_timeout = var.execution_timeout
     retention_period  = var.retention_period
   }
+
+  # Durable functions require JSON log format — plain text is rejected by the API.
+  logging_config {
+    log_format = "JSON"
+  }
 <% if dlq_enabled %>
 
   dead_letter_config {

@@ -55,12 +55,30 @@ case "${CMD}" in
   deploy)
     # -----------------------------------------------------------------------
     # Step 1: Package — zip RSF-generated orchestrator + handler files
+    #         plus the rsf.registry runtime (required by orchestrator imports)
     # -----------------------------------------------------------------------
     mkdir -p "${BUILD_DIR}"
+
+    # Bundle the minimal rsf.registry package from the installed rsf module.
+    # The orchestrator imports rsf.registry (get_handler, state decorator),
+    # so these files must be present in the Lambda zip.
+    # Trap ensures cleanup even if script fails mid-packaging.
+    trap 'rm -rf "${SCRIPT_DIR}/rsf"' EXIT
+    RSF_PKG="$(python3 -c 'import rsf; print(rsf.__path__[0])')"
+    mkdir -p "${SCRIPT_DIR}/rsf/registry"
+    cat > "${SCRIPT_DIR}/rsf/__init__.py" <<'PYEOF'
+"""RSF runtime — minimal subset bundled for Lambda deployment."""
+PYEOF
+    cp "${RSF_PKG}/registry/__init__.py" "${SCRIPT_DIR}/rsf/registry/__init__.py"
+    cp "${RSF_PKG}/registry/registry.py" "${SCRIPT_DIR}/rsf/registry/registry.py"
+
     cd "${SCRIPT_DIR}"
-    zip -r "${BUILD_DIR}/function.zip" orchestrator.py handlers/ \
+    zip -r "${BUILD_DIR}/function.zip" orchestrator.py handlers/ rsf/ \
       -x "**/__pycache__/*" "**/*.pyc"
     echo "Packaged: ${BUILD_DIR}/function.zip"
+
+    # Clean up bundled rsf directory (not needed after zip creation)
+    rm -rf "${SCRIPT_DIR}/rsf"
     echo ""
 
     # -----------------------------------------------------------------------

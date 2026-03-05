@@ -13,7 +13,7 @@ module "lambda" {
   version = "8.7.0"
 
   function_name = var.workflow_name
-  handler       = "generated.orchestrator.lambda_handler"
+  handler       = "orchestrator.lambda_handler"
   runtime       = "python3.13"
 
   # Pre-built zip — deploy.sh creates build/function.zip before calling terraform apply.
@@ -28,6 +28,9 @@ module "lambda" {
   # coalesce() prevents null propagation from WorkflowMetadata (default is null in RSF).
   durable_config_execution_timeout = coalesce(var.execution_timeout, 86400)
   durable_config_retention_period  = 14
+
+  # Durable functions require JSON log format — plain text is rejected by the API.
+  logging_log_format = "JSON"
 
   # IAM role — created by the module.
   create_role                   = true

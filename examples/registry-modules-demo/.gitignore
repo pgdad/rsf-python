@@ -1,6 +1,9 @@
 # Build artifacts (deploy.sh creates build/function.zip)
 build/
 
+# Transient rsf runtime bundle (deploy.sh creates and removes during packaging)
+rsf/
+
 # Terraform working directory
 .terraform/
 .terraform.lock.hcl

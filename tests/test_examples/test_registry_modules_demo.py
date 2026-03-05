@@ -123,7 +123,9 @@ class TestRegistryModulesDemoIntegration:
             )
 
             # Step 8: Poll until terminal state
-            execution = poll_execution(lambda_client, alias_arn, exec_id)
+            # Use function_name (not alias_arn) for polling — the ListDurableExecutionsByFunction
+            # API rejects DurableExecutionName filter when both FunctionName and Qualifier are provided.
+            execution = poll_execution(lambda_client, function_name, exec_id)
 
             yield {
                 "execution": execution,
