@@ -105,9 +105,10 @@ None.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 1 | Add MIT license and push v3.1 release tag | 2026-03-03 | 3fef358 | [1-add-mit-license-to-this-project-and-push](./quick/1-add-mit-license-to-this-project-and-push/) |
+| 2 | Fix 16 test failures from SDK rename, arg order swap, model coercion | 2026-03-05 | 864f655 | [2-continue-fixing-all-integration-tests-ba](./quick/2-continue-fixing-all-integration-tests-ba/) |
 
 ## Session Continuity
 
-Last session: 2026-03-04T17:23:55.689Z
-Stopped at: Completed 59-tests-02-PLAN.md
+Last session: 2026-03-05T00:07:55Z
+Stopped at: Completed quick task 2 (fix integration tests)
 Resume file: None
