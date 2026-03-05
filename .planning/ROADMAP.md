@@ -227,7 +227,9 @@ Plans:
   2. A side-by-side code block comparison in the tutorial shows equivalent raw HCL (RSF TerraformProvider output) next to registry module HCL for at least the Lambda and DynamoDB resources
   3. An annotated WorkflowMetadata schema table in the tutorial documents every field relevant to the example (function_name, handler, runtime, memory_size, timeout, environment, dynamodb_tables, dlq_enabled, alarms) with description and example value
   4. A dedicated "Common Pitfalls" section covers all four documented risks: absolute path and chmod +x requirements, packaging conflict (create_package=false), exact version pinning rationale, and durable IAM permissions not included in module defaults
-**Plans**: TBD
+**Plans**: 1 plan
+Plans:
+- [ ] 60-01-PLAN.md — Complete tutorial with walkthrough, side-by-side HCL comparison, schema table, and pitfalls
 
 ## Progress
 
@@ -243,7 +245,7 @@ Plans:
 | v1.7 Lambda URL | 36-38 | 8 | Complete | 2026-03-01 |
 | v2.0 Enhancement Suite | 39-50 | 34 | Complete | 2026-03-02 |
 | v3.0 Pluggable Providers | 51-55 | 17 | Complete | 2026-03-03 |
-| v3.2 Registry Modules Tutorial | 56-60 | 4+ | In progress | - |
+| v3.2 Registry Modules Tutorial | 56-60 | 9 | In progress | - |
 
 **v3.2 Phase Progress:**
 
@@ -253,4 +255,4 @@ Plans:
 | 57. Core Lambda Example | 3/3 | Complete    | 2026-03-04 |
 | 58. Full-Stack Registry Modules | 2/2 | Complete    | 2026-03-04 |
 | 59. Tests | 2/2 | Complete   | 2026-03-04 |
-| 60. Tutorial Document | 0/TBD | Not started | - |
+| 60. Tutorial Document | 0/1 | Not started | - |
