@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.2
 milestone_name: Terraform Registry Modules Tutorial
 status: planning
-stopped_at: Phase 60 context gathered
-last_updated: "2026-03-05T00:18:47.925Z"
+stopped_at: Completed 60-01-PLAN.md
+last_updated: "2026-03-05T00:37:40.138Z"
 last_activity: 2026-03-03 — Roadmap created, v3.2 phases 56-60 defined
 progress:
   total_phases: 5
-  completed_phases: 4
-  total_plans: 8
-  completed_plans: 8
+  completed_phases: 5
+  total_plans: 9
+  completed_plans: 9
   percent: 0
 ---
 
@@ -59,6 +59,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 58 P02 | 8min | 2 tasks | 3 files |
 | Phase 59-tests P01 | 1 | 2 tasks | 2 files |
 | Phase 59-tests P02 | 3 | 1 tasks | 1 files |
+| Phase 60-tutorial-document P01 | 4min | 2 tasks | 1 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,8 @@ All decisions logged in PROJECT.md Key Decisions table.
 - [Phase 59-tests]: rsf.toml patched inline in fixture (not context manager) so patch persists through yield into teardown test method
 - [Phase 59-tests]: test_z_teardown_leaves_empty_state is a visible test result per TEST-03 — teardown failure surfaces as named test failure
 - [Phase 59-tests]: Safety net in fixture finally block: terraform state list + direct destroy fallback + log group delete prevents orphaned AWS resources on any failure path
+- [Phase 60-tutorial-document]: Tutorial 09 uses simplified HCL excerpts in side-by-side comparison (not full file dumps) — readability over completeness, file path references for full source
+- [Phase 60-tutorial-document]: IAM callout box after Lambda comparison highlights attach_policies + number_of_policies gotcha — both must be set or managed policy silently does not attach
 
 ### Pending Todos
 
@@ -109,6 +112,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-03-05T00:18:47.923Z
-Stopped at: Phase 60 context gathered
-Resume file: .planning/phases/60-tutorial-document/60-CONTEXT.md
+Last session: 2026-03-05T00:37:40.137Z
+Stopped at: Completed 60-01-PLAN.md
+Resume file: None

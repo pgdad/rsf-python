@@ -37,10 +37,10 @@ Requirements for the Terraform Registry Modules Tutorial milestone. Each maps to
 
 ### Tutorial
 
-- [ ] **TUT-01**: Step-by-step tutorial (tutorials/09-custom-provider-registry-modules.md) walks through custom provider creation
-- [ ] **TUT-02**: Tutorial includes side-by-side comparison of raw HCL vs registry module HCL
-- [ ] **TUT-03**: Tutorial includes annotated WorkflowMetadata schema table for provider authors
-- [ ] **TUT-04**: Tutorial covers pitfalls: absolute path, chmod +x, packaging conflict, version pinning, durable IAM
+- [x] **TUT-01**: Step-by-step tutorial (tutorials/09-custom-provider-registry-modules.md) walks through custom provider creation
+- [x] **TUT-02**: Tutorial includes side-by-side comparison of raw HCL vs registry module HCL
+- [x] **TUT-03**: Tutorial includes annotated WorkflowMetadata schema table for provider authors
+- [x] **TUT-04**: Tutorial covers pitfalls: absolute path, chmod +x, packaging conflict, version pinning, durable IAM
 
 ### Tooling
 
@@ -96,10 +96,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TEST-01 | Phase 59 | Complete |
 | TEST-02 | Phase 59 | Complete |
 | TEST-03 | Phase 59 | Complete |
-| TUT-01 | Phase 60 | Pending |
-| TUT-02 | Phase 60 | Pending |
-| TUT-03 | Phase 60 | Pending |
-| TUT-04 | Phase 60 | Pending |
+| TUT-01 | Phase 60 | Complete |
+| TUT-02 | Phase 60 | Complete |
+| TUT-03 | Phase 60 | Complete |
+| TUT-04 | Phase 60 | Complete |
 | TOOL-01 | Phase 57 | Complete |
 
 **Coverage:**
