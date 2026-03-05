@@ -75,7 +75,7 @@ class TestInfrastructureConfig:
             custom={"program": "/usr/bin/deploy.sh"},
         )
         assert config.provider == "custom"
-        assert config.custom == {"program": "/usr/bin/deploy.sh"}
+        assert config.custom.program == "/usr/bin/deploy.sh"
 
     def test_extra_forbid(self) -> None:
         """InfrastructureConfig rejects unknown fields."""

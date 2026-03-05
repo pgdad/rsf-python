@@ -137,7 +137,7 @@ class TestRenderOrchestrator:
         sm = load_definition(simple_workflow)
         mappings = map_states(sm)
         code = render_orchestrator(sm, mappings, simple_workflow)
-        assert "from aws_lambda_durable_execution_sdk_python" in code
+        assert "from aws_durable_execution_sdk_python" in code
         assert "from rsf.registry import get_handler" in code
         assert "import handlers.do_work" in code
 

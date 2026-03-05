@@ -48,15 +48,15 @@ def _build_and_exec(sm, dsl_path, ctx, event, handlers=None):
     code = render_orchestrator(sm, mappings, dsl_path)
 
     # Create a mock SDK module
-    mock_sdk = types.ModuleType("aws_lambda_durable_execution_sdk_python")
+    mock_sdk = types.ModuleType("aws_durable_execution_sdk_python")
     mock_sdk.DurableContext = MockDurableContext
     mock_sdk.durable_execution = lambda f: f  # No-op decorator
 
-    mock_config = types.ModuleType("aws_lambda_durable_execution_sdk_python.config")
+    mock_config = types.ModuleType("aws_durable_execution_sdk_python.config")
     mock_config.Duration = Duration
 
-    sys.modules["aws_lambda_durable_execution_sdk_python"] = mock_sdk
-    sys.modules["aws_lambda_durable_execution_sdk_python.config"] = mock_config
+    sys.modules["aws_durable_execution_sdk_python"] = mock_sdk
+    sys.modules["aws_durable_execution_sdk_python.config"] = mock_config
 
     try:
         # Strip handler import lines (they reference files that don't exist in tests)
@@ -69,11 +69,11 @@ def _build_and_exec(sm, dsl_path, ctx, event, handlers=None):
         exec(compile(code, f"<orchestrator:{dsl_path.stem}>", "exec"), namespace)
 
         # Call the lambda_handler with our mock context
-        result = namespace["lambda_handler"](ctx, event)
+        result = namespace["lambda_handler"](event, ctx)
         return result
     finally:
-        sys.modules.pop("aws_lambda_durable_execution_sdk_python", None)
-        sys.modules.pop("aws_lambda_durable_execution_sdk_python.config", None)
+        sys.modules.pop("aws_durable_execution_sdk_python", None)
+        sys.modules.pop("aws_durable_execution_sdk_python.config", None)
         clear()
         clear_startup_hooks()
 
