@@ -1,8 +1,8 @@
 # [GENERATED HEADER - TIMESTAMP REMOVED]
 # [SOURCE HEADER - HASH REMOVED]
 
-from aws_lambda_durable_execution_sdk_python import DurableContext, durable_execution
-from aws_lambda_durable_execution_sdk_python.config import Duration
+from aws_durable_execution_sdk_python import DurableContext, durable_execution
+from aws_durable_execution_sdk_python.config import Duration
 from rsf.registry import get_handler, get_startup_hooks
 import handlers.string_operations
 import handlers.array_operations
@@ -32,7 +32,7 @@ _startup_done = False
 
 
 @durable_execution
-def lambda_handler(context: DurableContext, event: dict) -> dict:
+def lambda_handler(event: dict, context: DurableContext) -> dict:
     global _startup_done
     if not _startup_done:
         for hook in get_startup_hooks():
