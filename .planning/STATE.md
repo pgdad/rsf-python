@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.6
 milestone_name: Interactive Graph Editor
 status: planning
-stopped_at: Completed 62-01-PLAN.md
-last_updated: "2026-03-06T16:36:32.484Z"
+stopped_at: Completed 62-02-PLAN.md
+last_updated: "2026-03-06T16:42:46.736Z"
 last_activity: 2026-03-06 — Roadmap created, ready to plan Phase 61
 progress:
   total_phases: 3
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
   percent: 0
 ---
 
@@ -55,6 +55,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 61 P01 | 184 | 1 tasks | 6 files |
 | Phase 61 P02 | 120 | 1 tasks | 5 files |
 | Phase 62 P01 | 2 | 2 tasks | 4 files |
+| Phase 62 P02 | 226 | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -77,6 +78,10 @@ Recent decisions affecting current work:
 - [Phase 62]: Accordion expand: expandedNodeId (single string | null) enforces one expanded node at a time
 - [Phase 62]: Chevron uses stopPropagation to keep expand and node selection independent
 - [Phase 62]: expandedContent prop on BaseNode is extension point for Plan 02 property editors
+- [Phase 62]: TRANSITION_MANAGED_KEYS set guards Next/End/Type/Default/Choices/Catch/Retry from stateData overwrites in mergeGraphIntoYaml
+- [Phase 62]: rsf-graph-change CustomEvent bridges node components to GraphCanvas sync pipeline (no prop threading needed)
+- [Phase 62]: Focus guard: useEffect skips local state sync if document.activeElement === input ref (prevents clobbering active typing)
+- [Phase 62]: Text fields debounce 300ms, number/boolean sync immediately
 
 ### Pending Todos
 
@@ -99,6 +104,6 @@ None — starting fresh from v3.2 completion.
 
 ## Session Continuity
 
-Last session: 2026-03-06T16:36:32.483Z
-Stopped at: Completed 62-01-PLAN.md
+Last session: 2026-03-06T16:42:46.735Z
+Stopped at: Completed 62-02-PLAN.md
 Resume file: None
