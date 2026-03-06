@@ -1294,3 +1294,77 @@ body {
   font-style: italic;
   padding: 4px 0;
 }
+
+/* ===== Property Editor Styles ===== */
+
+.property-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.property-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.property-field label {
+  font-size: 9px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+}
+
+.property-field input,
+.property-field textarea {
+  padding: 3px 6px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  color: var(--text-primary);
+  font-size: 11px;
+  font-family: inherit;
+  width: 100%;
+}
+
+.property-field input:focus,
+.property-field textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.property-field input[type="number"] {
+  width: 80px;
+}
+
+.property-field textarea {
+  min-height: 40px;
+  resize: vertical;
+  font-family: 'Fira Code', 'Consolas', monospace;
+  font-size: 10px;
+}
+
+.property-field-toggle {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.toggle-btn {
+  padding: 2px 10px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+  color: var(--text-secondary);
+  font-size: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.toggle-btn.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+}

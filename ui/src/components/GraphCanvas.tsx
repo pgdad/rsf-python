@@ -43,6 +43,15 @@ export function GraphCanvas({ onGraphChange }: GraphCanvasProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
 
+  // Listen for property changes dispatched by node components (bridge to sync pipeline)
+  useEffect(() => {
+    const handlePropertyChange = () => {
+      onGraphChange?.();
+    };
+    document.addEventListener('rsf-graph-change', handlePropertyChange);
+    return () => document.removeEventListener('rsf-graph-change', handlePropertyChange);
+  }, [onGraphChange]);
+
   // Auto-dismiss toast after 2500ms
   useEffect(() => {
     if (!toastMessage) return;
