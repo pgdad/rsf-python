@@ -94,6 +94,29 @@ export function mergeGraphIntoYaml(
     // Catch edges: don't modify — Catch arrays contain complex data
   }
 
+  // Property fields managed by transition logic — do NOT overwrite from stateData
+  const TRANSITION_MANAGED_KEYS = new Set([
+    'Type', 'Next', 'End', 'Default', 'Choices', 'Catch', 'Retry',
+    'Branches', 'Iterator', 'ItemProcessor',
+  ]);
+
+  // Write stateData properties to AST
+  for (const node of nodes) {
+    const state = states[node.id];
+    if (!state) continue;
+    const stateData = node.data.stateData;
+    if (!stateData) continue;
+
+    for (const [key, value] of Object.entries(stateData)) {
+      if (TRANSITION_MANAGED_KEYS.has(key)) continue;
+      if (value === undefined || value === null || value === '') {
+        delete state[key];
+      } else {
+        state[key] = value;
+      }
+    }
+  }
+
   // Defensive reference cleanup: if a state's Next or Default still points to
   // a node that no longer exists (edge cascade may have already handled this via
   // the transitions loop above, but this is an independent safety net).
