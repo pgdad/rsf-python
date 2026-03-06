@@ -121,16 +121,19 @@ Your project directory now includes a `terraform/` subdirectory:
 
 ```
 my-workflow/
-├── orchestrator.py
 ├── workflow.yaml
 ├── pyproject.toml
 ├── .gitignore
-├── handlers/
-│   ├── __init__.py
-│   ├── example_handler.py
-│   ├── validate_order.py
-│   ├── require_approval.py
-│   └── process_order.py
+├── src/
+│   ├── generated/
+│   │   ├── __init__.py
+│   │   └── orchestrator.py
+│   └── handlers/
+│       ├── __init__.py
+│       ├── example_handler.py
+│       ├── validate_order.py
+│       ├── require_approval.py
+│       └── process_order.py
 ├── terraform/                    <-- NEW
 │   ├── main.tf
 │   ├── variables.tf

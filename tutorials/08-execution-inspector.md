@@ -94,7 +94,7 @@ data.
 Create handler implementations for all four Task states. Each handler adds meaningful data
 to the output so the inspector shows interesting state-by-state data transformations.
 
-Replace `handlers/fetch_data.py`:
+Replace `src/handlers/fetch_data.py`:
 
 ```python
 """Handler for the FetchData task state."""
@@ -114,7 +114,7 @@ def fetch_data(input_data: dict) -> dict:
     }
 ```
 
-Replace `handlers/transform_data.py`:
+Replace `src/handlers/transform_data.py`:
 
 ```python
 """Handler for the TransformData task state."""
@@ -137,7 +137,7 @@ def transform_data(input_data: dict) -> dict:
     }
 ```
 
-Replace `handlers/flag_for_review.py`:
+Replace `src/handlers/flag_for_review.py`:
 
 ```python
 """Handler for the FlagForReview task state."""
@@ -155,7 +155,7 @@ def flag_for_review(input_data: dict) -> dict:
     }
 ```
 
-Replace `handlers/publish_results.py`:
+Replace `src/handlers/publish_results.py`:
 
 ```python
 """Handler for the PublishResults task state."""

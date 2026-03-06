@@ -52,8 +52,9 @@ it with a complete starter project. You will see output like this:
 Created project: my-workflow/
 
   + my-workflow/workflow.yaml
-  + my-workflow/handlers/__init__.py
-  + my-workflow/handlers/example_handler.py
+  + my-workflow/src/handlers/__init__.py
+  + my-workflow/src/handlers/example_handler.py
+  + my-workflow/src/generated/__init__.py
   + my-workflow/pyproject.toml
   + my-workflow/.gitignore
   + my-workflow/tests/__init__.py
@@ -62,7 +63,7 @@ Created project: my-workflow/
 Next steps:
   cd my-workflow
   Edit workflow.yaml to define your state machine
-  Edit handlers/example_handler.py to implement your logic
+  Edit src/handlers/example_handler.py to implement your logic
 ```
 
 > If you run `rsf init my-workflow` a second time in the same directory, RSF will refuse to
@@ -85,9 +86,12 @@ my-workflow/
 ├── workflow.yaml
 ├── pyproject.toml
 ├── .gitignore
-├── handlers/
-│   ├── __init__.py
-│   └── example_handler.py
+├── src/
+│   ├── handlers/
+│   │   ├── __init__.py
+│   │   └── example_handler.py
+│   └── generated/
+│       └── __init__.py
 └── tests/
     ├── __init__.py
     └── test_example.py
@@ -133,7 +137,7 @@ validate changes to this file before generating any code.
 
 ---
 
-### `handlers/example_handler.py` — The Handler Code
+### `src/handlers/example_handler.py` — The Handler Code
 
 ```python
 """Example RSF handler using the @state decorator."""
@@ -169,9 +173,9 @@ This is where your business logic lives. Add more handler functions — each dec
 
 ---
 
-### `handlers/__init__.py` — Package Marker
+### `src/handlers/__init__.py` — Package Marker
 
-This file is empty. It marks the `handlers/` directory as a Python package so that the
+This file is empty. It marks the `src/handlers/` directory as a Python package so that the
 generated orchestrator code and your tests can import from it using `from handlers.example_handler import hello_world`.
 
 ---
@@ -321,7 +325,7 @@ discover and run the test files inside it when your project is installed as an e
 
 ## Step 3: Run the Example Tests
 
-Install the project in editable mode so that pytest can import from `handlers/`:
+Install the project in editable mode so that pytest can import from `src/handlers/`:
 
 ```bash
 pip install -e ".[dev]"

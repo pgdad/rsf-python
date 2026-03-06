@@ -25,7 +25,7 @@ If you have not deployed yet, go back to Tutorial 4 and run `rsf deploy --auto-a
 
 ## Step 1: Edit a Handler
 
-Open `handlers/validate_order.py` and add a timestamp to the return value. Replace the entire file with:
+Open `src/handlers/validate_order.py` and add a timestamp to the return value. Replace the entire file with:
 
 ```python
 """Handler for the ValidateOrder task state."""
