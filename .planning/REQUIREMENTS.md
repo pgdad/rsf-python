@@ -12,9 +12,9 @@ Requirements for milestone v3.6. Each maps to roadmap phases.
 - [x] **EDIT-01**: User can click a state node to expand it and reveal editable property fields
 - [x] **EDIT-02**: User can edit property values with type-appropriate inputs (text, number, boolean toggle)
 - [x] **EDIT-03**: Property changes instantly sync to the YAML editor and trigger backend validation
-- [ ] **EDIT-04**: Required fields are visually marked and enforce non-empty values before collapsing
-- [ ] **EDIT-05**: "Must have one of" fields (e.g., Wait duration) display as radio group + input, enforcing exactly one selection
-- [ ] **EDIT-06**: All 8 state types have correct property editors matching their Pydantic model fields
+- [x] **EDIT-04**: Required fields are visually marked and enforce non-empty values before collapsing
+- [x] **EDIT-05**: "Must have one of" fields (e.g., Wait duration) display as radio group + input, enforcing exactly one selection
+- [x] **EDIT-06**: All 8 state types have correct property editors matching their Pydantic model fields
 
 ### Graph Manipulation
 
@@ -51,9 +51,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EDIT-01 | Phase 62 | Complete |
 | EDIT-02 | Phase 62 | Complete |
 | EDIT-03 | Phase 62 | Complete |
-| EDIT-04 | Phase 63 | Pending |
-| EDIT-05 | Phase 63 | Pending |
-| EDIT-06 | Phase 63 | Pending |
+| EDIT-04 | Phase 63 | Complete |
+| EDIT-05 | Phase 63 | Complete |
+| EDIT-06 | Phase 63 | Complete |
 | GRAPH-01 | Phase 61 | Complete |
 | GRAPH-02 | Phase 61 | Complete |
 | GRAPH-03 | Phase 61 | Complete |
