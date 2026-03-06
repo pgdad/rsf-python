@@ -12,7 +12,7 @@
 - ✅ **v1.7 Lambda Function URL Support** — Phases 36-38 (shipped 2026-03-01)
 - ✅ **v2.0 Comprehensive Enhancement Suite** — Phases 39-50 (shipped 2026-03-02)
 - ✅ **v3.0 Pluggable Infrastructure Providers** — Phases 51-55 (shipped 2026-03-03)
-- 🚧 **v3.2 Terraform Registry Modules Tutorial** — Phases 56-60 (in progress)
+- ✅ **v3.2 Terraform Registry Modules Tutorial** — Phases 56-60 (shipped 2026-03-06)
 
 ## Phases
 
@@ -148,88 +148,18 @@ Full details: `.planning/milestones/v3.0-ROADMAP.md`
 
 </details>
 
-### 🚧 v3.2 Terraform Registry Modules Tutorial (In Progress)
+<details>
+<summary>✅ v3.2 Terraform Registry Modules Tutorial (Phases 56-60) — SHIPPED 2026-03-06</summary>
 
-**Milestone Goal:** Tutorial and example showing how to deploy Lambda Durable Functions via HashiCorp Terraform registry modules using RSF's custom provider system, demonstrating IaC-agnosticism in practice.
+- [x] Phase 56: Schema Verification (1/1 plan) — completed 2026-03-04
+- [x] Phase 57: Core Lambda Example (3/3 plans) — completed 2026-03-04
+- [x] Phase 58: Full-Stack Registry Modules (2/2 plans) — completed 2026-03-04
+- [x] Phase 59: Tests (2/2 plans) — completed 2026-03-04
+- [x] Phase 60: Tutorial Document (1/1 plan) — completed 2026-03-05
 
-- [x] **Phase 56: Schema Verification** — Confirm lambda module v8.7.0 durable_config variable names, alias convention, and IAM approach before writing Terraform (completed 2026-03-04)
-- [x] **Phase 57: Core Lambda Example** — Working example with deploy.sh, Lambda-only Terraform, workflow.yaml, and rsf.toml wiring (completed 2026-03-04)
-- [x] **Phase 58: Full-Stack Registry Modules** — Extend example with DynamoDB, SQS DLQ, CloudWatch alarms, and SNS modules (completed 2026-03-04)
-- [x] **Phase 59: Tests** — Local unit tests and real-AWS integration test with durable execution and teardown (completed 2026-03-04)
-- [x] **Phase 60: Tutorial Document** — Step-by-step tutorial with side-by-side HCL comparison, annotated schema, and pitfall coverage (completed 2026-03-05)
+Full details: `.planning/milestones/v3.2-ROADMAP.md`
 
-## Phase Details
-
-### Phase 56: Schema Verification
-**Goal**: All downstream Terraform code rests on verified facts — confirmed durable_config variable names in terraform-aws-modules/lambda v8.7.0, a chosen Lambda alias convention, and a validated IAM approach
-**Depends on**: Nothing (first phase of milestone)
-**Requirements**: REG-06
-**Success Criteria** (what must be TRUE):
-  1. Exact input variable names for durable_config in terraform-aws-modules/lambda v8.7.0 are confirmed from the live module source and documented
-  2. Lambda alias convention (always use alias, never $LATEST) is documented with the Terraform provider issue #45800 rationale
-  3. IAM approach decision (managed policy AWSLambdaBasicDurableExecutionRolePolicy vs. inline policy) is made with verification evidence
-  4. All five registry module versions are pinned to exact version strings in a versions.tf skeleton with rationale for exact pinning over range constraints
-  5. Lambda zip path convention (where deploy.sh creates the zip relative to generated source) is established and documented
-**Plans**: 1 plan
-Plans:
-- [ ] 56-01-PLAN.md — Example directory scaffold with versions.tf skeleton and verification findings document
-
-### Phase 57: Core Lambda Example
-**Goal**: Users can run `rsf deploy` on a real workflow and have RSF invoke a custom provider script that zips generated source and deploys a working Lambda Durable Function via terraform-aws-modules/lambda
-**Depends on**: Phase 56
-**Requirements**: PROV-01, PROV-02, PROV-03, PROV-04, REG-01, EXAM-01, EXAM-02, EXAM-03, TOOL-01
-**Success Criteria** (what must be TRUE):
-  1. `rsf deploy` on the registry-modules-demo example invokes deploy.sh via CustomProvider with WorkflowMetadata available at RSF_METADATA_FILE
-  2. deploy.sh reads RSF_METADATA_FILE, zips RSF-generated source, and runs terraform apply successfully — Lambda Durable Function is live in AWS
-  3. `rsf deploy --teardown` (or equivalent teardown path) destroys all AWS resources with no orphaned state
-  4. The example directory follows RSF conventions (workflow.yaml, handlers/, tests/, terraform/, README.md, deploy.sh) and rsf.toml configures provider="custom" with absolute path and FileTransport
-  5. deploy.sh starts with `set -euo pipefail` and a failed Terraform invocation causes rsf deploy to exit non-zero
-**Plans**: 3 plans
-Plans:
-- [ ] 57-01-PLAN.md — CLI --teardown flag + workflow YAML, handlers, and handler tests
-- [ ] 57-02-PLAN.md — Terraform files (main.tf, iam_durable.tf, variables.tf, outputs.tf, backend.tf)
-- [ ] 57-03-PLAN.md — deploy.sh, rsf.toml, and README.md integration layer
-
-### Phase 58: Full-Stack Registry Modules
-**Goal**: The registry-modules-demo example exercises all RSF infrastructure features — DynamoDB table, SQS DLQ, CloudWatch alarms, SNS topic — each deployed via the corresponding terraform-aws-modules registry module
-**Depends on**: Phase 57
-**Requirements**: REG-02, REG-03, REG-04, REG-05
-**Success Criteria** (what must be TRUE):
-  1. DynamoDB table is deployed via terraform-aws-modules/dynamodb-table/aws with for_each over WorkflowMetadata dynamodb_tables list
-  2. SQS DLQ is deployed via terraform-aws-modules/sqs/aws, gated by count conditional on dlq_enabled, and wired to the lambda module's dead_letter_target_arn
-  3. CloudWatch alarms (error_rate, duration, throttle) are deployed via the metric-alarm submodule of terraform-aws-modules/cloudwatch/aws
-  4. SNS topic is deployed via terraform-aws-modules/sns/aws and feeds alarm_actions on all CloudWatch alarms
-  5. A single `rsf deploy` followed by manual AWS Console verification confirms all five resource types exist and are correctly wired
-**Plans**: 2 plans
-Plans:
-- [ ] 58-01-PLAN.md — DynamoDB, SQS, SNS, CloudWatch Terraform modules + variables/outputs + IAM expansion
-- [ ] 58-02-PLAN.md — deploy.sh tfvars.json refactor + workflow.yaml alarms + validation
-
-### Phase 59: Tests
-**Goal**: Users can validate the example locally without AWS and verify end-to-end correctness on real AWS including a live durable execution polling to SUCCEEDED
-**Depends on**: Phase 58
-**Requirements**: TEST-01, TEST-02, TEST-03
-**Success Criteria** (what must be TRUE):
-  1. Local unit tests (examples/registry-modules-demo/tests/test_local.py) pass with `pytest` — no AWS credentials needed — covering workflow YAML parsing, handler registration, and handler business logic
-  2. Integration test in tests/test_examples/test_registry_modules_demo.py deploys to AWS, invokes a durable execution by name, polls list_durable_executions_by_function until status is SUCCEEDED, and asserts expected CloudWatch log output
-  3. Integration test teardown path exercises the custom provider's destroy command, and after teardown `terraform state list` returns empty — no orphaned resources
-**Plans**: 2 plans
-Plans:
-- [ ] 59-01-PLAN.md — Local unit tests (test_local.py) + pyproject.toml testpaths update
-- [ ] 59-02-PLAN.md — Real-AWS integration test with rsf deploy subprocess, durable execution, and teardown verification
-
-### Phase 60: Tutorial Document
-**Goal**: A developer new to RSF's custom provider system can follow tutorials/09-custom-provider-registry-modules.md from prerequisites to a working real-AWS deployment, understanding why every design choice was made
-**Depends on**: Phase 59
-**Requirements**: TUT-01, TUT-02, TUT-03, TUT-04
-**Success Criteria** (what must be TRUE):
-  1. Tutorial file tutorials/09-custom-provider-registry-modules.md exists with step-by-step numbered sections from prerequisites through teardown
-  2. A side-by-side code block comparison in the tutorial shows equivalent raw HCL (RSF TerraformProvider output) next to registry module HCL for at least the Lambda and DynamoDB resources
-  3. An annotated WorkflowMetadata schema table in the tutorial documents every field relevant to the example (function_name, handler, runtime, memory_size, timeout, environment, dynamodb_tables, dlq_enabled, alarms) with description and example value
-  4. A dedicated "Common Pitfalls" section covers all four documented risks: absolute path and chmod +x requirements, packaging conflict (create_package=false), exact version pinning rationale, and durable IAM permissions not included in module defaults
-**Plans**: 1 plan
-Plans:
-- [ ] 60-01-PLAN.md — Complete tutorial with walkthrough, side-by-side HCL comparison, schema table, and pitfalls
+</details>
 
 ## Progress
 
@@ -245,14 +175,4 @@ Plans:
 | v1.7 Lambda URL | 36-38 | 8 | Complete | 2026-03-01 |
 | v2.0 Enhancement Suite | 39-50 | 34 | Complete | 2026-03-02 |
 | v3.0 Pluggable Providers | 51-55 | 17 | Complete | 2026-03-03 |
-| v3.2 Registry Modules Tutorial | 56-60 | 9 | In progress | - |
-
-**v3.2 Phase Progress:**
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 56. Schema Verification | 1/1 | Complete    | 2026-03-04 |
-| 57. Core Lambda Example | 3/3 | Complete    | 2026-03-04 |
-| 58. Full-Stack Registry Modules | 2/2 | Complete    | 2026-03-04 |
-| 59. Tests | 2/2 | Complete   | 2026-03-04 |
-| 60. Tutorial Document | 1/1 | Complete    | 2026-03-05 |
+| v3.2 Registry Modules Tutorial | 56-60 | 9 | Complete | 2026-03-06 |

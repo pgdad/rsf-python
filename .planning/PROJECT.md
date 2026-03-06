@@ -10,7 +10,7 @@ Users can define, visualize, generate, deploy, and debug state machine workflows
 
 ## Current State
 
-v3.0 shipped (2026-03-03). RSF is a full development platform installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. 16 CLI commands, 7 DSL extensions, pluggable infrastructure providers (Terraform, CDK, custom), OpenTelemetry tracing, VS Code extension, GitHub Action, and all requirements satisfied through v3.0. ~36,400 LOC Python source + 8,900 LOC TypeScript + comprehensive test suite. Six real-world example workflows with automated integration testing prove end-to-end correctness on real AWS.
+v3.2 shipped (2026-03-06). RSF is a full development platform installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. 16 CLI commands, 7 DSL extensions, pluggable infrastructure providers (Terraform, CDK, custom), OpenTelemetry tracing, VS Code extension, GitHub Action, and all requirements satisfied through v3.2. ~36,400 LOC Python source + 8,900 LOC TypeScript + comprehensive test suite. Seven real-world example workflows (including registry-modules-demo with Terraform registry modules) with automated integration testing prove end-to-end correctness on real AWS. Nine tutorials covering all CLI commands and the custom provider system.
 
 ## Requirements
 
@@ -90,20 +90,15 @@ v3.0 shipped (2026-03-03). RSF is a full development platform installable via `p
 - ✓ Custom provider with security-hardened subprocess (`shell=False`, absolute path validation) and configurable metadata transport — v3.0
 - ✓ Provider configuration in workflow YAML `infrastructure:` block and project-wide `rsf.toml` with cascade — v3.0
 - ✓ Provider-aware CLI: doctor/diff/watch/export handle any provider gracefully — v3.0
+- ✓ Custom provider deploy.sh reading WorkflowMetadata via FileTransport and invoking terraform apply — v3.2
+- ✓ Registry-modules-demo example deploying Lambda Durable Functions via terraform-aws-modules registry modules — v3.2
+- ✓ Full-stack registry modules: DynamoDB, SQS DLQ, CloudWatch alarms, SNS via conditional terraform-aws-modules — v3.2
+- ✓ Local unit tests and real-AWS integration test with durable execution polling and teardown verification — v3.2
+- ✓ Tutorial 09: Custom provider with registry modules (side-by-side HCL comparison, schema table, pitfalls) — v3.2
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
-
-## Current Milestone: v3.2 Terraform Registry Modules Tutorial
-
-**Goal:** Tutorial and example showing how to create alternate infrastructure using HashiCorp's official Terraform registry modules with RSF's custom provider system, plus tooling enhancements where beneficial.
-
-**Target features:**
-- Tutorial walking students through creating a custom provider implementation using Terraform registry modules
-- New dedicated example workflow deployed via registry modules (terraform-aws-modules/lambda/aws, etc.)
-- Full-stack coverage: Lambda, IAM, CloudWatch, DynamoDB, SQS — mapping all RSF infra features to registry modules
-- Tooling enhancements to the custom provider system where the tutorial reveals friction points
 
 ### Out of Scope
 
@@ -135,6 +130,7 @@ v3.0 shipped (2026-03-03). RSF is a full development platform installable via `p
 - Shipped v1.7 with Lambda Function URL support (DSL, Terraform, example, tutorial) and 779 non-AWS tests
 - Shipped v2.0 with 12 phases, 34 plans, 25 requirements: full CLI toolchain (16 commands), 7 DSL extensions, observability, advanced testing, VS Code extension, GitHub Action, and workflow templates. 976+ non-AWS tests.
 - Shipped v3.0 with 5 phases, 17 plans, 29 requirements: pluggable infrastructure providers (Terraform, CDK, custom), metadata transport system, provider-aware CLI commands, rsf.toml project config.
+- Shipped v3.2 with 5 phases, 9 plans, 21 requirements: Terraform registry modules tutorial and example, custom provider deploy.sh, full-stack registry modules (Lambda, DynamoDB, SQS, CloudWatch, SNS), local and integration tests.
 
 ## Constraints
 
@@ -188,6 +184,11 @@ v3.0 shipped (2026-03-03). RSF is a full development platform installable via `p
 | `npx aws-cdk@latest` instead of global CDK binary | No global install needed; always uses latest CDK version | ✓ Good |
 | Custom provider `shell=False` + absolute path validation | Security hardened: no shell injection, program must exist and be executable | ✓ Good |
 | Terraform doctor check WARN (not FAIL) for non-TF providers | Informational only; missing terraform is not an error when using CDK or custom | ✓ Good |
+| FileTransport as canonical metadata transport for tutorials | ArgsTransport cannot handle list/dict fields reliably; FileTransport is universal | ✓ Good |
+| Exact version pinning for registry modules (not ~> ranges) | Terraform does not lock module versions in .terraform.lock.hcl | ✓ Good |
+| Lambda alias convention (never $LATEST) | Workaround for Terraform provider issue #45800 (AllowInvokeLatest unresolved) | ✓ Good |
+| Hybrid IAM: managed policy + inline supplement | AWSLambdaBasicDurableExecutionRolePolicy covers base, inline adds InvokeFunction/ListDurable/GetDurable | ✓ Good |
+| deploy.sh generates terraform.tfvars.json from RSF metadata via jq | Dynamic translation from RSF WorkflowMetadata to Terraform variables at deploy time | ✓ Good |
 
 ---
-*Last updated: 2026-03-03 after v3.2 milestone start*
+*Last updated: 2026-03-06 after v3.2 milestone completion*

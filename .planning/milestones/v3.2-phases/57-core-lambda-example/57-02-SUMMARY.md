@@ -124,6 +124,16 @@ None — no external service configuration required. Terraform files created but
 - Phase 57 Plan 03 can proceed: write deploy.sh, rsf.toml, workflow YAML, and handler files
 - Terraform outputs (alias_arn, function_name, role_arn) ready for deploy.sh to print post-apply summary
 
+## Self-Check: PASSED
+
+- FOUND: examples/registry-modules-demo/terraform/main.tf
+- FOUND: examples/registry-modules-demo/terraform/iam_durable.tf
+- FOUND: examples/registry-modules-demo/terraform/variables.tf
+- FOUND: examples/registry-modules-demo/terraform/outputs.tf
+- FOUND: examples/registry-modules-demo/terraform/backend.tf
+- FOUND commit: 7a4a36e (feat — 5 Terraform files)
+- FOUND commit: 400ee3d (docs — SUMMARY.md + STATE.md + ROADMAP.md)
+
 ---
 *Phase: 57-core-lambda-example*
 *Completed: 2026-03-04*

@@ -1,5 +1,22 @@
 # Milestones
 
+## v3.2 Terraform Registry Modules Tutorial (Shipped: 2026-03-06)
+
+**Phases completed:** 5 phases (56-60), 9 plans
+**Authored code:** 889 LOC (Python, Terraform, YAML, Bash) + 861 LOC tutorial
+**Requirements:** 21/21 complete
+**Timeline:** 3 days (2026-03-04 → 2026-03-06)
+
+**Key accomplishments:**
+- Schema verification: Confirmed terraform-aws-modules/lambda v8.7.0 durable_config variables, Lambda alias convention ($LATEST workaround for provider issue #45800), and hybrid IAM approach — all 5 registry module versions pinned to exact strings
+- Core example: Working registry-modules-demo example deploying Lambda Durable Functions via custom provider — deploy.sh reads RSF_METADATA_FILE via jq, zips generated source, runs terraform apply
+- Full-stack registry modules: DynamoDB (for_each), SQS DLQ (conditional count), CloudWatch alarms (error_rate/duration/throttle), SNS topic — all via terraform-aws-modules with conditional creation and proper IAM wiring
+- Test suite: 8 local unit tests (workflow parsing, handler registration) + real-AWS integration test with durable execution polling to SUCCEEDED and clean teardown verification via terraform state list
+- Tutorial: 861-line tutorials/09-custom-provider-registry-modules.md with side-by-side HCL comparison (raw vs registry module), annotated WorkflowMetadata schema table, and 5 common pitfalls in Problem/Symptom/Fix format
+- Quick tasks: Fixed all 7 examples end-to-end (195/195 tests), fixed rsf init/generate/deploy workflow, tagged releases v3.3-v3.5
+
+---
+
 ## v3.0 Pluggable Infrastructure Providers (Shipped: 2026-03-03)
 
 **Phases completed:** 5 phases (51-55), 17 plans
