@@ -195,7 +195,10 @@ Plans:
   2. User can click the same node again (or a collapse control) to collapse it back to its compact representation
   3. User can edit a text field (e.g., Comment), a number field (e.g., HeartbeatSeconds), and a boolean toggle (e.g., End) and see each change appear in the YAML editor within one render cycle
   4. YAML changes made in the Monaco editor are reflected back in the expanded node's fields without overwriting unrelated state
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 62-01-PLAN.md — Expand/collapse infrastructure: store state, chevron toggle, accordion behavior, expanded panel slot
+- [ ] 62-02-PLAN.md — Property editor UI for Task/Pass/Wait, mergeGraphIntoYaml property writing, debounced sync, focus guard
 
 ### Phase 63: Complete Property Editors and Validation Enforcement
 **Goal**: Every state type has a correct, complete property editor, required fields are enforced, and mutually exclusive fields use radio group selectors
@@ -223,4 +226,4 @@ Plans:
 | v2.0 Enhancement Suite | 39-50 | 34 | Complete | 2026-03-02 |
 | v3.0 Pluggable Providers | 51-55 | 17 | Complete | 2026-03-03 |
 | v3.2 Registry Modules Tutorial | 56-60 | 9 | Complete | 2026-03-06 |
-| v3.6 Interactive Graph Editor | 61-63 | 2+ | In progress | - |
+| v3.6 Interactive Graph Editor | 61-63 | 4+ | In progress | - |
