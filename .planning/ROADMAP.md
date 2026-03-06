@@ -209,7 +209,11 @@ Plans:
   2. Wait state duration fields (Seconds, Timestamp, SecondsPath, TimestampPath) render as a radio group where selecting one activates its input and deactivates the others, with exactly one value persisted to YAML
   3. All 8 state types (Task, Pass, Wait, Succeed, Fail, Choice, Parallel, Map) display property editors that match the fields defined in their Pydantic models — no missing fields, no extra fields
   4. Attempting to collapse a node with a required field empty shows an inline error message identifying the missing field
-**Plans**: TBD
+**Plans**: 3 plans
+Plans:
+- [ ] 63-01-PLAN.md — Shared infrastructure: BaseNode refactor for Choice/Succeed/Fail, validation guard in toggleExpand, CSS for required indicators and radio groups
+- [ ] 63-02-PLAN.md — Update Task/Wait/Pass editors with radio pairs, I/O Processing sections, and complete Pydantic field coverage
+- [ ] 63-03-PLAN.md — Property editors for Succeed/Fail/Choice/Parallel/Map and human verification of all 8 types
 
 ## Progress
 
@@ -226,4 +230,4 @@ Plans:
 | v2.0 Enhancement Suite | 39-50 | 34 | Complete | 2026-03-02 |
 | v3.0 Pluggable Providers | 51-55 | 17 | Complete | 2026-03-03 |
 | v3.2 Registry Modules Tutorial | 56-60 | 9 | Complete | 2026-03-06 |
-| v3.6 Interactive Graph Editor | 61-63 | 4+ | In progress | - |
+| v3.6 Interactive Graph Editor | 61-63 | 7+ | In progress | - |
