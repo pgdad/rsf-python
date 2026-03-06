@@ -1,18 +1,17 @@
-"""Example RSF handler using the @state decorator."""
+"""Example RSF handler for the HelloWorld task state."""
 
-from rsf.functions.decorators import state
+from rsf.registry import state
 
 
 @state("HelloWorld")
-def hello_world(event: dict, context: dict) -> dict:
+def hello_world(input_data: dict) -> dict:
     """Handle the HelloWorld state.
 
     Args:
-        event: The input event for this state.
-        context: The Lambda execution context.
+        input_data: The input data for this state.
 
     Returns:
         The output to pass to the next state.
     """
-    name = event.get("name", "World")
+    name = input_data.get("name", "World")
     return {"message": f"Hello, {name}!"}

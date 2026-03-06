@@ -4,9 +4,7 @@ StartAt: HelloWorld
 
 States:
   HelloWorld:
-    Type: Pass
-    Result:
-      message: "Hello from RSF!"
+    Type: Task
     Next: Done
 
   Done:
