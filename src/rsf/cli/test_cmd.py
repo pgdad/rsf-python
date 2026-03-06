@@ -131,11 +131,20 @@ def _evaluate_choice_rule(rule: Any, data: Any) -> bool:
 def _load_handler(state_name: str, workflow_dir: Path) -> Any:
     """Dynamically load a handler function for a Task state."""
     module_name = _to_snake_case(state_name)
-    handler_path = workflow_dir / "handlers" / f"{module_name}.py"
 
-    if not handler_path.exists():
+    # Check src/handlers/ first (new rsf init layout), then handlers/ (legacy)
+    src_handler_path = workflow_dir / "src" / "handlers" / f"{module_name}.py"
+    legacy_handler_path = workflow_dir / "handlers" / f"{module_name}.py"
+
+    if src_handler_path.exists():
+        handler_path = src_handler_path
+    elif legacy_handler_path.exists():
+        handler_path = legacy_handler_path
+    else:
         raise FileNotFoundError(
-            f"Handler file not found: {handler_path}\n"
+            f"Handler file not found in either:\n"
+            f"  {src_handler_path}\n"
+            f"  {legacy_handler_path}\n"
             f"Run 'rsf generate' to create handler stubs."
         )
 

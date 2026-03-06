@@ -30,27 +30,22 @@ States:
 
   CreateItem:
     Type: Task
-    Handler: handlers/create_item.py
     Next: Done
 
   GetItem:
     Type: Task
-    Handler: handlers/get_item.py
     Next: Done
 
   UpdateItem:
     Type: Task
-    Handler: handlers/update_item.py
     Next: Done
 
   DeleteItem:
     Type: Task
-    Handler: handlers/delete_item.py
     Next: Done
 
   ListItems:
     Type: Task
-    Handler: handlers/list_items.py
     Next: Done
 
   Done:

@@ -5,7 +5,6 @@ StartAt: ValidateFile
 States:
   ValidateFile:
     Type: Task
-    Handler: handlers/validate_file.py
     Next: CheckValidation
 
   CheckValidation:
@@ -18,22 +17,18 @@ States:
 
   TransformData:
     Type: Task
-    Handler: handlers/transform_data.py
     Next: ProcessUpload
 
   ProcessUpload:
     Type: Task
-    Handler: handlers/process_upload.py
     Next: NotifyComplete
 
   NotifyComplete:
     Type: Task
-    Handler: handlers/notify_complete.py
     Next: Done
 
   NotifyFailure:
     Type: Task
-    Handler: handlers/notify_complete.py
     Next: Failed
 
   Done:
