@@ -30,6 +30,7 @@ interface FlowState {
   validationErrors: ValidationError[];
   selectedNodeId: string | null;
   selectedEdgeId: string | null;
+  expandedNodeId: string | null;
   toastMessage: string | null;
   syncSource: SyncSource;
   needsLayout: boolean;
@@ -55,6 +56,8 @@ interface FlowState {
   selectEdge: (edgeId: string | null) => void;
   removeEdge: (edgeId: string) => void;
   clearSelection: () => void;
+  toggleExpand: (nodeId: string) => void;
+  updateStateProperty: (nodeId: string, key: string, value: unknown) => void;
   setToastMessage: (msg: string | null) => void;
   setSyncSource: (source: SyncSource) => void;
   setNeedsLayout: (needs: boolean) => void;
@@ -69,6 +72,7 @@ export const useFlowStore = create<FlowState>()(
     validationErrors: [],
     selectedNodeId: null,
     selectedEdgeId: null,
+    expandedNodeId: null,
     toastMessage: null,
     syncSource: null,
     needsLayout: false,
@@ -149,6 +153,11 @@ export const useFlowStore = create<FlowState>()(
           state.selectedNodeId = null;
         }
         state.selectedEdgeId = null;
+
+        // Clear expanded state if the expanded node is deleted
+        if (state.expandedNodeId === nodeId) {
+          state.expandedNodeId = null;
+        }
       }),
 
     selectNode: (nodeId) =>
@@ -190,6 +199,29 @@ export const useFlowStore = create<FlowState>()(
       set((state) => {
         state.selectedNodeId = null;
         state.selectedEdgeId = null;
+      }),
+
+    toggleExpand: (nodeId) =>
+      set((state) => {
+        if (state.expandedNodeId === nodeId) {
+          state.expandedNodeId = null;
+        } else {
+          state.expandedNodeId = nodeId;
+        }
+      }),
+
+    updateStateProperty: (nodeId, key, value) =>
+      set((state) => {
+        const node = state.nodes.find((n) => n.id === nodeId);
+        if (!node) return;
+        if (node.data.stateData === undefined) {
+          node.data.stateData = {};
+        }
+        if (value === undefined || value === null) {
+          delete node.data.stateData[key];
+        } else {
+          node.data.stateData[key] = value;
+        }
       }),
 
     setToastMessage: (msg) => set({ toastMessage: msg }),
