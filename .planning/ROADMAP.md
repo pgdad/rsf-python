@@ -168,7 +168,7 @@ Full details: `.planning/milestones/v3.2-ROADMAP.md`
 
 - [x] **Phase 61: Graph Manipulation** — Edge selection, edge deletion, node deletion with cascade, and YAML sync for removed transitions (completed 2026-03-06)
 - [x] **Phase 62: Expandable Node Infrastructure and Basic Property Editors** — Click-to-expand nodes with live-syncing text, number, and boolean editors for Task, Pass, and Wait states (completed 2026-03-06)
-- [ ] **Phase 63: Complete Property Editors and Validation Enforcement** — Full coverage of all 8 state types, required-field guards, and radio group selectors for mutually exclusive fields
+- [x] **Phase 63: Complete Property Editors and Validation Enforcement** — Full coverage of all 8 state types, required-field guards, and radio group selectors for mutually exclusive fields (completed 2026-03-06)
 
 ## Phase Details
 

@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.6
 milestone_name: Interactive Graph Editor
 status: planning
-stopped_at: Completed 63-01-PLAN.md
-last_updated: "2026-03-06T18:47:58.354Z"
+stopped_at: Completed 63-03-PLAN.md
+last_updated: "2026-03-06T18:52:54.634Z"
 last_activity: 2026-03-06 — Roadmap created, ready to plan Phase 61
 progress:
   total_phases: 3
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 7
-  completed_plans: 5
+  completed_plans: 7
   percent: 0
 ---
 
@@ -57,6 +57,8 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 62 P01 | 2 | 2 tasks | 4 files |
 | Phase 62 P02 | 226 | 2 tasks | 7 files |
 | Phase 63 P01 | 173 | 2 tasks | 7 files |
+| Phase 63 P02 | 171 | 3 tasks | 3 files |
+| Phase 63 P03 | 170 | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -86,6 +88,12 @@ Recent decisions affecting current work:
 - [Phase 63]: REQUIRED_FIELDS map: only Wait has Pydantic-required inline fields (oneOf timing field); all other state types have no enforced collapse validation
 - [Phase 63]: collapseBlocked is a transient string|null flag cleared on any next toggleExpand call — used by BaseNode to trigger shake animation via useEffect rising-edge detection
 - [Phase 63]: All 8 node types now use BaseNode unified infrastructure (ChoiceNode/SucceedNode/FailNode refactored in Phase 63 Plan 01)
+- [Phase 63]: WaitNode radio group: activeWaitType local state initialized from stateData, synced back via useEffect on external YAML edits
+- [Phase 63]: TaskNode radio pairs: activeTimeoutType and activeHeartbeatType can be null when both fields are absent (optional pairs)
+- [Phase 63]: Radio switching clears partner field via updateStateProperty(id, field, undefined) before setting new active type
+- [Phase 63]: Succeed/Choice I/O fields shown inline (no collapsible) — only have InputPath/OutputPath/Assign/Output, no full _IOFields mixin
+- [Phase 63]: Fail has zero I/O fields by ASL spec — no I/O section added to FailNode editor
+- [Phase 63]: Radio pair init reads stateData at mount to determine initial active type; null means neither selected
 
 ### Pending Todos
 
@@ -108,6 +116,6 @@ None — starting fresh from v3.2 completion.
 
 ## Session Continuity
 
-Last session: 2026-03-06T18:47:58.353Z
-Stopped at: Completed 63-01-PLAN.md
+Last session: 2026-03-06T18:52:54.633Z
+Stopped at: Completed 63-03-PLAN.md
 Resume file: None
