@@ -166,7 +166,7 @@ Full details: `.planning/milestones/v3.2-ROADMAP.md`
 
 **Milestone Goal:** Transform the graph editor from a read-only visualization into a fully interactive editing experience with inline property editors, validation, and edge/node management.
 
-- [ ] **Phase 61: Graph Manipulation** — Edge selection, edge deletion, node deletion with cascade, and YAML sync for removed transitions
+- [x] **Phase 61: Graph Manipulation** — Edge selection, edge deletion, node deletion with cascade, and YAML sync for removed transitions (completed 2026-03-06)
 - [ ] **Phase 62: Expandable Node Infrastructure and Basic Property Editors** — Click-to-expand nodes with live-syncing text, number, and boolean editors for Task, Pass, and Wait states
 - [ ] **Phase 63: Complete Property Editors and Validation Enforcement** — Full coverage of all 8 state types, required-field guards, and radio group selectors for mutually exclusive fields
 

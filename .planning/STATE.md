@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.6
 milestone_name: Interactive Graph Editor
 status: planning
-stopped_at: Completed 61-01-PLAN.md (edge selection/deletion)
-last_updated: "2026-03-06T16:03:20.090Z"
+stopped_at: Completed 61-02-PLAN.md (node deletion, StartAt reassignment, reference cleanup)
+last_updated: "2026-03-06T16:07:02.275Z"
 last_activity: 2026-03-06 — Roadmap created, ready to plan Phase 61
 progress:
   total_phases: 3
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 2
-  completed_plans: 1
+  completed_plans: 2
   percent: 0
 ---
 
@@ -53,6 +53,7 @@ Progress: [░░░░░░░░░░] 0%
 | v3.0 Pluggable Providers | 5 | 17 | 2026-03-02 → 2026-03-03 |
 | v3.2 Registry Modules Tutorial | 5 | 9 | 2026-03-04 → 2026-03-06 |
 | Phase 61 P01 | 184 | 1 tasks | 6 files |
+| Phase 61 P02 | 120 | 1 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -69,6 +70,9 @@ Recent decisions affecting current work:
 - [Phase 61]: Keyboard listener on graph-container div (not document) to prevent Monaco editor conflicts
 - [Phase 61]: Toggle behavior on edge click: re-clicking a selected edge deselects it
 - [Phase 61]: Toast auto-dismiss via useEffect setTimeout 2500ms not in store
+- [Phase 61]: Last-node guard in removeState — set toastMessage and return early, no deletion
+- [Phase 61]: isStart reassignment via alphabetical sort of remaining node IDs after start-node deletion
+- [Phase 61]: Defensive Next/Default reference cleanup in mergeGraphIntoYaml as independent safety net
 
 ### Pending Todos
 
@@ -91,6 +95,6 @@ None — starting fresh from v3.2 completion.
 
 ## Session Continuity
 
-Last session: 2026-03-06T16:03:20.088Z
-Stopped at: Completed 61-01-PLAN.md (edge selection/deletion)
+Last session: 2026-03-06T16:07:02.274Z
+Stopped at: Completed 61-02-PLAN.md (node deletion, StartAt reassignment, reference cleanup)
 Resume file: None
