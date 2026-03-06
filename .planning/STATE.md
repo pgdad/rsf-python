@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-03-03)
 Phase: 56 of 60 (Schema Verification)
 Plan: — (not started)
 Status: Ready to plan
-Last activity: 2026-03-06 - Completed quick task 5: tag v3.4 and push master branch
+Last activity: 2026-03-06 - Completed quick task 6: update pyproject.toml license field, tag v3.5
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -112,9 +112,10 @@ None.
 | 3 | Create v3.2 annotated release tag and push to GitHub | 2026-03-04 | ae3f3b6 | [3-create-minor-release-tag-and-push-to-git](./quick/3-create-minor-release-tag-and-push-to-git/) |
 | 4 | Fix all examples and tutorials to work end-to-end | 2026-03-06 | fee61a4 | [4-ensure-all-examples-and-tutorials-work](./quick/4-ensure-all-examples-and-tutorials-work/) |
 | 5 | Tag v3.4 release and push master branch to GitHub | 2026-03-06 | 9f857ee | [5-tag-minor-version-and-push-master-branch](./quick/5-tag-minor-version-and-push-master-branch/) |
+| 6 | Update pyproject.toml license field to PEP 639, tag v3.5 | 2026-03-06 | 1152bd5 | [6-update-pyproject-toml-license-field-and-](./quick/6-update-pyproject-toml-license-field-and-/) |
 
 ## Session Continuity
 
-Last session: 2026-03-06T11:22:55Z
-Stopped at: Completed quick task 5 (tag v3.4 and push master branch)
+Last session: 2026-03-06T12:48:11Z
+Stopped at: Completed quick task 6 (update pyproject.toml license field, tag v3.5)
 Resume file: None
