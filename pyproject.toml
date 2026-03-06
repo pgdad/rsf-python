@@ -7,7 +7,7 @@ name = "rsf"
 dynamic = ["version"]
 description = "Replacement for Step Functions — YAML DSL, code gen, and visual tooling for Lambda Durable Functions"
 readme = "README.md"
-license = "MIT"
+license = {file = "LICENSE"}
 requires-python = ">=3.12"
 authors = [
     { name = "pgdad and claude" },
