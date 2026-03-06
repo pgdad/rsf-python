@@ -1368,3 +1368,120 @@ body {
   border-color: var(--accent);
   color: white;
 }
+
+/* ===== Required field indicators ===== */
+
+/* Red asterisk after label text for required fields */
+.property-field label .required-asterisk {
+  color: var(--error);
+  margin-left: 2px;
+}
+
+/* Red border for empty required fields */
+.property-field input.field-error,
+.property-field textarea.field-error {
+  border-color: var(--error);
+}
+
+/* ===== Shake animation for blocked collapse ===== */
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-3px); }
+  50% { transform: translateX(3px); }
+  75% { transform: translateX(-3px); }
+}
+
+.flow-node.shake {
+  animation: shake 0.3s ease-in-out;
+}
+
+/* ===== Radio group styles ===== */
+
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.radio-option {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.radio-option input[type="radio"] {
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.radio-option .radio-input {
+  flex: 1;
+}
+
+.radio-option.disabled input:not([type="radio"]),
+.radio-option.disabled textarea {
+  opacity: 0.4;
+  pointer-events: none;
+}
+
+/* ===== Read-only summary badge for complex fields ===== */
+
+.readonly-summary {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-secondary);
+  padding: 3px 6px;
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border-color);
+  border-radius: 3px;
+}
+
+.readonly-summary .edit-hint {
+  font-style: italic;
+  color: var(--text-secondary);
+  opacity: 0.7;
+}
+
+/* ===== I/O Processing collapsible section ===== */
+
+.io-section {
+  margin-top: 4px;
+  border-top: 1px dashed var(--border-color);
+  padding-top: 4px;
+}
+
+.io-section-header {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  font-size: 9px;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  font-weight: 600;
+  padding: 2px 0;
+}
+
+.io-section-header:hover {
+  color: var(--text-primary);
+}
+
+.io-section-chevron {
+  font-size: 7px;
+  transition: transform 0.15s;
+}
+
+.io-section-chevron.open {
+  transform: rotate(90deg);
+}
+
+.io-section-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-top: 4px;
+}
