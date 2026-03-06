@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v3.6
 milestone_name: Interactive Graph Editor
-status: planning
-stopped_at: Completed 63-03-PLAN.md
-last_updated: "2026-03-06T18:56:36.519Z"
-last_activity: 2026-03-06 — Roadmap created, ready to plan Phase 61
+status: complete
+stopped_at: null
+last_updated: "2026-03-06T19:45:00.000Z"
+last_activity: 2026-03-06 — v3.6 milestone completed and archived
 progress:
   total_phases: 3
   completed_phases: 3
   total_plans: 7
   completed_plans: 7
-  percent: 0
+  percent: 100
 ---
 
 # Project State
@@ -21,21 +21,19 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** Phase 61 — Graph Manipulation
+**Current focus:** Planning next milestone
 
 ## Current Position
 
-Phase: 61 of 63 (Graph Manipulation)
-Plan: — of TBD
-Status: Ready to plan
-Last activity: 2026-03-06 — Roadmap created, ready to plan Phase 61
+Milestone v3.6 Interactive Graph Editor — COMPLETE
+All 3 phases (61-63) shipped with 7 plans and 10 requirements satisfied.
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [██████████] 100%
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 144 (across v1.0–v3.2)
+- Total plans completed: 151 (across v1.0–v3.6)
 
 **By Milestone:**
 
@@ -52,48 +50,13 @@ Progress: [░░░░░░░░░░] 0%
 | v2.0 Enhancement Suite | 12 | 34 | 2026-03-01 → 2026-03-02 |
 | v3.0 Pluggable Providers | 5 | 17 | 2026-03-02 → 2026-03-03 |
 | v3.2 Registry Modules Tutorial | 5 | 9 | 2026-03-04 → 2026-03-06 |
-| Phase 61 P01 | 184 | 1 tasks | 6 files |
-| Phase 61 P02 | 120 | 1 tasks | 5 files |
-| Phase 62 P01 | 2 | 2 tasks | 4 files |
-| Phase 62 P02 | 226 | 2 tasks | 7 files |
-| Phase 63 P01 | 173 | 2 tasks | 7 files |
-| Phase 63 P02 | 171 | 3 tasks | 3 files |
-| Phase 63 P03 | 170 | 2 tasks | 5 files |
+| v3.6 Interactive Graph Editor | 3 | 7 | 2026-03-06 |
 
 ## Accumulated Context
 
 ### Decisions
 
-All decisions logged in PROJECT.md Key Decisions table.
-
-Recent decisions affecting current work:
-- [v3.6 design]: Expandable nodes (not inspector panel) — editing stays in graph context
-- [v3.6 design]: Live sync on every keystroke — no explicit save step
-- [v3.6 design]: Radio group for one-of fields (e.g., Wait duration type) — enforces exactly one value
-- [v3.6 design]: Click + Delete key for edge deletion — consistent with standard graph editor UX
-- [v3.6 design]: AST-merge strategy preserved — graph edits patch YAML AST without clobbering complex state
-- [Phase 61]: Keyboard listener on graph-container div (not document) to prevent Monaco editor conflicts
-- [Phase 61]: Toggle behavior on edge click: re-clicking a selected edge deselects it
-- [Phase 61]: Toast auto-dismiss via useEffect setTimeout 2500ms not in store
-- [Phase 61]: Last-node guard in removeState — set toastMessage and return early, no deletion
-- [Phase 61]: isStart reassignment via alphabetical sort of remaining node IDs after start-node deletion
-- [Phase 61]: Defensive Next/Default reference cleanup in mergeGraphIntoYaml as independent safety net
-- [Phase 62]: Accordion expand: expandedNodeId (single string | null) enforces one expanded node at a time
-- [Phase 62]: Chevron uses stopPropagation to keep expand and node selection independent
-- [Phase 62]: expandedContent prop on BaseNode is extension point for Plan 02 property editors
-- [Phase 62]: TRANSITION_MANAGED_KEYS set guards Next/End/Type/Default/Choices/Catch/Retry from stateData overwrites in mergeGraphIntoYaml
-- [Phase 62]: rsf-graph-change CustomEvent bridges node components to GraphCanvas sync pipeline (no prop threading needed)
-- [Phase 62]: Focus guard: useEffect skips local state sync if document.activeElement === input ref (prevents clobbering active typing)
-- [Phase 62]: Text fields debounce 300ms, number/boolean sync immediately
-- [Phase 63]: REQUIRED_FIELDS map: only Wait has Pydantic-required inline fields (oneOf timing field); all other state types have no enforced collapse validation
-- [Phase 63]: collapseBlocked is a transient string|null flag cleared on any next toggleExpand call — used by BaseNode to trigger shake animation via useEffect rising-edge detection
-- [Phase 63]: All 8 node types now use BaseNode unified infrastructure (ChoiceNode/SucceedNode/FailNode refactored in Phase 63 Plan 01)
-- [Phase 63]: WaitNode radio group: activeWaitType local state initialized from stateData, synced back via useEffect on external YAML edits
-- [Phase 63]: TaskNode radio pairs: activeTimeoutType and activeHeartbeatType can be null when both fields are absent (optional pairs)
-- [Phase 63]: Radio switching clears partner field via updateStateProperty(id, field, undefined) before setting new active type
-- [Phase 63]: Succeed/Choice I/O fields shown inline (no collapsible) — only have InputPath/OutputPath/Assign/Output, no full _IOFields mixin
-- [Phase 63]: Fail has zero I/O fields by ASL spec — no I/O section added to FailNode editor
-- [Phase 63]: Radio pair init reads stateData at mount to determine initial active type; null means neither selected
+All decisions logged in PROJECT.md Key Decisions table (9 new decisions added for v3.6).
 
 ### Pending Todos
 
@@ -101,7 +64,7 @@ None.
 
 ### Blockers/Concerns
 
-None — starting fresh from v3.2 completion.
+None.
 
 ### Quick Tasks Completed
 
@@ -116,6 +79,6 @@ None — starting fresh from v3.2 completion.
 
 ## Session Continuity
 
-Last session: 2026-03-06T18:52:54.633Z
-Stopped at: Completed 63-03-PLAN.md
+Last session: 2026-03-06T19:45:00.000Z
+Stopped at: v3.6 milestone completed
 Resume file: None

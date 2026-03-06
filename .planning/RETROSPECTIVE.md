@@ -282,6 +282,51 @@
 
 ---
 
+## Milestone: v3.6 — Interactive Graph Editor
+
+**Shipped:** 2026-03-06
+**Phases:** 3 | **Plans:** 7
+
+### What Was Built
+- Edge selection/deletion with visual highlight, keyboard handlers, and live YAML sync
+- Node deletion with cascade edge removal, StartAt reassignment, and defensive reference cleanup
+- Expandable node infrastructure via shared BaseNode with accordion behavior
+- Property editors for all 8 state types with debounced text sync, immediate number/boolean sync, and focus guards
+- Radio group selectors: WaitNode 4-option, TaskNode 2 pairs, FailNode 2 pairs — all with mutual-exclusion clearing
+- Required field validation with collapse guard, shake animation, toast feedback, and red asterisk indicators
+
+### What Worked
+- BaseNode shared component (Phase 62) made Phase 63's 5 additional node types trivial to implement — just provide expandedContent prop
+- CustomEvent('rsf-graph-change') bridge cleanly decoupled node property changes from the sync pipeline without prop threading
+- TRANSITION_MANAGED_KEYS guard was a good architectural decision — prevents stateData from overwriting graph-topology-controlled fields
+- Focus guard pattern (check document.activeElement before updating local state) solved the bidirectional sync conflict elegantly
+- Phase dependency chain (61 → 62 → 63) was correctly ordered — each phase built cleanly on the previous
+
+### What Was Inefficient
+- Phase 61 SUMMARY frontmatter didn't include requirements-completed for GRAPH-01 through GRAPH-04 — metadata oversight caught only during milestone audit
+- summary-extract one_liner field still returns null — recurring issue across all milestones (7th time flagged)
+- End toggle and ChoiceNode Default input write to stateData but are silently ignored by TRANSITION_MANAGED_KEYS — UI gives no feedback about this constraint
+
+### Patterns Established
+- Expandable node pattern: BaseNode handles chrome (chevron, expand/collapse, shake), node-type component provides expandedContent
+- Radio group mutual-exclusion pattern: handleRadioChange clears all non-selected fields via updateStateProperty(id, field, undefined)
+- Focus guard pattern: useEffect checks document.activeElement === inputRef.current before updating local state from external sources
+- Collapsible sub-section pattern: ioOpen state toggle within expanded node for I/O Processing fields
+- Validation guard pattern: REQUIRED_FIELDS map checked in toggleExpand collapse path; collapseBlocked transient flag triggers shake
+
+### Key Lessons
+1. Shared infrastructure phases (BaseNode, store actions, sync pipeline) should come first — they're the foundation for all subsequent UI work
+2. Radio group UI for "must have one of" fields is effective but requires careful initialization from stateData at mount time
+3. TRANSITION_MANAGED_KEYS is architecturally correct but creates a UX gap — UI controls for managed fields should either be disabled or show explanatory tooltips
+4. 3-phase milestone for purely UI work completed in a single day — well-scoped phases with clear dependencies execute efficiently
+
+### Cost Observations
+- Model mix: ~30% opus (orchestration), ~60% sonnet (execution, verification, integration check)
+- Sessions: ~2 sessions in 1 day
+- Notable: Smallest time-to-ship milestone yet — 3 phases, 7 plans, 1 day
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -299,6 +344,7 @@
 | v2.0 Enhancement Suite | 12 | 34 | Milestone audit + gap closure; auto-advance pipeline |
 | v3.0 Pluggable Providers | 5 | 17 | Provider abstraction; config cascade; graceful CLI degradation |
 | v3.2 Registry Modules Tutorial | 5 | 9 | Custom provider tutorial; registry module patterns; quick tasks for ops |
+| v3.6 Interactive Graph Editor | 3 | 7 | UI-only milestone; shared BaseNode infrastructure; radio group patterns |
 
 ### Cumulative Quality
 
@@ -315,6 +361,7 @@
 | v2.0 | 976+ tests (+197) | 25/25 requirements verified via audit |
 | v3.0 | ~1,100+ tests | 29/29 provider requirements delivered |
 | v3.2 | 8 local + integration | 21/21 registry module requirements; 7 examples all passing |
+| v3.6 | 112 vitest UI tests | 10/10 graph editor requirements; all 8 state type editors |
 
 ### Top Lessons (Verified Across Milestones)
 
@@ -328,3 +375,4 @@
 8. Milestone audit + gap closure phases before shipping catches cross-phase integration issues that per-phase testing misses
 9. Documentation gates should be enforced during execution, not deferred to remediation phases
 10. Provider abstraction (ABC + registry + config cascade) cleanly separates interface from implementation and enables polyglot extensibility
+11. Shared infrastructure components (BaseNode) should be built first — they dramatically accelerate subsequent per-type implementations

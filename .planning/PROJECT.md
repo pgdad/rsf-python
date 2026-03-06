@@ -8,19 +8,9 @@ RSF is a complete development platform for AWS Lambda Durable Functions (launche
 
 Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
-## Current Milestone: v3.6 Interactive Graph Editor
-
-**Goal:** Transform the graph editor from a read-only visualization into a fully interactive editing experience with inline property editors, validation, and edge/node management.
-
-**Target features:**
-- Expandable inline property editors on state nodes with live YAML sync
-- Required field validation and "must have one of" radio group selectors
-- Edge deletion (click + Delete key) and node deletion with cascade
-- Correct enforcement of ASL state property requirements in the UI
-
 ## Current State
 
-v3.2 shipped (2026-03-06). RSF is a full development platform installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. 16 CLI commands, 7 DSL extensions, pluggable infrastructure providers (Terraform, CDK, custom), OpenTelemetry tracing, VS Code extension, GitHub Action, and all requirements satisfied through v3.2. ~36,400 LOC Python source + 8,900 LOC TypeScript + comprehensive test suite. Seven real-world example workflows (including registry-modules-demo with Terraform registry modules) with automated integration testing prove end-to-end correctness on real AWS. Nine tutorials covering all CLI commands and the custom provider system.
+v3.6 shipped (2026-03-06). RSF is a full development platform installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. 16 CLI commands, 7 DSL extensions, pluggable infrastructure providers (Terraform, CDK, custom), OpenTelemetry tracing, VS Code extension, GitHub Action, and all requirements satisfied through v3.6. ~36,400 LOC Python source + ~8,041 LOC TypeScript (ui/src) + comprehensive test suite (112 vitest UI tests). The graph editor is now fully interactive: users can select/delete edges and nodes, expand any of the 8 state types to edit properties inline with live YAML sync, and benefit from required-field validation with radio group selectors for mutually exclusive fields. Seven real-world example workflows with automated integration testing prove end-to-end correctness on real AWS. Nine tutorials covering all CLI commands and the custom provider system.
 
 ## Requirements
 
@@ -105,16 +95,18 @@ v3.2 shipped (2026-03-06). RSF is a full development platform installable via `p
 - ✓ Full-stack registry modules: DynamoDB, SQS DLQ, CloudWatch alarms, SNS via conditional terraform-aws-modules — v3.2
 - ✓ Local unit tests and real-AWS integration test with durable execution polling and teardown verification — v3.2
 - ✓ Tutorial 09: Custom provider with registry modules (side-by-side HCL comparison, schema table, pitfalls) — v3.2
+- ✓ Edge selection with visual highlight and edge deletion via Delete/Backspace key (preserves nodes) — v3.6
+- ✓ Node deletion with cascade removal of all connected edges, StartAt reassignment, and YAML sync — v3.6
+- ✓ Expandable inline property editors on all 8 state type nodes with live YAML sync — v3.6
+- ✓ Type-appropriate inputs (text, number, boolean, textarea) with debounced sync and focus guard — v3.6
+- ✓ Required field validation enforced in the UI editor with shake animation and toast feedback — v3.6
+- ✓ Radio group selectors for mutually exclusive fields (Wait duration, Task timeout/heartbeat, Fail error/cause) — v3.6
 
 ### Active
 
 <!-- Current scope. Building toward these. -->
 
-- [ ] Expandable inline property editors on graph nodes with live YAML sync
-- [ ] Required field validation enforced in the UI editor
-- [ ] "Must have one of" radio group selectors (e.g., Wait duration type)
-- [ ] Edge deletion via click + Delete key (preserves nodes)
-- [ ] Node deletion with cascade removal of all connected edges
+(None — planning next milestone)
 
 ### Out of Scope
 
@@ -147,6 +139,7 @@ v3.2 shipped (2026-03-06). RSF is a full development platform installable via `p
 - Shipped v2.0 with 12 phases, 34 plans, 25 requirements: full CLI toolchain (16 commands), 7 DSL extensions, observability, advanced testing, VS Code extension, GitHub Action, and workflow templates. 976+ non-AWS tests.
 - Shipped v3.0 with 5 phases, 17 plans, 29 requirements: pluggable infrastructure providers (Terraform, CDK, custom), metadata transport system, provider-aware CLI commands, rsf.toml project config.
 - Shipped v3.2 with 5 phases, 9 plans, 21 requirements: Terraform registry modules tutorial and example, custom provider deploy.sh, full-stack registry modules (Lambda, DynamoDB, SQS, CloudWatch, SNS), local and integration tests.
+- Shipped v3.6 with 3 phases, 7 plans, 10 requirements: interactive graph editor with edge/node selection and deletion, expandable property editors on all 8 state types, radio group selectors, required-field validation, and live bidirectional YAML sync. 112 vitest UI tests.
 
 ## Constraints
 
@@ -205,6 +198,14 @@ v3.2 shipped (2026-03-06). RSF is a full development platform installable via `p
 | Lambda alias convention (never $LATEST) | Workaround for Terraform provider issue #45800 (AllowInvokeLatest unresolved) | ✓ Good |
 | Hybrid IAM: managed policy + inline supplement | AWSLambdaBasicDurableExecutionRolePolicy covers base, inline adds InvokeFunction/ListDurable/GetDurable | ✓ Good |
 | deploy.sh generates terraform.tfvars.json from RSF metadata via jq | Dynamic translation from RSF WorkflowMetadata to Terraform variables at deploy time | ✓ Good |
+| Expandable nodes (not inspector panel) for property editing | Editing stays in graph context; no context switch to a side panel | ✓ Good |
+| Live sync on every keystroke (no explicit save) | Text fields debounce 300ms, number/boolean sync immediately; minimal friction | ✓ Good |
+| Radio groups for one-of fields (e.g., Wait duration type) | Enforces exactly one value selected; clears partner field on switch | ✓ Good |
+| TRANSITION_MANAGED_KEYS guard in mergeGraphIntoYaml | Prevents stateData overwrites of transition-controlled fields (Next, End, Default, Choices, Catch, Retry) | ✓ Good |
+| CustomEvent('rsf-graph-change') bridge for sync | Decouples node components from GraphCanvas; no prop threading needed | ✓ Good |
+| Focus guard pattern (useEffect skips sync if input focused) | Prevents YAML updates from clobbering active typing in expanded property editors | ✓ Good |
+| Single expandedNodeId (accordion) for expanded nodes | One expanded node at a time; prevents visual clutter and state complexity | ✓ Good |
+| Keyboard listener on graph-container div (not document) | Prevents Delete/Backspace from triggering graph deletion while typing in Monaco editor | ✓ Good |
 
 ---
-*Last updated: 2026-03-06 after v3.6 milestone start*
+*Last updated: 2026-03-06 after v3.6 milestone*

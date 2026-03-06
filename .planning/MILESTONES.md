@@ -1,5 +1,23 @@
 # Milestones
 
+## v3.6 Interactive Graph Editor (Shipped: 2026-03-06)
+
+**Phases completed:** 3 phases (61-63), 7 plans, 14 feat commits
+**Files changed:** 16 | **Net change:** +3,855 / -100 lines | **TypeScript:** 8,041 LOC (ui/src)
+**Requirements:** 10/10 complete
+**Timeline:** 1 day (2026-03-06)
+**Git range:** feat(61-01) → feat(63-03)
+
+**Key accomplishments:**
+- Edge selection and deletion: Click-to-select edges with blue highlight, Delete/Backspace to remove normal and default edges, toast for protected catch/choice edges, live YAML sync removing Next/Default references
+- Node deletion with cascade: Delete state nodes with automatic connected-edge removal, StartAt reassignment via alphabetical sort, defensive reference cleanup in mergeGraphIntoYaml, last-node guard
+- Expandable node infrastructure: Click-to-expand accordion on all 8 node types via shared BaseNode component with chevron toggle, expandedNodeId single-ID state, CustomEvent bridge for sync pipeline
+- Property editors with live sync: Type-appropriate inputs (text/number/boolean/textarea) for Task, Pass, Wait with 300ms debounce on text fields, immediate sync on number/boolean, focus guard preventing YAML overwrites during active typing
+- Radio group selectors: WaitNode 4-option mutual-exclusion radio group (Seconds/Timestamp/SecondsPath/TimestampPath), TaskNode timeout and heartbeat radio pairs, FailNode error/cause radio pairs — all clearing partner fields on switch
+- Required field validation: Collapse guard on Wait nodes enforcing timing field selection, shake animation via CSS keyframes, toast feedback, required-asterisk visual indicator on active radio option
+
+---
+
 ## v3.2 Terraform Registry Modules Tutorial (Shipped: 2026-03-06)
 
 **Phases completed:** 5 phases (56-60), 9 plans
