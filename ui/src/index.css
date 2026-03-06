@@ -1258,3 +1258,39 @@ body {
   border-radius: 3px;
   margin-left: 4px;
 }
+
+/* ===== Expand/Collapse Node Infrastructure ===== */
+
+/* Expand/collapse chevron */
+.node-expand-chevron {
+  background: none;
+  border: none;
+  color: rgba(255, 255, 255, 0.7);
+  cursor: pointer;
+  font-size: 8px;
+  padding: 0 2px;
+  line-height: 1;
+  margin-left: auto;
+}
+
+.node-expand-chevron:hover {
+  color: white;
+}
+
+/* Expanded node panel */
+.flow-node.expanded {
+  min-width: 220px;
+}
+
+.node-expanded-panel {
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border-color);
+}
+
+.node-expanded-placeholder {
+  font-size: 10px;
+  color: var(--text-secondary);
+  font-style: italic;
+  padding: 4px 0;
+}
