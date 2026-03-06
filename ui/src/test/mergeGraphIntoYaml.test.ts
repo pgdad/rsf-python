@@ -136,6 +136,107 @@ describe('mergeGraphIntoYaml', () => {
     });
   });
 
+  describe('reference cleanup when a node is deleted', () => {
+    it("sets End:true on a state whose Next points to a node that no longer exists", () => {
+      // A -> B, now B is deleted from nodes. A's Next still points to B in AST but B is gone.
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: {
+          A: { Type: 'Task', Next: 'B' },
+          B: { Type: 'Task', End: true },
+        },
+      };
+
+      // B has been removed from nodes, edge also removed
+      const nodes = [makeNode('A', 'Task', true)];
+      const edges: FlowEdge[] = [];
+
+      const result = mergeGraphIntoYaml(lastAst, nodes, edges);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+
+      expect(states['A']).not.toHaveProperty('Next');
+      expect(states['A']['End']).toBe(true);
+      expect(states).not.toHaveProperty('B');
+    });
+
+    it('updates StartAt to the node with isStart=true when start node changes', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: {
+          A: { Type: 'Task', Next: 'B' },
+          B: { Type: 'Task', End: true },
+        },
+      };
+
+      // A was deleted, B is now start
+      const nodes = [makeNode('B', 'Task', true)];
+      const edges: FlowEdge[] = [];
+
+      const result = mergeGraphIntoYaml(lastAst, nodes, edges);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+
+      expect(parsed['StartAt']).toBe('B');
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states).not.toHaveProperty('A');
+      expect(states['B']['End']).toBe(true);
+    });
+
+    it("removes Default from Choice state whose Default target no longer exists", () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'Router',
+        States: {
+          Router: {
+            Type: 'Choice',
+            Choices: [{ Variable: '$.x', NumericEquals: 1, Next: 'B' }],
+            Default: 'C',
+          },
+          B: { Type: 'Task', End: true },
+          C: { Type: 'Task', End: true },
+        },
+      };
+
+      // C is deleted from nodes, C's default edge also removed
+      const nodes = [makeNode('Router', 'Choice', true), makeNode('B')];
+      const edges: FlowEdge[] = [makeEdge('Router', 'B', 'choice')];
+
+      const result = mergeGraphIntoYaml(lastAst, nodes, edges);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+
+      expect(states['Router']).not.toHaveProperty('Default');
+      expect(states).not.toHaveProperty('C');
+    });
+
+    it('3-state chain A->B->C: removing B produces A with End:true and C with End:true', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: {
+          A: { Type: 'Task', Next: 'B' },
+          B: { Type: 'Task', Next: 'C' },
+          C: { Type: 'Task', End: true },
+        },
+      };
+
+      // B is removed; edges A->B and B->C are also removed
+      const nodes = [makeNode('A', 'Task', true), makeNode('C')];
+      const edges: FlowEdge[] = [];
+
+      const result = mergeGraphIntoYaml(lastAst, nodes, edges);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+
+      expect(states).not.toHaveProperty('B');
+      expect(states['A']).not.toHaveProperty('Next');
+      expect(states['A']['End']).toBe(true);
+      expect(states['C']['End']).toBe(true);
+    });
+  });
+
   describe('catch edges and choice rule edges', () => {
     it('preserves Catch arrays in AST even when no catch edges are in graph', () => {
       // Catch edges are complex data — removing them from graph should not change Catch array

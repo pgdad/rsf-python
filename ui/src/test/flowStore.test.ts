@@ -154,7 +154,7 @@ describe('useFlowStore', () => {
     });
 
     it('clears selectedNodeId if the removed node was selected', () => {
-      useFlowStore.getState().setNodes([makeFlowNode('A')]);
+      useFlowStore.getState().setNodes([makeFlowNode('A'), makeFlowNode('B')]);
       useFlowStore.getState().selectNode('A');
       useFlowStore.getState().removeState('A');
 
@@ -167,6 +167,68 @@ describe('useFlowStore', () => {
       useFlowStore.getState().removeState('B');
 
       expect(useFlowStore.getState().selectedNodeId).toBe('A');
+    });
+
+    it('sets toastMessage and does NOT remove node when only 1 node exists', () => {
+      useFlowStore.getState().setNodes([makeFlowNode('A')]);
+      useFlowStore.getState().removeState('A');
+
+      const state = useFlowStore.getState();
+      expect(state.nodes).toHaveLength(1);
+      expect(state.nodes[0].id).toBe('A');
+      expect(state.toastMessage).toBe('Cannot delete the only state');
+    });
+
+    it('reassigns isStart to alphabetically first remaining node when start node is deleted (A, B, C: delete A)', () => {
+      const nodeA = { ...makeFlowNode('A'), data: { ...makeFlowNode('A').data, isStart: true } };
+      const nodeB = makeFlowNode('B');
+      const nodeC = makeFlowNode('C');
+      useFlowStore.getState().setNodes([nodeA, nodeB, nodeC]);
+      useFlowStore.getState().removeState('A');
+
+      const state = useFlowStore.getState();
+      expect(state.nodes).toHaveLength(2);
+      const startNodes = state.nodes.filter((n) => n.data.isStart);
+      expect(startNodes).toHaveLength(1);
+      expect(startNodes[0].id).toBe('B');
+    });
+
+    it('reassigns isStart to alphabetically first remaining node (C, A, B: delete C)', () => {
+      const nodeC = { ...makeFlowNode('C'), data: { ...makeFlowNode('C').data, isStart: true } };
+      const nodeA = makeFlowNode('A');
+      const nodeB = makeFlowNode('B');
+      useFlowStore.getState().setNodes([nodeC, nodeA, nodeB]);
+      useFlowStore.getState().removeState('C');
+
+      const state = useFlowStore.getState();
+      expect(state.nodes).toHaveLength(2);
+      const startNodes = state.nodes.filter((n) => n.data.isStart);
+      expect(startNodes).toHaveLength(1);
+      expect(startNodes[0].id).toBe('A');
+    });
+
+    it('does not change isStart flags when a non-start node is removed', () => {
+      const nodeA = { ...makeFlowNode('A'), data: { ...makeFlowNode('A').data, isStart: true } };
+      const nodeB = makeFlowNode('B');
+      const nodeC = makeFlowNode('C');
+      useFlowStore.getState().setNodes([nodeA, nodeB, nodeC]);
+      useFlowStore.getState().removeState('C');
+
+      const state = useFlowStore.getState();
+      expect(state.nodes).toHaveLength(2);
+      const startNodes = state.nodes.filter((n) => n.data.isStart);
+      expect(startNodes).toHaveLength(1);
+      expect(startNodes[0].id).toBe('A');
+    });
+
+    it('clears selectedEdgeId when a node is removed', () => {
+      const nodeA = makeFlowNode('A');
+      const nodeB = makeFlowNode('B');
+      useFlowStore.getState().setNodes([nodeA, nodeB]);
+      useFlowStore.setState({ selectedEdgeId: 'e-A-B' });
+      useFlowStore.getState().removeState('B');
+
+      expect(useFlowStore.getState().selectedEdgeId).toBeNull();
     });
   });
 
