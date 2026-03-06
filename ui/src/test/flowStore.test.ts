@@ -18,6 +18,7 @@ function resetStore() {
     syncSource: null,
     needsLayout: false,
     lastAst: null,
+    collapseBlocked: null,
   });
 }
 
@@ -394,6 +395,104 @@ describe('useFlowStore', () => {
       useFlowStore.getState().toggleExpand('A');
       useFlowStore.getState().toggleExpand('B');
       expect(useFlowStore.getState().expandedNodeId).toBe('B');
+    });
+  });
+
+  describe('toggleExpand — validation guard', () => {
+    it('expanding always works regardless of stateData content', () => {
+      // Task node with no stateData — expand should always succeed
+      const taskNode = makeFlowNode('A', 'Task');
+      useFlowStore.getState().setNodes([taskNode]);
+      useFlowStore.getState().toggleExpand('A');
+      expect(useFlowStore.getState().expandedNodeId).toBe('A');
+    });
+
+    it('Task node with stateData.Resource empty: collapse is NOT blocked (Task has no Pydantic-required fields)', () => {
+      const taskNode: FlowNode = {
+        ...makeFlowNode('A', 'Task'),
+        data: { ...makeFlowNode('A', 'Task').data, stateData: { Resource: '' } },
+      };
+      useFlowStore.getState().setNodes([taskNode]);
+      useFlowStore.getState().toggleExpand('A'); // expand
+      useFlowStore.getState().toggleExpand('A'); // collapse — should succeed
+      expect(useFlowStore.getState().expandedNodeId).toBeNull();
+    });
+
+    it('Task node with stateData.Resource set: collapse allowed', () => {
+      const taskNode: FlowNode = {
+        ...makeFlowNode('A', 'Task'),
+        data: {
+          ...makeFlowNode('A', 'Task').data,
+          stateData: { Resource: 'arn:aws:lambda:us-east-1:123456789:function:myFn' },
+        },
+      };
+      useFlowStore.getState().setNodes([taskNode]);
+      useFlowStore.getState().toggleExpand('A');
+      useFlowStore.getState().toggleExpand('A');
+      expect(useFlowStore.getState().expandedNodeId).toBeNull();
+    });
+
+    it('Succeed node (no required fields): collapse always allowed', () => {
+      const succeedNode = makeFlowNode('A', 'Succeed');
+      useFlowStore.getState().setNodes([succeedNode]);
+      useFlowStore.getState().toggleExpand('A');
+      useFlowStore.getState().toggleExpand('A');
+      expect(useFlowStore.getState().expandedNodeId).toBeNull();
+    });
+
+    it('Wait node with none of Seconds/Timestamp/SecondsPath/TimestampPath set: blocks collapse', () => {
+      const waitNode: FlowNode = {
+        ...makeFlowNode('W', 'Wait'),
+        data: { ...makeFlowNode('W', 'Wait').data, stateData: {} },
+      };
+      useFlowStore.getState().setNodes([waitNode]);
+      useFlowStore.getState().toggleExpand('W'); // expand
+      useFlowStore.getState().toggleExpand('W'); // collapse — should be blocked
+      expect(useFlowStore.getState().expandedNodeId).toBe('W');
+      expect(useFlowStore.getState().toastMessage).toBeTruthy();
+      expect(useFlowStore.getState().collapseBlocked).toBe('W');
+    });
+
+    it('Wait node with Seconds set: collapse allowed', () => {
+      const waitNode: FlowNode = {
+        ...makeFlowNode('W', 'Wait'),
+        data: { ...makeFlowNode('W', 'Wait').data, stateData: { Seconds: 30 } },
+      };
+      useFlowStore.getState().setNodes([waitNode]);
+      useFlowStore.getState().toggleExpand('W');
+      useFlowStore.getState().toggleExpand('W');
+      expect(useFlowStore.getState().expandedNodeId).toBeNull();
+    });
+
+    it('Wait node with Timestamp set: collapse allowed', () => {
+      const waitNode: FlowNode = {
+        ...makeFlowNode('W', 'Wait'),
+        data: {
+          ...makeFlowNode('W', 'Wait').data,
+          stateData: { Timestamp: '2024-01-01T00:00:00Z' },
+        },
+      };
+      useFlowStore.getState().setNodes([waitNode]);
+      useFlowStore.getState().toggleExpand('W');
+      useFlowStore.getState().toggleExpand('W');
+      expect(useFlowStore.getState().expandedNodeId).toBeNull();
+    });
+
+    it('collapseBlocked is cleared on the next toggleExpand call (expand)', () => {
+      const waitNode: FlowNode = {
+        ...makeFlowNode('W', 'Wait'),
+        data: { ...makeFlowNode('W', 'Wait').data, stateData: {} },
+      };
+      useFlowStore.getState().setNodes([waitNode]);
+      useFlowStore.getState().toggleExpand('W'); // expand
+      useFlowStore.getState().toggleExpand('W'); // blocked collapse
+      expect(useFlowStore.getState().collapseBlocked).toBe('W');
+
+      // Add Seconds so next collapse will work; re-expand another node clears blocked
+      const waitNode2 = makeFlowNode('X', 'Succeed');
+      useFlowStore.getState().setNodes([...useFlowStore.getState().nodes, waitNode2]);
+      useFlowStore.getState().toggleExpand('X'); // switch to X — clears collapseBlocked
+      expect(useFlowStore.getState().collapseBlocked).toBeNull();
     });
   });
 
