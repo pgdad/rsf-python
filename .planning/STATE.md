@@ -110,9 +110,10 @@ None.
 | 1 | Add MIT license and push v3.1 release tag | 2026-03-03 | 3fef358 | [1-add-mit-license-to-this-project-and-push](./quick/1-add-mit-license-to-this-project-and-push/) |
 | 2 | Fix 16 test failures from SDK rename, arg order swap, model coercion | 2026-03-05 | 864f655 | [2-continue-fixing-all-integration-tests-ba](./quick/2-continue-fixing-all-integration-tests-ba/) |
 | 3 | Create v3.2 annotated release tag and push to GitHub | 2026-03-04 | ae3f3b6 | [3-create-minor-release-tag-and-push-to-git](./quick/3-create-minor-release-tag-and-push-to-git/) |
+| 4 | Fix all examples and tutorials to work end-to-end | 2026-03-06 | fee61a4 | [4-ensure-all-examples-and-tutorials-work](./quick/4-ensure-all-examples-and-tutorials-work/) |
 
 ## Session Continuity
 
-Last session: 2026-03-04T02:13:00Z
-Stopped at: Completed quick task 3 (v3.2 release tag)
+Last session: 2026-03-06T10:47:44Z
+Stopped at: Completed quick task 4 (fix examples and tutorials)
 Resume file: None
