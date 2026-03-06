@@ -18,10 +18,10 @@ Requirements for milestone v3.6. Each maps to roadmap phases.
 
 ### Graph Manipulation
 
-- [ ] **GRAPH-01**: User can select an edge by clicking it, with visual highlight feedback
-- [ ] **GRAPH-02**: User can delete a selected edge by pressing Delete/Backspace key, preserving both connected nodes
+- [x] **GRAPH-01**: User can select an edge by clicking it, with visual highlight feedback
+- [x] **GRAPH-02**: User can delete a selected edge by pressing Delete/Backspace key, preserving both connected nodes
 - [ ] **GRAPH-03**: User can delete a state node, which cascades to remove all connected edges
-- [ ] **GRAPH-04**: Edge deletion updates the YAML (removes Next/Default references) with live sync
+- [x] **GRAPH-04**: Edge deletion updates the YAML (removes Next/Default references) with live sync
 
 ## Future Requirements
 
@@ -54,10 +54,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | EDIT-04 | Phase 63 | Pending |
 | EDIT-05 | Phase 63 | Pending |
 | EDIT-06 | Phase 63 | Pending |
-| GRAPH-01 | Phase 61 | Pending |
-| GRAPH-02 | Phase 61 | Pending |
+| GRAPH-01 | Phase 61 | Complete |
+| GRAPH-02 | Phase 61 | Complete |
 | GRAPH-03 | Phase 61 | Pending |
-| GRAPH-04 | Phase 61 | Pending |
+| GRAPH-04 | Phase 61 | Complete |
 
 **Coverage:**
 - v3.6 requirements: 10 total

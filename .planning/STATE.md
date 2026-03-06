@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v3.6
 milestone_name: Interactive Graph Editor
 status: planning
-stopped_at: Phase 61 context gathered
-last_updated: "2026-03-06T15:51:27.173Z"
+stopped_at: Completed 61-01-PLAN.md (edge selection/deletion)
+last_updated: "2026-03-06T16:03:20.090Z"
 last_activity: 2026-03-06 — Roadmap created, ready to plan Phase 61
 progress:
   total_phases: 3
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_plans: 2
+  completed_plans: 1
   percent: 0
 ---
 
@@ -52,6 +52,7 @@ Progress: [░░░░░░░░░░] 0%
 | v2.0 Enhancement Suite | 12 | 34 | 2026-03-01 → 2026-03-02 |
 | v3.0 Pluggable Providers | 5 | 17 | 2026-03-02 → 2026-03-03 |
 | v3.2 Registry Modules Tutorial | 5 | 9 | 2026-03-04 → 2026-03-06 |
+| Phase 61 P01 | 184 | 1 tasks | 6 files |
 
 ## Accumulated Context
 
@@ -65,6 +66,9 @@ Recent decisions affecting current work:
 - [v3.6 design]: Radio group for one-of fields (e.g., Wait duration type) — enforces exactly one value
 - [v3.6 design]: Click + Delete key for edge deletion — consistent with standard graph editor UX
 - [v3.6 design]: AST-merge strategy preserved — graph edits patch YAML AST without clobbering complex state
+- [Phase 61]: Keyboard listener on graph-container div (not document) to prevent Monaco editor conflicts
+- [Phase 61]: Toggle behavior on edge click: re-clicking a selected edge deselects it
+- [Phase 61]: Toast auto-dismiss via useEffect setTimeout 2500ms not in store
 
 ### Pending Todos
 
@@ -87,6 +91,6 @@ None — starting fresh from v3.2 completion.
 
 ## Session Continuity
 
-Last session: 2026-03-06T15:51:27.171Z
-Stopped at: Phase 61 context gathered
-Resume file: .planning/phases/61-graph-manipulation/61-CONTEXT.md
+Last session: 2026-03-06T16:03:20.088Z
+Stopped at: Completed 61-01-PLAN.md (edge selection/deletion)
+Resume file: None
