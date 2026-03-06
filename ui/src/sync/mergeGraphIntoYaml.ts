@@ -94,6 +94,23 @@ export function mergeGraphIntoYaml(
     // Catch edges: don't modify — Catch arrays contain complex data
   }
 
+  // Defensive reference cleanup: if a state's Next or Default still points to
+  // a node that no longer exists (edge cascade may have already handled this via
+  // the transitions loop above, but this is an independent safety net).
+  for (const stateName of Object.keys(states)) {
+    const state = states[stateName];
+    if (state.Next !== undefined && !existingNodeIds.has(state.Next as string)) {
+      delete state.Next;
+      state.End = true;
+    }
+    if (
+      state.Default !== undefined &&
+      !existingNodeIds.has(state.Default as string)
+    ) {
+      delete state.Default;
+    }
+  }
+
   // Update StartAt based on isStart flag
   const startNode = nodes.find((n) => n.data.isStart);
   if (startNode) {

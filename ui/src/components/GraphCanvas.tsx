@@ -34,6 +34,7 @@ export function GraphCanvas({ onGraphChange }: GraphCanvasProps) {
   const selectNode = useFlowStore((s) => s.selectNode);
   const selectEdge = useFlowStore((s) => s.selectEdge);
   const removeEdge = useFlowStore((s) => s.removeEdge);
+  const removeState = useFlowStore((s) => s.removeState);
   const clearSelection = useFlowStore((s) => s.clearSelection);
   const selectedEdgeId = useFlowStore((s) => s.selectedEdgeId);
   const toastMessage = useFlowStore((s) => s.toastMessage);
@@ -59,9 +60,14 @@ export function GraphCanvas({ onGraphChange }: GraphCanvasProps) {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Delete' || event.key === 'Backspace') {
         const currentSelectedEdgeId = useFlowStore.getState().selectedEdgeId;
+        const currentSelectedNodeId = useFlowStore.getState().selectedNodeId;
         if (currentSelectedEdgeId) {
           event.preventDefault();
           removeEdge(currentSelectedEdgeId);
+          onGraphChange?.();
+        } else if (currentSelectedNodeId) {
+          event.preventDefault();
+          removeState(currentSelectedNodeId);
           onGraphChange?.();
         }
       } else if (event.key === 'Escape') {
@@ -71,7 +77,7 @@ export function GraphCanvas({ onGraphChange }: GraphCanvasProps) {
 
     container.addEventListener('keydown', handleKeyDown);
     return () => container.removeEventListener('keydown', handleKeyDown);
-  }, [removeEdge, clearSelection, onGraphChange]);
+  }, [removeEdge, removeState, clearSelection, onGraphChange]);
 
   const handleDragOver = useCallback((event: DragEvent) => {
     event.preventDefault();

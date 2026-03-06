@@ -121,13 +121,34 @@ export const useFlowStore = create<FlowState>()(
 
     removeState: (nodeId) =>
       set((state) => {
+        // Guard: cannot delete the last remaining node
+        if (state.nodes.length <= 1) {
+          state.toastMessage = 'Cannot delete the only state';
+          return;
+        }
+
+        const nodeToRemove = state.nodes.find((n) => n.id === nodeId);
+        const isStartNode = nodeToRemove?.data?.isStart === true;
+
+        // Remove the node and all connected edges
         state.nodes = state.nodes.filter((n) => n.id !== nodeId);
         state.edges = state.edges.filter(
           (e) => e.source !== nodeId && e.target !== nodeId,
         );
+
+        // Reassign isStart to alphabetically first remaining node if we deleted the start node
+        if (isStartNode && state.nodes.length > 0) {
+          const sorted = [...state.nodes].sort((a, b) =>
+            a.id.localeCompare(b.id),
+          );
+          sorted[0].data.isStart = true;
+        }
+
+        // Clear selection state
         if (state.selectedNodeId === nodeId) {
           state.selectedNodeId = null;
         }
+        state.selectedEdgeId = null;
       }),
 
     selectNode: (nodeId) =>
