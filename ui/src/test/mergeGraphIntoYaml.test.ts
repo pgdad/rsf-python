@@ -237,6 +237,269 @@ describe('mergeGraphIntoYaml', () => {
     });
   });
 
+  describe('stateData property fields written to YAML AST', () => {
+    it('writes stateData.Comment to YAML for a Task node', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Task', End: true } },
+      };
+      const node = makeNode('A', 'Task', true);
+      node.data.stateData = { Comment: 'hello' };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']['Comment']).toBe('hello');
+    });
+
+    it('writes stateData.TimeoutSeconds to YAML as a number for a Task node', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Task', End: true } },
+      };
+      const node = makeNode('A', 'Task', true);
+      node.data.stateData = { TimeoutSeconds: 30 };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']['TimeoutSeconds']).toBe(30);
+    });
+
+    it('writes stateData.HeartbeatSeconds to YAML for a Task node', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Task', End: true } },
+      };
+      const node = makeNode('A', 'Task', true);
+      node.data.stateData = { HeartbeatSeconds: 10 };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']['HeartbeatSeconds']).toBe(10);
+    });
+
+    it('writes stateData.Resource to YAML for a Task node', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Task', End: true } },
+      };
+      const node = makeNode('A', 'Task', true);
+      node.data.stateData = { Resource: 'arn:aws:lambda:us-east-1:123:function:MyFn' };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']['Resource']).toBe('arn:aws:lambda:us-east-1:123:function:MyFn');
+    });
+
+    it('does NOT overwrite End from stateData (transition-managed)', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Task', Next: 'B' }, B: { Type: 'Task', End: true } },
+      };
+      const nodeA = makeNode('A', 'Task', true);
+      nodeA.data.stateData = { End: true }; // stateData says End:true
+      const nodeB = makeNode('B');
+      // But there's a normal edge A->B, so transitions logic sets Next:B
+      const result = mergeGraphIntoYaml(lastAst, [nodeA, nodeB], [makeEdge('A', 'B', 'normal')]);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      // Transition logic wins: A should have Next:B, not End:true
+      expect(states['A']['Next']).toBe('B');
+      expect(states['A']).not.toHaveProperty('End');
+    });
+
+    it('does NOT overwrite Next from stateData (transition-managed)', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Task', End: true }, B: { Type: 'Task', End: true } },
+      };
+      const nodeA = makeNode('A', 'Task', true);
+      nodeA.data.stateData = { Next: 'B' }; // stateData says Next:B
+      const nodeB = makeNode('B');
+      // No edge A->B, so transitions logic sets End:true on A
+      const result = mergeGraphIntoYaml(lastAst, [nodeA, nodeB], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      // Transition logic wins: no outgoing normal edge => End:true
+      expect(states['A']['End']).toBe(true);
+      expect(states['A']).not.toHaveProperty('Next');
+    });
+
+    it('writes stateData.Result (object) to YAML for a Pass node', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Pass', End: true } },
+      };
+      const node = makeNode('A', 'Pass', true);
+      node.data.stateData = { Result: { key: 'val' } };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']['Result']).toEqual({ key: 'val' });
+    });
+
+    it('writes stateData.Comment for a Pass node', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Pass', End: true } },
+      };
+      const node = makeNode('A', 'Pass', true);
+      node.data.stateData = { Comment: 'note' };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']['Comment']).toBe('note');
+    });
+
+    it('writes stateData.Seconds for a Wait node', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Wait', End: true } },
+      };
+      const node = makeNode('A', 'Task', true); // makeNode doesn't support Wait type, use Task slot
+      node.data.stateType = 'Wait' as 'Task';
+      node.data.stateData = { Seconds: 60 };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']['Seconds']).toBe(60);
+    });
+
+    it('writes stateData.Timestamp for a Wait node', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Wait', End: true } },
+      };
+      const node = makeNode('A', 'Task', true);
+      node.data.stateType = 'Wait' as 'Task';
+      node.data.stateData = { Timestamp: '2024-01-01T00:00:00Z' };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']['Timestamp']).toBe('2024-01-01T00:00:00Z');
+    });
+
+    it('writes stateData.SecondsPath for a Wait node', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Wait', End: true } },
+      };
+      const node = makeNode('A', 'Task', true);
+      node.data.stateType = 'Wait' as 'Task';
+      node.data.stateData = { SecondsPath: '$.delay' };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']['SecondsPath']).toBe('$.delay');
+    });
+
+    it('writes stateData.TimestampPath for a Wait node', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Wait', End: true } },
+      };
+      const node = makeNode('A', 'Task', true);
+      node.data.stateType = 'Wait' as 'Task';
+      node.data.stateData = { TimestampPath: '$.ts' };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']['TimestampPath']).toBe('$.ts');
+    });
+
+    it('removes a property from YAML when stateData sets it to undefined', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Task', End: true, Comment: 'old comment' } },
+      };
+      const node = makeNode('A', 'Task', true);
+      // Setting Comment to undefined means "clear it"
+      node.data.stateData = { Comment: undefined };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']).not.toHaveProperty('Comment');
+    });
+
+    it('removes a property from YAML when stateData sets it to null', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Task', End: true, Comment: 'old comment' } },
+      };
+      const node = makeNode('A', 'Task', true);
+      node.data.stateData = { Comment: null as unknown as undefined };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']).not.toHaveProperty('Comment');
+    });
+
+    it('removes a property from YAML when stateData sets it to empty string', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Task', End: true, Comment: 'old comment' } },
+      };
+      const node = makeNode('A', 'Task', true);
+      node.data.stateData = { Comment: '' };
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']).not.toHaveProperty('Comment');
+    });
+
+    it('preserves existing Catch array when writing stateData properties', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: {
+          A: {
+            Type: 'Task',
+            End: true,
+            Catch: [{ ErrorEquals: ['States.ALL'], Next: 'EH' }],
+          },
+          EH: { Type: 'Task', End: true },
+        },
+      };
+      const nodeA = makeNode('A', 'Task', true);
+      nodeA.data.stateData = { Comment: 'with catch' };
+      const nodeEH = makeNode('EH');
+      const result = mergeGraphIntoYaml(lastAst, [nodeA, nodeEH], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']['Catch']).toBeDefined();
+      expect((states['A']['Catch'] as unknown[]).length).toBe(1);
+      expect(states['A']['Comment']).toBe('with catch');
+    });
+
+    it('does NOT overwrite Type from stateData (transition-managed)', () => {
+      const lastAst = {
+        rsf_version: '1.0',
+        StartAt: 'A',
+        States: { A: { Type: 'Task', End: true } },
+      };
+      const node = makeNode('A', 'Task', true);
+      node.data.stateData = { Type: 'Pass' }; // stateData tries to change Type
+      const result = mergeGraphIntoYaml(lastAst, [node], []);
+      const parsed = yaml.load(result) as Record<string, unknown>;
+      const states = parsed.States as Record<string, Record<string, unknown>>;
+      expect(states['A']['Type']).toBe('Task'); // AST Type preserved
+    });
+  });
+
   describe('catch edges and choice rule edges', () => {
     it('preserves Catch arrays in AST even when no catch edges are in graph', () => {
       // Catch edges are complex data — removing them from graph should not change Catch array
