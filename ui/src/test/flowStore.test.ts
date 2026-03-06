@@ -12,6 +12,8 @@ function resetStore() {
     yamlContent: '',
     validationErrors: [],
     selectedNodeId: null,
+    selectedEdgeId: null,
+    toastMessage: null,
     syncSource: null,
     needsLayout: false,
     lastAst: null,
@@ -31,13 +33,17 @@ function makeFlowNode(id: string, stateType: string = 'Task'): FlowNode {
   };
 }
 
-function makeFlowEdge(source: string, target: string): FlowEdge {
+function makeFlowEdge(
+  source: string,
+  target: string,
+  edgeType: FlowEdge['data']['edgeType'] = 'normal',
+): FlowEdge {
   return {
     id: `e-${source}-${target}`,
     source,
     target,
     type: 'transition',
-    data: { edgeType: 'normal' as const },
+    data: { edgeType },
   };
 }
 
@@ -54,6 +60,8 @@ describe('useFlowStore', () => {
       expect(state.yamlContent).toBe('');
       expect(state.validationErrors).toEqual([]);
       expect(state.selectedNodeId).toBeNull();
+      expect(state.selectedEdgeId).toBeNull();
+      expect(state.toastMessage).toBeNull();
       expect(state.syncSource).toBeNull();
       expect(state.needsLayout).toBe(false);
       expect(state.lastAst).toBeNull();
@@ -172,6 +180,93 @@ describe('useFlowStore', () => {
       useFlowStore.getState().selectNode('node-1');
       useFlowStore.getState().selectNode(null);
       expect(useFlowStore.getState().selectedNodeId).toBeNull();
+    });
+
+    it('clears selectedEdgeId when a node is selected (mutual exclusion)', () => {
+      useFlowStore.getState().selectEdge('edge-1');
+      expect(useFlowStore.getState().selectedEdgeId).toBe('edge-1');
+
+      useFlowStore.getState().selectNode('node-1');
+      expect(useFlowStore.getState().selectedNodeId).toBe('node-1');
+      expect(useFlowStore.getState().selectedEdgeId).toBeNull();
+    });
+  });
+
+  describe('selectEdge', () => {
+    it('sets selectedEdgeId', () => {
+      useFlowStore.getState().selectEdge('edge-1');
+      expect(useFlowStore.getState().selectedEdgeId).toBe('edge-1');
+    });
+
+    it('clears selectedEdgeId with null', () => {
+      useFlowStore.getState().selectEdge('edge-1');
+      useFlowStore.getState().selectEdge(null);
+      expect(useFlowStore.getState().selectedEdgeId).toBeNull();
+    });
+
+    it('clears selectedNodeId when an edge is selected (mutual exclusion)', () => {
+      useFlowStore.getState().selectNode('node-1');
+      expect(useFlowStore.getState().selectedNodeId).toBe('node-1');
+
+      useFlowStore.getState().selectEdge('edge-1');
+      expect(useFlowStore.getState().selectedEdgeId).toBe('edge-1');
+      expect(useFlowStore.getState().selectedNodeId).toBeNull();
+    });
+  });
+
+  describe('removeEdge', () => {
+    it('removes a normal edge and clears selectedEdgeId', () => {
+      const edge = makeFlowEdge('A', 'B', 'normal');
+      useFlowStore.getState().setEdges([edge]);
+      useFlowStore.getState().selectEdge(edge.id);
+      useFlowStore.getState().removeEdge(edge.id);
+
+      const state = useFlowStore.getState();
+      expect(state.edges).toHaveLength(0);
+      expect(state.selectedEdgeId).toBeNull();
+    });
+
+    it('removes a default edge', () => {
+      const edge = makeFlowEdge('A', 'B', 'default');
+      useFlowStore.getState().setEdges([edge]);
+      useFlowStore.getState().removeEdge(edge.id);
+
+      expect(useFlowStore.getState().edges).toHaveLength(0);
+    });
+
+    it('does NOT remove a catch edge and sets toastMessage', () => {
+      const edge = makeFlowEdge('A', 'B', 'catch');
+      useFlowStore.getState().setEdges([edge]);
+      useFlowStore.getState().removeEdge(edge.id);
+
+      const state = useFlowStore.getState();
+      expect(state.edges).toHaveLength(1);
+      expect(state.toastMessage).toBe('Catch edges must be edited in YAML');
+    });
+
+    it('does NOT remove a choice edge and sets toastMessage', () => {
+      const edge = makeFlowEdge('A', 'B', 'choice');
+      useFlowStore.getState().setEdges([edge]);
+      useFlowStore.getState().removeEdge(edge.id);
+
+      const state = useFlowStore.getState();
+      expect(state.edges).toHaveLength(1);
+      expect(state.toastMessage).toBe('Choice rule edges must be edited in YAML');
+    });
+  });
+
+  describe('clearSelection', () => {
+    it('clears both selectedNodeId and selectedEdgeId', () => {
+      useFlowStore.getState().selectNode('node-1');
+      // Manually set selectedEdgeId without going through selectEdge
+      // (since selectEdge clears selectedNodeId)
+      useFlowStore.setState({ selectedEdgeId: 'edge-1', selectedNodeId: 'node-1' });
+
+      useFlowStore.getState().clearSelection();
+
+      const state = useFlowStore.getState();
+      expect(state.selectedNodeId).toBeNull();
+      expect(state.selectedEdgeId).toBeNull();
     });
   });
 

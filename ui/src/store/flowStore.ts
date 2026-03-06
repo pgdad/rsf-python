@@ -29,6 +29,8 @@ interface FlowState {
   yamlContent: string;
   validationErrors: ValidationError[];
   selectedNodeId: string | null;
+  selectedEdgeId: string | null;
+  toastMessage: string | null;
   syncSource: SyncSource;
   needsLayout: boolean;
   lastAst: Record<string, unknown> | null;
@@ -50,6 +52,10 @@ interface FlowState {
   addState: (node: FlowNode) => void;
   removeState: (nodeId: string) => void;
   selectNode: (nodeId: string | null) => void;
+  selectEdge: (edgeId: string | null) => void;
+  removeEdge: (edgeId: string) => void;
+  clearSelection: () => void;
+  setToastMessage: (msg: string | null) => void;
   setSyncSource: (source: SyncSource) => void;
   setNeedsLayout: (needs: boolean) => void;
   setLastAst: (ast: Record<string, unknown> | null) => void;
@@ -62,6 +68,8 @@ export const useFlowStore = create<FlowState>()(
     yamlContent: '',
     validationErrors: [],
     selectedNodeId: null,
+    selectedEdgeId: null,
+    toastMessage: null,
     syncSource: null,
     needsLayout: false,
     lastAst: null,
@@ -122,7 +130,48 @@ export const useFlowStore = create<FlowState>()(
         }
       }),
 
-    selectNode: (nodeId) => set({ selectedNodeId: nodeId }),
+    selectNode: (nodeId) =>
+      set((state) => {
+        state.selectedNodeId = nodeId;
+        state.selectedEdgeId = null; // mutual exclusion
+      }),
+
+    selectEdge: (edgeId) =>
+      set((state) => {
+        state.selectedEdgeId = edgeId;
+        state.selectedNodeId = null; // mutual exclusion
+      }),
+
+    removeEdge: (edgeId) =>
+      set((state) => {
+        const edge = state.edges.find((e) => e.id === edgeId);
+        if (!edge) return;
+
+        const edgeType = edge.data?.edgeType ?? 'normal';
+
+        if (edgeType === 'catch') {
+          state.toastMessage = 'Catch edges must be edited in YAML';
+          return;
+        }
+        if (edgeType === 'choice') {
+          state.toastMessage = 'Choice rule edges must be edited in YAML';
+          return;
+        }
+
+        // Remove normal or default edges
+        state.edges = state.edges.filter((e) => e.id !== edgeId);
+        if (state.selectedEdgeId === edgeId) {
+          state.selectedEdgeId = null;
+        }
+      }),
+
+    clearSelection: () =>
+      set((state) => {
+        state.selectedNodeId = null;
+        state.selectedEdgeId = null;
+      }),
+
+    setToastMessage: (msg) => set({ toastMessage: msg }),
     setSyncSource: (source) => set({ syncSource: source }),
     setNeedsLayout: (needs) => set({ needsLayout: needs }),
     setLastAst: (ast) => set({ lastAst: ast }),
