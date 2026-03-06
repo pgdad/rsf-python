@@ -13,6 +13,7 @@ function resetStore() {
     validationErrors: [],
     selectedNodeId: null,
     selectedEdgeId: null,
+    expandedNodeId: null,
     toastMessage: null,
     syncSource: null,
     needsLayout: false,
@@ -367,6 +368,93 @@ describe('useFlowStore', () => {
       expect(state.edges[0].source).toBe('A');
       expect(state.edges[0].target).toBe('B');
       expect(state.edges[0].data?.edgeType).toBe('normal');
+    });
+  });
+
+  describe('expandedNodeId initial state', () => {
+    it('is null by default', () => {
+      const state = useFlowStore.getState();
+      expect(state.expandedNodeId).toBeNull();
+    });
+  });
+
+  describe('toggleExpand', () => {
+    it('sets expandedNodeId to the given node when no node is expanded', () => {
+      useFlowStore.getState().toggleExpand('A');
+      expect(useFlowStore.getState().expandedNodeId).toBe('A');
+    });
+
+    it('collapses (sets to null) when toggling the already-expanded node', () => {
+      useFlowStore.getState().toggleExpand('A');
+      useFlowStore.getState().toggleExpand('A');
+      expect(useFlowStore.getState().expandedNodeId).toBeNull();
+    });
+
+    it('switches to new node (accordion) when a different node is already expanded', () => {
+      useFlowStore.getState().toggleExpand('A');
+      useFlowStore.getState().toggleExpand('B');
+      expect(useFlowStore.getState().expandedNodeId).toBe('B');
+    });
+  });
+
+  describe('updateStateProperty', () => {
+    it('sets a string property on a node stateData', () => {
+      useFlowStore.getState().setNodes([makeFlowNode('A')]);
+      useFlowStore.getState().updateStateProperty('A', 'Comment', 'hello');
+      const node = useFlowStore.getState().nodes.find((n) => n.id === 'A');
+      expect(node?.data.stateData?.Comment).toBe('hello');
+    });
+
+    it('sets a numeric property on a node stateData', () => {
+      useFlowStore.getState().setNodes([makeFlowNode('A')]);
+      useFlowStore.getState().updateStateProperty('A', 'TimeoutSeconds', 30);
+      const node = useFlowStore.getState().nodes.find((n) => n.id === 'A');
+      expect(node?.data.stateData?.TimeoutSeconds).toBe(30);
+    });
+
+    it('sets a boolean property on a node stateData', () => {
+      useFlowStore.getState().setNodes([makeFlowNode('A')]);
+      useFlowStore.getState().updateStateProperty('A', 'End', true);
+      const node = useFlowStore.getState().nodes.find((n) => n.id === 'A');
+      expect(node?.data.stateData?.End).toBe(true);
+    });
+
+    it('is a no-op when node does not exist', () => {
+      useFlowStore.getState().setNodes([makeFlowNode('A')]);
+      // Should not throw
+      useFlowStore.getState().updateStateProperty('NonExistent', 'Comment', 'hello');
+      const state = useFlowStore.getState();
+      expect(state.nodes).toHaveLength(1);
+    });
+
+    it('initializes stateData as {} if undefined before setting property', () => {
+      const node = makeFlowNode('A');
+      // makeFlowNode does not set stateData, so it is undefined
+      useFlowStore.getState().setNodes([node]);
+      expect(useFlowStore.getState().nodes[0].data.stateData).toBeUndefined();
+      useFlowStore.getState().updateStateProperty('A', 'Comment', 'init-test');
+      const updated = useFlowStore.getState().nodes.find((n) => n.id === 'A');
+      expect(updated?.data.stateData).toBeDefined();
+      expect(updated?.data.stateData?.Comment).toBe('init-test');
+    });
+  });
+
+  describe('removeState clears expandedNodeId', () => {
+    it('clears expandedNodeId when the expanded node is deleted', () => {
+      useFlowStore.getState().setNodes([makeFlowNode('A'), makeFlowNode('B')]);
+      useFlowStore.getState().toggleExpand('A');
+      expect(useFlowStore.getState().expandedNodeId).toBe('A');
+
+      useFlowStore.getState().removeState('A');
+      expect(useFlowStore.getState().expandedNodeId).toBeNull();
+    });
+
+    it('does not clear expandedNodeId when a different node is deleted', () => {
+      useFlowStore.getState().setNodes([makeFlowNode('A'), makeFlowNode('B')]);
+      useFlowStore.getState().toggleExpand('A');
+      useFlowStore.getState().removeState('B');
+
+      expect(useFlowStore.getState().expandedNodeId).toBe('A');
     });
   });
 });
