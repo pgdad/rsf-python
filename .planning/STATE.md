@@ -4,8 +4,8 @@ milestone: v3.6
 milestone_name: Interactive Graph Editor
 status: complete
 stopped_at: null
-last_updated: "2026-03-06T20:06:50.000Z"
-last_activity: 2026-03-06 - Completed quick task 7: change the python development status to Stable and create a new minor release version, push master branch and the new release tag to github
+last_updated: "2026-03-06T21:53:32.000Z"
+last_activity: 2026-03-06 - Completed quick task 8: fix rsf generate to produce handler on default scaffolded project
 progress:
   total_phases: 3
   completed_phases: 3
@@ -77,9 +77,10 @@ None.
 | 5 | Tag v3.4 release and push master branch to GitHub | 2026-03-06 | 9f857ee | [5-tag-minor-version-and-push-master-branch](./quick/5-tag-minor-version-and-push-master-branch/) |
 | 6 | Update pyproject.toml license field to PEP 639, tag v3.5 | 2026-03-06 | 1152bd5 | [6-update-pyproject-toml-license-field-and-](./quick/6-update-pyproject-toml-license-field-and-/) |
 | 7 | Update Development Status to Production/Stable, tag v3.7 | 2026-03-06 | 264fd04 | [7-change-the-python-development-status-to-](./quick/7-change-the-python-development-status-to-/) |
+| 8 | Fix rsf generate to produce handler on default scaffold | 2026-03-06 | 55a4551 | [8-rsf-generate-does-not-generate-an-exampl](./quick/8-rsf-generate-does-not-generate-an-exampl/) |
 
 ## Session Continuity
 
-Last session: 2026-03-06T20:08:55Z
-Stopped at: Completed quick-7 (Development Status to Production/Stable)
+Last session: 2026-03-06T21:53:32Z
+Stopped at: Completed quick-8 (Fix rsf generate handler generation)
 Resume file: None
