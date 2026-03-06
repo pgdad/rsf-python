@@ -13,6 +13,7 @@
 - ✅ **v2.0 Comprehensive Enhancement Suite** — Phases 39-50 (shipped 2026-03-02)
 - ✅ **v3.0 Pluggable Infrastructure Providers** — Phases 51-55 (shipped 2026-03-03)
 - ✅ **v3.2 Terraform Registry Modules Tutorial** — Phases 56-60 (shipped 2026-03-06)
+- 🚧 **v3.6 Interactive Graph Editor** — Phases 61-63 (in progress)
 
 ## Phases
 
@@ -161,6 +162,49 @@ Full details: `.planning/milestones/v3.2-ROADMAP.md`
 
 </details>
 
+### 🚧 v3.6 Interactive Graph Editor (In Progress)
+
+**Milestone Goal:** Transform the graph editor from a read-only visualization into a fully interactive editing experience with inline property editors, validation, and edge/node management.
+
+- [ ] **Phase 61: Graph Manipulation** — Edge selection, edge deletion, node deletion with cascade, and YAML sync for removed transitions
+- [ ] **Phase 62: Expandable Node Infrastructure and Basic Property Editors** — Click-to-expand nodes with live-syncing text, number, and boolean editors for Task, Pass, and Wait states
+- [ ] **Phase 63: Complete Property Editors and Validation Enforcement** — Full coverage of all 8 state types, required-field guards, and radio group selectors for mutually exclusive fields
+
+## Phase Details
+
+### Phase 61: Graph Manipulation
+**Goal**: Users can select, delete, and manage edges and nodes directly in the graph with all changes reflected live in YAML
+**Depends on**: Phase 60 (v3.2 complete)
+**Requirements**: GRAPH-01, GRAPH-02, GRAPH-03, GRAPH-04
+**Success Criteria** (what must be TRUE):
+  1. User can click an edge and see it visually highlighted (distinct from its default appearance)
+  2. User can press Delete or Backspace while an edge is selected and the edge disappears from the graph, leaving both endpoint nodes intact
+  3. Deleting an edge removes the corresponding Next or Default reference from the YAML in real time, with no manual save required
+  4. User can delete a state node and all edges connected to that node are removed from the graph simultaneously
+**Plans**: TBD
+
+### Phase 62: Expandable Node Infrastructure and Basic Property Editors
+**Goal**: Users can expand any state node to reveal and edit its core properties, with changes immediately reflected in YAML
+**Depends on**: Phase 61
+**Requirements**: EDIT-01, EDIT-02, EDIT-03
+**Success Criteria** (what must be TRUE):
+  1. User can click a state node to expand it in place, revealing a property editor panel without leaving the graph view
+  2. User can click the same node again (or a collapse control) to collapse it back to its compact representation
+  3. User can edit a text field (e.g., Comment), a number field (e.g., HeartbeatSeconds), and a boolean toggle (e.g., End) and see each change appear in the YAML editor within one render cycle
+  4. YAML changes made in the Monaco editor are reflected back in the expanded node's fields without overwriting unrelated state
+**Plans**: TBD
+
+### Phase 63: Complete Property Editors and Validation Enforcement
+**Goal**: Every state type has a correct, complete property editor, required fields are enforced, and mutually exclusive fields use radio group selectors
+**Depends on**: Phase 62
+**Requirements**: EDIT-04, EDIT-05, EDIT-06
+**Success Criteria** (what must be TRUE):
+  1. Required fields are visually marked (e.g., asterisk or color indicator) and the node cannot be collapsed while a required field is empty
+  2. Wait state duration fields (Seconds, Timestamp, SecondsPath, TimestampPath) render as a radio group where selecting one activates its input and deactivates the others, with exactly one value persisted to YAML
+  3. All 8 state types (Task, Pass, Wait, Succeed, Fail, Choice, Parallel, Map) display property editors that match the fields defined in their Pydantic models — no missing fields, no extra fields
+  4. Attempting to collapse a node with a required field empty shows an inline error message identifying the missing field
+**Plans**: TBD
+
 ## Progress
 
 | Milestone | Phases | Plans | Status | Shipped |
@@ -176,3 +220,4 @@ Full details: `.planning/milestones/v3.2-ROADMAP.md`
 | v2.0 Enhancement Suite | 39-50 | 34 | Complete | 2026-03-02 |
 | v3.0 Pluggable Providers | 51-55 | 17 | Complete | 2026-03-03 |
 | v3.2 Registry Modules Tutorial | 56-60 | 9 | Complete | 2026-03-06 |
+| v3.6 Interactive Graph Editor | 61-63 | TBD | Not started | - |

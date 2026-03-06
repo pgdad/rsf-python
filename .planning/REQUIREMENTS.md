@@ -48,22 +48,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EDIT-01 | — | Pending |
-| EDIT-02 | — | Pending |
-| EDIT-03 | — | Pending |
-| EDIT-04 | — | Pending |
-| EDIT-05 | — | Pending |
-| EDIT-06 | — | Pending |
-| GRAPH-01 | — | Pending |
-| GRAPH-02 | — | Pending |
-| GRAPH-03 | — | Pending |
-| GRAPH-04 | — | Pending |
+| EDIT-01 | Phase 62 | Pending |
+| EDIT-02 | Phase 62 | Pending |
+| EDIT-03 | Phase 62 | Pending |
+| EDIT-04 | Phase 63 | Pending |
+| EDIT-05 | Phase 63 | Pending |
+| EDIT-06 | Phase 63 | Pending |
+| GRAPH-01 | Phase 61 | Pending |
+| GRAPH-02 | Phase 61 | Pending |
+| GRAPH-03 | Phase 61 | Pending |
+| GRAPH-04 | Phase 61 | Pending |
 
 **Coverage:**
 - v3.6 requirements: 10 total
-- Mapped to phases: 0
-- Unmapped: 10 ⚠️
+- Mapped to phases: 10
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-03-06*
-*Last updated: 2026-03-06 after initial definition*
+*Last updated: 2026-03-06 after roadmap creation (phases 61-63)*

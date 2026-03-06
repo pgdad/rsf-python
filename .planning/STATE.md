@@ -4,10 +4,10 @@ milestone: v3.6
 milestone_name: Interactive Graph Editor
 status: active
 stopped_at: ""
-last_updated: "2026-03-06T14:00:00.000Z"
-last_activity: "2026-03-06 - Milestone v3.6 started"
+last_updated: "2026-03-06T14:30:00.000Z"
+last_activity: "2026-03-06 - Roadmap created for v3.6"
 progress:
-  total_phases: 0
+  total_phases: 3
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,14 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** v3.6 Interactive Graph Editor
+**Current focus:** Phase 61 — Graph Manipulation
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-03-06 — Milestone v3.6 started
+Phase: 61 of 63 (Graph Manipulation)
+Plan: — of TBD
+Status: Ready to plan
+Last activity: 2026-03-06 — Roadmap created, ready to plan Phase 61
+
+Progress: [░░░░░░░░░░] 0%
 
 ## Performance Metrics
 
@@ -57,13 +59,20 @@ Last activity: 2026-03-06 — Milestone v3.6 started
 
 All decisions logged in PROJECT.md Key Decisions table.
 
+Recent decisions affecting current work:
+- [v3.6 design]: Expandable nodes (not inspector panel) — editing stays in graph context
+- [v3.6 design]: Live sync on every keystroke — no explicit save step
+- [v3.6 design]: Radio group for one-of fields (e.g., Wait duration type) — enforces exactly one value
+- [v3.6 design]: Click + Delete key for edge deletion — consistent with standard graph editor UX
+- [v3.6 design]: AST-merge strategy preserved — graph edits patch YAML AST without clobbering complex state
+
 ### Pending Todos
 
 None.
 
 ### Blockers/Concerns
 
-None — all v3.2 blockers resolved.
+None — starting fresh from v3.2 completion.
 
 ### Quick Tasks Completed
 
@@ -78,6 +87,6 @@ None — all v3.2 blockers resolved.
 
 ## Session Continuity
 
-Last session: 2026-03-06T13:30:00Z
-Stopped at: Completed v3.2 milestone
+Last session: 2026-03-06T14:30:00Z
+Stopped at: Roadmap created for v3.6 Interactive Graph Editor — 3 phases (61-63), 10/10 requirements mapped
 Resume file: None
