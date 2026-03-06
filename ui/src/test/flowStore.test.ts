@@ -36,7 +36,7 @@ function makeFlowNode(id: string, stateType: string = 'Task'): FlowNode {
 function makeFlowEdge(
   source: string,
   target: string,
-  edgeType: FlowEdge['data']['edgeType'] = 'normal',
+  edgeType: 'normal' | 'catch' | 'default' | 'choice' = 'normal',
 ): FlowEdge {
   return {
     id: `e-${source}-${target}`,

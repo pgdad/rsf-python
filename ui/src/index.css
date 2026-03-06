@@ -101,6 +101,28 @@ body {
 .graph-container {
   flex: 1;
   background: var(--bg-tertiary);
+  position: relative;
+}
+
+.graph-container:focus {
+  outline: none;
+}
+
+/* Toast notification for protected edge deletion attempts */
+.graph-toast {
+  position: absolute;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1e293b;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 13px;
+  z-index: 1000;
+  pointer-events: none;
+  white-space: nowrap;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 /* Palette */

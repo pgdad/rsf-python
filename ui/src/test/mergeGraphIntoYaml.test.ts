@@ -19,7 +19,7 @@ function makeNode(id: string, stateType: 'Task' | 'Choice' | 'Pass' = 'Task', is
 function makeEdge(
   source: string,
   target: string,
-  edgeType: FlowEdge['data']['edgeType'] = 'normal',
+  edgeType: 'normal' | 'catch' | 'default' | 'choice' = 'normal',
 ): FlowEdge {
   return {
     id: `e-${source}-${target}`,

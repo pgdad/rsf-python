@@ -1,10 +1,10 @@
 /**
  * Graph canvas component using @xyflow/react.
  * Renders the workflow graph with minimap, controls, and background grid.
- * Supports drag-drop from palette.
+ * Supports drag-drop from palette, edge selection/deletion, and keyboard shortcuts.
  */
 
-import { useCallback, type DragEvent } from 'react';
+import { useCallback, useEffect, useRef, type DragEvent } from 'react';
 import {
   ReactFlow,
   MiniMap,
@@ -32,8 +32,46 @@ export function GraphCanvas({ onGraphChange }: GraphCanvasProps) {
   const onConnect = useFlowStore((s) => s.onConnect);
   const addState = useFlowStore((s) => s.addState);
   const selectNode = useFlowStore((s) => s.selectNode);
+  const selectEdge = useFlowStore((s) => s.selectEdge);
+  const removeEdge = useFlowStore((s) => s.removeEdge);
+  const clearSelection = useFlowStore((s) => s.clearSelection);
+  const selectedEdgeId = useFlowStore((s) => s.selectedEdgeId);
+  const toastMessage = useFlowStore((s) => s.toastMessage);
+  const setToastMessage = useFlowStore((s) => s.setToastMessage);
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
+
+  // Auto-dismiss toast after 2500ms
+  useEffect(() => {
+    if (!toastMessage) return;
+    const timer = setTimeout(() => {
+      setToastMessage(null);
+    }, 2500);
+    return () => clearTimeout(timer);
+  }, [toastMessage, setToastMessage]);
+
+  // Keyboard listener on the graph container div (not document — avoids Monaco conflicts)
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Delete' || event.key === 'Backspace') {
+        const currentSelectedEdgeId = useFlowStore.getState().selectedEdgeId;
+        if (currentSelectedEdgeId) {
+          event.preventDefault();
+          removeEdge(currentSelectedEdgeId);
+          onGraphChange?.();
+        }
+      } else if (event.key === 'Escape') {
+        clearSelection();
+      }
+    };
+
+    container.addEventListener('keydown', handleKeyDown);
+    return () => container.removeEventListener('keydown', handleKeyDown);
+  }, [removeEdge, clearSelection, onGraphChange]);
 
   const handleDragOver = useCallback((event: DragEvent) => {
     event.preventDefault();
@@ -108,13 +146,39 @@ export function GraphCanvas({ onGraphChange }: GraphCanvasProps) {
   );
 
   const handlePaneClick = useCallback(() => {
-    selectNode(null);
-  }, [selectNode]);
+    clearSelection();
+  }, [clearSelection]);
+
+  const handleEdgeClick = useCallback(
+    (_event: React.MouseEvent, edge: { id: string }) => {
+      if (selectedEdgeId === edge.id) {
+        // Toggle off: re-clicking a selected edge deselects it
+        selectEdge(null);
+      } else {
+        selectEdge(edge.id);
+      }
+    },
+    [selectedEdgeId, selectEdge],
+  );
+
+  const handleNodeClick = useCallback(
+    (_event: React.MouseEvent, node: { id: string }) => {
+      selectNode(node.id);
+    },
+    [selectNode],
+  );
 
   return (
     <div className="graph-pane">
       <div className="pane-header">Workflow Graph</div>
-      <div className="graph-container">
+      <div
+        className="graph-container"
+        ref={containerRef}
+        tabIndex={0}
+      >
+        {toastMessage && (
+          <div className="graph-toast">{toastMessage}</div>
+        )}
         <ReactFlow
           nodes={nodes}
           edges={edges}
@@ -122,6 +186,8 @@ export function GraphCanvas({ onGraphChange }: GraphCanvasProps) {
           onEdgesChange={handleEdgesChange}
           onConnect={handleConnectEnd}
           onPaneClick={handlePaneClick}
+          onEdgeClick={handleEdgeClick}
+          onNodeClick={handleNodeClick}
           onDragOver={handleDragOver}
           onDrop={handleDrop}
           nodeTypes={nodeTypes}
