@@ -78,11 +78,15 @@ def deploy(
             raise typer.Exit(code=1)
 
     # Step 3: Generate orchestrator + handlers via codegen
+    # Output into src/generated/ to match Terraform template's archive_file source_dir
+    codegen_output = workflow.parent / "src" / "generated"
+    codegen_output.mkdir(parents=True, exist_ok=True)
     with Status("[bold]Generating code...[/bold]", console=console):
         codegen_result = codegen_generate(
             definition=definition,
             dsl_path=workflow,
-            output_dir=workflow.parent,
+            output_dir=codegen_output,
+            handlers_dir=workflow.parent / "src" / "handlers",
         )
 
     console.print(
@@ -186,6 +190,10 @@ def _deploy_full(provider: object, ctx: ProviderContext) -> None:
         console.print(
             f"[red]Error:[/red] Infrastructure deploy failed (exit {exc.returncode})"
         )
+        if exc.stderr:
+            console.print(f"[dim]{exc.stderr.strip()}[/dim]")
+        if exc.stdout:
+            console.print(f"[dim]{exc.stdout.strip()}[/dim]")
         raise typer.Exit(code=1)
 
     console.print("\n[green]Deploy complete[/green]")

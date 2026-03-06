@@ -25,8 +25,9 @@ def test_init_creates_all_expected_files(tmp_path: Path, monkeypatch: pytest.Mon
 
     expected_files = [
         "workflow.yaml",
-        "handlers/__init__.py",
-        "handlers/example_handler.py",
+        "src/handlers/__init__.py",
+        "src/handlers/example_handler.py",
+        "src/generated/__init__.py",
         "pyproject.toml",
         ".gitignore",
         "tests/__init__.py",

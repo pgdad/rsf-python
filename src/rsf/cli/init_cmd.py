@@ -175,29 +175,51 @@ def init(
         )
         raise typer.Exit(code=1)
 
-    # Create project directory structure
+    # Create project directory structure matching Terraform template expectations:
+    #   project/
+    #     workflow.yaml
+    #     src/handlers/          ← user handler code
+    #     src/generated/         ← rsf generate output (orchestrator.py)
+    #     terraform/             ← rsf deploy output
+    #     tests/
     project_dir.mkdir(parents=True, exist_ok=True)
-    handlers_dir = project_dir / "handlers"
+    src_dir = project_dir / "src"
+    src_dir.mkdir(exist_ok=True)
+    handlers_dir = src_dir / "handlers"
     handlers_dir.mkdir(exist_ok=True)
+    generated_dir = src_dir / "generated"
+    generated_dir.mkdir(exist_ok=True)
     tests_dir = project_dir / "tests"
     tests_dir.mkdir(exist_ok=True)
 
     created_files: list[str] = []
 
-    # workflow.yaml — copy static template
+    # workflow.yaml — copy template with project name substituted into Comment
     workflow_dest = project_dir / "workflow.yaml"
-    shutil.copy2(_TEMPLATES_DIR / "workflow.yaml", workflow_dest)
+    template_text = (_TEMPLATES_DIR / "workflow.yaml").read_text(encoding="utf-8")
+    workflow_dest.write_text(
+        template_text.replace(
+            "A minimal RSF workflow — edit to define your state machine",
+            project_name,
+        ),
+        encoding="utf-8",
+    )
     created_files.append("workflow.yaml")
 
-    # handlers/__init__.py — empty
+    # src/handlers/__init__.py — empty
     handlers_init = handlers_dir / "__init__.py"
     handlers_init.write_text("", encoding="utf-8")
-    created_files.append("handlers/__init__.py")
+    created_files.append("src/handlers/__init__.py")
 
-    # handlers/example_handler.py — static template
+    # src/handlers/example_handler.py — static template
     handler_dest = handlers_dir / "example_handler.py"
     shutil.copy2(_TEMPLATES_DIR / "handler_example.py", handler_dest)
-    created_files.append("handlers/example_handler.py")
+    created_files.append("src/handlers/example_handler.py")
+
+    # src/generated/__init__.py — empty (needed for Python imports)
+    generated_init = generated_dir / "__init__.py"
+    generated_init.write_text("", encoding="utf-8")
+    created_files.append("src/generated/__init__.py")
 
     # pyproject.toml — rendered Jinja2 template
     pyproject_dest = project_dir / "pyproject.toml"

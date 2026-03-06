@@ -20,10 +20,15 @@ console = Console()
 def generate(
     workflow: Path = typer.Argument("workflow.yaml", help="Path to workflow YAML file"),
     output_dir: Path = typer.Option(
-        ".",
+        "src/generated",
         "--output",
         "-o",
-        help="Output directory for generated files",
+        help="Output directory for orchestrator.py",
+    ),
+    handlers_dir_opt: Path = typer.Option(
+        None,
+        "--handlers-dir",
+        help="Output directory for handler stubs (default: src/handlers or OUTPUT/handlers)",
     ),
     no_infra: bool = typer.Option(
         False,
@@ -34,7 +39,7 @@ def generate(
     """Generate orchestrator.py and handler stubs from a workflow YAML.
 
     Validates the workflow first (structural + semantic).  On success, writes
-    orchestrator.py to OUTPUT_DIR and handler stubs to OUTPUT_DIR/handlers/.
+    orchestrator.py to OUTPUT_DIR and handler stubs to HANDLERS_DIR.
     Existing handler stubs without the generated marker are preserved
     (Generation Gap pattern).
     """
@@ -78,11 +83,15 @@ def generate(
         raise typer.Exit(code=1)
 
     # 5. Generate code
+    output_dir.mkdir(parents=True, exist_ok=True)
+    # Default handlers_dir: sibling of output_dir (src/handlers when output is src/generated)
+    handlers_dir = handlers_dir_opt or output_dir.parent / "handlers"
+    handlers_dir.mkdir(parents=True, exist_ok=True)
     result = codegen_generate(
         definition=definition,
         dsl_path=workflow,
         output_dir=output_dir,
-        handlers_dir=output_dir / "handlers",
+        handlers_dir=handlers_dir,
         rsf_version=__version__,
     )
 

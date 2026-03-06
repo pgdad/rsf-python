@@ -154,8 +154,10 @@ def sanitize_name(name: str) -> str:
         my-workflow -> my_workflow
         ProcessOrderV2 -> process_order_v2
     """
-    # Replace hyphens with underscores
-    s = name.replace("-", "_")
+    # Replace hyphens and spaces with underscores
+    s = name.replace("-", "_").replace(" ", "_")
+    # Strip any characters that are not alphanumeric or underscore
+    s = re.sub(r"[^a-zA-Z0-9_]", "", s)
     # Insert underscore before uppercase letters following lowercase/digit
     s = re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s)
     # Insert underscore between consecutive uppercase and following lowercase

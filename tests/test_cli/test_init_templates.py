@@ -165,12 +165,12 @@ def test_default_init_still_works(tmp_path: Path, monkeypatch: pytest.MonkeyPatc
 
     project = tmp_path / "my-project"
     assert (project / "workflow.yaml").exists()
-    assert (project / "handlers" / "example_handler.py").exists()
+    assert (project / "src" / "handlers" / "example_handler.py").exists()
     assert (project / "tests" / "test_example.py").exists()
 
     # Default scaffold should NOT have template-specific files
-    assert not (project / "handlers" / "create_item.py").exists()
-    assert not (project / "handlers" / "validate_file.py").exists()
+    assert not (project / "src" / "handlers" / "create_item.py").exists()
+    assert not (project / "src" / "handlers" / "validate_file.py").exists()
 
 
 # ─── Content Validity ────────────────────────────────────────────────────────

@@ -66,25 +66,27 @@ class TestGenerateSubcommand:
         """rsf generate creates orchestrator.py and handler stubs for Task states."""
         wf = tmp_path / "workflow.yaml"
         wf.write_text(VALID_WORKFLOW, encoding="utf-8")
-        out = tmp_path / "out"
+        out = tmp_path / "out" / "generated"
+        handlers = tmp_path / "out" / "handlers"
 
         result = runner.invoke(app, ["generate", str(wf), "--output", str(out)])
 
         assert result.exit_code == 0, f"Expected exit 0, got {result.exit_code}: {result.output}"
         assert (out / "orchestrator.py").exists(), "orchestrator.py should be created"
-        assert (out / "handlers" / "process_data.py").exists(), "handler stub should be created"
+        assert (handlers / "process_data.py").exists(), "handler stub should be created"
 
     def test_generate_skips_existing_handler_on_second_run(self, tmp_path: Path) -> None:
         """Running generate twice skips handlers that were modified (Generation Gap)."""
         wf = tmp_path / "workflow.yaml"
         wf.write_text(VALID_WORKFLOW, encoding="utf-8")
-        out = tmp_path / "out"
+        out = tmp_path / "out" / "generated"
+        handlers = tmp_path / "out" / "handlers"
 
         # First run — creates handler
         result1 = runner.invoke(app, ["generate", str(wf), "--output", str(out)])
         assert result1.exit_code == 0, f"First generate failed: {result1.output}"
 
-        handler = out / "handlers" / "process_data.py"
+        handler = handlers / "process_data.py"
         assert handler.exists()
 
         # Simulate user editing the handler (remove generated marker)
@@ -151,14 +153,15 @@ class TestGenerateSubcommand:
         """rsf generate creates one handler stub per Task state."""
         wf = tmp_path / "workflow.yaml"
         wf.write_text(VALID_WORKFLOW_MULTI_TASK, encoding="utf-8")
-        out = tmp_path / "out"
+        out = tmp_path / "out" / "generated"
+        handlers = tmp_path / "out" / "handlers"
 
         result = runner.invoke(app, ["generate", str(wf), "--output", str(out)])
 
         assert result.exit_code == 0, f"Expected exit 0: {result.output}"
         assert (out / "orchestrator.py").exists()
-        assert (out / "handlers" / "step_one.py").exists(), "step_one handler should be created"
-        assert (out / "handlers" / "step_two.py").exists(), "step_two handler should be created"
+        assert (handlers / "step_one.py").exists(), "step_one handler should be created"
+        assert (handlers / "step_two.py").exists(), "step_two handler should be created"
 
     def test_generate_output_mentions_handler_count(self, tmp_path: Path) -> None:
         """rsf generate prints a summary mentioning how many handlers were created/skipped."""
