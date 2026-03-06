@@ -128,23 +128,34 @@ def _evaluate_choice_rule(rule: Any, data: Any) -> bool:
     return False
 
 
+# Cache of already-loaded handler modules to avoid duplicate @state registration
+_handler_cache: dict[str, Any] = {}
+
+
 def _load_handler(state_name: str, workflow_dir: Path) -> Any:
     """Dynamically load a handler function for a Task state."""
     module_name = _to_snake_case(state_name)
 
-    # Check src/handlers/ first (new rsf init layout), then handlers/ (legacy)
-    src_handler_path = workflow_dir / "src" / "handlers" / f"{module_name}.py"
-    legacy_handler_path = workflow_dir / "handlers" / f"{module_name}.py"
+    # Return cached handler if already loaded (avoids duplicate @state registration)
+    cache_key = f"{workflow_dir}:{module_name}"
+    if cache_key in _handler_cache:
+        return _handler_cache[cache_key]
 
-    if src_handler_path.exists():
-        handler_path = src_handler_path
-    elif legacy_handler_path.exists():
+    # Check handlers/ first (examples and legacy layout), then src/handlers/ (new rsf init)
+    # handlers/ takes priority so examples with real handlers are not shadowed
+    # by rsf generate stubs in src/handlers/
+    legacy_handler_path = workflow_dir / "handlers" / f"{module_name}.py"
+    src_handler_path = workflow_dir / "src" / "handlers" / f"{module_name}.py"
+
+    if legacy_handler_path.exists():
         handler_path = legacy_handler_path
+    elif src_handler_path.exists():
+        handler_path = src_handler_path
     else:
         raise FileNotFoundError(
             f"Handler file not found in either:\n"
-            f"  {src_handler_path}\n"
             f"  {legacy_handler_path}\n"
+            f"  {src_handler_path}\n"
             f"Run 'rsf generate' to create handler stubs."
         )
 
@@ -159,6 +170,7 @@ def _load_handler(state_name: str, workflow_dir: Path) -> Any:
     if handler_fn is None:
         raise AttributeError(f"Handler function '{module_name}' not found in {handler_path}")
 
+    _handler_cache[cache_key] = handler_fn
     return handler_fn
 
 
