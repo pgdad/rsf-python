@@ -162,7 +162,7 @@ Full details: `.planning/milestones/v3.2-ROADMAP.md`
 
 </details>
 
-### 🚧 v3.6 Interactive Graph Editor (In Progress)
+### v3.6 Interactive Graph Editor (In Progress)
 
 **Milestone Goal:** Transform the graph editor from a read-only visualization into a fully interactive editing experience with inline property editors, validation, and edge/node management.
 
@@ -181,7 +181,10 @@ Full details: `.planning/milestones/v3.2-ROADMAP.md`
   2. User can press Delete or Backspace while an edge is selected and the edge disappears from the graph, leaving both endpoint nodes intact
   3. Deleting an edge removes the corresponding Next or Default reference from the YAML in real time, with no manual save required
   4. User can delete a state node and all edges connected to that node are removed from the graph simultaneously
-**Plans**: TBD
+**Plans**: 2 plans
+Plans:
+- [ ] 61-01-PLAN.md — Edge selection visual, edge deletion with protected edge handling, and YAML sync
+- [ ] 61-02-PLAN.md — Node deletion with cascade, StartAt reassignment, and reference cleanup
 
 ### Phase 62: Expandable Node Infrastructure and Basic Property Editors
 **Goal**: Users can expand any state node to reveal and edit its core properties, with changes immediately reflected in YAML
@@ -220,4 +223,4 @@ Full details: `.planning/milestones/v3.2-ROADMAP.md`
 | v2.0 Enhancement Suite | 39-50 | 34 | Complete | 2026-03-02 |
 | v3.0 Pluggable Providers | 51-55 | 17 | Complete | 2026-03-03 |
 | v3.2 Registry Modules Tutorial | 56-60 | 9 | Complete | 2026-03-06 |
-| v3.6 Interactive Graph Editor | 61-63 | TBD | Not started | - |
+| v3.6 Interactive Graph Editor | 61-63 | 2+ | In progress | - |
