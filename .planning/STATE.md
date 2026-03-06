@@ -4,8 +4,8 @@ milestone: v3.6
 milestone_name: Interactive Graph Editor
 status: complete
 stopped_at: null
-last_updated: "2026-03-06T19:45:00.000Z"
-last_activity: 2026-03-06 — v3.6 milestone completed and archived
+last_updated: "2026-03-06T20:06:50.000Z"
+last_activity: 2026-03-06 - Completed quick task 7: change the python development status to Stable and create a new minor release version, push master branch and the new release tag to github
 progress:
   total_phases: 3
   completed_phases: 3
