@@ -250,5 +250,5 @@ def init(
         f"\n[bold]Next steps:[/bold]\n"
         f"  cd {project_name}\n"
         f"  Edit workflow.yaml to define your state machine\n"
-        f"  Edit handlers/example_handler.py to implement your logic"
+        f"  Edit src/handlers/example_handler.py to implement your logic"
     )
