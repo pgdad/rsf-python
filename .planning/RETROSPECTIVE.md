@@ -239,6 +239,49 @@
 
 ---
 
+## Milestone: v3.2 — Terraform Registry Modules Tutorial
+
+**Shipped:** 2026-03-06
+**Phases:** 5 | **Plans:** 9
+
+### What Was Built
+- Schema verification of terraform-aws-modules/lambda v8.7.0 durable_config variables, alias convention, and IAM approach
+- Working registry-modules-demo example deploying Lambda Durable Functions via custom provider with deploy.sh
+- Full-stack Terraform registry modules: DynamoDB (for_each), SQS DLQ (conditional count), CloudWatch alarms, SNS
+- 8 local unit tests + real-AWS integration test with durable execution polling and teardown verification
+- 861-line tutorial with side-by-side HCL comparison, WorkflowMetadata schema table, and 5 common pitfalls
+- 6 quick tasks: MIT license, test fixes, release tags (v3.1-v3.5), example fixes, pyproject.toml license update
+
+### What Worked
+- Schema verification phase (56) as prerequisite prevented downstream Terraform errors — durable_config variable names, alias convention, IAM approach all confirmed before writing code
+- Custom provider deploy.sh reading RSF_METADATA_FILE via jq worked reliably — metadata transport system proved its value
+- Quick tasks for operational work (release tags, test fixes) kept milestone phases focused on feature delivery
+- Conditional Terraform resources (count on DLQ, for_each on DynamoDB, alarm_by_type map) kept module composition clean
+
+### What Was Inefficient
+- No milestone audit performed before completion — requirements all checked off but no formal cross-phase integration verification
+- summary-extract one_liner field still returns null — recurring issue across all milestones
+- Phase dates in ROADMAP.md compressed (all showing 2026-03-04/05) — actual work spanned 3 days but timestamps don't reflect session boundaries
+
+### Patterns Established
+- Custom provider deploy.sh pattern: bash script reading RSF_METADATA_FILE, generating terraform.tfvars.json via jq, invoking terraform
+- Registry module conditional creation: count + conditional wiring for optional resources (DLQ, alarms)
+- generate_tfvars() before both deploy AND destroy — Terraform needs vars even during destruction
+- Side-by-side HCL comparison in tutorials: raw vs registry module code for the same resource
+
+### Key Lessons
+1. Registry modules add value for standardization but introduce indirection — tutorial must explain what the module does behind the scenes
+2. deploy.sh tfvars.json generation is the critical translation layer between RSF metadata and Terraform variables
+3. Pitfall documentation (Problem/Symptom/Fix format) is more useful than "best practices" lists
+4. Quick tasks are effective for operational work (releases, fixes) that shouldn't block milestone phases
+
+### Cost Observations
+- Model mix: ~30% opus (orchestration), ~60% sonnet (research, checking, execution)
+- Sessions: ~3 sessions across 3 days
+- Notable: Smallest milestone yet (5 phases, 9 plans) — well-scoped tutorial milestones execute quickly
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -255,6 +298,7 @@
 | v1.7 Lambda URL | 3 | 8 | Lambda Function URL DSL + Terraform + example |
 | v2.0 Enhancement Suite | 12 | 34 | Milestone audit + gap closure; auto-advance pipeline |
 | v3.0 Pluggable Providers | 5 | 17 | Provider abstraction; config cascade; graceful CLI degradation |
+| v3.2 Registry Modules Tutorial | 5 | 9 | Custom provider tutorial; registry module patterns; quick tasks for ops |
 
 ### Cumulative Quality
 
@@ -270,6 +314,7 @@
 | v1.7 | 779 tests (+35) | Lambda Function URL end-to-end |
 | v2.0 | 976+ tests (+197) | 25/25 requirements verified via audit |
 | v3.0 | ~1,100+ tests | 29/29 provider requirements delivered |
+| v3.2 | 8 local + integration | 21/21 registry module requirements; 7 examples all passing |
 
 ### Top Lessons (Verified Across Milestones)
 
