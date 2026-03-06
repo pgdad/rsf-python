@@ -23,6 +23,51 @@ import type {
   SyncSource,
 } from '../types';
 
+/**
+ * Required field validation specs per state type.
+ * - string: a single required field (must be non-empty)
+ * - { oneOf: string[] }: at least one of the listed fields must be set (mutual-exclusion group)
+ *
+ * Only Pydantic-required fields (no default in model) are included.
+ * Currently the only enforced validation is Wait's oneOf timing field requirement.
+ */
+type FieldSpec = string | { oneOf: string[] };
+
+const REQUIRED_FIELDS: Partial<Record<string, FieldSpec[]>> = {
+  Wait: [{ oneOf: ['Seconds', 'Timestamp', 'SecondsPath', 'TimestampPath'] }],
+};
+
+/**
+ * Check stateData against the required field specs for a given state type.
+ * Returns null if valid, or an error message string if validation fails.
+ */
+function checkRequiredFields(
+  stateType: string,
+  stateData: Record<string, unknown>,
+): string | null {
+  const specs = REQUIRED_FIELDS[stateType];
+  if (!specs) return null;
+
+  for (const spec of specs) {
+    if (typeof spec === 'string') {
+      const val = stateData[spec];
+      if (val === undefined || val === null || val === '') {
+        return `Required field missing: ${spec}`;
+      }
+    } else {
+      // oneOf: at least one must be set
+      const hasOne = spec.oneOf.some((field) => {
+        const val = stateData[field];
+        return val !== undefined && val !== null && val !== '';
+      });
+      if (!hasOne) {
+        return `Required field missing: one of ${spec.oneOf.join(', ')} must be set`;
+      }
+    }
+  }
+  return null;
+}
+
 interface FlowState {
   nodes: FlowNode[];
   edges: FlowEdge[];
@@ -31,6 +76,8 @@ interface FlowState {
   selectedNodeId: string | null;
   selectedEdgeId: string | null;
   expandedNodeId: string | null;
+  /** Transient flag: set to nodeId when a collapse attempt was blocked by validation. Cleared on next toggleExpand call. */
+  collapseBlocked: string | null;
   toastMessage: string | null;
   syncSource: SyncSource;
   needsLayout: boolean;
@@ -73,6 +120,7 @@ export const useFlowStore = create<FlowState>()(
     selectedNodeId: null,
     selectedEdgeId: null,
     expandedNodeId: null,
+    collapseBlocked: null,
     toastMessage: null,
     syncSource: null,
     needsLayout: false,
@@ -203,9 +251,26 @@ export const useFlowStore = create<FlowState>()(
 
     toggleExpand: (nodeId) =>
       set((state) => {
+        // Always clear collapseBlocked at the start of any toggleExpand call
+        state.collapseBlocked = null;
+
         if (state.expandedNodeId === nodeId) {
+          // Attempting to collapse — validate required fields first
+          const node = state.nodes.find((n) => n.id === nodeId);
+          if (node) {
+            const stateType = node.data.stateType as string;
+            const stateData = (node.data.stateData as Record<string, unknown>) ?? {};
+            const error = checkRequiredFields(stateType, stateData);
+            if (error) {
+              // Block collapse: set toast and collapseBlocked flag
+              state.toastMessage = error;
+              state.collapseBlocked = nodeId;
+              return;
+            }
+          }
           state.expandedNodeId = null;
         } else {
+          // Expanding — always allowed
           state.expandedNodeId = nodeId;
         }
       }),
