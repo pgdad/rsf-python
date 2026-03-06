@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v3.2
-milestone_name: Terraform Registry Modules Tutorial
-status: complete
-stopped_at: Milestone v3.2 complete
-last_updated: "2026-03-06T13:30:00.000Z"
-last_activity: "2026-03-06 - Completed v3.2 milestone"
+milestone: v3.6
+milestone_name: Interactive Graph Editor
+status: active
+stopped_at: ""
+last_updated: "2026-03-06T14:00:00.000Z"
+last_activity: "2026-03-06 - Milestone v3.6 started"
 progress:
-  total_phases: 5
-  completed_phases: 5
-  total_plans: 9
-  completed_plans: 9
-  percent: 100
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-06)
 
 **Core value:** Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
-**Current focus:** v3.2 complete — planning next milestone
+**Current focus:** v3.6 Interactive Graph Editor
 
 ## Current Position
 
-Milestone v3.2 complete (5 phases, 9 plans, 21 requirements)
-Last activity: 2026-03-06 - Completed v3.2 milestone
-
-Progress: [████████████████████] 100%
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-03-06 — Milestone v3.6 started
 
 ## Performance Metrics
 

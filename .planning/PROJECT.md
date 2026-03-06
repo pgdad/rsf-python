@@ -8,6 +8,16 @@ RSF is a complete development platform for AWS Lambda Durable Functions (launche
 
 Users can define, visualize, generate, deploy, and debug state machine workflows on Lambda Durable Functions with full AWS Step Functions feature parity — without writing state management or orchestration code by hand.
 
+## Current Milestone: v3.6 Interactive Graph Editor
+
+**Goal:** Transform the graph editor from a read-only visualization into a fully interactive editing experience with inline property editors, validation, and edge/node management.
+
+**Target features:**
+- Expandable inline property editors on state nodes with live YAML sync
+- Required field validation and "must have one of" radio group selectors
+- Edge deletion (click + Delete key) and node deletion with cascade
+- Correct enforcement of ASL state property requirements in the UI
+
 ## Current State
 
 v3.2 shipped (2026-03-06). RSF is a full development platform installable via `pip install rsf` with bundled React UIs, git-tag versioning (hatch-vcs), and CI/CD publishing to PyPI. 16 CLI commands, 7 DSL extensions, pluggable infrastructure providers (Terraform, CDK, custom), OpenTelemetry tracing, VS Code extension, GitHub Action, and all requirements satisfied through v3.2. ~36,400 LOC Python source + 8,900 LOC TypeScript + comprehensive test suite. Seven real-world example workflows (including registry-modules-demo with Terraform registry modules) with automated integration testing prove end-to-end correctness on real AWS. Nine tutorials covering all CLI commands and the custom provider system.
@@ -100,6 +110,12 @@ v3.2 shipped (2026-03-06). RSF is a full development platform installable via `p
 
 <!-- Current scope. Building toward these. -->
 
+- [ ] Expandable inline property editors on graph nodes with live YAML sync
+- [ ] Required field validation enforced in the UI editor
+- [ ] "Must have one of" radio group selectors (e.g., Wait duration type)
+- [ ] Edge deletion via click + Delete key (preserves nodes)
+- [ ] Node deletion with cascade removal of all connected edges
+
 ### Out of Scope
 
 <!-- Explicit boundaries. Includes reasoning to prevent re-adding. -->
@@ -191,4 +207,4 @@ v3.2 shipped (2026-03-06). RSF is a full development platform installable via `p
 | deploy.sh generates terraform.tfvars.json from RSF metadata via jq | Dynamic translation from RSF WorkflowMetadata to Terraform variables at deploy time | ✓ Good |
 
 ---
-*Last updated: 2026-03-06 after v3.2 milestone completion*
+*Last updated: 2026-03-06 after v3.6 milestone start*
