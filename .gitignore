@@ -14,6 +14,7 @@ orchestrator.py
 
 # Terraform runtime files
 .terraform/
+.terraform.lock.hcl
 *.tfstate
 *.tfstate.backup
 *.zip
