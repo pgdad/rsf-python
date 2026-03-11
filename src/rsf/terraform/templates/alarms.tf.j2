@@ -4,6 +4,11 @@
 <% if needs_sns_topic %>
 resource "aws_sns_topic" "<< resource_id >>_alarm_notifications" {
   name = "${local.function_name}-alarm-notifications"
+
+  tags = {
+    ManagedBy = "rsf"
+    Workflow  = var.workflow_name
+  }
 }
 <% endif %>
 
@@ -30,6 +35,11 @@ resource "aws_cloudwatch_metric_alarm" "<< resource_id >>_error_rate_<< loop.ind
 <% else %>
   alarm_actions = [aws_sns_topic.<< resource_id >>_alarm_notifications.arn]
 <% endif %>
+
+  tags = {
+    ManagedBy = "rsf"
+    Workflow  = var.workflow_name
+  }
 }
 
 <% elif alarm.type == "duration" %>
@@ -54,6 +64,11 @@ resource "aws_cloudwatch_metric_alarm" "<< resource_id >>_duration_<< loop.index
 <% else %>
   alarm_actions = [aws_sns_topic.<< resource_id >>_alarm_notifications.arn]
 <% endif %>
+
+  tags = {
+    ManagedBy = "rsf"
+    Workflow  = var.workflow_name
+  }
 }
 
 <% elif alarm.type == "throttle" %>
@@ -78,6 +93,11 @@ resource "aws_cloudwatch_metric_alarm" "<< resource_id >>_throttle_<< loop.index
 <% else %>
   alarm_actions = [aws_sns_topic.<< resource_id >>_alarm_notifications.arn]
 <% endif %>
+
+  tags = {
+    ManagedBy = "rsf"
+    Workflow  = var.workflow_name
+  }
 }
 
 <% endif %>

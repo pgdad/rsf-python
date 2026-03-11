@@ -10,6 +10,11 @@ resource "aws_cloudwatch_event_rule" "<< resource_id >>_trigger_<< loop.index0 >
 <% if trigger.event_pattern %>
   event_pattern = jsonencode(<< trigger.event_pattern | tojson >>)
 <% endif %>
+
+  tags = {
+    ManagedBy = "rsf"
+    Workflow  = var.workflow_name
+  }
 }
 
 resource "aws_cloudwatch_event_target" "<< resource_id >>_target_<< loop.index0 >>" {
@@ -27,6 +32,11 @@ resource "aws_lambda_permission" "<< resource_id >>_allow_eventbridge_<< loop.in
 <% elif trigger.type == "sqs" %>
 resource "aws_sqs_queue" "<< resource_id >>_trigger_<< loop.index0 >>" {
   name = "<< trigger.queue_name >>"
+
+  tags = {
+    ManagedBy = "rsf"
+    Workflow  = var.workflow_name
+  }
 }
 
 resource "aws_lambda_event_source_mapping" "<< resource_id >>_sqs_<< loop.index0 >>" {

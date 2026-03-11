@@ -24,6 +24,11 @@ resource "aws_dynamodb_table" "<< resource_id >>_<< table.table_name | replace('
     type = "<< table.sort_key.type >>"
   }
 <% endif %>
+
+  tags = {
+    ManagedBy = "rsf"
+    Workflow  = var.workflow_name
+  }
 }
 
 <% endfor %>

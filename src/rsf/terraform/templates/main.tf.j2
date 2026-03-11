@@ -36,6 +36,11 @@ resource "aws_lambda_function" "<< resource_id >>" {
   }
 <% endif %>
 
+  tags = {
+    ManagedBy = "rsf"
+    Workflow  = var.workflow_name
+  }
+
   lifecycle {
     ignore_changes = [filename, source_code_hash]
   }

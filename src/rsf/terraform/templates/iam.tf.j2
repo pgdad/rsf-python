@@ -15,6 +15,11 @@ resource "aws_iam_role" "lambda_exec" {
       }
     ]
   })
+
+  tags = {
+    ManagedBy = "rsf"
+    Workflow  = var.workflow_name
+  }
 }
 
 resource "aws_iam_role_policy" "lambda_policy" {

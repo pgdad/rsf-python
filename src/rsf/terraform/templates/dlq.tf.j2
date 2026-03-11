@@ -7,4 +7,9 @@ resource "aws_sqs_queue" "<< resource_id >>_dlq" {
   name = "${local.function_name}-dlq"
 <% endif %>
   message_retention_seconds = 1209600  # 14 days
+
+  tags = {
+    ManagedBy = "rsf"
+    Workflow  = var.workflow_name
+  }
 }
