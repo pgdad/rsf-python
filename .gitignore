@@ -18,3 +18,7 @@ orchestrator.py
 *.tfstate.backup
 *.zip
 crash.log
+
+# Test/tool artifacts
+.hypothesis/
+node_modules/
