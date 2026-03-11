@@ -81,9 +81,10 @@ None.
 | 9 | Create v3.8 release tag and push master to GitHub | 2026-03-06 | v3.8 tag | [9-create-a-new-minor-version-and-push-mast](./quick/9-create-a-new-minor-version-and-push-mast/) |
 | 10 | Commit changed files, push master, tag v3.9 | 2026-03-11 | 5a0182a | [10-add-changed-files-to-git-commit-push-to-](./quick/10-add-changed-files-to-git-commit-push-to-/) |
 | 11 | Fix rsf doctor to check src/handlers/ instead of handlers/ | 2026-03-11 | 8c1ea30 | [11-fix-rsf-doctor-to-look-for-handlers-in-s](./quick/11-fix-rsf-doctor-to-look-for-handlers-in-s/) |
+| 12 | Add saved/unsaved indicator and Ctrl+S save to RSF graph editor | 2026-03-11 | c3d7a00 | [12-add-saved-unsaved-indicator-to-rsf-ui-fo](./quick/12-add-saved-unsaved-indicator-to-rsf-ui-fo/) |
 
 ## Session Continuity
 
-Last session: 2026-03-11T13:00:00Z
-Stopped at: Completed quick-11 (Fix rsf doctor to check src/handlers/ instead of handlers/)
+Last session: 2026-03-11T13:52:58Z
+Stopped at: Completed quick-12 (Add saved/unsaved indicator and Ctrl+S save to RSF graph editor)
 Resume file: None
