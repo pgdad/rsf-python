@@ -199,7 +199,11 @@ class TestGenerateNoInfra:
         result = runner.invoke(app, ["generate", "--no-infra", str(wf), "--output", str(out)])
 
         assert result.exit_code == 0
-        assert "--no-infra" in result.output or "no-infra" in result.output.lower() or "infrastructure" in result.output.lower()
+        assert (
+            "--no-infra" in result.output
+            or "no-infra" in result.output.lower()
+            or "infrastructure" in result.output.lower()
+        )
 
     def test_generate_no_infra_with_output_dir(self, tmp_path: Path) -> None:
         """rsf generate --no-infra --output respects the output directory."""

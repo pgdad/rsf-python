@@ -56,10 +56,9 @@ def _emit_task(mapping: StateMapping) -> list[str]:
 
     # Sub-workflow invocation: use Lambda invoke instead of handler call
     if mapping.sub_workflow:
-        sw_name = topyrepr(mapping.sub_workflow)
         invoke_lines = [
             f"# Sub-workflow invocation: {mapping.sub_workflow}",
-            f"_sw_response = lambda_client.invoke(",
+            "_sw_response = lambda_client.invoke(",
             f'    FunctionName=f"{{RSF_NAME_PREFIX}}-{mapping.sub_workflow}",',
             '    InvocationType="RequestResponse",',
             "    Payload=json.dumps(input_data),",

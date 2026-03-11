@@ -109,7 +109,7 @@ def init(
             desc = _TEMPLATE_DESCRIPTIONS.get(tpl_name, "No description available")
             console.print(f"  [cyan]{tpl_name}[/cyan] — {desc}")
         console.print(
-            f"\n[bold]Usage:[/bold] rsf init --template <name> [project-name]\n"
+            "\n[bold]Usage:[/bold] rsf init --template <name> [project-name]\n"
         )
         return
 

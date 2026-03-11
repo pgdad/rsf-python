@@ -843,7 +843,7 @@ class TestDLQGeneration:
 
     def test_no_dlq_no_dlq_tf(self, tmp_path):
         config = TerraformConfig(workflow_name="test")
-        result = generate_terraform(config, tmp_path)
+        generate_terraform(config, tmp_path)
         assert not (tmp_path / "dlq.tf").exists()
         content = (tmp_path / "main.tf").read_text()
         assert "dead_letter_config" not in content
@@ -853,7 +853,7 @@ class TestDLQGeneration:
             workflow_name="test",
             dlq_enabled=False,
         )
-        result = generate_terraform(config, tmp_path)
+        generate_terraform(config, tmp_path)
         assert not (tmp_path / "dlq.tf").exists()
 
     def test_dlq_produces_sqs_iam_permission(self, tmp_path):

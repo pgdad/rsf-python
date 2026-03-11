@@ -85,7 +85,7 @@ def validate(
                 get_provider(toml_config.provider)
             except ProviderNotFoundError:
                 available = list_providers()
-                console.print(f"[red]Validation errors in[/red] rsf.toml:")
+                console.print("[red]Validation errors in[/red] rsf.toml:")
                 console.print(
                     f"  [yellow]infrastructure.provider[/yellow]: "
                     f"Unknown provider '{toml_config.provider}'. "
@@ -93,7 +93,7 @@ def validate(
                 )
                 raise typer.Exit(code=1)
     except ValidationError as exc:
-        console.print(f"[red]Validation errors in[/red] rsf.toml:")
+        console.print("[red]Validation errors in[/red] rsf.toml:")
         for error in exc.errors():
             field_path = ".".join(str(loc) for loc in error["loc"])
             console.print(f"  [yellow]infrastructure.{field_path}[/yellow]: {error['msg']}")

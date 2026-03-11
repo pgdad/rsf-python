@@ -254,7 +254,7 @@ class TestLogsCommand:
             from rsf.cli.main import app
 
             runner = CliRunner()
-            result = runner.invoke(
+            runner.invoke(
                 app,
                 [
                     "logs",
@@ -423,7 +423,7 @@ class TestLogsCommand:
             )
 
             # Parse JSONL output
-            lines = [l for l in result.output.strip().split("\n") if l.startswith("{")]
+            lines = [line for line in result.output.strip().split("\n") if line.startswith("{")]
             assert len(lines) >= 1
             parsed = json.loads(lines[-1])
             assert parsed["function"] == "my-fn"
@@ -477,7 +477,7 @@ class TestLogsCommand:
             )
 
             # Should not contain Rich markup
-            output_lines = [l for l in result.output.split("\n") if "Test message" in l]
+            output_lines = [line for line in result.output.split("\n") if "Test message" in line]
             assert len(output_lines) >= 1
             assert "[dim]" not in output_lines[0]
             assert "[bold]" not in output_lines[0]

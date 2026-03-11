@@ -10,8 +10,6 @@ import json
 import logging
 import subprocess
 from datetime import datetime, timezone
-from pathlib import Path
-
 import pytest
 from botocore.exceptions import ClientError
 

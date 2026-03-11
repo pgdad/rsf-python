@@ -238,7 +238,7 @@ class TestRunProviderCommand:
             args=["echo", "hello"], returncode=0, stdout="hello\n", stderr=""
         )
         provider = _CompleteProvider()
-        result = provider.run_provider_command(["echo", "hello"])
+        provider.run_provider_command(["echo", "hello"])
 
         mock_run.assert_called_once()
         call_kwargs = mock_run.call_args

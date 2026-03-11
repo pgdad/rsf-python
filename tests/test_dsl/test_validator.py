@@ -357,7 +357,11 @@ class TestSubWorkflowValidation:
                 },
             }
         )
-        assert not any("SubWorkflow" in e.message or "sub_workflow" in e.message.lower() for e in errors if e.severity == "error")
+        assert not any(
+            "SubWorkflow" in e.message or "sub_workflow" in e.message.lower()
+            for e in errors
+            if e.severity == "error"
+        )
 
     def test_undeclared_sub_workflow_produces_error(self):
         errors = _validate(
@@ -623,7 +627,11 @@ class TestDLQValidation:
                 "dead_letter_queue": {"enabled": True},
             }
         )
-        assert not any("dlq" in e.message.lower() or "dead_letter" in e.message.lower() for e in errors if e.severity == "error")
+        assert not any(
+            "dlq" in e.message.lower() or "dead_letter" in e.message.lower()
+            for e in errors
+            if e.severity == "error"
+        )
 
     def test_dlq_disabled_no_errors(self):
         errors = _validate(

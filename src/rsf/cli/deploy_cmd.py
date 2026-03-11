@@ -34,7 +34,9 @@ def deploy(
     tf_dir: Path = typer.Option(None, "--tf-dir", hidden=True, help="[deprecated] Alias for --output-dir"),
     no_infra: bool = typer.Option(False, "--no-infra", help="Generate and deploy code only, skip infrastructure"),
     stage: str | None = typer.Option(None, "--stage", help="Deployment stage (e.g., dev, staging, prod)"),
-    teardown: bool = typer.Option(False, "--teardown", help="Destroy all deployed infrastructure (runs provider teardown)"),
+    teardown: bool = typer.Option(
+        False, "--teardown", help="Destroy all deployed infrastructure (runs provider teardown)"
+    ),
 ) -> None:
     """Deploy an RSF workflow to AWS via the configured infrastructure provider.
 
