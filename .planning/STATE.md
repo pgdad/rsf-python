@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed quick-16 (Push master and create v3.11 release tag)
-last_updated: "2026-03-11T14:45:00.000Z"
+stopped_at: Completed quick-17 (Verify all examples and tutorials still pass)
+last_updated: "2026-03-11T16:25:00.000Z"
 progress:
   total_phases: 2
   completed_phases: 2
@@ -85,9 +85,10 @@ None.
 | 14 | Add scroll bars to workflow graph editor | 2026-03-11 | 62064bf | [14-add-scroll-bars-to-workflow-editor-for-e](./quick/14-add-scroll-bars-to-workflow-editor-for-e/) |
 | 15 | Fix CI builds (conftest conflict, ruff format, missing test deps) | 2026-03-11 | 9318d6e | [15-fix-ci-conftest-conflict-exclude-example](./quick/15-fix-ci-conftest-conflict-exclude-example/) |
 | 16 | Push master and create v3.11 tag | 2026-03-11 | v3.11 tag | [16-push-master-to-github-and-create-v3-11-t](./quick/16-push-master-to-github-and-create-v3-11-t/) |
+| 17 | Verify all examples and tutorials still pass | 2026-03-11 | 8e53c28 | [17-verify-all-examples-and-tutorials-still-](./quick/17-verify-all-examples-and-tutorials-still-/) |
 
 ## Session Continuity
 
-Last session: 2026-03-11T19:31:00.000Z
-Stopped at: Completed quick-16 (Push master and create v3.11 release tag)
+Last session: 2026-03-11T16:25:00.000Z
+Stopped at: Completed quick-17 (Verify all examples and tutorials still pass)
 Resume file: None
