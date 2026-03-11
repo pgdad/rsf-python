@@ -1482,6 +1482,28 @@ body {
   opacity: 0.7;
 }
 
+/* ===== Custom Graph Scroll Bars ===== */
+
+.graph-scrollbar-track {
+  background: transparent;
+  transition: background 0.15s;
+}
+
+.graph-scrollbar-track:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.graph-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.25);
+  transition: background 0.15s;
+  user-select: none;
+}
+
+.graph-scrollbar-thumb:hover,
+.graph-scrollbar-thumb:active {
+  background: rgba(255, 255, 255, 0.45);
+}
+
 /* ===== I/O Processing collapsible section ===== */
 
 .io-section {
