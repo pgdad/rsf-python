@@ -11,8 +11,9 @@ resource "aws_dynamodb_table" "order_history" {
   }
 
   tags = {
-    Project = "rsf-examples"
-    Example = "order-processing"
+    ManagedBy = "rsf"
+    Project   = "rsf-examples"
+    Example   = "order-processing"
   }
 }
 

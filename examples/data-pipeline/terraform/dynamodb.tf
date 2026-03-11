@@ -11,8 +11,9 @@ resource "aws_dynamodb_table" "pipeline_results" {
   }
 
   tags = {
-    Project = "rsf-examples"
-    Example = "data-pipeline"
+    ManagedBy = "rsf"
+    Project   = "rsf-examples"
+    Example   = "data-pipeline"
   }
 }
 

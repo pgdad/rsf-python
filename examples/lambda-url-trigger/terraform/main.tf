@@ -25,6 +25,11 @@ resource "aws_lambda_function" "lambda_url_trigger" {
     retention_period  = var.retention_period
   }
 
+  tags = {
+    ManagedBy = "rsf"
+    Workflow  = var.workflow_name
+  }
+
   lifecycle {
     ignore_changes = [filename, source_code_hash]
   }

@@ -25,6 +25,11 @@ resource "aws_lambda_function" "retry_and_recovery" {
     retention_period  = var.retention_period
   }
 
+  tags = {
+    ManagedBy = "rsf"
+    Workflow  = var.workflow_name
+  }
+
   lifecycle {
     ignore_changes = [filename, source_code_hash]
   }
