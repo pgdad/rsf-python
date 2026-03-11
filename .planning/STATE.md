@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed quick-14 (Add scroll bars to workflow editor)
-last_updated: "2026-03-11T14:15:58.249Z"
+stopped_at: Completed quick-15 (Fix CI conftest conflict — exclude example testpaths)
+last_updated: "2026-03-11T14:45:00.000Z"
 progress:
   total_phases: 2
   completed_phases: 2
@@ -83,9 +83,10 @@ None.
 | 12 | Add saved/unsaved indicator and Ctrl+S save to RSF graph editor | 2026-03-11 | c3d7a00 | [12-add-saved-unsaved-indicator-to-rsf-ui-fo](./quick/12-add-saved-unsaved-indicator-to-rsf-ui-fo/) |
 | 13 | Push master and create v3.10 tag | 2026-03-11 | v3.10 tag | [13-push-changes-to-github-and-create-new-ta](./quick/13-push-changes-to-github-and-create-new-ta/) |
 | 14 | Add scroll bars to workflow graph editor | 2026-03-11 | 62064bf | [14-add-scroll-bars-to-workflow-editor-for-e](./quick/14-add-scroll-bars-to-workflow-editor-for-e/) |
+| 15 | Fix CI conftest conflict — exclude example testpaths | 2026-03-11 | 03aa4a6 | [15-fix-ci-conftest-conflict-exclude-example](./quick/15-fix-ci-conftest-conflict-exclude-example/) |
 
 ## Session Continuity
 
-Last session: 2026-03-11T14:15:58.247Z
-Stopped at: Completed quick-14 (Add scroll bars to workflow editor)
+Last session: 2026-03-11T14:45:00.000Z
+Stopped at: Completed quick-15 (Fix CI conftest conflict — exclude example testpaths)
 Resume file: None
