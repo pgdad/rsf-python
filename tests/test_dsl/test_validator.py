@@ -358,9 +358,7 @@ class TestSubWorkflowValidation:
             }
         )
         assert not any(
-            "SubWorkflow" in e.message or "sub_workflow" in e.message.lower()
-            for e in errors
-            if e.severity == "error"
+            "SubWorkflow" in e.message or "sub_workflow" in e.message.lower() for e in errors if e.severity == "error"
         )
 
     def test_undeclared_sub_workflow_produces_error(self):
@@ -418,16 +416,10 @@ class TestTriggerValidation:
             {
                 "StartAt": "T",
                 "States": {"T": {"Type": "Task", "End": True}},
-                "triggers": [
-                    {"type": "eventbridge", "schedule_expression": "rate(5 minutes)"}
-                ],
+                "triggers": [{"type": "eventbridge", "schedule_expression": "rate(5 minutes)"}],
             }
         )
-        assert not any(
-            "trigger" in e.message.lower()
-            for e in errors
-            if e.severity == "error"
-        )
+        assert not any("trigger" in e.message.lower() for e in errors if e.severity == "error")
 
     def test_valid_sqs_trigger_no_errors(self):
         errors = _validate(
@@ -437,11 +429,7 @@ class TestTriggerValidation:
                 "triggers": [{"type": "sqs", "queue_name": "my-queue"}],
             }
         )
-        assert not any(
-            "trigger" in e.message.lower()
-            for e in errors
-            if e.severity == "error"
-        )
+        assert not any("trigger" in e.message.lower() for e in errors if e.severity == "error")
 
     def test_valid_sns_trigger_no_errors(self):
         errors = _validate(
@@ -456,11 +444,7 @@ class TestTriggerValidation:
                 ],
             }
         )
-        assert not any(
-            "trigger" in e.message.lower()
-            for e in errors
-            if e.severity == "error"
-        )
+        assert not any("trigger" in e.message.lower() for e in errors if e.severity == "error")
 
     def test_eventbridge_missing_both_produces_error(self):
         errors = _validate(
@@ -470,11 +454,7 @@ class TestTriggerValidation:
                 "triggers": [{"type": "eventbridge"}],
             }
         )
-        trigger_errors = [
-            e
-            for e in errors
-            if "schedule_expression" in e.message or "event_pattern" in e.message
-        ]
+        trigger_errors = [e for e in errors if "schedule_expression" in e.message or "event_pattern" in e.message]
         assert len(trigger_errors) >= 1
 
     def test_sqs_large_batch_size_warning(self):
@@ -483,16 +463,10 @@ class TestTriggerValidation:
             {
                 "StartAt": "T",
                 "States": {"T": {"Type": "Task", "End": True}},
-                "triggers": [
-                    {"type": "sqs", "queue_name": "my-queue", "batch_size": 10000}
-                ],
+                "triggers": [{"type": "sqs", "queue_name": "my-queue", "batch_size": 10000}],
             }
         )
-        warnings = [
-            e
-            for e in errors
-            if e.severity == "warning" and "batch_size" in e.message
-        ]
+        warnings = [e for e in errors if e.severity == "warning" and "batch_size" in e.message]
         assert len(warnings) >= 1
 
     def test_empty_triggers_list_warning(self):
@@ -503,11 +477,7 @@ class TestTriggerValidation:
                 "triggers": [],
             }
         )
-        warnings = [
-            e
-            for e in errors
-            if e.severity == "warning" and "trigger" in e.message.lower()
-        ]
+        warnings = [e for e in errors if e.severity == "warning" and "trigger" in e.message.lower()]
         assert len(warnings) >= 1
 
 
@@ -628,9 +598,7 @@ class TestDLQValidation:
             }
         )
         assert not any(
-            "dlq" in e.message.lower() or "dead_letter" in e.message.lower()
-            for e in errors
-            if e.severity == "error"
+            "dlq" in e.message.lower() or "dead_letter" in e.message.lower() for e in errors if e.severity == "error"
         )
 
     def test_dlq_disabled_no_errors(self):

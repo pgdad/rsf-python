@@ -26,16 +26,16 @@ class TestLocalRunner:
 
     def test_simple_two_state_workflow_executes(self, tmp_path):
         """Simple Task -> End workflow executes and returns final output."""
-        defn = _make_definition({
-            "Start": {"Type": "Task", "End": True},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Task", "End": True},
+            }
+        )
 
         # Create a simple handler
         handlers_dir = tmp_path / "handlers"
         handlers_dir.mkdir()
-        (handlers_dir / "start.py").write_text(
-            "def start(event):\n    return {'result': 'done'}\n"
-        )
+        (handlers_dir / "start.py").write_text("def start(event):\n    return {'result': 'done'}\n")
 
         runner = LocalRunner(
             definition=defn,
@@ -50,16 +50,16 @@ class TestLocalRunner:
 
     def test_trace_includes_state_names_and_transitions(self, tmp_path):
         """Trace output includes state names and transition arrows."""
-        defn = _make_definition({
-            "Start": {"Type": "Task", "Next": "End"},
-            "End": {"Type": "Succeed"},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Task", "Next": "End"},
+                "End": {"Type": "Succeed"},
+            }
+        )
 
         handlers_dir = tmp_path / "handlers"
         handlers_dir.mkdir()
-        (handlers_dir / "start.py").write_text(
-            "def start(event):\n    return event\n"
-        )
+        (handlers_dir / "start.py").write_text("def start(event):\n    return event\n")
 
         runner = LocalRunner(
             definition=defn,
@@ -77,9 +77,11 @@ class TestLocalRunner:
 
     def test_pass_state_injects_result(self, tmp_path):
         """Pass state injects Result into output correctly."""
-        defn = _make_definition({
-            "Start": {"Type": "Pass", "Result": {"injected": True}, "End": True},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Pass", "Result": {"injected": True}, "End": True},
+            }
+        )
 
         runner = LocalRunner(
             definition=defn,
@@ -156,10 +158,12 @@ class TestLocalRunner:
 
     def test_wait_state_skipped_in_local_mode(self, tmp_path):
         """Wait state is skipped (no delay) but appears in trace."""
-        defn = _make_definition({
-            "Start": {"Type": "Wait", "Seconds": 30, "Next": "Done"},
-            "Done": {"Type": "Succeed"},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Wait", "Seconds": 30, "Next": "Done"},
+                "Done": {"Type": "Succeed"},
+            }
+        )
 
         runner = LocalRunner(
             definition=defn,
@@ -176,9 +180,11 @@ class TestLocalRunner:
 
     def test_succeed_state_terminates_with_success(self, tmp_path):
         """Succeed state terminates execution with success."""
-        defn = _make_definition({
-            "Start": {"Type": "Succeed"},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Succeed"},
+            }
+        )
 
         runner = LocalRunner(
             definition=defn,
@@ -192,13 +198,15 @@ class TestLocalRunner:
 
     def test_fail_state_terminates_with_error(self, tmp_path):
         """Fail state terminates execution with error message."""
-        defn = _make_definition({
-            "Start": {
-                "Type": "Fail",
-                "Error": "CustomError",
-                "Cause": "Something went wrong",
-            },
-        })
+        defn = _make_definition(
+            {
+                "Start": {
+                    "Type": "Fail",
+                    "Error": "CustomError",
+                    "Cause": "Something went wrong",
+                },
+            }
+        )
 
         runner = LocalRunner(
             definition=defn,
@@ -213,10 +221,12 @@ class TestLocalRunner:
 
     def test_mock_handlers_passes_input_through(self, tmp_path):
         """--mock-handlers passes input through without calling real handler functions."""
-        defn = _make_definition({
-            "Start": {"Type": "Task", "Next": "Process"},
-            "Process": {"Type": "Task", "End": True},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Task", "Next": "Process"},
+                "Process": {"Type": "Task", "End": True},
+            }
+        )
 
         # Don't create any handler files -- mock mode shouldn't need them
         runner = LocalRunner(
@@ -233,29 +243,29 @@ class TestLocalRunner:
 
     def test_handler_exception_with_catch_routes_to_target(self, tmp_path):
         """Handler exception with Catch routes to the catch target state."""
-        defn = _make_definition({
-            "Start": {
-                "Type": "Task",
-                "Catch": [
-                    {
-                        "ErrorEquals": ["States.ALL"],
-                        "Next": "HandleError",
-                    },
-                ],
-                "End": True,
-            },
-            "HandleError": {
-                "Type": "Pass",
-                "Result": {"handled": True},
-                "End": True,
-            },
-        })
+        defn = _make_definition(
+            {
+                "Start": {
+                    "Type": "Task",
+                    "Catch": [
+                        {
+                            "ErrorEquals": ["States.ALL"],
+                            "Next": "HandleError",
+                        },
+                    ],
+                    "End": True,
+                },
+                "HandleError": {
+                    "Type": "Pass",
+                    "Result": {"handled": True},
+                    "End": True,
+                },
+            }
+        )
 
         handlers_dir = tmp_path / "handlers"
         handlers_dir.mkdir()
-        (handlers_dir / "start.py").write_text(
-            "def start(event):\n    raise ValueError('test error')\n"
-        )
+        (handlers_dir / "start.py").write_text("def start(event):\n    raise ValueError('test error')\n")
 
         runner = LocalRunner(
             definition=defn,
@@ -271,24 +281,27 @@ class TestLocalRunner:
 
     def test_handler_exception_with_retry(self, tmp_path):
         """Handler exception with Retry retries the configured number of times."""
-        defn = _make_definition({
-            "Start": {
-                "Type": "Task",
-                "Retry": [
-                    {
-                        "ErrorEquals": ["States.ALL"],
-                        "MaxAttempts": 2,
-                        "IntervalSeconds": 0,
-                    },
-                ],
-                "End": True,
-            },
-        })
+        defn = _make_definition(
+            {
+                "Start": {
+                    "Type": "Task",
+                    "Retry": [
+                        {
+                            "ErrorEquals": ["States.ALL"],
+                            "MaxAttempts": 2,
+                            "IntervalSeconds": 0,
+                        },
+                    ],
+                    "End": True,
+                },
+            }
+        )
 
         handlers_dir = tmp_path / "handlers"
         handlers_dir.mkdir()
         # Handler that fails first 2 times, succeeds on 3rd
-        (handlers_dir / "start.py").write_text(textwrap.dedent("""\
+        (handlers_dir / "start.py").write_text(
+            textwrap.dedent("""\
             _call_count = 0
             def start(event):
                 global _call_count
@@ -296,7 +309,8 @@ class TestLocalRunner:
                 if _call_count < 3:
                     raise ValueError(f'attempt {_call_count}')
                 return {'attempt': _call_count}
-        """))
+        """)
+        )
 
         runner = LocalRunner(
             definition=defn,
@@ -310,15 +324,15 @@ class TestLocalRunner:
 
     def test_handler_exception_without_error_handling_stops(self, tmp_path):
         """Handler exception without error handling stops execution with traceback."""
-        defn = _make_definition({
-            "Start": {"Type": "Task", "End": True},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Task", "End": True},
+            }
+        )
 
         handlers_dir = tmp_path / "handlers"
         handlers_dir.mkdir()
-        (handlers_dir / "start.py").write_text(
-            "def start(event):\n    raise RuntimeError('fatal error')\n"
-        )
+        (handlers_dir / "start.py").write_text("def start(event):\n    raise RuntimeError('fatal error')\n")
 
         runner = LocalRunner(
             definition=defn,
@@ -332,9 +346,11 @@ class TestLocalRunner:
 
     def test_json_output_produces_json_lines(self, tmp_path):
         """--json flag produces JSON lines output (one dict per transition)."""
-        defn = _make_definition({
-            "Start": {"Type": "Pass", "Result": {"ok": True}, "End": True},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Pass", "Result": {"ok": True}, "End": True},
+            }
+        )
 
         output = StringIO()
         runner = LocalRunner(
@@ -378,9 +394,11 @@ class TestLocalRunner:
 
     def test_verbose_mode_records_input_output(self, tmp_path):
         """Verbose mode (-v) records input/output payloads at each state."""
-        defn = _make_definition({
-            "Start": {"Type": "Pass", "Result": {"transformed": True}, "End": True},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Pass", "Result": {"transformed": True}, "End": True},
+            }
+        )
 
         runner = LocalRunner(
             definition=defn,
@@ -403,15 +421,15 @@ class TestChaosIntegration:
         """--chaos StateName:timeout causes the state to fail with ChaosTimeoutError."""
         from rsf.testing.chaos import ChaosFixture
 
-        defn = _make_definition({
-            "Start": {"Type": "Task", "End": True},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Task", "End": True},
+            }
+        )
 
         handlers_dir = tmp_path / "handlers"
         handlers_dir.mkdir()
-        (handlers_dir / "start.py").write_text(
-            "def start(event):\n    return {'result': 'done'}\n"
-        )
+        (handlers_dir / "start.py").write_text("def start(event):\n    return {'result': 'done'}\n")
 
         chaos = ChaosFixture()
         chaos.inject_failure("Start", "timeout")
@@ -431,15 +449,15 @@ class TestChaosIntegration:
         """--chaos StateName:exception causes RuntimeError."""
         from rsf.testing.chaos import ChaosFixture
 
-        defn = _make_definition({
-            "Start": {"Type": "Task", "End": True},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Task", "End": True},
+            }
+        )
 
         handlers_dir = tmp_path / "handlers"
         handlers_dir.mkdir()
-        (handlers_dir / "start.py").write_text(
-            "def start(event):\n    return {'result': 'done'}\n"
-        )
+        (handlers_dir / "start.py").write_text("def start(event):\n    return {'result': 'done'}\n")
 
         chaos = ChaosFixture()
         chaos.inject_failure("Start", "exception")
@@ -459,15 +477,15 @@ class TestChaosIntegration:
         """--chaos StateName:throttle causes ChaosThrottleError."""
         from rsf.testing.chaos import ChaosFixture
 
-        defn = _make_definition({
-            "Start": {"Type": "Task", "End": True},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Task", "End": True},
+            }
+        )
 
         handlers_dir = tmp_path / "handlers"
         handlers_dir.mkdir()
-        (handlers_dir / "start.py").write_text(
-            "def start(event):\n    return {'ok': True}\n"
-        )
+        (handlers_dir / "start.py").write_text("def start(event):\n    return {'ok': True}\n")
 
         chaos = ChaosFixture()
         chaos.inject_failure("Start", "throttle")
@@ -487,24 +505,24 @@ class TestChaosIntegration:
         """Chaos-injected failure interacts with Catch to route to error handler."""
         from rsf.testing.chaos import ChaosFixture
 
-        defn = _make_definition({
-            "Start": {
-                "Type": "Task",
-                "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "HandleError"}],
-                "End": True,
-            },
-            "HandleError": {
-                "Type": "Pass",
-                "Result": {"caught": True},
-                "End": True,
-            },
-        })
+        defn = _make_definition(
+            {
+                "Start": {
+                    "Type": "Task",
+                    "Catch": [{"ErrorEquals": ["States.ALL"], "Next": "HandleError"}],
+                    "End": True,
+                },
+                "HandleError": {
+                    "Type": "Pass",
+                    "Result": {"caught": True},
+                    "End": True,
+                },
+            }
+        )
 
         handlers_dir = tmp_path / "handlers"
         handlers_dir.mkdir()
-        (handlers_dir / "start.py").write_text(
-            "def start(event):\n    return {'ok': True}\n"
-        )
+        (handlers_dir / "start.py").write_text("def start(event):\n    return {'ok': True}\n")
 
         chaos = ChaosFixture()
         chaos.inject_failure("Start", "exception")
@@ -524,19 +542,19 @@ class TestChaosIntegration:
         """Chaos-injected failure with count=1 interacts with Retry -- first call fails, retry succeeds."""
         from rsf.testing.chaos import ChaosFixture
 
-        defn = _make_definition({
-            "Start": {
-                "Type": "Task",
-                "Retry": [{"ErrorEquals": ["States.ALL"], "MaxAttempts": 2, "IntervalSeconds": 0}],
-                "End": True,
-            },
-        })
+        defn = _make_definition(
+            {
+                "Start": {
+                    "Type": "Task",
+                    "Retry": [{"ErrorEquals": ["States.ALL"], "MaxAttempts": 2, "IntervalSeconds": 0}],
+                    "End": True,
+                },
+            }
+        )
 
         handlers_dir = tmp_path / "handlers"
         handlers_dir.mkdir()
-        (handlers_dir / "start.py").write_text(
-            "def start(event):\n    return {'result': 'ok'}\n"
-        )
+        (handlers_dir / "start.py").write_text("def start(event):\n    return {'result': 'ok'}\n")
 
         chaos = ChaosFixture()
         chaos.inject_failure("Start", "timeout", count=1)
@@ -557,19 +575,17 @@ class TestChaosIntegration:
         """States without chaos injection execute normally."""
         from rsf.testing.chaos import ChaosFixture
 
-        defn = _make_definition({
-            "Start": {"Type": "Task", "Next": "Process"},
-            "Process": {"Type": "Task", "End": True},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Task", "Next": "Process"},
+                "Process": {"Type": "Task", "End": True},
+            }
+        )
 
         handlers_dir = tmp_path / "handlers"
         handlers_dir.mkdir()
-        (handlers_dir / "start.py").write_text(
-            "def start(event):\n    return {'step': 1}\n"
-        )
-        (handlers_dir / "process.py").write_text(
-            "def process(event):\n    return {'step': 2}\n"
-        )
+        (handlers_dir / "start.py").write_text("def start(event):\n    return {'step': 1}\n")
+        (handlers_dir / "process.py").write_text("def process(event):\n    return {'step': 2}\n")
 
         chaos = ChaosFixture()
         chaos.inject_failure("Process", "timeout")  # Only Process fails
@@ -589,15 +605,15 @@ class TestChaosIntegration:
 
     def test_no_chaos_fixture_runs_normally(self, tmp_path):
         """When chaos_fixture is None (default), behavior is unchanged."""
-        defn = _make_definition({
-            "Start": {"Type": "Task", "End": True},
-        })
+        defn = _make_definition(
+            {
+                "Start": {"Type": "Task", "End": True},
+            }
+        )
 
         handlers_dir = tmp_path / "handlers"
         handlers_dir.mkdir()
-        (handlers_dir / "start.py").write_text(
-            "def start(event):\n    return {'result': 'done'}\n"
-        )
+        (handlers_dir / "start.py").write_text("def start(event):\n    return {'result': 'done'}\n")
 
         runner = LocalRunner(
             definition=defn,

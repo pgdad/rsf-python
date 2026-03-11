@@ -33,11 +33,7 @@ def _render_template(template_name: str, **kwargs: str) -> str:
 
 def _get_available_templates() -> list[str]:
     """Return names of available template subdirectories containing a workflow.yaml."""
-    return sorted(
-        d.name
-        for d in _TEMPLATES_DIR.iterdir()
-        if d.is_dir() and (d / "workflow.yaml").exists()
-    )
+    return sorted(d.name for d in _TEMPLATES_DIR.iterdir() if d.is_dir() and (d / "workflow.yaml").exists())
 
 
 def _scaffold_from_template(template_name: str, project_name: str, project_dir: Path) -> list[str]:
@@ -108,18 +104,13 @@ def init(
         for tpl_name in available_templates:
             desc = _TEMPLATE_DESCRIPTIONS.get(tpl_name, "No description available")
             console.print(f"  [cyan]{tpl_name}[/cyan] — {desc}")
-        console.print(
-            "\n[bold]Usage:[/bold] rsf init --template <name> [project-name]\n"
-        )
+        console.print("\n[bold]Usage:[/bold] rsf init --template <name> [project-name]\n")
         return
 
     # Handle --template <name>
     if template is not None:
         if template not in available_templates:
-            console.print(
-                f"[red]Error:[/red] Unknown template '{template}'. "
-                f"Available templates:"
-            )
+            console.print(f"[red]Error:[/red] Unknown template '{template}'. Available templates:")
             for tpl_name in available_templates:
                 desc = _TEMPLATE_DESCRIPTIONS.get(tpl_name, "")
                 console.print(f"  [cyan]{tpl_name}[/cyan] — {desc}")
@@ -142,8 +133,7 @@ def init(
         created_files = _scaffold_from_template(template, project_name, project_dir)
 
         console.print(
-            f"\n[bold green]Created project from template "
-            f"[cyan]{template}[/cyan]:[/bold green] {project_name}/\n"
+            f"\n[bold green]Created project from template [cyan]{template}[/cyan]:[/bold green] {project_name}/\n"
         )
         for filename in created_files:
             console.print(f"  [dim]+[/dim] {project_name}/{filename}")

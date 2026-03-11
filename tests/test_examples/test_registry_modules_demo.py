@@ -148,9 +148,7 @@ class TestRegistryModulesDemoIntegration:
                     text=True,
                 )
                 if state_check.stdout.strip():
-                    logger.warning(
-                        "deployment: safety net — terraform state not empty, running direct destroy"
-                    )
+                    logger.warning("deployment: safety net — terraform state not empty, running direct destroy")
                     subprocess.run(
                         [
                             "terraform",
@@ -171,9 +169,7 @@ class TestRegistryModulesDemoIntegration:
                     logger.info("deployment: safety net — deleted log group %s", log_group)
                 except ClientError as e:
                     if e.response["Error"]["Code"] == "ResourceNotFoundException":
-                        logger.info(
-                            "deployment: log group already deleted: %s", log_group
-                        )
+                        logger.info("deployment: log group already deleted: %s", log_group)
                     else:
                         raise
 
@@ -194,10 +190,7 @@ class TestRegistryModulesDemoIntegration:
             deployment["start_time"],
         )
 
-        messages = " ".join(
-            next((f["value"] for f in row if f["field"] == "@message"), "")
-            for row in results
-        )
+        messages = " ".join(next((f["value"] for f in row if f["field"] == "@message"), "") for row in results)
 
         for handler in ("ValidateImage", "ResizeImage", "AnalyzeContent", "CatalogueImage"):
             assert handler in messages, f"Handler '{handler}' not found in CloudWatch logs"
@@ -265,9 +258,7 @@ class TestRegistryModulesDemoIntegration:
             logs_client.delete_log_group(logGroupName=log_group)
         except ClientError as e:
             if e.response["Error"]["Code"] == "ResourceNotFoundException":
-                logger.info(
-                    "test_z_teardown: log group already deleted: %s", log_group
-                )
+                logger.info("test_z_teardown: log group already deleted: %s", log_group)
             else:
                 raise
 

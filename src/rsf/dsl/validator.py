@@ -101,10 +101,7 @@ def _validate_triggers(
             if trigger.schedule_expression is None and trigger.event_pattern is None:
                 errors.append(
                     ValidationError(
-                        message=(
-                            "EventBridge trigger must have at least one of "
-                            "schedule_expression or event_pattern"
-                        ),
+                        message=("EventBridge trigger must have at least one of schedule_expression or event_pattern"),
                         path=f"triggers[{i}]",
                     )
                 )
@@ -230,10 +227,7 @@ def _validate_alarms(
         if alarm.type in seen_types:
             errors.append(
                 ValidationError(
-                    message=(
-                        f"Multiple alarms of type '{alarm.type}' — "
-                        "consider combining into a single alarm"
-                    ),
+                    message=(f"Multiple alarms of type '{alarm.type}' — consider combining into a single alarm"),
                     path=f"alarms[{i}]",
                     severity="warning",
                 )
@@ -280,8 +274,7 @@ def _collect_sub_workflow_refs(
                 errors.append(
                     ValidationError(
                         message=(
-                            f"SubWorkflow '{state.sub_workflow}' in state '{name}' "
-                            "is not declared in sub_workflows"
+                            f"SubWorkflow '{state.sub_workflow}' in state '{name}' is not declared in sub_workflows"
                         ),
                         path=f"States.{name}.SubWorkflow",
                     )
@@ -292,9 +285,7 @@ def _collect_sub_workflow_refs(
                 _collect_sub_workflow_refs(branch.states, referenced, errors, declared)
         # Recurse into Map ItemProcessor
         if isinstance(state, MapState) and state.item_processor is not None:
-            _collect_sub_workflow_refs(
-                state.item_processor.states, referenced, errors, declared
-            )
+            _collect_sub_workflow_refs(state.item_processor.states, referenced, errors, declared)
 
 
 def _validate_state_machine(

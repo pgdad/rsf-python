@@ -35,9 +35,7 @@ class ChaosThrottleError(Exception):
     """
 
     def __init__(self, state_name: str):
-        super().__init__(
-            f"TooManyRequestsException: Rate exceeded for state '{state_name}'"
-        )
+        super().__init__(f"TooManyRequestsException: Rate exceeded for state '{state_name}'")
         self.state_name = state_name
 
 
@@ -80,10 +78,7 @@ class ChaosFixture:
         """
         valid_types = ("timeout", "exception", "throttle")
         if isinstance(failure_type, str) and failure_type not in valid_types:
-            raise ValueError(
-                f"Invalid failure_type '{failure_type}'. "
-                f"Must be one of {valid_types} or a callable."
-            )
+            raise ValueError(f"Invalid failure_type '{failure_type}'. Must be one of {valid_types} or a callable.")
         self._failures[state_name] = _InjectedFailure(
             state_name=state_name,
             failure_type=failure_type,

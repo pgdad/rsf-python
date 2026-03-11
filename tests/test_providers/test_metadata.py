@@ -376,4 +376,3 @@ class TestCreateMetadata:
         meta = create_metadata(defn, "test-wf")
         assert meta.lambda_url_enabled is False
         assert meta.lambda_url_auth_type == "NONE"
-

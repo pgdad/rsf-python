@@ -61,9 +61,7 @@ def workflow_data(draw):
                     max_size=5,
                 )
             ),
-            "status": draw(
-                st.sampled_from(["pending", "approved", "rejected", "processing"])
-            ),
+            "status": draw(st.sampled_from(["pending", "approved", "rejected", "processing"])),
         },
     }
     # Add random extra keys

@@ -95,16 +95,10 @@ def _parse_since(since: str) -> int:
     return int((datetime.now(timezone.utc) - timedelta(hours=1)).timestamp() * 1000)
 
 
-def _filter_by_level(
-    events: list[dict[str, Any]], min_level: str
-) -> list[dict[str, Any]]:
+def _filter_by_level(events: list[dict[str, Any]], min_level: str) -> list[dict[str, Any]]:
     """Filter log events to only those at or above the minimum level."""
     min_priority = LEVEL_PRIORITY.get(min_level.upper(), 1)
-    return [
-        e
-        for e in events
-        if LEVEL_PRIORITY.get(_extract_level(e.get("message", "")), 1) >= min_priority
-    ]
+    return [e for e in events if LEVEL_PRIORITY.get(_extract_level(e.get("message", "")), 1) >= min_priority]
 
 
 def _format_log_line(
@@ -139,42 +133,23 @@ def _format_log_line(
         return f"[{ts_str}] [{function_name}] [{level}] {clean_message}"
 
     color = LEVEL_COLORS.get(level, "white")
-    return (
-        f"[dim]{ts_str}[/dim] [bold]{function_name}[/bold] "
-        f"[{color}]{level}[/{color}] {clean_message}"
-    )
+    return f"[dim]{ts_str}[/dim] [bold]{function_name}[/bold] [{color}]{level}[/{color}] {clean_message}"
 
 
 def logs(
-    workflow: Path = typer.Argument(
-        "workflow.yaml", help="Path to workflow YAML file"
-    ),
+    workflow: Path = typer.Argument("workflow.yaml", help="Path to workflow YAML file"),
     tf_dir: Path = typer.Option(
         "terraform",
         "--tf-dir",
         help="Terraform directory for log group discovery",
     ),
-    execution_id: str | None = typer.Option(
-        None, "--execution-id", help="Filter logs by execution ID"
-    ),
-    tail: bool = typer.Option(
-        False, "--tail", "-f", help="Continuously stream new log events"
-    ),
-    since: str = typer.Option(
-        "1h", "--since", help="Show logs since (e.g., 1h, 30m, 2d, or ISO date)"
-    ),
-    level: str | None = typer.Option(
-        None, "--level", help="Minimum log level: INFO, WARN, ERROR"
-    ),
-    output_json: bool = typer.Option(
-        False, "--json", help="Output in JSONL format"
-    ),
-    no_color: bool = typer.Option(
-        False, "--no-color", help="Disable colored output"
-    ),
-    stage: str | None = typer.Option(
-        None, "--stage", help="Deployment stage"
-    ),
+    execution_id: str | None = typer.Option(None, "--execution-id", help="Filter logs by execution ID"),
+    tail: bool = typer.Option(False, "--tail", "-f", help="Continuously stream new log events"),
+    since: str = typer.Option("1h", "--since", help="Show logs since (e.g., 1h, 30m, 2d, or ISO date)"),
+    level: str | None = typer.Option(None, "--level", help="Minimum log level: INFO, WARN, ERROR"),
+    output_json: bool = typer.Option(False, "--json", help="Output in JSONL format"),
+    no_color: bool = typer.Option(False, "--no-color", help="Disable colored output"),
+    stage: str | None = typer.Option(None, "--stage", help="Deployment stage"),
 ) -> None:
     """Tail and search CloudWatch logs across all workflow Lambda functions.
 
@@ -198,9 +173,7 @@ def logs(
         )
         raise typer.Exit(code=1)
 
-    console.print(
-        f"[blue]Streaming logs from {len(log_groups)} function(s)...[/blue]"
-    )
+    console.print(f"[blue]Streaming logs from {len(log_groups)} function(s)...[/blue]")
     for lg in log_groups:
         console.print(f"  [dim]{lg}[/dim]")
     console.print()
@@ -271,9 +244,7 @@ def logs(
 
             # Update start time to avoid duplicate events
             if all_events:
-                filter_kwargs["startTime"] = (
-                    all_events[-1].get("timestamp", start_time) + 1
-                )
+                filter_kwargs["startTime"] = all_events[-1].get("timestamp", start_time) + 1
 
             time.sleep(2)
 

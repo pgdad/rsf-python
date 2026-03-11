@@ -126,9 +126,7 @@ class TestCustomProviderDeploy:
         executable_script: Path,
     ) -> None:
         """deploy() calls subprocess.run with correct program path."""
-        ctx = _make_ctx(
-            minimal_metadata, tmp_path, str(executable_script), args=["deploy"]
-        )
+        ctx = _make_ctx(minimal_metadata, tmp_path, str(executable_script), args=["deploy"])
         with patch.object(provider, "run_provider_command_streaming") as mock_run:
             mock_run.return_value = MagicMock(returncode=0)
             provider.deploy(ctx)
@@ -290,9 +288,7 @@ class TestCustomProviderDeploy:
         tmp_path: Path,
     ) -> None:
         """Non-existent program raises FileNotFoundError."""
-        ctx = _make_ctx(
-            minimal_metadata, tmp_path, "/nonexistent/program/deploy.sh"
-        )
+        ctx = _make_ctx(minimal_metadata, tmp_path, "/nonexistent/program/deploy.sh")
         with pytest.raises(FileNotFoundError, match="not found"):
             provider.deploy(ctx)
 
@@ -637,9 +633,7 @@ class TestCustomProviderStreaming:
         """run_provider_command_streaming merges env with os.environ."""
         with patch("rsf.providers.custom.subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(returncode=0)
-            provider.run_provider_command_streaming(
-                ["echo"], env={"MY_VAR": "test"}
-            )
+            provider.run_provider_command_streaming(["echo"], env={"MY_VAR": "test"})
 
         call_kwargs = mock_run.call_args.kwargs
         assert call_kwargs["env"]["MY_VAR"] == "test"

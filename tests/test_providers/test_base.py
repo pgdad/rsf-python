@@ -247,9 +247,7 @@ class TestRunProviderCommand:
     @patch("rsf.providers.base.subprocess.run")
     def test_returns_completed_process(self, mock_run: MagicMock) -> None:
         """run_provider_command() returns CompletedProcess."""
-        expected = subprocess.CompletedProcess(
-            args=["echo", "hello"], returncode=0, stdout="hello\n", stderr=""
-        )
+        expected = subprocess.CompletedProcess(args=["echo", "hello"], returncode=0, stdout="hello\n", stderr="")
         mock_run.return_value = expected
         provider = _CompleteProvider()
         result = provider.run_provider_command(["echo", "hello"])
@@ -258,9 +256,7 @@ class TestRunProviderCommand:
     @patch("rsf.providers.base.subprocess.run")
     def test_raises_on_nonzero_exit(self, mock_run: MagicMock) -> None:
         """run_provider_command() raises CalledProcessError on failure."""
-        mock_run.side_effect = subprocess.CalledProcessError(
-            returncode=1, cmd=["bad-cmd"]
-        )
+        mock_run.side_effect = subprocess.CalledProcessError(returncode=1, cmd=["bad-cmd"])
         provider = _CompleteProvider()
         with pytest.raises(subprocess.CalledProcessError):
             provider.run_provider_command(["bad-cmd"])
@@ -268,9 +264,7 @@ class TestRunProviderCommand:
     @patch("rsf.providers.base.subprocess.run")
     def test_merges_env_with_os_environ(self, mock_run: MagicMock) -> None:
         """run_provider_command() merges provided env with os.environ."""
-        mock_run.return_value = subprocess.CompletedProcess(
-            args=["echo"], returncode=0, stdout="", stderr=""
-        )
+        mock_run.return_value = subprocess.CompletedProcess(args=["echo"], returncode=0, stdout="", stderr="")
         provider = _CompleteProvider()
         custom_env = {"MY_VAR": "my_value"}
         provider.run_provider_command(["echo"], env=custom_env)
@@ -285,9 +279,7 @@ class TestRunProviderCommand:
     @patch("rsf.providers.base.subprocess.run")
     def test_passes_cwd(self, mock_run: MagicMock, tmp_path: Path) -> None:
         """run_provider_command() passes cwd to subprocess."""
-        mock_run.return_value = subprocess.CompletedProcess(
-            args=["echo"], returncode=0, stdout="", stderr=""
-        )
+        mock_run.return_value = subprocess.CompletedProcess(args=["echo"], returncode=0, stdout="", stderr="")
         provider = _CompleteProvider()
         provider.run_provider_command(["echo"], cwd=tmp_path)
 
@@ -297,9 +289,7 @@ class TestRunProviderCommand:
     @patch("rsf.providers.base.subprocess.run")
     def test_captures_output_as_text(self, mock_run: MagicMock) -> None:
         """run_provider_command() captures output as text."""
-        mock_run.return_value = subprocess.CompletedProcess(
-            args=["echo"], returncode=0, stdout="output", stderr=""
-        )
+        mock_run.return_value = subprocess.CompletedProcess(args=["echo"], returncode=0, stdout="output", stderr="")
         provider = _CompleteProvider()
         provider.run_provider_command(["echo"])
 

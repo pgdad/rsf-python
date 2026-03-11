@@ -94,9 +94,7 @@ class EnvTransport(MetadataTransport):
 
 
 # Valid placeholders for CLI arg templates: WorkflowMetadata field names + metadata_file
-_VALID_PLACEHOLDERS: set[str] = set(WorkflowMetadata.__dataclass_fields__.keys()) | {
-    "metadata_file"
-}
+_VALID_PLACEHOLDERS: set[str] = set(WorkflowMetadata.__dataclass_fields__.keys()) | {"metadata_file"}
 
 
 class ArgsTransport(MetadataTransport):

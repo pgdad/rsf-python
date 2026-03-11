@@ -94,13 +94,9 @@ class TestLambdaUrlTriggerIntegration:
     def test_post_returns_success(self, deployment):
         """HTTP POST to Lambda URL should return a success status code."""
         response = deployment["post_response"]
-        assert response.status_code == 200, (
-            f"Expected 200, got {response.status_code}: {response.text}"
-        )
+        assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
 
     def test_execution_succeeded(self, deployment):
         """Durable execution should complete with SUCCEEDED status."""
         execution = deployment["execution"]
-        assert execution["Status"] == "SUCCEEDED", (
-            f"Expected SUCCEEDED, got {execution.get('Status')}"
-        )
+        assert execution["Status"] == "SUCCEEDED", f"Expected SUCCEEDED, got {execution.get('Status')}"

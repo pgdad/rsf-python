@@ -84,10 +84,12 @@ class TestInfrastructureConfig:
 
     def test_from_dict(self) -> None:
         """InfrastructureConfig can be created from dict (model_validate)."""
-        config = InfrastructureConfig.model_validate({
-            "provider": "terraform",
-            "terraform": {"tf_dir": "custom", "backend_bucket": "my-bucket"},
-        })
+        config = InfrastructureConfig.model_validate(
+            {
+                "provider": "terraform",
+                "terraform": {"tf_dir": "custom", "backend_bucket": "my-bucket"},
+            }
+        )
         assert config.provider == "terraform"
         assert config.terraform.tf_dir == "custom"
         assert config.terraform.backend_bucket == "my-bucket"

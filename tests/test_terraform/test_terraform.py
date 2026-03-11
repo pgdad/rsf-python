@@ -350,9 +350,7 @@ class TestTriggerGeneration:
     def test_sqs_trigger_creates_resources(self, tmp_path):
         config = TerraformConfig(
             workflow_name="test",
-            triggers=[
-                {"type": "sqs", "queue_name": "order-events", "batch_size": 5}
-            ],
+            triggers=[{"type": "sqs", "queue_name": "order-events", "batch_size": 5}],
         )
         generate_terraform(config, tmp_path)
         content = (tmp_path / "triggers.tf").read_text()
@@ -400,9 +398,7 @@ class TestTriggerGeneration:
     def test_sqs_trigger_produces_iam_permissions(self, tmp_path):
         config = TerraformConfig(
             workflow_name="test",
-            triggers=[
-                {"type": "sqs", "queue_name": "my-queue", "batch_size": 10}
-            ],
+            triggers=[{"type": "sqs", "queue_name": "my-queue", "batch_size": 10}],
             has_sqs_triggers=True,
         )
         generate_terraform(config, tmp_path)
@@ -415,9 +411,7 @@ class TestTriggerGeneration:
     def test_eventbridge_trigger_produces_lambda_permission(self, tmp_path):
         config = TerraformConfig(
             workflow_name="test",
-            triggers=[
-                {"type": "eventbridge", "schedule_expression": "rate(5 minutes)", "event_pattern": None}
-            ],
+            triggers=[{"type": "eventbridge", "schedule_expression": "rate(5 minutes)", "event_pattern": None}],
         )
         generate_terraform(config, tmp_path)
         content = (tmp_path / "triggers.tf").read_text()

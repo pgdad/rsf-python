@@ -34,13 +34,17 @@ class TestWorkflowDiffEngine:
 
     def test_state_added_shows_as_added(self):
         """State present in local but not deployed shows as 'added'."""
-        local = _make_definition({
-            "Start": {"Type": "Task", "Next": "NewState"},
-            "NewState": {"Type": "Pass", "End": True},
-        })
-        deployed = _make_definition({
-            "Start": {"Type": "Task", "End": True},
-        })
+        local = _make_definition(
+            {
+                "Start": {"Type": "Task", "Next": "NewState"},
+                "NewState": {"Type": "Pass", "End": True},
+            }
+        )
+        deployed = _make_definition(
+            {
+                "Start": {"Type": "Task", "End": True},
+            }
+        )
         diffs = compute_diff(local, deployed)
         state_diffs = [d for d in diffs if d.component == "State" and d.name == "NewState"]
         assert len(state_diffs) == 1
@@ -49,13 +53,17 @@ class TestWorkflowDiffEngine:
 
     def test_state_removed_shows_as_removed(self):
         """State present in deployed but not local shows as 'removed'."""
-        local = _make_definition({
-            "Start": {"Type": "Task", "End": True},
-        })
-        deployed = _make_definition({
-            "Start": {"Type": "Task", "Next": "OldState"},
-            "OldState": {"Type": "Pass", "End": True},
-        })
+        local = _make_definition(
+            {
+                "Start": {"Type": "Task", "End": True},
+            }
+        )
+        deployed = _make_definition(
+            {
+                "Start": {"Type": "Task", "Next": "OldState"},
+                "OldState": {"Type": "Pass", "End": True},
+            }
+        )
         diffs = compute_diff(local, deployed)
         state_diffs = [d for d in diffs if d.component == "State" and d.name == "OldState"]
         assert len(state_diffs) == 1
@@ -63,12 +71,16 @@ class TestWorkflowDiffEngine:
 
     def test_state_type_changed_shows_as_changed(self):
         """State with different type shows as 'changed'."""
-        local = _make_definition({
-            "Start": {"Type": "Pass", "End": True},
-        })
-        deployed = _make_definition({
-            "Start": {"Type": "Task", "End": True},
-        })
+        local = _make_definition(
+            {
+                "Start": {"Type": "Pass", "End": True},
+            }
+        )
+        deployed = _make_definition(
+            {
+                "Start": {"Type": "Task", "End": True},
+            }
+        )
         diffs = compute_diff(local, deployed)
         state_diffs = [d for d in diffs if d.component == "State" and d.name == "Start"]
         assert len(state_diffs) == 1
@@ -78,16 +90,20 @@ class TestWorkflowDiffEngine:
 
     def test_transition_changed_detected(self):
         """State with different Next target shows as transition change."""
-        local = _make_definition({
-            "Start": {"Type": "Task", "Next": "StateB"},
-            "StateA": {"Type": "Pass", "End": True},
-            "StateB": {"Type": "Pass", "End": True},
-        })
-        deployed = _make_definition({
-            "Start": {"Type": "Task", "Next": "StateA"},
-            "StateA": {"Type": "Pass", "End": True},
-            "StateB": {"Type": "Pass", "End": True},
-        })
+        local = _make_definition(
+            {
+                "Start": {"Type": "Task", "Next": "StateB"},
+                "StateA": {"Type": "Pass", "End": True},
+                "StateB": {"Type": "Pass", "End": True},
+            }
+        )
+        deployed = _make_definition(
+            {
+                "Start": {"Type": "Task", "Next": "StateA"},
+                "StateA": {"Type": "Pass", "End": True},
+                "StateB": {"Type": "Pass", "End": True},
+            }
+        )
         diffs = compute_diff(local, deployed)
         transition_diffs = [d for d in diffs if d.component == "Transition" and d.name == "Start"]
         assert len(transition_diffs) == 1
@@ -120,13 +136,17 @@ class TestWorkflowDiffEngine:
 
     def test_handler_added_detected(self):
         """Adding a Task state should also report a handler addition."""
-        local = _make_definition({
-            "Start": {"Type": "Task", "Next": "Process"},
-            "Process": {"Type": "Task", "End": True},
-        })
-        deployed = _make_definition({
-            "Start": {"Type": "Task", "End": True},
-        })
+        local = _make_definition(
+            {
+                "Start": {"Type": "Task", "Next": "Process"},
+                "Process": {"Type": "Task", "End": True},
+            }
+        )
+        deployed = _make_definition(
+            {
+                "Start": {"Type": "Task", "End": True},
+            }
+        )
         diffs = compute_diff(local, deployed)
         handler_diffs = [d for d in diffs if d.component == "Handler" and d.name == "Process"]
         assert len(handler_diffs) == 1
@@ -134,14 +154,18 @@ class TestWorkflowDiffEngine:
 
     def test_multiple_changes_all_reported(self):
         """Multiple changes in same workflow should all be reported."""
-        local = _make_definition({
-            "Start": {"Type": "Pass", "Next": "NewState"},
-            "NewState": {"Type": "Task", "End": True},
-        })
-        deployed = _make_definition({
-            "Start": {"Type": "Task", "Next": "OldState"},
-            "OldState": {"Type": "Pass", "End": True},
-        })
+        local = _make_definition(
+            {
+                "Start": {"Type": "Pass", "Next": "NewState"},
+                "NewState": {"Type": "Task", "End": True},
+            }
+        )
+        deployed = _make_definition(
+            {
+                "Start": {"Type": "Task", "Next": "OldState"},
+                "OldState": {"Type": "Pass", "End": True},
+            }
+        )
         diffs = compute_diff(local, deployed)
         # Should have changes for: Start type change, Start transition change,
         # NewState added (+ handler), OldState removed
@@ -149,10 +173,12 @@ class TestWorkflowDiffEngine:
 
     def test_none_deployed_treats_all_as_added(self):
         """None deployed definition means everything is new."""
-        local = _make_definition({
-            "Start": {"Type": "Task", "Next": "Process"},
-            "Process": {"Type": "Pass", "End": True},
-        })
+        local = _make_definition(
+            {
+                "Start": {"Type": "Task", "Next": "Process"},
+                "Process": {"Type": "Pass", "End": True},
+            }
+        )
         diffs = compute_diff(local, None)
         state_diffs = [d for d in diffs if d.component == "State"]
         assert len(state_diffs) == 2

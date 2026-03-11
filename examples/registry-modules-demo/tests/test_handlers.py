@@ -15,9 +15,7 @@ class TestValidateImageHandler:
         """A valid JPEG image should return valid=True with correct format and size."""
         from handlers.validate_image import validate_image
 
-        result = validate_image(
-            {"image_id": "img-001", "format": "jpeg", "size_bytes": 1024 * 1024}
-        )
+        result = validate_image({"image_id": "img-001", "format": "jpeg", "size_bytes": 1024 * 1024})
         assert result["valid"] is True
         assert result["format"] == "jpeg"
         assert result["size_bytes"] == 1024 * 1024
@@ -26,9 +24,7 @@ class TestValidateImageHandler:
         """A valid PNG image should return valid=True."""
         from handlers.validate_image import validate_image
 
-        result = validate_image(
-            {"image_id": "img-002", "format": "png", "size_bytes": 512 * 1024}
-        )
+        result = validate_image({"image_id": "img-002", "format": "png", "size_bytes": 512 * 1024})
         assert result["valid"] is True
         assert result["format"] == "png"
 
@@ -51,9 +47,7 @@ class TestValidateImageHandler:
         """An image exactly at 10 MB should pass validation."""
         from handlers.validate_image import validate_image
 
-        result = validate_image(
-            {"image_id": "img-005", "format": "webp", "size_bytes": 10 * 1024 * 1024}
-        )
+        result = validate_image({"image_id": "img-005", "format": "webp", "size_bytes": 10 * 1024 * 1024})
         assert result["valid"] is True
 
     def test_validate_image_gif_format(self):
@@ -77,9 +71,7 @@ class TestResizeImageHandler:
         """Resize should compute correct target_height from aspect ratio."""
         from handlers.resize_image import resize_image
 
-        result = resize_image(
-            {"image_id": "img-010", "width": 1920, "height": 1080, "target_width": 960}
-        )
+        result = resize_image({"image_id": "img-010", "width": 1920, "height": 1080, "target_width": 960})
         assert result["resized"] is True
         assert result["original_width"] == 1920
         assert result["original_height"] == 1080
@@ -90,18 +82,14 @@ class TestResizeImageHandler:
         """Resizing a square image should produce a square target."""
         from handlers.resize_image import resize_image
 
-        result = resize_image(
-            {"image_id": "img-011", "width": 800, "height": 800, "target_width": 400}
-        )
+        result = resize_image({"image_id": "img-011", "width": 800, "height": 800, "target_width": 400})
         assert result["target_height"] == 400
 
     def test_resize_image_portrait_image(self):
         """Resizing a portrait image should maintain aspect ratio."""
         from handlers.resize_image import resize_image
 
-        result = resize_image(
-            {"image_id": "img-012", "width": 600, "height": 900, "target_width": 300}
-        )
+        result = resize_image({"image_id": "img-012", "width": 600, "height": 900, "target_width": 300})
         assert result["target_height"] == 450  # 900 * (300/600)
 
 

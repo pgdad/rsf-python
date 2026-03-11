@@ -49,9 +49,7 @@ def test_validate_file_wrong_extension_rejected(mock_s3: MagicMock) -> None:
 def test_transform_csv_to_jsonl(mock_s3: MagicMock) -> None:
     """TransformData converts CSV to JSON lines format."""
     csv_content = "name,age\nAlice,30\nBob,25"
-    mock_s3.get_object.return_value = {
-        "Body": BytesIO(csv_content.encode())
-    }
+    mock_s3.get_object.return_value = {"Body": BytesIO(csv_content.encode())}
     from handlers.transform_data import transform_data
 
     event = {"key": "data/people.csv", "bucket": "uploads", "valid": True, "size": 100}

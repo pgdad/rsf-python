@@ -114,9 +114,7 @@ def deploy(
 
     # Step 6: Check --code-only constraint (Terraform-specific)
     if code_only and infra_config.provider != "terraform":
-        console.print(
-            "[red]Error:[/red] --code-only is only supported with the terraform provider"
-        )
+        console.print("[red]Error:[/red] --code-only is only supported with the terraform provider")
         raise typer.Exit(code=1)
 
     # Step 7: Derive workflow name
@@ -180,18 +178,14 @@ def _deploy_full(provider: object, ctx: ProviderContext) -> None:
     with Status("[bold]Generating infrastructure files...[/bold]", console=console):
         provider.generate(ctx)
 
-    console.print(
-        f"[green]Infrastructure generated[/green] in [bold]{ctx.output_dir}[/bold]"
-    )
+    console.print(f"[green]Infrastructure generated[/green] in [bold]{ctx.output_dir}[/bold]")
 
     # Deploy via provider
     console.print("\n[bold]Deploying infrastructure...[/bold]")
     try:
         provider.deploy(ctx)
     except subprocess.CalledProcessError as exc:
-        console.print(
-            f"[red]Error:[/red] Infrastructure deploy failed (exit {exc.returncode})"
-        )
+        console.print(f"[red]Error:[/red] Infrastructure deploy failed (exit {exc.returncode})")
         if exc.stderr:
             console.print(f"[dim]{exc.stderr.strip()}[/dim]")
         if exc.stdout:
@@ -207,9 +201,7 @@ def _teardown_infra(provider: object, ctx: ProviderContext) -> None:
     try:
         provider.teardown(ctx)
     except subprocess.CalledProcessError as exc:
-        console.print(
-            f"[red]Error:[/red] Infrastructure teardown failed (exit {exc.returncode})"
-        )
+        console.print(f"[red]Error:[/red] Infrastructure teardown failed (exit {exc.returncode})")
         raise typer.Exit(code=1)
     except NotImplementedError as exc:
         console.print(f"[red]Error:[/red] {exc}")
@@ -225,10 +217,7 @@ def _deploy_code_only(ctx: ProviderContext) -> None:
     """
     # Check terraform binary
     if not shutil.which("terraform"):
-        console.print(
-            "[red]Error:[/red] terraform binary not found. "
-            "Install from https://terraform.io"
-        )
+        console.print("[red]Error:[/red] terraform binary not found. Install from https://terraform.io")
         raise typer.Exit(code=1)
 
     # Check output_dir has terraform state
@@ -240,9 +229,7 @@ def _deploy_code_only(ctx: ProviderContext) -> None:
         raise typer.Exit(code=1)
 
     # Run targeted terraform apply for Lambda only
-    console.print(
-        "\n[bold]Running targeted terraform apply (Lambda code update)...[/bold]"
-    )
+    console.print("\n[bold]Running targeted terraform apply (Lambda code update)...[/bold]")
     targeted_cmd = [
         "terraform",
         "apply",
@@ -258,9 +245,7 @@ def _deploy_code_only(ctx: ProviderContext) -> None:
             check=True,
         )
     except subprocess.CalledProcessError as exc:
-        console.print(
-            f"[red]Error:[/red] terraform apply --code-only failed (exit {exc.returncode})"
-        )
+        console.print(f"[red]Error:[/red] terraform apply --code-only failed (exit {exc.returncode})")
         raise typer.Exit(code=1)
 
     console.print("\n[green]Code update complete[/green]")

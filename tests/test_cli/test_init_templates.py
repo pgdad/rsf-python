@@ -39,9 +39,7 @@ def test_template_list_shows_descriptions(tmp_path: Path, monkeypatch: pytest.Mo
 # ─── API Gateway CRUD Template ──────────────────────────────────────────────
 
 
-def test_api_gateway_crud_creates_complete_scaffold(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_api_gateway_crud_creates_complete_scaffold(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf init --template api-gateway-crud creates all expected files."""
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["init", "--template", "api-gateway-crud", "my-api"])
@@ -70,9 +68,7 @@ def test_api_gateway_crud_creates_complete_scaffold(
         assert (project / rel_path).exists(), f"Missing file: {rel_path}"
 
 
-def test_api_gateway_crud_default_project_name(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_api_gateway_crud_default_project_name(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf init --template api-gateway-crud without project name defaults to template name."""
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["init", "--template", "api-gateway-crud"])
@@ -85,9 +81,7 @@ def test_api_gateway_crud_default_project_name(
 # ─── S3 Event Pipeline Template ─────────────────────────────────────────────
 
 
-def test_s3_event_pipeline_creates_complete_scaffold(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_s3_event_pipeline_creates_complete_scaffold(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf init --template s3-event-pipeline creates all expected files."""
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["init", "--template", "s3-event-pipeline", "my-pipeline"])
@@ -115,9 +109,7 @@ def test_s3_event_pipeline_creates_complete_scaffold(
         assert (project / rel_path).exists(), f"Missing file: {rel_path}"
 
 
-def test_s3_event_pipeline_default_project_name(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_s3_event_pipeline_default_project_name(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf init --template s3-event-pipeline without project name defaults to template name."""
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["init", "--template", "s3-event-pipeline"])
@@ -142,9 +134,7 @@ def test_invalid_template_shows_error(tmp_path: Path, monkeypatch: pytest.Monkey
     assert "s3-event-pipeline" in result.output
 
 
-def test_no_project_name_no_template_shows_error(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_no_project_name_no_template_shows_error(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf init without project name or template shows error."""
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["init"])
@@ -177,9 +167,7 @@ def test_default_init_still_works(tmp_path: Path, monkeypatch: pytest.MonkeyPatc
 
 
 @pytest.mark.parametrize("template", ["api-gateway-crud", "s3-event-pipeline"])
-def test_template_workflow_yaml_is_valid(
-    template: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_template_workflow_yaml_is_valid(template: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Scaffolded workflow.yaml is valid YAML with StartAt and States fields."""
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["init", "--template", template, f"test-{template}"])
@@ -196,9 +184,7 @@ def test_template_workflow_yaml_is_valid(
 
 
 @pytest.mark.parametrize("template", ["api-gateway-crud", "s3-event-pipeline"])
-def test_template_pyproject_has_project_name(
-    template: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_template_pyproject_has_project_name(template: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Scaffolded pyproject.toml contains the correct project name."""
     monkeypatch.chdir(tmp_path)
     project_name = f"my-{template}-project"
@@ -213,9 +199,7 @@ def test_template_pyproject_has_project_name(
 
 
 @pytest.mark.parametrize("template", ["api-gateway-crud", "s3-event-pipeline"])
-def test_template_gitignore_created(
-    template: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_template_gitignore_created(template: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Scaffolded project has .gitignore (renamed from gitignore)."""
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["init", "--template", template, f"test-{template}"])
@@ -228,9 +212,7 @@ def test_template_gitignore_created(
 
 
 @pytest.mark.parametrize("template", ["api-gateway-crud", "s3-event-pipeline"])
-def test_template_has_handlers_and_tests_dirs(
-    template: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_template_has_handlers_and_tests_dirs(template: str, tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """Scaffolded project has handlers/ and tests/ subdirectories."""
     monkeypatch.chdir(tmp_path)
     result = runner.invoke(app, ["init", "--template", template, f"test-{template}"])

@@ -78,9 +78,7 @@ class CustomProvider(InfrastructureProvider):
         try:
             extra_args = transport.prepare(ctx.metadata, env)
             cmd = [str(program)] + list(config.args) + extra_args
-            self.run_provider_command_streaming(
-                cmd, cwd=ctx.workflow_path.parent, env=env
-            )
+            self.run_provider_command_streaming(cmd, cwd=ctx.workflow_path.parent, env=env)
         finally:
             transport.cleanup()
 
@@ -115,9 +113,7 @@ class CustomProvider(InfrastructureProvider):
         try:
             extra_args = transport.prepare(ctx.metadata, env)
             cmd = [str(program)] + list(config.teardown_args) + extra_args
-            self.run_provider_command_streaming(
-                cmd, cwd=ctx.workflow_path.parent, env=env
-            )
+            self.run_provider_command_streaming(cmd, cwd=ctx.workflow_path.parent, env=env)
         finally:
             transport.cleanup()
 
@@ -153,8 +149,7 @@ class CustomProvider(InfrastructureProvider):
                     PrerequisiteCheck(
                         "custom-program-executable",
                         "fail",
-                        f"custom program is not executable: {config.program}. "
-                        f"Fix: chmod +x {config.program}",
+                        f"custom program is not executable: {config.program}. Fix: chmod +x {config.program}",
                     )
                 )
         else:
@@ -182,10 +177,7 @@ class CustomProvider(InfrastructureProvider):
         config = self._get_config(ctx)
 
         if not Path(config.program).is_absolute():
-            raise ValueError(
-                f"Custom provider program must be an absolute path, "
-                f"got: {config.program}"
-            )
+            raise ValueError(f"Custom provider program must be an absolute path, got: {config.program}")
 
         # Validate arg templates if using args transport
         if config.metadata_transport == "args":
@@ -248,10 +240,7 @@ class CustomProvider(InfrastructureProvider):
                 "Ensure 'definition' is passed to ProviderContext."
             )
 
-        if (
-            ctx.definition.infrastructure is None
-            or ctx.definition.infrastructure.custom is None
-        ):
+        if ctx.definition.infrastructure is None or ctx.definition.infrastructure.custom is None:
             raise ValueError(
                 "CustomProvider requires 'custom' block in infrastructure config. "
                 "Add 'custom:' with 'program:' to your workflow YAML."
@@ -276,27 +265,17 @@ class CustomProvider(InfrastructureProvider):
         path = Path(program)
 
         if not path.is_absolute():
-            raise ValueError(
-                f"Custom provider program must be an absolute path, "
-                f"got: {program}"
-            )
+            raise ValueError(f"Custom provider program must be an absolute path, got: {program}")
 
         if not path.exists():
-            raise FileNotFoundError(
-                f"Custom provider program not found: {program}"
-            )
+            raise FileNotFoundError(f"Custom provider program not found: {program}")
 
         if not os.access(path, os.X_OK):
-            raise PermissionError(
-                f"Custom provider program is not executable: {program}\n"
-                f"Fix: chmod +x {program}"
-            )
+            raise PermissionError(f"Custom provider program is not executable: {program}\nFix: chmod +x {program}")
 
         return path
 
-    def _create_transport(
-        self, config: CustomProviderConfig
-    ) -> MetadataTransport:
+    def _create_transport(self, config: CustomProviderConfig) -> MetadataTransport:
         """Create the appropriate MetadataTransport from config.
 
         Args:
@@ -314,6 +293,4 @@ class CustomProvider(InfrastructureProvider):
             return EnvTransport()
         if config.metadata_transport == "args":
             return ArgsTransport(config.args)
-        raise ValueError(
-            f"Unknown metadata_transport: {config.metadata_transport}"
-        )
+        raise ValueError(f"Unknown metadata_transport: {config.metadata_transport}")

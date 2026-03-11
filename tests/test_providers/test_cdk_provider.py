@@ -59,9 +59,7 @@ class TestCDKProviderInterface:
 class TestCDKProviderGenerate:
     """Tests for CDKProvider.generate()."""
 
-    def test_generate_delegates_to_generator(
-        self, provider: CDKProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_generate_delegates_to_generator(self, provider: CDKProvider, minimal_ctx: ProviderContext) -> None:
         """generate() calls generate_cdk with correct config."""
         with patch("rsf.providers.cdk.generate_cdk") as mock_gen:
             mock_gen.return_value = MagicMock(generated_files=[], skipped_files=[])
@@ -78,9 +76,7 @@ class TestCDKProviderGenerate:
 class TestCDKProviderDeploy:
     """Tests for CDKProvider.deploy()."""
 
-    def test_deploy_calls_streaming_subprocess(
-        self, provider: CDKProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_deploy_calls_streaming_subprocess(self, provider: CDKProvider, minimal_ctx: ProviderContext) -> None:
         """deploy() invokes npx aws-cdk@latest deploy."""
         with (
             patch.object(provider, "_check_bootstrap_or_warn"),
@@ -139,9 +135,7 @@ class TestCDKProviderDeploy:
         c_idx = cmd.index("-c")
         assert cmd[c_idx + 1] == "stage=prod"
 
-    def test_deploy_checks_bootstrap_first(
-        self, provider: CDKProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_deploy_checks_bootstrap_first(self, provider: CDKProvider, minimal_ctx: ProviderContext) -> None:
         """deploy() calls _check_bootstrap_or_warn before running cdk deploy."""
         call_order = []
 
@@ -165,9 +159,7 @@ class TestCDKProviderDeploy:
 class TestCDKProviderBootstrap:
     """Tests for CDK bootstrap detection."""
 
-    def test_bootstrap_missing_raises(
-        self, provider: CDKProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_bootstrap_missing_raises(self, provider: CDKProvider, minimal_ctx: ProviderContext) -> None:
         """When CDKToolkit stack is missing, raises SystemExit with bootstrap command."""
         from botocore.exceptions import ClientError
 
@@ -185,9 +177,7 @@ class TestCDKProviderBootstrap:
             with pytest.raises(SystemExit, match="CDKToolkit"):
                 provider._check_bootstrap_or_warn(minimal_ctx)
 
-    def test_bootstrap_present_continues(
-        self, provider: CDKProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_bootstrap_present_continues(self, provider: CDKProvider, minimal_ctx: ProviderContext) -> None:
         """When CDKToolkit stack exists, _check_bootstrap_or_warn returns quietly."""
         mock_cf = MagicMock()
         mock_cf.describe_stacks.return_value = {"Stacks": [{"StackName": "CDKToolkit"}]}
@@ -221,9 +211,7 @@ class TestCDKProviderBootstrap:
 class TestCDKProviderTeardown:
     """Tests for CDKProvider.teardown()."""
 
-    def test_teardown_calls_destroy(
-        self, provider: CDKProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_teardown_calls_destroy(self, provider: CDKProvider, minimal_ctx: ProviderContext) -> None:
         """teardown() invokes cdk destroy --force."""
         with patch.object(provider, "run_provider_command_streaming") as mock_run:
             mock_run.return_value = MagicMock(returncode=0)
@@ -258,9 +246,7 @@ class TestCDKProviderTeardown:
 class TestCDKProviderPrereqs:
     """Tests for CDKProvider.check_prerequisites()."""
 
-    def test_npx_found(
-        self, provider: CDKProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_npx_found(self, provider: CDKProvider, minimal_ctx: ProviderContext) -> None:
         """check_prerequisites() returns pass for npx when found."""
         with patch("rsf.providers.cdk.shutil.which", side_effect=lambda x: "/usr/bin/npx" if x == "npx" else None):
             checks = provider.check_prerequisites(minimal_ctx)
@@ -268,9 +254,7 @@ class TestCDKProviderPrereqs:
         npx_check = next(c for c in checks if c.name == "node/npx")
         assert npx_check.status == "pass"
 
-    def test_npx_missing(
-        self, provider: CDKProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_npx_missing(self, provider: CDKProvider, minimal_ctx: ProviderContext) -> None:
         """check_prerequisites() returns fail for missing npx."""
         with patch("rsf.providers.cdk.shutil.which", return_value=None):
             checks = provider.check_prerequisites(minimal_ctx)
@@ -279,9 +263,7 @@ class TestCDKProviderPrereqs:
         assert npx_check.status == "fail"
         assert "nodejs" in npx_check.message.lower() or "node" in npx_check.message.lower()
 
-    def test_cdk_found(
-        self, provider: CDKProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_cdk_found(self, provider: CDKProvider, minimal_ctx: ProviderContext) -> None:
         """check_prerequisites() returns pass for cdk binary when found."""
         with patch("rsf.providers.cdk.shutil.which", return_value="/usr/bin/mock"):
             checks = provider.check_prerequisites(minimal_ctx)
@@ -289,9 +271,7 @@ class TestCDKProviderPrereqs:
         cdk_check = next(c for c in checks if c.name == "cdk")
         assert cdk_check.status == "pass"
 
-    def test_cdk_missing_is_warn_not_fail(
-        self, provider: CDKProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_cdk_missing_is_warn_not_fail(self, provider: CDKProvider, minimal_ctx: ProviderContext) -> None:
         """check_prerequisites() returns warn (not fail) for missing cdk binary."""
         with patch("rsf.providers.cdk.shutil.which", side_effect=lambda x: "/usr/bin/npx" if x == "npx" else None):
             checks = provider.check_prerequisites(minimal_ctx)
@@ -300,9 +280,7 @@ class TestCDKProviderPrereqs:
         assert cdk_check.status == "warn"
         assert "npm install" in cdk_check.message
 
-    def test_returns_both_checks(
-        self, provider: CDKProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_returns_both_checks(self, provider: CDKProvider, minimal_ctx: ProviderContext) -> None:
         """check_prerequisites() returns checks for both npx and cdk."""
         with patch("rsf.providers.cdk.shutil.which", return_value="/usr/bin/mock"):
             checks = provider.check_prerequisites(minimal_ctx)
@@ -315,9 +293,7 @@ class TestCDKProviderPrereqs:
 class TestCDKProviderValidateConfig:
     """Tests for CDKProvider.validate_config()."""
 
-    def test_validate_config_noop(
-        self, provider: CDKProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_validate_config_noop(self, provider: CDKProvider, minimal_ctx: ProviderContext) -> None:
         """validate_config() is a no-op (Pydantic handles validation)."""
         # Should not raise
         result = provider.validate_config(minimal_ctx)
@@ -327,9 +303,7 @@ class TestCDKProviderValidateConfig:
 class TestCDKProviderStreaming:
     """Tests for streaming subprocess execution."""
 
-    def test_streaming_subprocess_no_capture(
-        self, provider: CDKProvider
-    ) -> None:
+    def test_streaming_subprocess_no_capture(self, provider: CDKProvider) -> None:
         """run_provider_command_streaming does not use capture_output."""
         with patch("rsf.providers.cdk.subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(returncode=0)
@@ -348,9 +322,7 @@ class TestCDKProviderStreaming:
         """run_provider_command_streaming merges env with os.environ."""
         with patch("rsf.providers.cdk.subprocess.run") as mock_run:
             mock_run.return_value = MagicMock(returncode=0)
-            provider.run_provider_command_streaming(
-                ["echo"], env={"MY_VAR": "test"}
-            )
+            provider.run_provider_command_streaming(["echo"], env={"MY_VAR": "test"})
 
         call_kwargs = mock_run.call_args.kwargs
         assert call_kwargs["env"]["MY_VAR"] == "test"

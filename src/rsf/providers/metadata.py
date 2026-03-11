@@ -69,9 +69,7 @@ def create_metadata(
         WorkflowMetadata with all infrastructure fields extracted.
     """
     # Count handler (TaskState) instances
-    handler_count = sum(
-        1 for s in definition.states.values() if isinstance(s, TaskState)
-    )
+    handler_count = sum(1 for s in definition.states.values() if isinstance(s, TaskState))
 
     # Extract triggers
     triggers: list[dict[str, Any]] = []
@@ -137,11 +135,7 @@ def create_metadata(
     # Extract Lambda URL config
     lambda_url_enabled = False
     lambda_url_auth_type = "NONE"
-    if (
-        hasattr(definition, "lambda_url")
-        and definition.lambda_url
-        and definition.lambda_url.enabled
-    ):
+    if hasattr(definition, "lambda_url") and definition.lambda_url and definition.lambda_url.enabled:
         lambda_url_enabled = True
         lambda_url_auth_type = definition.lambda_url.auth_type.value
 

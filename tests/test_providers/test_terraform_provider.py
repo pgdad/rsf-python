@@ -71,9 +71,7 @@ def minimal_ctx(minimal_metadata: WorkflowMetadata, tmp_path: Path) -> ProviderC
 class TestTerraformProviderGenerate:
     """Tests for TerraformProvider.generate()."""
 
-    def test_generate_calls_generate_terraform(
-        self, provider: TerraformProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_generate_calls_generate_terraform(self, provider: TerraformProvider, minimal_ctx: ProviderContext) -> None:
         """generate() delegates to generate_terraform() with correct config."""
         with patch("rsf.providers.terraform.generate_terraform") as mock_gen:
             mock_gen.return_value = MagicMock(generated_files=[], skipped_files=[])
@@ -119,9 +117,7 @@ class TestTerraformProviderGenerate:
 class TestTerraformProviderDeploy:
     """Tests for TerraformProvider.deploy()."""
 
-    def test_deploy_runs_init_then_apply(
-        self, provider: TerraformProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_deploy_runs_init_then_apply(self, provider: TerraformProvider, minimal_ctx: ProviderContext) -> None:
         """deploy() calls terraform init then terraform apply."""
         with patch.object(provider, "run_provider_command") as mock_run:
             mock_run.return_value = MagicMock(returncode=0)
@@ -176,9 +172,7 @@ class TestTerraformProviderDeploy:
 class TestTerraformProviderTeardown:
     """Tests for TerraformProvider.teardown()."""
 
-    def test_teardown_runs_destroy(
-        self, provider: TerraformProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_teardown_runs_destroy(self, provider: TerraformProvider, minimal_ctx: ProviderContext) -> None:
         """teardown() calls terraform destroy -auto-approve."""
         with patch.object(provider, "run_provider_command") as mock_run:
             mock_run.return_value = MagicMock(returncode=0)
@@ -192,9 +186,7 @@ class TestTerraformProviderTeardown:
 class TestTerraformProviderPrereqs:
     """Tests for TerraformProvider.check_prerequisites()."""
 
-    def test_terraform_found(
-        self, provider: TerraformProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_terraform_found(self, provider: TerraformProvider, minimal_ctx: ProviderContext) -> None:
         """check_prerequisites() returns pass when terraform binary found."""
         with patch("rsf.providers.terraform.shutil.which", return_value="/usr/bin/terraform"):
             checks = provider.check_prerequisites(minimal_ctx)
@@ -203,9 +195,7 @@ class TestTerraformProviderPrereqs:
         assert checks[0].status == "pass"
         assert checks[0].name == "terraform"
 
-    def test_terraform_missing(
-        self, provider: TerraformProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_terraform_missing(self, provider: TerraformProvider, minimal_ctx: ProviderContext) -> None:
         """check_prerequisites() returns warn when terraform binary not found."""
         with patch("rsf.providers.terraform.shutil.which", return_value=None):
             checks = provider.check_prerequisites(minimal_ctx)
@@ -218,9 +208,7 @@ class TestTerraformProviderPrereqs:
 class TestTerraformProviderValidateConfig:
     """Tests for TerraformProvider.validate_config()."""
 
-    def test_validate_config_noop(
-        self, provider: TerraformProvider, minimal_ctx: ProviderContext
-    ) -> None:
+    def test_validate_config_noop(self, provider: TerraformProvider, minimal_ctx: ProviderContext) -> None:
         """validate_config() is a no-op (Pydantic handles validation)."""
         # Should not raise
         provider.validate_config(minimal_ctx)

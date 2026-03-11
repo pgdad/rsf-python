@@ -26,9 +26,7 @@ def test_create_item_returns_201(mock_uuid: MagicMock, mock_table: MagicMock) ->
 @patch("handlers.get_item.table")
 def test_get_item_returns_200(mock_table: MagicMock) -> None:
     """GetItem handler returns 200 with item data."""
-    mock_table.get_item.return_value = {
-        "Item": {"id": "abc-123", "name": "Widget"}
-    }
+    mock_table.get_item.return_value = {"Item": {"id": "abc-123", "name": "Widget"}}
     from handlers.get_item import get_item
 
     event = {"pathParameters": {"id": "abc-123"}}
@@ -57,9 +55,7 @@ def test_get_item_returns_404_when_not_found(mock_table: MagicMock) -> None:
 @patch("handlers.update_item.table")
 def test_update_item_returns_200(mock_table: MagicMock) -> None:
     """UpdateItem handler returns 200 with updated attributes."""
-    mock_table.update_item.return_value = {
-        "Attributes": {"id": "abc-123", "name": "Updated Widget", "price": 19.99}
-    }
+    mock_table.update_item.return_value = {"Attributes": {"id": "abc-123", "name": "Updated Widget", "price": 19.99}}
     from handlers.update_item import update_item
 
     event = {

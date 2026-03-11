@@ -111,11 +111,13 @@ class TestValidateOrderHandler:
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("ValidateOrder")
 
-        result = handler({
-            "orderId": "test-001",
-            "items": [{"name": "Widget", "price": 29.99, "quantity": 2}],
-            "total": 59.98,
-        })
+        result = handler(
+            {
+                "orderId": "test-001",
+                "items": [{"name": "Widget", "price": 29.99, "quantity": 2}],
+                "total": 59.98,
+            }
+        )
 
         assert result["valid"] is True
         assert result["orderId"] == "test-001"
@@ -127,14 +129,16 @@ class TestValidateOrderHandler:
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("ValidateOrder")
 
-        result = handler({
-            "orderId": "test-002",
-            "items": [
-                {"name": "Widget A", "price": 10.00, "quantity": 1},
-                {"name": "Widget B", "price": 20.00, "quantity": 3},
-            ],
-            "total": 70.00,
-        })
+        result = handler(
+            {
+                "orderId": "test-002",
+                "items": [
+                    {"name": "Widget A", "price": 10.00, "quantity": 1},
+                    {"name": "Widget B", "price": 20.00, "quantity": 3},
+                ],
+                "total": 70.00,
+            }
+        )
 
         assert result["valid"] is True
         assert result["itemCount"] == 2
@@ -145,11 +149,13 @@ class TestValidateOrderHandler:
         handler = get_handler("ValidateOrder")
 
         with pytest.raises(Exception, match="at least one item"):
-            handler({
-                "orderId": "test-003",
-                "items": [],
-                "total": 0,
-            })
+            handler(
+                {
+                    "orderId": "test-003",
+                    "items": [],
+                    "total": 0,
+                }
+            )
 
     def test_negative_total_raises(self):
         """Order with negative total should raise an error."""
@@ -157,11 +163,13 @@ class TestValidateOrderHandler:
         handler = get_handler("ValidateOrder")
 
         with pytest.raises(Exception, match="not be negative"):
-            handler({
-                "orderId": "test-004",
-                "items": [{"name": "Widget", "price": 10.00, "quantity": 1}],
-                "total": -5.00,
-            })
+            handler(
+                {
+                    "orderId": "test-004",
+                    "items": [{"name": "Widget", "price": 10.00, "quantity": 1}],
+                    "total": -5.00,
+                }
+            )
 
     def test_non_list_items_raises(self):
         """Order with non-list items should raise an error."""
@@ -169,11 +177,13 @@ class TestValidateOrderHandler:
         handler = get_handler("ValidateOrder")
 
         with pytest.raises(Exception, match="must be a list"):
-            handler({
-                "orderId": "test-005",
-                "items": "not a list",
-                "total": 10.00,
-            })
+            handler(
+                {
+                    "orderId": "test-005",
+                    "items": "not a list",
+                    "total": 10.00,
+                }
+            )
 
     def test_non_numeric_total_raises(self):
         """Order with non-numeric total should raise an error."""
@@ -181,11 +191,13 @@ class TestValidateOrderHandler:
         handler = get_handler("ValidateOrder")
 
         with pytest.raises(Exception, match="must be a number"):
-            handler({
-                "orderId": "test-006",
-                "items": [{"name": "Widget", "price": 10.00, "quantity": 1}],
-                "total": "not a number",
-            })
+            handler(
+                {
+                    "orderId": "test-006",
+                    "items": [{"name": "Widget", "price": 10.00, "quantity": 1}],
+                    "total": "not a number",
+                }
+            )
 
 
 class TestProcessOrderHandler:
@@ -196,11 +208,13 @@ class TestProcessOrderHandler:
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("ProcessOrder")
 
-        result = handler({
-            "orderId": "test-001",
-            "total": 59.98,
-            "itemCount": 1,
-        })
+        result = handler(
+            {
+                "orderId": "test-001",
+                "total": 59.98,
+                "itemCount": 1,
+            }
+        )
 
         assert result["processed"] is True
         assert result["orderId"] == "test-001"

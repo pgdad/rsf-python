@@ -67,9 +67,7 @@ def test_init_workflow_yaml_is_valid(tmp_path: Path, monkeypatch: pytest.MonkeyP
 
     # Verify at least one state has Type: Task so rsf generate produces handler stubs
     has_task = any(
-        state_def.get("Type") == "Task"
-        for state_def in data["States"].values()
-        if isinstance(state_def, dict)
+        state_def.get("Type") == "Task" for state_def in data["States"].values() if isinstance(state_def, dict)
     )
     assert has_task, "Default workflow must contain at least one Task state"
 
@@ -100,12 +98,17 @@ def test_init_then_generate_produces_handler(tmp_path: Path, monkeypatch: pytest
 
     # Step 2: run generate from the project directory
     monkeypatch.chdir(project)
-    gen_result = runner.invoke(app, [
-        "generate",
-        "workflow.yaml",
-        "--output", str(project / "src" / "generated"),
-        "--handlers-dir", str(project / "src" / "handlers"),
-    ])
+    gen_result = runner.invoke(
+        app,
+        [
+            "generate",
+            "workflow.yaml",
+            "--output",
+            str(project / "src" / "generated"),
+            "--handlers-dir",
+            str(project / "src" / "handlers"),
+        ],
+    )
     assert gen_result.exit_code == 0, f"rsf generate failed: {gen_result.output}"
 
     # Step 3: verify generated handler stub exists for HelloWorld Task state
@@ -116,6 +119,4 @@ def test_init_then_generate_produces_handler(tmp_path: Path, monkeypatch: pytest
 
     # Step 4: verify output mentions handler creation or skip
     output_lower = gen_result.output.lower()
-    assert "handler" in output_lower, (
-        f"Generate output should mention handlers. Got: {gen_result.output}"
-    )
+    assert "handler" in output_lower, f"Generate output should mention handlers. Got: {gen_result.output}"

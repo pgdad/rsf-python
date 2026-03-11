@@ -31,16 +31,12 @@ class TestDiscoverLogGroups:
                 {
                     "type": "aws_lambda_function",
                     "name": "orchestrator",
-                    "instances": [
-                        {"attributes": {"function_name": "my-workflow-orchestrator"}}
-                    ],
+                    "instances": [{"attributes": {"function_name": "my-workflow-orchestrator"}}],
                 },
                 {
                     "type": "aws_lambda_function",
                     "name": "handler",
-                    "instances": [
-                        {"attributes": {"function_name": "my-workflow-handler"}}
-                    ],
+                    "instances": [{"attributes": {"function_name": "my-workflow-handler"}}],
                 },
             ]
         }
@@ -76,9 +72,7 @@ class TestDiscoverLogGroups:
                 {
                     "type": "aws_lambda_function",
                     "name": "fn",
-                    "instances": [
-                        {"attributes": {"function_name": "my-function"}}
-                    ],
+                    "instances": [{"attributes": {"function_name": "my-function"}}],
                 },
             ]
         }
@@ -150,9 +144,7 @@ class TestParseSince:
     def test_iso_date_returns_correct_epoch(self) -> None:
         """Test 9: ISO date returns correct epoch_ms."""
         result = _parse_since("2026-01-01T00:00:00Z")
-        expected = int(
-            datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc).timestamp() * 1000
-        )
+        expected = int(datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc).timestamp() * 1000)
         assert result == expected
 
 
@@ -235,9 +227,7 @@ class TestLogsCommand:
                 {
                     "type": "aws_lambda_function",
                     "name": "fn",
-                    "instances": [
-                        {"attributes": {"function_name": "my-fn"}}
-                    ],
+                    "instances": [{"attributes": {"function_name": "my-fn"}}],
                 }
             ]
         }
@@ -277,9 +267,7 @@ class TestLogsCommand:
                 {
                     "type": "aws_lambda_function",
                     "name": "fn",
-                    "instances": [
-                        {"attributes": {"function_name": "my-fn"}}
-                    ],
+                    "instances": [{"attributes": {"function_name": "my-fn"}}],
                 }
             ]
         }
@@ -292,7 +280,6 @@ class TestLogsCommand:
         }
 
         with patch("boto3.client", return_value=mock_client):
-
             from typer.testing import CliRunner
             from rsf.cli.main import app
 
@@ -321,9 +308,7 @@ class TestLogsCommand:
                 {
                     "type": "aws_lambda_function",
                     "name": "fn",
-                    "instances": [
-                        {"attributes": {"function_name": "my-fn"}}
-                    ],
+                    "instances": [{"attributes": {"function_name": "my-fn"}}],
                 }
             ]
         }
@@ -334,18 +319,12 @@ class TestLogsCommand:
             "events": [
                 {
                     "logGroupName": "/aws/lambda/my-fn",
-                    "timestamp": int(
-                        datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc).timestamp()
-                        * 1000
-                    ),
+                    "timestamp": int(datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc).timestamp() * 1000),
                     "message": "INFO: normal log",
                 },
                 {
                     "logGroupName": "/aws/lambda/my-fn",
-                    "timestamp": int(
-                        datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc).timestamp()
-                        * 1000
-                    ),
+                    "timestamp": int(datetime(2026, 1, 1, 0, 0, 1, tzinfo=timezone.utc).timestamp() * 1000),
                     "message": "ERROR: something broke",
                 },
             ],
@@ -353,7 +332,6 @@ class TestLogsCommand:
         }
 
         with patch("boto3.client", return_value=mock_client):
-
             from typer.testing import CliRunner
             from rsf.cli.main import app
 
@@ -382,9 +360,7 @@ class TestLogsCommand:
                 {
                     "type": "aws_lambda_function",
                     "name": "fn",
-                    "instances": [
-                        {"attributes": {"function_name": "my-fn"}}
-                    ],
+                    "instances": [{"attributes": {"function_name": "my-fn"}}],
                 }
             ]
         }
@@ -395,10 +371,7 @@ class TestLogsCommand:
             "events": [
                 {
                     "logGroupName": "/aws/lambda/my-fn",
-                    "timestamp": int(
-                        datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc).timestamp()
-                        * 1000
-                    ),
+                    "timestamp": int(datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc).timestamp() * 1000),
                     "message": "Hello from Lambda",
                 },
             ],
@@ -406,7 +379,6 @@ class TestLogsCommand:
         }
 
         with patch("boto3.client", return_value=mock_client):
-
             from typer.testing import CliRunner
             from rsf.cli.main import app
 
@@ -436,9 +408,7 @@ class TestLogsCommand:
                 {
                     "type": "aws_lambda_function",
                     "name": "fn",
-                    "instances": [
-                        {"attributes": {"function_name": "my-fn"}}
-                    ],
+                    "instances": [{"attributes": {"function_name": "my-fn"}}],
                 }
             ]
         }
@@ -449,10 +419,7 @@ class TestLogsCommand:
             "events": [
                 {
                     "logGroupName": "/aws/lambda/my-fn",
-                    "timestamp": int(
-                        datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc).timestamp()
-                        * 1000
-                    ),
+                    "timestamp": int(datetime(2026, 1, 1, 0, 0, 0, tzinfo=timezone.utc).timestamp() * 1000),
                     "message": "Test message",
                 },
             ],
@@ -460,7 +427,6 @@ class TestLogsCommand:
         }
 
         with patch("boto3.client", return_value=mock_client):
-
             from typer.testing import CliRunner
             from rsf.cli.main import app
 
@@ -489,9 +455,7 @@ class TestLogsCommand:
                 {
                     "type": "aws_lambda_function",
                     "name": "fn",
-                    "instances": [
-                        {"attributes": {"function_name": "my-fn"}}
-                    ],
+                    "instances": [{"attributes": {"function_name": "my-fn"}}],
                 }
             ]
         }
@@ -502,10 +466,7 @@ class TestLogsCommand:
             "events": [
                 {
                     "logGroupName": "/aws/lambda/my-fn",
-                    "timestamp": int(
-                        datetime(2026, 1, 1, 12, 30, 0, tzinfo=timezone.utc).timestamp()
-                        * 1000
-                    ),
+                    "timestamp": int(datetime(2026, 1, 1, 12, 30, 0, tzinfo=timezone.utc).timestamp() * 1000),
                     "message": "Processing request",
                 },
             ],
@@ -513,7 +474,6 @@ class TestLogsCommand:
         }
 
         with patch("boto3.client", return_value=mock_client):
-
             from typer.testing import CliRunner
             from rsf.cli.main import app
 

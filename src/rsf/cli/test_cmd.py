@@ -277,9 +277,7 @@ class LocalRunner:
             current_data = output_data if output_data is not None else current_data
             current_state = next_state
 
-    def _execute_state(
-        self, name: str, state: Any, data: Any
-    ) -> tuple[str | None, Any, str | None]:
+    def _execute_state(self, name: str, state: Any, data: Any) -> tuple[str | None, Any, str | None]:
         """Execute a single state and return (next_state, output, error)."""
         if isinstance(state, TaskState):
             return self._execute_task(name, state, data)
@@ -298,9 +296,7 @@ class LocalRunner:
         else:
             return None, data, f"Unsupported state type: {type(state).__name__}"
 
-    def _execute_task(
-        self, name: str, state: TaskState, data: Any
-    ) -> tuple[str | None, Any, str | None]:
+    def _execute_task(self, name: str, state: TaskState, data: Any) -> tuple[str | None, Any, str | None]:
         """Execute a Task state, handling mock mode, retry, and catch."""
         if self.mock_handlers or state.sub_workflow:
             # Mock mode or sub-workflow: pass through
@@ -433,13 +429,9 @@ class LocalRunner:
             if self.verbose and self.transitions:
                 latest = self.transitions[-1]
                 if latest.input_data is not None:
-                    self.console.print(
-                        f"    [dim]Input:  {json.dumps(latest.input_data, default=str)}[/dim]"
-                    )
+                    self.console.print(f"    [dim]Input:  {json.dumps(latest.input_data, default=str)}[/dim]")
                 if latest.output_data is not None:
-                    self.console.print(
-                        f"    [dim]Output: {json.dumps(latest.output_data, default=str)}[/dim]"
-                    )
+                    self.console.print(f"    [dim]Output: {json.dumps(latest.output_data, default=str)}[/dim]")
 
 
 def _render_summary(result: ExecutionResult) -> Table:
@@ -517,8 +509,7 @@ def test_workflow(
                 raise typer.Exit(code=1)
         if not json_output:
             console.print(
-                f"[bold yellow]Chaos injection active:[/bold yellow] "
-                f"{len(chaos_specs)} failure(s) configured"
+                f"[bold yellow]Chaos injection active:[/bold yellow] {len(chaos_specs)} failure(s) configured"
             )
 
     # Load workflow

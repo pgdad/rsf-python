@@ -25,7 +25,8 @@ from rsf.dsl.parser import load_definition
 def simple_workflow(tmp_path: Path) -> Path:
     """A simple linear workflow with 3 Task states."""
     wf = tmp_path / "workflow.yaml"
-    wf.write_text(textwrap.dedent("""\
+    wf.write_text(
+        textwrap.dedent("""\
         rsf_version: "1.0"
         StartAt: StepA
         States:
@@ -38,7 +39,8 @@ def simple_workflow(tmp_path: Path) -> Path:
           StepC:
             Type: Task
             End: true
-    """))
+    """)
+    )
     return wf
 
 
@@ -46,7 +48,8 @@ def simple_workflow(tmp_path: Path) -> Path:
 def parallel_workflow(tmp_path: Path) -> Path:
     """Workflow with a Parallel state containing 2 branches, each with 1 Task."""
     wf = tmp_path / "workflow.yaml"
-    wf.write_text(textwrap.dedent("""\
+    wf.write_text(
+        textwrap.dedent("""\
         rsf_version: "1.0"
         StartAt: Init
         States:
@@ -69,7 +72,8 @@ def parallel_workflow(tmp_path: Path) -> Path:
             Next: Done
           Done:
             Type: Succeed
-    """))
+    """)
+    )
     return wf
 
 
@@ -77,7 +81,8 @@ def parallel_workflow(tmp_path: Path) -> Path:
 def choice_workflow(tmp_path: Path) -> Path:
     """Workflow with a Choice state and two branches."""
     wf = tmp_path / "workflow.yaml"
-    wf.write_text(textwrap.dedent("""\
+    wf.write_text(
+        textwrap.dedent("""\
         rsf_version: "1.0"
         StartAt: Check
         States:
@@ -94,7 +99,8 @@ def choice_workflow(tmp_path: Path) -> Path:
           LowPath:
             Type: Task
             End: true
-    """))
+    """)
+    )
     return wf
 
 
@@ -102,7 +108,8 @@ def choice_workflow(tmp_path: Path) -> Path:
 def dynamo_workflow(tmp_path: Path) -> Path:
     """Workflow with DynamoDB tables defined."""
     wf = tmp_path / "workflow.yaml"
-    wf.write_text(textwrap.dedent("""\
+    wf.write_text(
+        textwrap.dedent("""\
         rsf_version: "1.0"
         StartAt: Process
         States:
@@ -114,7 +121,8 @@ def dynamo_workflow(tmp_path: Path) -> Path:
             partition_key:
               name: order_id
               type: S
-    """))
+    """)
+    )
     return wf
 
 
@@ -244,7 +252,8 @@ class TestCalculateTriggerCost:
 
     def test_sqs_trigger_cost(self, tmp_path: Path):
         wf = tmp_path / "workflow.yaml"
-        wf.write_text(textwrap.dedent("""\
+        wf.write_text(
+            textwrap.dedent("""\
             rsf_version: "1.0"
             StartAt: Process
             States:
@@ -254,7 +263,8 @@ class TestCalculateTriggerCost:
             triggers:
               - type: sqs
                 queue_name: my-queue
-        """))
+        """)
+        )
         definition = load_definition(wf)
         pricing = _get_pricing("us-east-1")
         cost = _calculate_trigger_cost(definition, 1_000_000, pricing)
@@ -262,7 +272,8 @@ class TestCalculateTriggerCost:
 
     def test_eventbridge_trigger_cost(self, tmp_path: Path):
         wf = tmp_path / "workflow.yaml"
-        wf.write_text(textwrap.dedent("""\
+        wf.write_text(
+            textwrap.dedent("""\
             rsf_version: "1.0"
             StartAt: Process
             States:
@@ -272,7 +283,8 @@ class TestCalculateTriggerCost:
             triggers:
               - type: eventbridge
                 schedule_expression: "rate(1 minute)"
-        """))
+        """)
+        )
         definition = load_definition(wf)
         pricing = _get_pricing("us-east-1")
         cost = _calculate_trigger_cost(definition, 1_000_000, pricing)

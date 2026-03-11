@@ -12,9 +12,7 @@ from typing import Any
 
 from rsf.dsl import StateMachineDefinition
 
-_SCHEMA_ID = (
-    "https://raw.githubusercontent.com/esa/rsf-python/main/schemas/rsf-workflow.json"
-)
+_SCHEMA_ID = "https://raw.githubusercontent.com/esa/rsf-python/main/schemas/rsf-workflow.json"
 
 
 def generate_json_schema() -> dict[str, Any]:

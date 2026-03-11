@@ -410,9 +410,7 @@ class TestProviderAwareDoctor:
     def test_terraform_dir_skipped_for_non_terraform_provider(self, tmp_path: Path) -> None:
         """terraform/ directory check is skipped when provider is not terraform."""
         workflow = tmp_path / "workflow.yaml"
-        workflow.write_text(
-            "StartAt: First\nStates:\n  First:\n    Type: Task\n    End: true\n"
-        )
+        workflow.write_text("StartAt: First\nStates:\n  First:\n    Type: Task\n    End: true\n")
         tf_dir = tmp_path / "terraform"
         tf_dir.mkdir()
 
@@ -428,9 +426,7 @@ class TestProviderAwareDoctor:
     def test_terraform_dir_included_for_terraform_provider(self, tmp_path: Path) -> None:
         """terraform/ directory check is included when provider is terraform."""
         workflow = tmp_path / "workflow.yaml"
-        workflow.write_text(
-            "StartAt: First\nStates:\n  First:\n    Type: Task\n    End: true\n"
-        )
+        workflow.write_text("StartAt: First\nStates:\n  First:\n    Type: Task\n    End: true\n")
         tf_dir = tmp_path / "terraform"
         tf_dir.mkdir()
 

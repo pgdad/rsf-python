@@ -151,9 +151,7 @@ def _count_lambda_invocations(definition: StateMachineDefinition, pricing: dict[
     return max(task_count, 1)
 
 
-def _count_dynamodb_operations(
-    definition: StateMachineDefinition, pricing: dict[str, float]
-) -> tuple[int, int]:
+def _count_dynamodb_operations(definition: StateMachineDefinition, pricing: dict[str, float]) -> tuple[int, int]:
     """Count estimated DynamoDB reads and writes per invocation.
 
     Returns (reads_per_invocation, writes_per_invocation).
@@ -168,9 +166,7 @@ def _count_dynamodb_operations(
     return (reads, writes)
 
 
-def _calculate_lambda_cost(
-    invocations: int, tasks_per_execution: int, pricing: dict[str, float]
-) -> float:
+def _calculate_lambda_cost(invocations: int, tasks_per_execution: int, pricing: dict[str, float]) -> float:
     """Calculate monthly Lambda cost.
 
     Includes request cost and compute cost (GB-seconds).
@@ -208,9 +204,7 @@ def _calculate_dynamodb_cost(
     return read_cost + write_cost
 
 
-def _calculate_data_transfer_cost(
-    invocations: int, tasks_per_execution: int, pricing: dict[str, float]
-) -> float:
+def _calculate_data_transfer_cost(invocations: int, tasks_per_execution: int, pricing: dict[str, float]) -> float:
     """Calculate monthly data transfer cost estimate."""
     total_requests = invocations * tasks_per_execution
     payload_kb = pricing["estimated_payload_kb"]
@@ -221,9 +215,7 @@ def _calculate_data_transfer_cost(
     return billable_gb * pricing["data_transfer_per_gb"]
 
 
-def _calculate_trigger_cost(
-    definition: StateMachineDefinition, invocations: int, pricing: dict[str, float]
-) -> float:
+def _calculate_trigger_cost(definition: StateMachineDefinition, invocations: int, pricing: dict[str, float]) -> float:
     """Calculate monthly trigger cost based on configured event sources."""
     triggers = definition.triggers
     if not triggers:
@@ -244,12 +236,8 @@ def _calculate_trigger_cost(
 
 def cost(
     workflow: Path = typer.Argument("workflow.yaml", help="Path to workflow YAML file"),
-    invocations: int = typer.Option(
-        1000, "--invocations", "-n", help="Expected monthly invocations"
-    ),
-    region: str = typer.Option(
-        "us-east-1", "--region", help="AWS region for pricing"
-    ),
+    invocations: int = typer.Option(1000, "--invocations", "-n", help="Expected monthly invocations"),
+    region: str = typer.Option("us-east-1", "--region", help="AWS region for pricing"),
     output_json: bool = typer.Option(False, "--json", help="Output as JSON"),
 ) -> None:
     """Estimate monthly AWS costs for a workflow based on structure and invocation count.

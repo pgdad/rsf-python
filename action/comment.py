@@ -109,9 +109,7 @@ def build_comment_body() -> str:
         lines.append("")
 
     lines.append("---")
-    lines.append(
-        f"*Posted by [RSF Action](https://github.com/{GITHUB_REPOSITORY})*"
-    )
+    lines.append(f"*Posted by [RSF Action](https://github.com/{GITHUB_REPOSITORY})*")
 
     return "\n".join(lines)
 
@@ -145,10 +143,7 @@ def _github_api(
 
 def find_existing_comment() -> int | None:
     """Find an existing RSF Action comment on the PR. Returns comment ID or None."""
-    url = (
-        f"https://api.github.com/repos/{GITHUB_REPOSITORY}"
-        f"/issues/{PR_NUMBER}/comments?per_page=100"
-    )
+    url = f"https://api.github.com/repos/{GITHUB_REPOSITORY}/issues/{PR_NUMBER}/comments?per_page=100"
     comments = _github_api("GET", url)
     if not isinstance(comments, list):
         return None
@@ -166,10 +161,7 @@ def post_or_update_comment(body: str) -> None:
 
     if existing_id:
         # Update existing comment
-        url = (
-            f"https://api.github.com/repos/{GITHUB_REPOSITORY}"
-            f"/issues/comments/{existing_id}"
-        )
+        url = f"https://api.github.com/repos/{GITHUB_REPOSITORY}/issues/comments/{existing_id}"
         result = _github_api("PATCH", url, {"body": body})
         if result:
             print(f"Updated existing PR comment (ID: {existing_id})")
@@ -182,10 +174,7 @@ def post_or_update_comment(body: str) -> None:
 
 def _create_new_comment(body: str) -> None:
     """Create a new PR comment."""
-    url = (
-        f"https://api.github.com/repos/{GITHUB_REPOSITORY}"
-        f"/issues/{PR_NUMBER}/comments"
-    )
+    url = f"https://api.github.com/repos/{GITHUB_REPOSITORY}/issues/{PR_NUMBER}/comments"
     result = _github_api("POST", url, {"body": body})
     if result:
         print(f"Posted new PR comment (ID: {result.get('id')})")

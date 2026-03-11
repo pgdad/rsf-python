@@ -39,15 +39,11 @@ def validate_image(input_data: dict) -> dict:
 
     if fmt not in VALID_FORMATS:
         _log("ValidateImage", "Invalid image format", format=fmt)
-        raise InvalidImageError(
-            f"Unsupported image format: {fmt!r}. Supported formats: {sorted(VALID_FORMATS)}"
-        )
+        raise InvalidImageError(f"Unsupported image format: {fmt!r}. Supported formats: {sorted(VALID_FORMATS)}")
 
     if size_bytes > MAX_SIZE_BYTES:
         _log("ValidateImage", "Image too large", size_bytes=size_bytes, max_bytes=MAX_SIZE_BYTES)
-        raise InvalidImageError(
-            f"Image size {size_bytes} bytes exceeds limit of {MAX_SIZE_BYTES} bytes (10 MB)"
-        )
+        raise InvalidImageError(f"Image size {size_bytes} bytes exceeds limit of {MAX_SIZE_BYTES} bytes (10 MB)")
 
     _log("ValidateImage", "Image validated successfully", format=fmt, size_bytes=size_bytes)
 

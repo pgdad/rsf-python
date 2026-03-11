@@ -89,9 +89,7 @@ class CDKProvider(InfrastructureProvider):
         checks: list[PrerequisiteCheck] = []
 
         if shutil.which("npx"):
-            checks.append(
-                PrerequisiteCheck("node/npx", "pass", "npx found")
-            )
+            checks.append(PrerequisiteCheck("node/npx", "pass", "npx found"))
         else:
             checks.append(
                 PrerequisiteCheck(
@@ -102,9 +100,7 @@ class CDKProvider(InfrastructureProvider):
             )
 
         if shutil.which("cdk"):
-            checks.append(
-                PrerequisiteCheck("cdk", "pass", "cdk binary found")
-            )
+            checks.append(PrerequisiteCheck("cdk", "pass", "cdk binary found"))
         else:
             checks.append(
                 PrerequisiteCheck(

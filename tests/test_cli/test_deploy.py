@@ -278,9 +278,7 @@ def test_deploy_no_infra_skips_terraform(workflow_dir: Path, monkeypatch: pytest
     assert "skipped" in result.output.lower() or "no-infra" in result.output.lower()
 
 
-def test_deploy_no_infra_and_code_only_mutually_exclusive(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_no_infra_and_code_only_mutually_exclusive(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf deploy --no-infra --code-only exits 1 with a mutual exclusion error."""
     monkeypatch.chdir(workflow_dir)
 
@@ -290,9 +288,7 @@ def test_deploy_no_infra_and_code_only_mutually_exclusive(
     assert "mutually exclusive" in result.output.lower() or "no-infra" in result.output.lower()
 
 
-def test_deploy_without_no_infra_still_calls_provider(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_without_no_infra_still_calls_provider(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf deploy (without --no-infra) still calls provider as before."""
     monkeypatch.chdir(workflow_dir)
 
@@ -382,7 +378,7 @@ def test_deploy_code_only_non_terraform_errors(workflow_dir: Path, monkeypatch: 
     # Write workflow with CDK provider
     wf = workflow_dir / "workflow.yaml"
     wf.write_text(
-        MINIMAL_WORKFLOW_YAML + 'infrastructure:\n  provider: cdk\n',
+        MINIMAL_WORKFLOW_YAML + "infrastructure:\n  provider: cdk\n",
         encoding="utf-8",
     )
 
@@ -410,7 +406,7 @@ def test_deploy_unknown_provider_errors(workflow_dir: Path, monkeypatch: pytest.
     # Write workflow with unknown provider
     wf = workflow_dir / "workflow.yaml"
     wf.write_text(
-        MINIMAL_WORKFLOW_YAML + 'infrastructure:\n  provider: pulumi\n',
+        MINIMAL_WORKFLOW_YAML + "infrastructure:\n  provider: pulumi\n",
         encoding="utf-8",
     )
 
@@ -435,9 +431,7 @@ def test_deploy_unknown_provider_errors(workflow_dir: Path, monkeypatch: pytest.
 class TestStageDeployment:
     """Tests for multi-stage deployment via --stage option."""
 
-    def test_deploy_stage_prod_uses_stage_var_file(
-        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_deploy_stage_prod_uses_stage_var_file(self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """rsf deploy --stage prod looks for stages/prod.tfvars file."""
         monkeypatch.chdir(workflow_dir)
         # Create stage var file
@@ -461,9 +455,7 @@ class TestStageDeployment:
         assert result.exit_code == 0, f"Unexpected exit: {result.output}"
         assert "Deploy complete" in result.output
 
-    def test_deploy_stage_dev_uses_stage_var_file(
-        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_deploy_stage_dev_uses_stage_var_file(self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """rsf deploy --stage dev looks for stages/dev.tfvars file."""
         monkeypatch.chdir(workflow_dir)
         stages_dir = workflow_dir / "stages"
@@ -485,9 +477,7 @@ class TestStageDeployment:
 
         assert result.exit_code == 0, f"Unexpected exit: {result.output}"
 
-    def test_deploy_without_stage_no_var_file(
-        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_deploy_without_stage_no_var_file(self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """rsf deploy without --stage works as before (no -var-file passed)."""
         monkeypatch.chdir(workflow_dir)
 
@@ -509,9 +499,7 @@ class TestStageDeployment:
         ctx = mock_provider.deploy.call_args[0][0]
         assert ctx.stage_var_file is None
 
-    def test_deploy_stage_missing_var_file_errors(
-        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_deploy_stage_missing_var_file_errors(self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """rsf deploy --stage prod with missing prod.tfvars prints error and exits."""
         monkeypatch.chdir(workflow_dir)
         # Do NOT create stages/prod.tfvars
@@ -606,9 +594,7 @@ class TestStageDeployment:
         assert result.exit_code == 0, f"Unexpected exit: {result.output}"
         mock_run.assert_not_called()
 
-    def test_deploy_stage_isolates_output_dir(
-        self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-    ) -> None:
+    def test_deploy_stage_isolates_output_dir(self, workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
         """rsf deploy --stage prod uses terraform/prod/ directory for isolation."""
         monkeypatch.chdir(workflow_dir)
         stages_dir = workflow_dir / "stages"
@@ -637,9 +623,7 @@ class TestStageDeployment:
 # -- --teardown flag tests --
 
 
-def test_deploy_teardown_calls_provider_teardown(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_teardown_calls_provider_teardown(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf deploy --teardown calls provider.teardown(ctx) and exits 0 with 'Teardown complete'."""
     monkeypatch.chdir(workflow_dir)
 
@@ -662,9 +646,7 @@ def test_deploy_teardown_calls_provider_teardown(
     mock_provider.teardown.assert_called_once()
 
 
-def test_deploy_teardown_exits_nonzero_on_subprocess_error(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_teardown_exits_nonzero_on_subprocess_error(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """provider.teardown() raises CalledProcessError -> exit 1 with 'Infrastructure teardown failed'."""
     monkeypatch.chdir(workflow_dir)
 
@@ -686,9 +668,7 @@ def test_deploy_teardown_exits_nonzero_on_subprocess_error(
     assert "teardown failed" in result.output.lower() or "Infrastructure teardown failed" in result.output
 
 
-def test_deploy_teardown_not_implemented_errors_gracefully(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_teardown_not_implemented_errors_gracefully(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """provider.teardown() raises NotImplementedError -> exit 1 with error message."""
     monkeypatch.chdir(workflow_dir)
 
@@ -710,9 +690,7 @@ def test_deploy_teardown_not_implemented_errors_gracefully(
     assert "Error" in result.output or "not supported" in result.output.lower()
 
 
-def test_deploy_teardown_mutually_exclusive_with_code_only(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_teardown_mutually_exclusive_with_code_only(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf deploy --teardown --code-only -> exit 1 with mutual exclusion error."""
     monkeypatch.chdir(workflow_dir)
 
@@ -722,9 +700,7 @@ def test_deploy_teardown_mutually_exclusive_with_code_only(
     assert "mutually exclusive" in result.output.lower() or "teardown" in result.output.lower()
 
 
-def test_deploy_teardown_mutually_exclusive_with_no_infra(
-    workflow_dir: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_deploy_teardown_mutually_exclusive_with_no_infra(workflow_dir: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     """rsf deploy --teardown --no-infra -> exit 1 with mutual exclusion error."""
     monkeypatch.chdir(workflow_dir)
 

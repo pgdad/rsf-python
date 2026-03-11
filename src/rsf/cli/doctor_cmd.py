@@ -393,16 +393,12 @@ def _render_results(
         console.print(line, highlight=False)
         if check.fix_hint and check.status in ("FAIL", "WARN"):
             console.print(
-                f"    [dim]Fix: {check.fix_hint}[/dim]"
-                if not no_color
-                else f"    Fix: {check.fix_hint}",
+                f"    [dim]Fix: {check.fix_hint}[/dim]" if not no_color else f"    Fix: {check.fix_hint}",
                 highlight=False,
             )
 
     if project_checks:
-        console.print(
-            "\n[bold]Project[/bold]" if not no_color else "\nProject"
-        )
+        console.print("\n[bold]Project[/bold]" if not no_color else "\nProject")
         for check in project_checks:
             sym = symbols[check.status]
             line = f"  {sym} {check.name}"
@@ -411,9 +407,7 @@ def _render_results(
             console.print(line, highlight=False)
             if check.fix_hint and check.status in ("FAIL", "WARN"):
                 console.print(
-                    f"    [dim]Fix: {check.fix_hint}[/dim]"
-                    if not no_color
-                    else f"    Fix: {check.fix_hint}",
+                    f"    [dim]Fix: {check.fix_hint}[/dim]" if not no_color else f"    Fix: {check.fix_hint}",
                     highlight=False,
                 )
 
@@ -426,8 +420,7 @@ def _render_results(
     console.print()
     if fail_count:
         console.print(
-            f"[red bold]{fail_count} issue(s) found[/red bold] "
-            f"({pass_count}/{total} passed, {warn_count} warning(s))"
+            f"[red bold]{fail_count} issue(s) found[/red bold] ({pass_count}/{total} passed, {warn_count} warning(s))"
             if not no_color
             else f"{fail_count} issue(s) found ({pass_count}/{total} passed, {warn_count} warning(s))"
         )
@@ -438,11 +431,7 @@ def _render_results(
             else f"All checks passed with {warn_count} warning(s)"
         )
     else:
-        console.print(
-            "[green bold]All checks passed[/green bold]"
-            if not no_color
-            else "All checks passed"
-        )
+        console.print("[green bold]All checks passed[/green bold]" if not no_color else "All checks passed")
 
 
 def _detect_provider(workflow_path: Path) -> str:
@@ -465,18 +454,10 @@ def _detect_provider(workflow_path: Path) -> str:
 
 
 def doctor(
-    workflow: Path = typer.Argument(
-        "workflow.yaml", exists=False, help="Path to workflow YAML file"
-    ),
-    tf_dir: Path = typer.Option(
-        "terraform", "--tf-dir", help="Terraform directory to check"
-    ),
-    output_json: bool = typer.Option(
-        False, "--json", help="Output JSON report"
-    ),
-    no_color: bool = typer.Option(
-        False, "--no-color", help="Disable colored output"
-    ),
+    workflow: Path = typer.Argument("workflow.yaml", exists=False, help="Path to workflow YAML file"),
+    tf_dir: Path = typer.Option("terraform", "--tf-dir", help="Terraform directory to check"),
+    output_json: bool = typer.Option(False, "--json", help="Output JSON report"),
+    no_color: bool = typer.Option(False, "--no-color", help="Disable colored output"),
 ) -> None:
     """Diagnose environment and project health.
 

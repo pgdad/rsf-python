@@ -40,9 +40,7 @@ def get_provider(name: str) -> InfrastructureProvider:
     """
     if name not in _PROVIDERS:
         available = sorted(_PROVIDERS.keys())
-        raise ProviderNotFoundError(
-            f"Unknown provider: {name}. Available: {available}"
-        )
+        raise ProviderNotFoundError(f"Unknown provider: {name}. Available: {available}")
     return _PROVIDERS[name]()
 
 

@@ -129,10 +129,7 @@ def render_orchestrator(
         state_blocks.append(StateBlock(name=mapping.state_name, code=code))
 
     # Build handler imports for Task states (skip sub-workflow tasks)
-    task_names = [
-        m.state_name for m in mappings
-        if m.state_type == "Task" and not m.sub_workflow
-    ]
+    task_names = [m.state_name for m in mappings if m.state_type == "Task" and not m.sub_workflow]
     handler_imports = [f"handlers.{_to_snake_case(name)}" for name in task_names]
 
     # Check for sub-workflows

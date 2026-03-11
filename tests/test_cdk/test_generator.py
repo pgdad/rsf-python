@@ -92,9 +92,7 @@ class TestGenerateCDK:
     def test_generation_gap_overwrites_generated_file(self, tmp_path, minimal_config):
         """Existing file with GENERATED_MARKER is overwritten."""
         generated_file = tmp_path / "app.py"
-        generated_file.write_text(
-            f"{GENERATED_MARKER}\n# old content\n", encoding="utf-8"
-        )
+        generated_file.write_text(f"{GENERATED_MARKER}\n# old content\n", encoding="utf-8")
 
         result = generate_cdk(minimal_config, tmp_path)
 

@@ -154,9 +154,7 @@ class TestBuildSamTemplate:
         template = _build_sam_template(infra)
 
         resources = template["Resources"]
-        log_groups = [
-            k for k in resources if resources[k]["Type"] == "AWS::Logs::LogGroup"
-        ]
+        log_groups = [k for k in resources if resources[k]["Type"] == "AWS::Logs::LogGroup"]
         assert len(log_groups) == 1
         assert resources[log_groups[0]]["Properties"]["RetentionInDays"] == 14
 
@@ -214,9 +212,7 @@ class TestBuildSamTemplate:
         template = _build_sam_template(infra)
 
         resources = template["Resources"]
-        dynamo_keys = [
-            k for k in resources if resources[k]["Type"] == "AWS::DynamoDB::Table"
-        ]
+        dynamo_keys = [k for k in resources if resources[k]["Type"] == "AWS::DynamoDB::Table"]
         assert len(dynamo_keys) == 1
 
         # Check IAM permissions include DynamoDB actions
@@ -239,9 +235,7 @@ class TestBuildSamTemplate:
         template = _build_sam_template(infra)
 
         resources = template["Resources"]
-        alarm_keys = [
-            k for k in resources if resources[k]["Type"] == "AWS::CloudWatch::Alarm"
-        ]
+        alarm_keys = [k for k in resources if resources[k]["Type"] == "AWS::CloudWatch::Alarm"]
         assert len(alarm_keys) == 1
 
         alarm = resources[alarm_keys[0]]
@@ -259,9 +253,7 @@ class TestBuildSamTemplate:
         resources = template["Resources"]
 
         # Should have SQS queue for DLQ
-        sqs_keys = [
-            k for k in resources if resources[k]["Type"] == "AWS::SQS::Queue"
-        ]
+        sqs_keys = [k for k in resources if resources[k]["Type"] == "AWS::SQS::Queue"]
         assert len(sqs_keys) >= 1
 
         # Function should have DeadLetterQueue config

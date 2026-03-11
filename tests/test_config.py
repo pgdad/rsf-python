@@ -27,9 +27,7 @@ class TestLoadProjectConfig:
 
     def test_toml_with_valid_infrastructure(self, tmp_path: Path) -> None:
         """rsf.toml with [infrastructure] returns InfrastructureConfig."""
-        (tmp_path / "rsf.toml").write_text(
-            '[infrastructure]\nprovider = "terraform"\n'
-        )
+        (tmp_path / "rsf.toml").write_text('[infrastructure]\nprovider = "terraform"\n')
         result = load_project_config(tmp_path)
         assert result is not None
         assert isinstance(result, InfrastructureConfig)
@@ -38,10 +36,10 @@ class TestLoadProjectConfig:
     def test_toml_with_nested_terraform_config(self, tmp_path: Path) -> None:
         """rsf.toml with [infrastructure.terraform] parses nested config."""
         (tmp_path / "rsf.toml").write_text(
-            '[infrastructure]\n'
+            "[infrastructure]\n"
             'provider = "terraform"\n'
-            '\n'
-            '[infrastructure.terraform]\n'
+            "\n"
+            "[infrastructure.terraform]\n"
             'tf_dir = "custom"\n'
             'backend_bucket = "my-bucket"\n'
         )
@@ -54,9 +52,7 @@ class TestLoadProjectConfig:
 
     def test_toml_with_invalid_field_raises(self, tmp_path: Path) -> None:
         """rsf.toml with unknown field in [infrastructure] raises ValidationError."""
-        (tmp_path / "rsf.toml").write_text(
-            '[infrastructure]\nprovider = "terraform"\nbad_field = "x"\n'
-        )
+        (tmp_path / "rsf.toml").write_text('[infrastructure]\nprovider = "terraform"\nbad_field = "x"\n')
         with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
             load_project_config(tmp_path)
 
@@ -76,9 +72,7 @@ class TestResolveInfraConfig:
         from rsf.dsl.parser import parse_definition
 
         # Write rsf.toml with cdk provider
-        (tmp_path / "rsf.toml").write_text(
-            '[infrastructure]\nprovider = "cdk"\n'
-        )
+        (tmp_path / "rsf.toml").write_text('[infrastructure]\nprovider = "cdk"\n')
 
         # Workflow YAML has terraform provider
         data = {
@@ -98,9 +92,7 @@ class TestResolveInfraConfig:
         from rsf.dsl.parser import parse_definition
 
         # Write rsf.toml
-        (tmp_path / "rsf.toml").write_text(
-            '[infrastructure]\nprovider = "cdk"\n'
-        )
+        (tmp_path / "rsf.toml").write_text('[infrastructure]\nprovider = "cdk"\n')
 
         # Workflow YAML has no infrastructure block
         data = {

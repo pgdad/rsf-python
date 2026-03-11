@@ -54,9 +54,7 @@ def _build_sam_template(infra: dict[str, Any]) -> dict[str, Any]:
     function_resource: dict[str, Any] = {
         "Type": "AWS::Serverless::Function",
         "Properties": {
-            "FunctionName": {
-                "Fn::Sub": f"${{AWS::StackName}}-{workflow_name}-orchestrator"
-            },
+            "FunctionName": {"Fn::Sub": f"${{AWS::StackName}}-{workflow_name}-orchestrator"},
             "Handler": "orchestrator.handler",
             "CodeUri": ".",
             "Policies": [
@@ -97,14 +95,10 @@ def _build_sam_template(infra: dict[str, Any]) -> dict[str, Any]:
         if trigger["type"] == "eventbridge":
             event_name = f"EventBridgeRule{i + 1}"
             event_def: dict[str, Any] = {
-                "Type": "Schedule"
-                if trigger.get("schedule_expression")
-                else "EventBridgeRule"
+                "Type": "Schedule" if trigger.get("schedule_expression") else "EventBridgeRule"
             }
             if trigger.get("schedule_expression"):
-                event_def["Properties"] = {
-                    "Schedule": trigger["schedule_expression"]
-                }
+                event_def["Properties"] = {"Schedule": trigger["schedule_expression"]}
             elif trigger.get("event_pattern"):
                 event_def["Properties"] = {"Pattern": trigger["event_pattern"]}
             events[event_name] = event_def
@@ -122,9 +116,7 @@ def _build_sam_template(infra: dict[str, Any]) -> dict[str, Any]:
             events[event_name] = {
                 "Type": "SNS",
                 "Properties": {
-                    "Topic": trigger.get(
-                        "topic_arn", {"Ref": f"TriggerTopic{i + 1}"}
-                    ),
+                    "Topic": trigger.get("topic_arn", {"Ref": f"TriggerTopic{i + 1}"}),
                 },
             }
 
@@ -150,9 +142,7 @@ def _build_sam_template(infra: dict[str, Any]) -> dict[str, Any]:
     resources[f"{logical_id}LogGroup"] = {
         "Type": "AWS::Logs::LogGroup",
         "Properties": {
-            "LogGroupName": {
-                "Fn::Sub": f"/aws/lambda/${{AWS::StackName}}-{workflow_name}-orchestrator"
-            },
+            "LogGroupName": {"Fn::Sub": f"/aws/lambda/${{AWS::StackName}}-{workflow_name}-orchestrator"},
             "RetentionInDays": 14,
         },
     }
@@ -163,9 +153,7 @@ def _build_sam_template(infra: dict[str, Any]) -> dict[str, Any]:
         dynamo_resource: dict[str, Any] = {
             "Type": "AWS::DynamoDB::Table",
             "Properties": {
-                "TableName": {
-                    "Fn::Sub": f"${{AWS::StackName}}-{table['table_name']}"
-                },
+                "TableName": {"Fn::Sub": f"${{AWS::StackName}}-{table['table_name']}"},
                 "BillingMode": table.get("billing_mode", "PAY_PER_REQUEST"),
                 "AttributeDefinitions": [
                     {
@@ -216,9 +204,7 @@ def _build_sam_template(infra: dict[str, Any]) -> dict[str, Any]:
                     "dynamodb:Query",
                     "dynamodb:Scan",
                 ],
-                "Resource": {
-                    "Fn::GetAtt": [f"{table_logical_id}Table", "Arn"]
-                },
+                "Resource": {"Fn::GetAtt": [f"{table_logical_id}Table", "Arn"]},
             }
         )
 
@@ -228,9 +214,7 @@ def _build_sam_template(infra: dict[str, Any]) -> dict[str, Any]:
             resources[f"TriggerQueue{i + 1}"] = {
                 "Type": "AWS::SQS::Queue",
                 "Properties": {
-                    "QueueName": {
-                        "Fn::Sub": f"${{AWS::StackName}}-{trigger['queue_name']}"
-                    },
+                    "QueueName": {"Fn::Sub": f"${{AWS::StackName}}-{trigger['queue_name']}"},
                 },
             }
 
@@ -248,9 +232,7 @@ def _build_sam_template(infra: dict[str, Any]) -> dict[str, Any]:
     # --- CloudWatch Alarms ---
     for i, alarm in enumerate(infra.get("alarms", [])):
         alarm_type = alarm["type"]
-        alarm_logical_id = (
-            f"{logical_id}{_sanitize_logical_id(alarm_type)}Alarm{i + 1}"
-        )
+        alarm_logical_id = f"{logical_id}{_sanitize_logical_id(alarm_type)}Alarm{i + 1}"
 
         metric_name = {
             "error_rate": "Errors",
@@ -261,9 +243,7 @@ def _build_sam_template(infra: dict[str, Any]) -> dict[str, Any]:
         alarm_resource: dict[str, Any] = {
             "Type": "AWS::CloudWatch::Alarm",
             "Properties": {
-                "AlarmName": {
-                    "Fn::Sub": f"${{AWS::StackName}}-{workflow_name}-{alarm_type}"
-                },
+                "AlarmName": {"Fn::Sub": f"${{AWS::StackName}}-{workflow_name}-{alarm_type}"},
                 "MetricName": metric_name,
                 "Namespace": "AWS/Lambda",
                 "Statistic": "Sum",
@@ -281,9 +261,7 @@ def _build_sam_template(infra: dict[str, Any]) -> dict[str, Any]:
         }
 
         if alarm.get("sns_topic_arn"):
-            alarm_resource["Properties"]["AlarmActions"] = [
-                alarm["sns_topic_arn"]
-            ]
+            alarm_resource["Properties"]["AlarmActions"] = [alarm["sns_topic_arn"]]
 
         resources[alarm_logical_id] = alarm_resource
 
@@ -302,18 +280,14 @@ def _build_sam_template(infra: dict[str, Any]) -> dict[str, Any]:
 
 
 def export_workflow(
-    workflow: Path = typer.Argument(
-        "workflow.yaml", help="Path to workflow YAML file"
-    ),
+    workflow: Path = typer.Argument("workflow.yaml", help="Path to workflow YAML file"),
     format: str = typer.Option(
         "cloudformation",
         "--format",
         "-f",
         help="Export format: cloudformation",
     ),
-    output: Path | None = typer.Option(
-        None, "--output", "-o", help="Output file path (default: stdout)"
-    ),
+    output: Path | None = typer.Option(None, "--output", "-o", help="Output file path (default: stdout)"),
 ) -> None:
     """Export a workflow definition to CloudFormation/SAM format.
 

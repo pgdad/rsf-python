@@ -188,17 +188,12 @@ async def replay_execution(
         raise HTTPException(
             status_code=400,
             detail=(
-                f"Cannot replay execution in {source.status.value} status. "
-                "Only terminal executions can be replayed."
+                f"Cannot replay execution in {source.status.value} status. Only terminal executions can be replayed."
             ),
         )
 
     # Determine payload: use provided override, or fall back to original
-    payload = (
-        body.input_payload
-        if body and body.input_payload is not None
-        else source.input_payload or {}
-    )
+    payload = body.input_payload if body and body.input_payload is not None else source.input_payload or {}
 
     # Invoke Lambda asynchronously
     result = await client.invoke_execution(payload)

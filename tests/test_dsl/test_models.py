@@ -476,24 +476,18 @@ class TestLambdaUrlConfig:
         return data
 
     def test_lambda_url_none_auth(self):
-        sm = StateMachineDefinition.model_validate(
-            self._base(lambda_url={"enabled": True, "auth_type": "NONE"})
-        )
+        sm = StateMachineDefinition.model_validate(self._base(lambda_url={"enabled": True, "auth_type": "NONE"}))
         assert sm.lambda_url is not None
         assert sm.lambda_url.enabled is True
         assert sm.lambda_url.auth_type == LambdaUrlAuthType.NONE
 
     def test_lambda_url_aws_iam_auth(self):
-        sm = StateMachineDefinition.model_validate(
-            self._base(lambda_url={"enabled": True, "auth_type": "AWS_IAM"})
-        )
+        sm = StateMachineDefinition.model_validate(self._base(lambda_url={"enabled": True, "auth_type": "AWS_IAM"}))
         assert sm.lambda_url is not None
         assert sm.lambda_url.auth_type == LambdaUrlAuthType.AWS_IAM
 
     def test_lambda_url_disabled(self):
-        sm = StateMachineDefinition.model_validate(
-            self._base(lambda_url={"enabled": False, "auth_type": "NONE"})
-        )
+        sm = StateMachineDefinition.model_validate(self._base(lambda_url={"enabled": False, "auth_type": "NONE"}))
         assert sm.lambda_url is not None
         assert sm.lambda_url.enabled is False
 
@@ -503,21 +497,15 @@ class TestLambdaUrlConfig:
 
     def test_lambda_url_rejects_invalid_auth_type(self):
         with pytest.raises(ValidationError):
-            StateMachineDefinition.model_validate(
-                self._base(lambda_url={"enabled": True, "auth_type": "BASIC"})
-            )
+            StateMachineDefinition.model_validate(self._base(lambda_url={"enabled": True, "auth_type": "BASIC"}))
 
     def test_lambda_url_rejects_missing_auth_type(self):
         with pytest.raises(ValidationError):
-            StateMachineDefinition.model_validate(
-                self._base(lambda_url={"enabled": True})
-            )
+            StateMachineDefinition.model_validate(self._base(lambda_url={"enabled": True}))
 
     def test_lambda_url_rejects_missing_enabled(self):
         with pytest.raises(ValidationError):
-            StateMachineDefinition.model_validate(
-                self._base(lambda_url={"auth_type": "NONE"})
-            )
+            StateMachineDefinition.model_validate(self._base(lambda_url={"auth_type": "NONE"}))
 
     def test_lambda_url_rejects_extra_fields(self):
         with pytest.raises(ValidationError):
@@ -626,11 +614,7 @@ class TestDynamoDBConfig:
 
     def test_dynamodb_table_requires_table_name_and_partition_key(self):
         with pytest.raises(ValidationError):
-            StateMachineDefinition.model_validate(
-                self._base(
-                    dynamodb_tables=[{}]
-                )
-            )
+            StateMachineDefinition.model_validate(self._base(dynamodb_tables=[{}]))
 
     def test_multiple_dynamodb_tables(self):
         sm = StateMachineDefinition.model_validate(
@@ -685,9 +669,7 @@ class TestSubWorkflow:
             {
                 "StartAt": "T",
                 "sub_workflows": [{"name": "child-workflow"}],
-                "States": {
-                    "T": {"Type": "Task", "SubWorkflow": "child-workflow", "End": True}
-                },
+                "States": {"T": {"Type": "Task", "SubWorkflow": "child-workflow", "End": True}},
             }
         )
         task = sm.states["T"]
@@ -723,15 +705,11 @@ class TestSubWorkflow:
 
     def test_sub_workflow_ref_requires_name(self):
         with pytest.raises(ValidationError):
-            StateMachineDefinition.model_validate(
-                self._base(sub_workflows=[{}])
-            )
+            StateMachineDefinition.model_validate(self._base(sub_workflows=[{}]))
 
     def test_sub_workflow_ref_empty_name_rejected(self):
         with pytest.raises(ValidationError):
-            StateMachineDefinition.model_validate(
-                self._base(sub_workflows=[{"name": ""}])
-            )
+            StateMachineDefinition.model_validate(self._base(sub_workflows=[{"name": ""}]))
 
 
 class TestTriggerConfig:
@@ -748,11 +726,7 @@ class TestTriggerConfig:
 
     def test_eventbridge_trigger_with_schedule(self):
         sm = StateMachineDefinition.model_validate(
-            self._base(
-                triggers=[
-                    {"type": "eventbridge", "schedule_expression": "rate(5 minutes)"}
-                ]
-            )
+            self._base(triggers=[{"type": "eventbridge", "schedule_expression": "rate(5 minutes)"}])
         )
         assert sm.triggers is not None
         assert len(sm.triggers) == 1
@@ -775,13 +749,7 @@ class TestTriggerConfig:
         assert trigger.event_pattern == {"source": ["aws.s3"]}
 
     def test_sqs_trigger(self):
-        sm = StateMachineDefinition.model_validate(
-            self._base(
-                triggers=[
-                    {"type": "sqs", "queue_name": "my-queue"}
-                ]
-            )
-        )
+        sm = StateMachineDefinition.model_validate(self._base(triggers=[{"type": "sqs", "queue_name": "my-queue"}]))
         trigger = sm.triggers[0]
         assert trigger.type == "sqs"
         assert trigger.queue_name == "my-queue"
@@ -789,11 +757,7 @@ class TestTriggerConfig:
 
     def test_sqs_trigger_custom_batch_size(self):
         sm = StateMachineDefinition.model_validate(
-            self._base(
-                triggers=[
-                    {"type": "sqs", "queue_name": "my-queue", "batch_size": 5}
-                ]
-            )
+            self._base(triggers=[{"type": "sqs", "queue_name": "my-queue", "batch_size": 5}])
         )
         assert sm.triggers[0].batch_size == 5
 
@@ -830,32 +794,24 @@ class TestTriggerConfig:
     def test_unknown_trigger_type_rejected(self):
         with pytest.raises(ValidationError):
             StateMachineDefinition.model_validate(
-                self._base(
-                    triggers=[{"type": "kinesis", "stream_name": "my-stream"}]
-                )
+                self._base(triggers=[{"type": "kinesis", "stream_name": "my-stream"}])
             )
 
     def test_eventbridge_requires_schedule_or_pattern(self):
         """EventBridge trigger with neither schedule_expression nor event_pattern
         should still parse at the model level (semantic validator catches this)."""
-        sm = StateMachineDefinition.model_validate(
-            self._base(triggers=[{"type": "eventbridge"}])
-        )
+        sm = StateMachineDefinition.model_validate(self._base(triggers=[{"type": "eventbridge"}]))
         trigger = sm.triggers[0]
         assert trigger.schedule_expression is None
         assert trigger.event_pattern is None
 
     def test_sqs_trigger_requires_queue_name(self):
         with pytest.raises(ValidationError):
-            StateMachineDefinition.model_validate(
-                self._base(triggers=[{"type": "sqs"}])
-            )
+            StateMachineDefinition.model_validate(self._base(triggers=[{"type": "sqs"}]))
 
     def test_sns_trigger_requires_topic_arn(self):
         with pytest.raises(ValidationError):
-            StateMachineDefinition.model_validate(
-                self._base(triggers=[{"type": "sns"}])
-            )
+            StateMachineDefinition.model_validate(self._base(triggers=[{"type": "sns"}]))
 
     def test_triggers_omitted_backward_compat(self):
         sm = StateMachineDefinition.model_validate(self._base())
@@ -874,22 +830,16 @@ class TestWorkflowTimeout:
         return data
 
     def test_valid_timeout_parsed(self):
-        sm = StateMachineDefinition.model_validate(
-            self._base(TimeoutSeconds=300)
-        )
+        sm = StateMachineDefinition.model_validate(self._base(TimeoutSeconds=300))
         assert sm.timeout_seconds == 300
 
     def test_zero_timeout_rejected(self):
         with pytest.raises(ValidationError):
-            StateMachineDefinition.model_validate(
-                self._base(TimeoutSeconds=0)
-            )
+            StateMachineDefinition.model_validate(self._base(TimeoutSeconds=0))
 
     def test_negative_timeout_rejected(self):
         with pytest.raises(ValidationError):
-            StateMachineDefinition.model_validate(
-                self._base(TimeoutSeconds=-5)
-            )
+            StateMachineDefinition.model_validate(self._base(TimeoutSeconds=-5))
 
     def test_no_timeout_optional(self):
         sm = StateMachineDefinition.model_validate(self._base())
@@ -984,11 +934,7 @@ class TestAlarmConfig:
         assert alarm.sns_topic_arn == "arn:aws:sns:us-east-2:123456789012:MyAlerts"
 
     def test_alarm_without_sns_topic_arn(self):
-        sm = StateMachineDefinition.model_validate(
-            self._base(
-                alarms=[{"type": "error_rate", "threshold": 5}]
-            )
-        )
+        sm = StateMachineDefinition.model_validate(self._base(alarms=[{"type": "error_rate", "threshold": 5}]))
         alarm = sm.alarms[0]
         assert alarm.sns_topic_arn is None
 
@@ -1009,34 +955,20 @@ class TestAlarmConfig:
 
     def test_unknown_alarm_type_rejected(self):
         with pytest.raises(ValidationError):
-            StateMachineDefinition.model_validate(
-                self._base(
-                    alarms=[{"type": "cpu_usage", "threshold": 80}]
-                )
-            )
+            StateMachineDefinition.model_validate(self._base(alarms=[{"type": "cpu_usage", "threshold": 80}]))
 
     def test_threshold_must_be_positive(self):
         with pytest.raises(ValidationError):
-            StateMachineDefinition.model_validate(
-                self._base(
-                    alarms=[{"type": "error_rate", "threshold": 0}]
-                )
-            )
+            StateMachineDefinition.model_validate(self._base(alarms=[{"type": "error_rate", "threshold": 0}]))
 
     def test_period_must_be_at_least_60(self):
         with pytest.raises(ValidationError):
             StateMachineDefinition.model_validate(
-                self._base(
-                    alarms=[{"type": "error_rate", "threshold": 5, "period": 30}]
-                )
+                self._base(alarms=[{"type": "error_rate", "threshold": 5, "period": 30}])
             )
 
     def test_state_machine_with_alarms_parses(self):
-        sm = StateMachineDefinition.model_validate(
-            self._base(
-                alarms=[{"type": "error_rate", "threshold": 5}]
-            )
-        )
+        sm = StateMachineDefinition.model_validate(self._base(alarms=[{"type": "error_rate", "threshold": 5}]))
         assert sm.alarms is not None
         assert len(sm.alarms) == 1
 
@@ -1057,9 +989,7 @@ class TestDLQConfig:
         return data
 
     def test_dlq_enabled_default_max_receive_count(self):
-        sm = StateMachineDefinition.model_validate(
-            self._base(dead_letter_queue={"enabled": True})
-        )
+        sm = StateMachineDefinition.model_validate(self._base(dead_letter_queue={"enabled": True}))
         assert sm.dead_letter_queue is not None
         assert sm.dead_letter_queue.enabled is True
         assert sm.dead_letter_queue.max_receive_count == 3
@@ -1072,32 +1002,24 @@ class TestDLQConfig:
 
     def test_dlq_custom_queue_name(self):
         sm = StateMachineDefinition.model_validate(
-            self._base(
-                dead_letter_queue={"enabled": True, "queue_name": "my-custom-dlq"}
-            )
+            self._base(dead_letter_queue={"enabled": True, "queue_name": "my-custom-dlq"})
         )
         assert sm.dead_letter_queue.queue_name == "my-custom-dlq"
 
     def test_dlq_max_receive_count_must_be_at_least_1(self):
         with pytest.raises(ValidationError):
             StateMachineDefinition.model_validate(
-                self._base(
-                    dead_letter_queue={"enabled": True, "max_receive_count": 0}
-                )
+                self._base(dead_letter_queue={"enabled": True, "max_receive_count": 0})
             )
 
     def test_dlq_max_receive_count_must_be_at_most_1000(self):
         with pytest.raises(ValidationError):
             StateMachineDefinition.model_validate(
-                self._base(
-                    dead_letter_queue={"enabled": True, "max_receive_count": 1001}
-                )
+                self._base(dead_letter_queue={"enabled": True, "max_receive_count": 1001})
             )
 
     def test_dlq_disabled(self):
-        sm = StateMachineDefinition.model_validate(
-            self._base(dead_letter_queue={"enabled": False})
-        )
+        sm = StateMachineDefinition.model_validate(self._base(dead_letter_queue={"enabled": False}))
         assert sm.dead_letter_queue.enabled is False
 
     def test_dlq_rejects_extra_fields(self):
@@ -1112,9 +1034,7 @@ class TestDLQConfig:
             )
 
     def test_state_machine_with_dlq_parses(self):
-        sm = StateMachineDefinition.model_validate(
-            self._base(dead_letter_queue={"enabled": True})
-        )
+        sm = StateMachineDefinition.model_validate(self._base(dead_letter_queue={"enabled": True}))
         assert sm.dead_letter_queue is not None
 
     def test_state_machine_without_dlq_backward_compat(self):
