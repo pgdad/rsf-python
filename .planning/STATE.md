@@ -83,10 +83,10 @@ None.
 | 12 | Add saved/unsaved indicator and Ctrl+S save to RSF graph editor | 2026-03-11 | c3d7a00 | [12-add-saved-unsaved-indicator-to-rsf-ui-fo](./quick/12-add-saved-unsaved-indicator-to-rsf-ui-fo/) |
 | 13 | Push master and create v3.10 tag | 2026-03-11 | v3.10 tag | [13-push-changes-to-github-and-create-new-ta](./quick/13-push-changes-to-github-and-create-new-ta/) |
 | 14 | Add scroll bars to workflow graph editor | 2026-03-11 | 62064bf | [14-add-scroll-bars-to-workflow-editor-for-e](./quick/14-add-scroll-bars-to-workflow-editor-for-e/) |
-| 15 | Fix CI conftest conflict — exclude example testpaths | 2026-03-11 | 03aa4a6 | [15-fix-ci-conftest-conflict-exclude-example](./quick/15-fix-ci-conftest-conflict-exclude-example/) |
+| 15 | Fix CI builds (conftest conflict, ruff format, missing test deps) | 2026-03-11 | 9318d6e | [15-fix-ci-conftest-conflict-exclude-example](./quick/15-fix-ci-conftest-conflict-exclude-example/) |
 
 ## Session Continuity
 
-Last session: 2026-03-11T14:45:00.000Z
-Stopped at: Completed quick-15 (Fix CI conftest conflict — exclude example testpaths)
+Last session: 2026-03-11T14:50:00.000Z
+Stopped at: Completed quick-15 (Fix CI builds — all green)
 Resume file: None

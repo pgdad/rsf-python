@@ -23,30 +23,37 @@ metrics:
   files_modified: 1
 ---
 
-# Quick Task 15: Fix CI conftest conflict — exclude example testpaths
+# Quick Task 15: Fix CI Builds
 
-**One-liner:** Removed 7 example subdirs from pytest testpaths to eliminate `ValueError: Plugin already registered` for `tests.conftest` in CI.
+**One-liner:** Fixed 3 CI failures: conftest plugin collision, ruff formatting violations, and missing test dependencies.
 
 ## What Was Done
 
-Both `tests/conftest.py` and `examples/lambda-url-trigger/tests/conftest.py` resolved to the same module name `tests.conftest` when pytest was discovering tests across all 8 testpaths. This caused a `ValueError: Plugin already registered under a different name` in CI on both Python 3.12 and 3.13.
+### 1. Conftest Plugin Collision (pytest)
+Both `tests/conftest.py` and `examples/lambda-url-trigger/tests/conftest.py` resolved to the same module name `tests.conftest`. Fixed by removing 7 example testpaths from `pyproject.toml`, keeping only `["tests"]`.
 
-The fix: change `testpaths` in `[tool.pytest.ini_options]` from 8 directories to just `["tests"]`. The `tests/test_examples/` directory already contains dedicated test files for every example (`test_order_processing.py`, `test_data_pipeline.py`, `test_intrinsic_showcase.py`, `test_approval_workflow.py`, `test_retry_recovery.py`, `test_lambda_url_trigger.py`, `test_registry_modules_demo.py`), so no test coverage is lost.
+### 2. Ruff Lint Violations
+12+ violations (F841, F541, E501, E741, F401) across src/ and tests/. All resolved.
+
+### 3. Ruff Format Violations
+49 files had formatting that didn't match `ruff format` expectations. Ran `ruff format .` across entire codebase.
+
+### 4. Missing Test Dependencies
+`requests` and `hypothesis` not in dev dependencies. Added to `[project.optional-dependencies] dev`.
 
 ## Tasks Completed
 
 | Task | Name | Commit | Files |
 |------|------|--------|-------|
-| 1 | Remove example testpaths from pyproject.toml | 03aa4a6 | pyproject.toml |
-| 2 | Push to master | (push) | — |
+| 1 | Remove example testpaths | 03aa4a6 | pyproject.toml |
+| 2 | Fix ruff lint violations | a04c7de | 8 files |
+| 3 | Ruff format + add missing deps | 9318d6e | 49 files + pyproject.toml |
 
-## Deviations from Plan
+## Verification
 
-None — plan executed exactly as written. Note: local pytest run was skipped because no pytest is installed in the active Python environment; CI will verify correctness on both Python 3.12 and 3.13.
+CI run 22958390431: all 3 jobs green (lint, test 3.12, test 3.13)
 
 ## Self-Check: PASSED
 
-- [x] pyproject.toml modified: `testpaths = ["tests"]` confirmed
-- [x] Commit 03aa4a6 exists: `fix(ci): remove example testpaths to resolve conftest plugin collision`
-- [x] Pushed to master (bf81074..03aa4a6)
+- [x] CI fully green on all 3 jobs
 - [x] No version tag created
