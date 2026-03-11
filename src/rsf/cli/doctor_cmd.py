@@ -484,7 +484,7 @@ def doctor(
     When run inside a project directory, also validates workflow.yaml and directory structure.
     Provider-specific checks are shown when a non-default provider is configured.
     """
-    handlers_dir = workflow.parent / "handlers" if workflow else None
+    handlers_dir = workflow.parent / "src" / "handlers" if workflow else None
 
     # Detect configured provider
     provider_name = _detect_provider(workflow)

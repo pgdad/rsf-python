@@ -219,7 +219,7 @@ States:
         )
         tf_dir = tmp_path / "terraform"
         tf_dir.mkdir()
-        handlers_dir = tmp_path / "handlers"
+        handlers_dir = tmp_path / "src" / "handlers"
 
         results = run_all_checks(
             workflow_path=workflow,
