@@ -78,16 +78,7 @@ line-length = 120
 select = ["E", "F", "W"]
 
 [tool.pytest.ini_options]
-testpaths = [
-    "tests",
-    "examples/order-processing/tests",
-    "examples/data-pipeline/tests",
-    "examples/intrinsic-showcase/tests",
-    "examples/approval-workflow/tests",
-    "examples/retry-and-recovery/tests",
-    "examples/lambda-url-trigger/tests",
-    "examples/registry-modules-demo/tests",
-]
+testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "--import-mode=importlib"
 markers = [
