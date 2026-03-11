@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-stopped_at: Completed quick-17 (Verify all examples and tutorials still pass)
-last_updated: "2026-03-11T16:25:00.000Z"
+stopped_at: Completed quick-18 (Add tags to all Terraform-created resources)
+last_updated: "2026-03-11T17:10:00.000Z"
 progress:
   total_phases: 2
   completed_phases: 2
@@ -86,9 +86,10 @@ None.
 | 15 | Fix CI builds (conftest conflict, ruff format, missing test deps) | 2026-03-11 | 9318d6e | [15-fix-ci-conftest-conflict-exclude-example](./quick/15-fix-ci-conftest-conflict-exclude-example/) |
 | 16 | Push master and create v3.11 tag | 2026-03-11 | v3.11 tag | [16-push-master-to-github-and-create-v3-11-t](./quick/16-push-master-to-github-and-create-v3-11-t/) |
 | 17 | Verify all examples and tutorials still pass | 2026-03-11 | 8e53c28 | [17-verify-all-examples-and-tutorials-still-](./quick/17-verify-all-examples-and-tutorials-still-/) |
+| 18 | Add ManagedBy/Workflow tags to all Terraform-created resources | 2026-03-11 | cdd53a4 | [18-add-tags-to-all-terraform-created-resour](./quick/18-add-tags-to-all-terraform-created-resour/) |
 
 ## Session Continuity
 
-Last session: 2026-03-11T16:25:00.000Z
-Stopped at: Completed quick-17 (Verify all examples and tutorials still pass)
+Last session: 2026-03-11T17:10:00.000Z
+Stopped at: Completed quick-18 (Add tags to all Terraform-created resources)
 Resume file: None
