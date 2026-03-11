@@ -19,6 +19,8 @@ function resetStore() {
     needsLayout: false,
     lastAst: null,
     collapseBlocked: null,
+    savedYaml: '',
+    filePath: null,
   });
 }
 
@@ -67,6 +69,50 @@ describe('useFlowStore', () => {
       expect(state.syncSource).toBeNull();
       expect(state.needsLayout).toBe(false);
       expect(state.lastAst).toBeNull();
+      expect(state.savedYaml).toBe('');
+      expect(state.filePath).toBeNull();
+    });
+  });
+
+  describe('save tracking', () => {
+    it('markSaved sets savedYaml to current yamlContent', () => {
+      const yaml = 'StartAt: A\nStates:\n  A:\n    Type: Succeed\n    End: true';
+      useFlowStore.getState().setYamlContent(yaml);
+      useFlowStore.getState().markSaved();
+      expect(useFlowStore.getState().savedYaml).toBe(yaml);
+    });
+
+    it('setFilePath sets the filePath', () => {
+      useFlowStore.getState().setFilePath('/path/to/workflow.yaml');
+      expect(useFlowStore.getState().filePath).toBe('/path/to/workflow.yaml');
+    });
+
+    it('setFilePath accepts null', () => {
+      useFlowStore.getState().setFilePath('/path/to/workflow.yaml');
+      useFlowStore.getState().setFilePath(null);
+      expect(useFlowStore.getState().filePath).toBeNull();
+    });
+
+    it('isDirty pattern: yamlContent !== savedYaml after content change', () => {
+      const yaml = 'StartAt: A';
+      useFlowStore.getState().setYamlContent(yaml);
+      useFlowStore.getState().markSaved();
+      // Initially clean
+      expect(useFlowStore.getState().yamlContent).toBe(useFlowStore.getState().savedYaml);
+
+      // Modify content
+      useFlowStore.getState().setYamlContent(yaml + '\n# changed');
+      expect(useFlowStore.getState().yamlContent).not.toBe(useFlowStore.getState().savedYaml);
+    });
+
+    it('after markSaved the content matches savedYaml again (clean state)', () => {
+      useFlowStore.getState().setYamlContent('yaml: v1');
+      useFlowStore.getState().markSaved();
+      useFlowStore.getState().setYamlContent('yaml: v2');
+      expect(useFlowStore.getState().yamlContent).not.toBe(useFlowStore.getState().savedYaml);
+
+      useFlowStore.getState().markSaved();
+      expect(useFlowStore.getState().yamlContent).toBe(useFlowStore.getState().savedYaml);
     });
   });
 

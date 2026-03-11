@@ -82,6 +82,10 @@ interface FlowState {
   syncSource: SyncSource;
   needsLayout: boolean;
   lastAst: Record<string, unknown> | null;
+  /** YAML content as of the last save or file load. Used to compute isDirty. */
+  savedYaml: string;
+  /** The file path currently being edited. */
+  filePath: string | null;
 
   // Actions
   onNodesChange: (changes: NodeChange[]) => void;
@@ -109,6 +113,10 @@ interface FlowState {
   setSyncSource: (source: SyncSource) => void;
   setNeedsLayout: (needs: boolean) => void;
   setLastAst: (ast: Record<string, unknown> | null) => void;
+  /** Sets savedYaml to the current yamlContent (marks state as clean). */
+  markSaved: () => void;
+  /** Sets the file path being edited. */
+  setFilePath: (path: string | null) => void;
 }
 
 export const useFlowStore = create<FlowState>()(
@@ -125,6 +133,8 @@ export const useFlowStore = create<FlowState>()(
     syncSource: null,
     needsLayout: false,
     lastAst: null,
+    savedYaml: '',
+    filePath: null,
 
     onNodesChange: (changes) =>
       set((state) => {
@@ -293,5 +303,10 @@ export const useFlowStore = create<FlowState>()(
     setSyncSource: (source) => set({ syncSource: source }),
     setNeedsLayout: (needs) => set({ needsLayout: needs }),
     setLastAst: (ast) => set({ lastAst: ast }),
+    markSaved: () =>
+      set((state) => {
+        state.savedYaml = state.yamlContent;
+      }),
+    setFilePath: (path) => set({ filePath: path }),
   })),
 );

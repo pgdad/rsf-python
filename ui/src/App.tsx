@@ -51,6 +51,12 @@ function EditorApp() {
 
   const setYamlContent = useFlowStore((s) => s.setYamlContent);
   const setSyncSource = useFlowStore((s) => s.setSyncSource);
+  const filePath = useFlowStore((s) => s.filePath);
+  const yamlContent = useFlowStore((s) => s.yamlContent);
+  const savedYaml = useFlowStore((s) => s.savedYaml);
+  const markSaved = useFlowStore((s) => s.markSaved);
+  const setFilePath = useFlowStore((s) => s.setFilePath);
+  const isDirty = yamlContent !== savedYaml;
 
   const handleParsedRef = useRef<((r: ParsedResponse) => void) | null>(null);
 
@@ -66,6 +72,11 @@ function EditorApp() {
         case 'file_loaded':
           setSyncSource('editor');
           setYamlContent(response.yaml);
+          setFilePath(response.path);
+          useFlowStore.setState({ savedYaml: response.yaml });
+          break;
+        case 'file_saved':
+          markSaved();
           break;
         case 'schema':
           setSchema(response.json_schema);
@@ -75,7 +86,7 @@ function EditorApp() {
           break;
       }
     },
-    [setYamlContent, setSyncSource],
+    [setYamlContent, setSyncSource, setFilePath, markSaved],
   );
 
   const { send } = useWebSocket({
@@ -95,10 +106,37 @@ function EditorApp() {
 
   const { syncGraphToYaml } = useGraphToYamlSync({ send });
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        const { filePath: fp, yamlContent: yaml } = useFlowStore.getState();
+        if (fp) {
+          send({ type: 'save_file', path: fp, yaml });
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [send]);
+
   return (
     <div className="app">
       <header className="app-header">
         <h1>RSF Graph Editor</h1>
+        <div className="save-controls">
+          <span className={`save-status ${isDirty ? 'unsaved' : 'saved'}`}>
+            {isDirty ? 'Unsaved' : 'Saved'}
+          </span>
+          {filePath && isDirty && (
+            <button
+              className="save-btn"
+              onClick={() => send({ type: 'save_file', path: filePath, yaml: yamlContent })}
+            >
+              Save
+            </button>
+          )}
+        </div>
         <div className="header-right">
           <a href="#/inspector" className="header-link">Inspector</a>
           <span className={`connection-status ${connected ? 'connected' : ''}`}>
