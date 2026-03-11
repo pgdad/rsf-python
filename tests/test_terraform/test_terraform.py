@@ -168,6 +168,7 @@ class TestGenerateTerraform:
         assert "archive_file" in content
         assert "my-workflow" in content  # workflow_name in output_path
         assert "my_workflow" in content  # sanitized resource_id
+        assert "ManagedBy" in content
 
     def test_variables_tf_content(self, config, tmp_path):
         generate_terraform(config, tmp_path)
@@ -209,6 +210,7 @@ class TestGenerateTerraform:
         content = (tmp_path / "cloudwatch.tf").read_text()
         assert "aws_cloudwatch_log_group" in content
         assert "retention_in_days" in content
+        assert "ManagedBy" in content
 
     def test_backend_tf_no_bucket(self, config, tmp_path):
         generate_terraform(config, tmp_path)
@@ -898,3 +900,223 @@ class TestStageConfig:
         """TerraformConfig.stage defaults to None."""
         config = TerraformConfig(workflow_name="test")
         assert config.stage is None
+
+
+class TestTagGeneration:
+    """Tests verifying ManagedBy/Workflow tags are present on all taggable resources."""
+
+    def test_main_tf_has_managed_by_tag(self, tmp_path):
+        """Generated main.tf includes ManagedBy=rsf tag on aws_lambda_function."""
+        config = TerraformConfig(workflow_name="tag-test")
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "main.tf").read_text()
+        assert "ManagedBy" in content
+        assert '"rsf"' in content
+
+    def test_iam_role_has_tags(self, tmp_path):
+        """Generated iam.tf includes tags on aws_iam_role (not aws_iam_role_policy)."""
+        config = TerraformConfig(workflow_name="tag-test")
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "iam.tf").read_text()
+        assert "ManagedBy" in content
+        # tags block appears before aws_iam_role_policy resource (on the role)
+        role_end = content.index('resource "aws_iam_role_policy"')
+        role_section = content[:role_end]
+        assert "ManagedBy" in role_section
+
+    def test_cloudwatch_log_group_has_tags(self, tmp_path):
+        """Generated cloudwatch.tf includes tags on aws_cloudwatch_log_group."""
+        config = TerraformConfig(workflow_name="tag-test")
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "cloudwatch.tf").read_text()
+        assert "ManagedBy" in content
+        assert '"rsf"' in content
+
+    def test_dynamodb_tables_have_tags(self, tmp_path):
+        """Generated dynamodb.tf includes tags on each aws_dynamodb_table."""
+        config = TerraformConfig(
+            workflow_name="tag-test",
+            dynamodb_tables=[
+                {
+                    "table_name": "orders",
+                    "partition_key": {"name": "id", "type": "S"},
+                    "billing_mode": "PAY_PER_REQUEST",
+                },
+                {
+                    "table_name": "events",
+                    "partition_key": {"name": "event_id", "type": "S"},
+                    "billing_mode": "PAY_PER_REQUEST",
+                },
+            ],
+            has_dynamodb_tables=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "dynamodb.tf").read_text()
+        assert "ManagedBy" in content
+        # Two tables — tags should appear twice
+        assert content.count("ManagedBy") == 2
+
+    def test_dlq_has_tags(self, tmp_path):
+        """Generated dlq.tf includes tags on aws_sqs_queue."""
+        config = TerraformConfig(
+            workflow_name="tag-test",
+            dlq_enabled=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "dlq.tf").read_text()
+        assert "ManagedBy" in content
+        assert '"rsf"' in content
+
+    def test_alarm_sns_topic_has_tags(self, tmp_path):
+        """Generated alarms.tf includes tags on auto-created aws_sns_topic."""
+        config = TerraformConfig(
+            workflow_name="tag-test",
+            alarms=[
+                {
+                    "type": "error_rate",
+                    "threshold": 5,
+                    "period": 300,
+                    "evaluation_periods": 1,
+                    "sns_topic_arn": None,
+                }
+            ],
+            has_alarms=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "alarms.tf").read_text()
+        # SNS topic is created when sns_topic_arn is None
+        assert 'resource "aws_sns_topic"' in content
+        # Verify tags appear on the SNS topic (before the alarm resource)
+        sns_topic_end = content.index('resource "aws_cloudwatch_metric_alarm"')
+        sns_section = content[:sns_topic_end]
+        assert "ManagedBy" in sns_section
+
+    def test_alarm_resources_have_tags(self, tmp_path):
+        """Generated alarms.tf includes tags on aws_cloudwatch_metric_alarm resources."""
+        config = TerraformConfig(
+            workflow_name="tag-test",
+            alarms=[
+                {
+                    "type": "error_rate",
+                    "threshold": 5,
+                    "period": 300,
+                    "evaluation_periods": 1,
+                    "sns_topic_arn": None,
+                },
+                {
+                    "type": "duration",
+                    "threshold": 10000,
+                    "period": 300,
+                    "evaluation_periods": 1,
+                    "sns_topic_arn": None,
+                },
+                {
+                    "type": "throttle",
+                    "threshold": 10,
+                    "period": 300,
+                    "evaluation_periods": 1,
+                    "sns_topic_arn": None,
+                },
+            ],
+            has_alarms=True,
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "alarms.tf").read_text()
+        # 1 SNS topic + 3 alarms = 4 ManagedBy occurrences
+        assert content.count("ManagedBy") == 4
+
+    def test_sqs_trigger_queue_has_tags(self, tmp_path):
+        """Generated triggers.tf includes tags on aws_sqs_queue for SQS trigger."""
+        config = TerraformConfig(
+            workflow_name="tag-test",
+            triggers=[{"type": "sqs", "queue_name": "my-queue", "batch_size": 5}],
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "triggers.tf").read_text()
+        assert "aws_sqs_queue" in content
+        assert "ManagedBy" in content
+
+    def test_eventbridge_rule_has_tags(self, tmp_path):
+        """Generated triggers.tf includes tags on aws_cloudwatch_event_rule."""
+        config = TerraformConfig(
+            workflow_name="tag-test",
+            triggers=[
+                {
+                    "type": "eventbridge",
+                    "schedule_expression": "rate(5 minutes)",
+                    "event_pattern": None,
+                }
+            ],
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "triggers.tf").read_text()
+        assert "aws_cloudwatch_event_rule" in content
+        assert "ManagedBy" in content
+
+    def test_lambda_permission_and_event_target_have_no_tags(self, tmp_path):
+        """Non-taggable resources (aws_lambda_permission, aws_cloudwatch_event_target) must not have tags."""
+        config = TerraformConfig(
+            workflow_name="tag-test",
+            triggers=[
+                {
+                    "type": "eventbridge",
+                    "schedule_expression": "rate(1 hour)",
+                    "event_pattern": None,
+                }
+            ],
+        )
+        generate_terraform(config, tmp_path)
+        content = (tmp_path / "triggers.tf").read_text()
+        # tags should only appear inside the event_rule block, not the permission or target blocks
+        # The event_rule block ends before aws_cloudwatch_event_target
+        event_target_start = content.index('resource "aws_cloudwatch_event_target"')
+        after_event_target = content[event_target_start:]
+        # No tags after the event_target (lambda_permission follows it)
+        assert "ManagedBy" not in after_event_target
+
+    def test_all_generated_files_have_tags(self, tmp_path):
+        """Full generation with all features: every file creating taggable resources has ManagedBy."""
+        config = TerraformConfig(
+            workflow_name="full-test",
+            dlq_enabled=True,
+            lambda_url_enabled=True,
+            lambda_url_auth_type="NONE",
+            alarms=[
+                {
+                    "type": "error_rate",
+                    "threshold": 5,
+                    "period": 300,
+                    "evaluation_periods": 1,
+                    "sns_topic_arn": None,
+                }
+            ],
+            has_alarms=True,
+            dynamodb_tables=[
+                {
+                    "table_name": "records",
+                    "partition_key": {"name": "id", "type": "S"},
+                    "billing_mode": "PAY_PER_REQUEST",
+                }
+            ],
+            has_dynamodb_tables=True,
+            triggers=[{"type": "sqs", "queue_name": "events-queue", "batch_size": 1}],
+        )
+        generate_terraform(config, tmp_path)
+
+        # These files contain taggable resources and MUST have ManagedBy
+        taggable_files = ["main.tf", "iam.tf", "cloudwatch.tf", "dynamodb.tf", "dlq.tf", "alarms.tf", "triggers.tf"]
+        for filename in taggable_files:
+            content = (tmp_path / filename).read_text()
+            assert "ManagedBy" in content, f"Expected ManagedBy tag in {filename}"
+
+        # lambda_url.tf must NOT have tags (aws_lambda_function_url is not taggable)
+        lambda_url_content = (tmp_path / "lambda_url.tf").read_text()
+        assert "ManagedBy" not in lambda_url_content, "lambda_url.tf should not have tags"
+
+    def test_workflow_tag_value_uses_var_workflow_name(self, tmp_path):
+        """Tags use var.workflow_name (Terraform variable) not a hardcoded string."""
+        config = TerraformConfig(workflow_name="my-workflow")
+        generate_terraform(config, tmp_path)
+        for filename in ["main.tf", "iam.tf", "cloudwatch.tf"]:
+            content = (tmp_path / filename).read_text()
+            assert "var.workflow_name" in content, f"Expected var.workflow_name in {filename}"
