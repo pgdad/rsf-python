@@ -68,7 +68,7 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
         if current_state == 'ValidateOrder':
             try:
                 handler = get_handler('ValidateOrder')
-                input_data = context.step('ValidateOrder', handler, input_data)
+                input_data = context.step(lambda _step_ctx: handler(input_data), 'ValidateOrder')
                 current_state = 'CheckOrderValue'
             except Exception as _err:
                 if type(_err).__name__ in ['InvalidOrderError'] or "States.ALL" in ['InvalidOrderError']:
@@ -90,8 +90,9 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
 
         elif current_state == 'ProcessOrder':
             try:
-                _branches = [lambda _inp: _run_branch_processpayment(context, _inp), lambda _inp: _run_branch_reserveinventory(context, _inp)]
-                _result = context.parallel('ProcessOrder', _branches, input_data)
+                _captured = input_data
+                _branches = [lambda _ctx: _run_branch_processpayment(_ctx, _captured), lambda _ctx: _run_branch_reserveinventory(_ctx, _captured)]
+                _result = context.parallel(_branches, 'ProcessOrder')
                 input_data = _result.get_results()
                 current_state = 'SendConfirmation'
             except Exception as _err:
@@ -104,7 +105,7 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
         elif current_state == 'RequireApproval':
             try:
                 handler = get_handler('RequireApproval')
-                input_data = context.step('RequireApproval', handler, input_data)
+                input_data = context.step(lambda _step_ctx: handler(input_data), 'RequireApproval')
                 current_state = 'ProcessOrder'
             except Exception as _err:
                 if type(_err).__name__ in ['States.Timeout', 'ApprovalDenied'] or "States.ALL" in ['States.Timeout', 'ApprovalDenied']:
@@ -115,7 +116,7 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
 
         elif current_state == 'SendConfirmation':
             handler = get_handler('SendConfirmation')
-            input_data = context.step('SendConfirmation', handler, input_data)
+            input_data = context.step(lambda _step_ctx: handler(input_data), 'SendConfirmation')
             current_state = 'OrderComplete'
 
         elif current_state == 'OrderComplete':
@@ -131,6 +132,22 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
         _wf_span.__exit__(None, None, None)
 
     return input_data
+
+
+def _run_branch_processpayment(branch_ctx: "DurableContext", _input: dict) -> dict:
+    """Execute the ProcessPayment parallel branch."""
+    _data = _input
+    _handler_process_payment = get_handler('ProcessPayment')
+    _data = branch_ctx.step(lambda _sc, _d=_data: _handler_process_payment(_d), 'ProcessPayment')
+    return _data
+
+
+def _run_branch_reserveinventory(branch_ctx: "DurableContext", _input: dict) -> dict:
+    """Execute the ReserveInventory parallel branch."""
+    _data = _input
+    _handler_reserve_inventory = get_handler('ReserveInventory')
+    _data = branch_ctx.step(lambda _sc, _d=_data: _handler_reserve_inventory(_d), 'ReserveInventory')
+    return _data
 
 
 def _resolve_path(data: dict, path: str) -> object:

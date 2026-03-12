@@ -24,3 +24,8 @@ output "function_url" {
   description = "Lambda Function URL endpoint"
   value       = aws_lambda_function_url.lambda_url_trigger_url.function_url
 }
+
+output "alias_arn" {
+  description = "ARN of the live alias — use this for Lambda invocations"
+  value       = aws_lambda_alias.live.arn
+}

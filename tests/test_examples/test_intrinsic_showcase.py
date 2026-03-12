@@ -48,11 +48,12 @@ class TestIntrinsicShowcaseIntegration:
         iam_propagation_wait()
 
         fn = outputs["function_name"]
+        alias_arn = outputs["alias_arn"]
         exec_id = make_execution_id("intrinsic-showcase")
         start_time = datetime.now(timezone.utc)
 
         lambda_client.invoke(
-            FunctionName=fn,
+            FunctionName=alias_arn,
             InvocationType="Event",
             Payload=json.dumps(self.EVENT),
             DurableExecutionName=exec_id,

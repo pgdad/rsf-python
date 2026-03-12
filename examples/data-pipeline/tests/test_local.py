@@ -347,7 +347,7 @@ class TestFullPipelineSimulation:
             "prefix": pipeline_input["source"]["prefix"],
             "maxItems": 100,
         }
-        fetch_raw_result = ctx.step("FetchRecords", handlers["FetchRecords"], fetch_input)
+        fetch_raw_result = ctx.step(lambda _sc: handlers["FetchRecords"](fetch_input), "FetchRecords")
 
         # ResultSelector picks records.$ and count.$
         fetch_selected = {
@@ -361,16 +361,15 @@ class TestFullPipelineSimulation:
         # ItemsPath: $.fetched.records -> iterate over records
         records = data["fetched"]["records"]
 
-        def map_item_processor(item):
+        def map_item_processor(_ctx, item, _idx, _all):
             validated = handlers["ValidateRecord"](item)
             enriched = handlers["EnrichRecord"](validated)
             return enriched
 
         map_result = ctx.map(
-            "TransformRecords",
-            map_item_processor,
             records,
-            max_concurrency=5,
+            map_item_processor,
+            "TransformRecords",
         )
         transformed = map_result.get_results()
         # ResultPath: $.transformed
@@ -382,7 +381,7 @@ class TestFullPipelineSimulation:
             "tableName": data["config"]["config"]["tableName"],
             "items": data["transformed"],
         }
-        store_result = ctx.step("StoreResults", handlers["StoreResults"], store_input)
+        store_result = ctx.step(lambda _sc: handlers["StoreResults"](store_input), "StoreResults")
         # ResultPath: $.stored, OutputPath: $.stored -> final output
         data["stored"] = store_result
 
@@ -403,19 +402,19 @@ class TestFullPipelineSimulation:
             "prefix": "incoming/2026-02-26/",
             "maxItems": 100,
         }
-        fetch_result = ctx.step("FetchRecords", handlers["FetchRecords"], fetch_input)
+        fetch_result = ctx.step(lambda _sc: handlers["FetchRecords"](fetch_input), "FetchRecords")
         records = fetch_result["items"]
 
         # TransformRecords map
-        def map_processor(item):
+        def map_processor(_ctx, item, _idx, _all):
             v = handlers["ValidateRecord"](item)
             return handlers["EnrichRecord"](v)
 
-        ctx.map("TransformRecords", map_processor, records, max_concurrency=5)
+        ctx.map(records, map_processor, "TransformRecords")
 
         # StoreResults step
         store_input = {"tableName": "pipeline-results", "items": records}
-        ctx.step("StoreResults", handlers["StoreResults"], store_input)
+        ctx.step(lambda _sc: handlers["StoreResults"](store_input), "StoreResults")
 
         # Verify call order
         assert len(ctx.calls) == 3
@@ -433,11 +432,11 @@ class TestFullPipelineSimulation:
         fetch_result = handlers["FetchRecords"]({"bucket": "data-lake", "prefix": "incoming/", "maxItems": 100})
         records = fetch_result["items"]
 
-        def map_processor(item):
+        def map_processor(_ctx, item, _idx, _all):
             v = handlers["ValidateRecord"](item)
             return handlers["EnrichRecord"](v)
 
-        map_result = ctx.map("TransformRecords", map_processor, records)
+        map_result = ctx.map(records, map_processor, "TransformRecords")
         transformed = map_result.get_results()
 
         assert len(transformed) == len(records)
@@ -455,16 +454,16 @@ class TestFullPipelineSimulation:
         records = fetch_result["items"]
 
         # Transform
-        def map_processor(item):
+        def map_processor(_ctx, item, _idx, _all):
             v = handlers["ValidateRecord"](item)
             return handlers["EnrichRecord"](v)
 
-        map_result = ctx.map("TransformRecords", map_processor, records)
+        map_result = ctx.map(records, map_processor, "TransformRecords")
         transformed = map_result.get_results()
 
         # Store
         store_input = {"tableName": "pipeline-results", "items": transformed}
-        store_result = ctx.step("StoreResults", handlers["StoreResults"], store_input)
+        store_result = ctx.step(lambda _sc: handlers["StoreResults"](store_input), "StoreResults")
 
         assert store_result["itemsWritten"] == len(records)
         assert store_result["tableName"] == "pipeline-results"
@@ -476,13 +475,13 @@ class TestFullPipelineSimulation:
         # Simulate an empty fetch result
         empty_fetch = {"items": [], "totalCount": 0}
         ctx.override_step("FetchRecords", empty_fetch)
-        ctx.step("FetchRecords", handlers["FetchRecords"], {})
+        ctx.step(lambda _sc: handlers["FetchRecords"]({}), "FetchRecords")
 
         # Map with empty list
-        map_result = ctx.map("TransformRecords", lambda x: x, [])
+        map_result = ctx.map([], lambda _ctx, x, _i, _a: x, "TransformRecords")
         assert map_result.get_results() == []
 
         # Store empty
         store_input = {"tableName": "pipeline-results", "items": []}
-        store_result = ctx.step("StoreResults", handlers["StoreResults"], store_input)
+        store_result = ctx.step(lambda _sc: handlers["StoreResults"](store_input), "StoreResults")
         assert store_result["itemsWritten"] == 0

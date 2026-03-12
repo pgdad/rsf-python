@@ -66,12 +66,12 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
             _state_span.__enter__()
         if current_state == 'ValidateOrder':
             handler = get_handler('ValidateOrder')
-            input_data = context.step('ValidateOrder', handler, input_data)
+            input_data = context.step(lambda _step_ctx: handler(input_data), 'ValidateOrder')
             current_state = 'ProcessOrder'
 
         elif current_state == 'ProcessOrder':
             handler = get_handler('ProcessOrder')
-            input_data = context.step('ProcessOrder', handler, input_data)
+            input_data = context.step(lambda _step_ctx: handler(input_data), 'ProcessOrder')
             current_state = 'OrderComplete'
 
         elif current_state == 'OrderComplete':

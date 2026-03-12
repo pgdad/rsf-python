@@ -2,6 +2,12 @@
 
 Provides MockDurableContext that simulates the SDK's step, wait, parallel,
 and map primitives without requiring actual Lambda infrastructure.
+
+API matches the real AWS Lambda Durable Functions SDK (DurableFunction.v9):
+  context.step(func, name=None, config=None)
+  context.wait(duration, name=None)
+  context.parallel(functions, name=None, config=None)
+  context.map(inputs, func, name=None, config=None)
 """
 
 from __future__ import annotations
@@ -19,15 +25,22 @@ class Duration:
         self.value = value
 
     @staticmethod
-    def seconds(n: int | float) -> Duration:
+    def seconds(n: int | float) -> "Duration":
         return Duration("seconds", n)
 
     @staticmethod
-    def timestamp(ts: str) -> Duration:
+    def timestamp(ts: str) -> "Duration":
         return Duration("timestamp", ts)
 
     def __repr__(self) -> str:
         return f"Duration.{self.kind}({self.value!r})"
+
+
+class MockStepContext:
+    """Mock StepContext passed to step functions — matches real SDK (only has logger)."""
+
+    def __init__(self) -> None:
+        self.logger = None
 
 
 @dataclass
@@ -35,7 +48,7 @@ class StepRecord:
     """Records a single SDK call for introspection."""
 
     operation: str  # "step", "wait", "parallel", "map"
-    name: str
+    name: str | None = None
     input_data: Any = None
     result: Any = None
     duration: Duration | None = None
@@ -56,6 +69,12 @@ class MockDurableContext:
 
     Records all SDK calls and executes handlers synchronously for testing.
     Supports step, wait, parallel, and map primitives.
+
+    Matches the real AWS Lambda Durable Functions SDK API:
+      step(func, name=None, config=None)   — func receives MockStepContext
+      wait(duration, name=None)
+      parallel(functions, name=None)       — each function receives MockDurableContext
+      map(inputs, func, name=None)         — func receives (MockDurableContext, item, idx, all)
     """
 
     def __init__(self) -> None:
@@ -69,44 +88,54 @@ class MockDurableContext:
         """
         self._step_overrides[name] = result
 
-    def step(self, name: str, handler: Callable, input_data: Any) -> Any:
-        """Execute a Task state handler and record the call.
+    def step(self, func: Callable, name: str | None = None, config: Any = None) -> Any:
+        """Execute a step function and record the call.
 
-        If an override is set for this step name, return that instead
-        of calling the handler.
+        Matches real SDK: step(func: Callable[[StepContext], T], name=None, config=None) -> T
+
+        The func receives a MockStepContext (has only .logger).
+        If an override is set for this step name, return that instead.
         """
-        record = StepRecord(operation="step", name=name, input_data=copy.deepcopy(input_data))
+        step_ctx = MockStepContext()
+        record = StepRecord(operation="step", name=name)
 
         if name in self._step_overrides:
             result = self._step_overrides[name]
         else:
-            result = handler(input_data)
+            result = func(step_ctx)
 
         record.result = result
         self.calls.append(record)
         return result
 
-    def wait(self, name: str, duration: Duration) -> None:
-        """Record a Wait state without actually waiting."""
+    def wait(self, duration: Duration, name: str | None = None) -> None:
+        """Record a Wait state without actually waiting.
+
+        Matches real SDK: wait(duration, name=None) -> None
+        """
         record = StepRecord(operation="wait", name=name, duration=duration)
         self.calls.append(record)
 
     def parallel(
         self,
-        name: str,
-        branches: list[Callable],
-        input_data: Any,
+        functions: list[Callable],
+        name: str | None = None,
+        config: Any = None,
     ) -> BranchResult:
-        """Execute parallel branches synchronously and return combined results."""
-        record = StepRecord(
-            operation="parallel",
-            name=name,
-            input_data=copy.deepcopy(input_data),
-        )
+        """Execute parallel branches synchronously and return combined results.
+
+        Matches real SDK: parallel(functions, name=None, config=None) -> BatchResult
+        Each function receives a MockDurableContext (branch context).
+        """
+        record = StepRecord(operation="parallel", name=name)
 
         results = []
-        for branch_fn in branches:
-            branch_result = branch_fn(copy.deepcopy(input_data))
+        for branch_fn in functions:
+            branch_ctx = MockDurableContext()
+            branch_ctx._step_overrides = self._step_overrides  # share overrides
+            branch_result = branch_fn(branch_ctx)
+            # Merge branch calls for inspection
+            self.calls.extend(branch_ctx.calls)
             results.append(branch_result)
 
         record.result = results
@@ -115,21 +144,24 @@ class MockDurableContext:
 
     def map(
         self,
-        name: str,
-        item_fn: Callable,
-        items: list[Any],
-        max_concurrency: int | None = None,
+        inputs: list[Any],
+        func: Callable,
+        name: str | None = None,
+        config: Any = None,
     ) -> BranchResult:
-        """Execute map operation synchronously over items."""
-        record = StepRecord(
-            operation="map",
-            name=name,
-            input_data=copy.deepcopy(items),
-        )
+        """Execute map operation synchronously over items.
+
+        Matches real SDK: map(inputs, func, name=None, config=None) -> BatchResult
+        func receives (DurableContext, item, index, all_items).
+        """
+        record = StepRecord(operation="map", name=name, input_data=copy.deepcopy(inputs))
 
         results = []
-        for item in items:
-            result = item_fn(copy.deepcopy(item))
+        for idx, item in enumerate(inputs):
+            item_ctx = MockDurableContext()
+            item_ctx._step_overrides = self._step_overrides  # share overrides
+            result = func(item_ctx, copy.deepcopy(item), idx, inputs)
+            self.calls.extend(item_ctx.calls)
             results.append(result)
 
         record.result = results

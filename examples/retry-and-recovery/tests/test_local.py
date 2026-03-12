@@ -356,9 +356,8 @@ class TestHappyPath:
             "payload": {"item": "widget"},
         }
         result_after_primary = ctx.step(
+            lambda _sc: primary_result,
             "CallPrimaryService",
-            lambda d: primary_result,
-            {"requestId": "req-hp", "payload": {"item": "widget"}},
         )
         assert result_after_primary["source"] == "primary"
         assert result_after_primary["status"] == "ok"
@@ -370,9 +369,8 @@ class TestHappyPath:
             "checksPerformed": ["status_check", "payload_integrity"],
         }
         verify_out = ctx.step(
+            lambda _sc: verification,
             "VerifyResult",
-            lambda d: verification,
-            result_after_primary,
         )
         assert verify_out["verified"] is True
 
@@ -388,17 +386,17 @@ class TestHappyPath:
 
         ctx = MockDurableContext()
 
+        _primary_input = {"requestId": "req-real", "payload": {"x": 1}}
         primary_out = ctx.step(
+            lambda _sc: call_primary_service(_primary_input),
             "CallPrimaryService",
-            call_primary_service,
-            {"requestId": "req-real", "payload": {"x": 1}},
         )
         assert primary_out["status"] == "ok"
 
+        _verify_input = primary_out
         verify_out = ctx.step(
+            lambda _sc: verify_result(_verify_input),
             "VerifyResult",
-            verify_result,
-            primary_out,
         )
         assert verify_out["verified"] is True
         assert verify_out["source"] == "primary"
@@ -438,9 +436,8 @@ class TestFallbackPath:
             "payload": {},
         }
         fallback_out = ctx.step(
+            lambda _sc: fallback_result,
             "TryFallbackService",
-            lambda d: fallback_result,
-            primary_error,
         )
         assert fallback_out["source"] == "fallback"
 
@@ -451,9 +448,8 @@ class TestFallbackPath:
             "checksPerformed": ["status_check", "payload_integrity"],
         }
         verify_out = ctx.step(
+            lambda _sc: verification,
             "VerifyResult",
-            lambda d: verification,
-            fallback_out,
         )
         assert verify_out["verified"] is True
         assert verify_out["source"] == "fallback"
@@ -469,21 +465,21 @@ class TestFallbackPath:
 
         ctx = MockDurableContext()
 
+        _fallback_input = {
+            "requestId": "req-fb-real",
+            "primaryError": {"Error": "ServiceDownError"},
+        }
         fallback_out = ctx.step(
+            lambda _sc: try_fallback_service(_fallback_input),
             "TryFallbackService",
-            try_fallback_service,
-            {
-                "requestId": "req-fb-real",
-                "primaryError": {"Error": "ServiceDownError"},
-            },
         )
         assert fallback_out["source"] == "fallback"
         assert fallback_out["status"] == "ok"
 
+        _verify_input = fallback_out
         verify_out = ctx.step(
+            lambda _sc: verify_result(_verify_input),
             "VerifyResult",
-            verify_result,
-            fallback_out,
         )
         assert verify_out["verified"] is True
         assert verify_out["source"] == "fallback"

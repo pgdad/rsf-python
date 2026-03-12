@@ -67,19 +67,19 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
             _state_span.__enter__()
         if current_state == 'SubmitRequest':
             handler = get_handler('SubmitRequest')
-            input_data = context.step('SubmitRequest', handler, input_data)
+            input_data = context.step(lambda _step_ctx: handler(input_data), 'SubmitRequest')
             current_state = 'SetApprovalContext'
 
         elif current_state == 'SetApprovalContext':
             current_state = 'WaitForReview'
 
         elif current_state == 'WaitForReview':
-            context.wait('WaitForReview', Duration.seconds(5))
+            context.wait(Duration.seconds(5), 'WaitForReview')
             current_state = 'CheckApprovalStatus'
 
         elif current_state == 'CheckApprovalStatus':
             handler = get_handler('CheckApprovalStatus')
-            input_data = context.step('CheckApprovalStatus', handler, input_data)
+            input_data = context.step(lambda _step_ctx: handler(input_data), 'CheckApprovalStatus')
             current_state = 'EvaluateDecision'
 
         elif current_state == 'EvaluateDecision':
@@ -94,7 +94,7 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
 
         elif current_state == 'ProcessApproval':
             handler = get_handler('ProcessApproval')
-            input_data = context.step('ProcessApproval', handler, input_data)
+            input_data = context.step(lambda _step_ctx: handler(input_data), 'ProcessApproval')
             current_state = 'RequestApproved'
 
         elif current_state == 'RequestDenied':

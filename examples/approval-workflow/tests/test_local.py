@@ -290,16 +290,13 @@ class TestApprovedFlowSimulation:
 
         # Step 1: SubmitRequest
         submit_handler = get_handler("SubmitRequest")
-        submit_result = ctx.step(
-            "SubmitRequest",
-            submit_handler,
-            {
-                "requestData": {"item": "server", "cost": 5000},
-                "submittedBy": "user-10",
-                "executionId": "exec-001",
-                "stateMachine": "ApprovalWorkflow",
-            },
-        )
+        _submit_input = {
+            "requestData": {"item": "server", "cost": 5000},
+            "submittedBy": "user-10",
+            "executionId": "exec-001",
+            "stateMachine": "ApprovalWorkflow",
+        }
+        submit_result = ctx.step(lambda _sc: submit_handler(_submit_input), "SubmitRequest")
         assert submit_result["status"] == "pending"
         request_id = submit_result["requestId"]
 
@@ -308,7 +305,7 @@ class TestApprovedFlowSimulation:
         # {"requestId": request_id, "submitter": "user-10", "stateName": "SetApprovalContext", ...}
 
         # Step 3: WaitForReview
-        ctx.wait("WaitForReview", Duration.seconds(5))
+        ctx.wait(Duration.seconds(5), "WaitForReview")
 
         # Step 4: CheckApprovalStatus — request starts with "approve" prefix
         # Override to simulate an "approved" response for our request ID
@@ -322,14 +319,11 @@ class TestApprovedFlowSimulation:
             },
         )
         check_handler = get_handler("CheckApprovalStatus")
-        check_result = ctx.step(
-            "CheckApprovalStatus",
-            check_handler,
-            {
-                "requestId": request_id,
-                "checkNumber": 0,
-            },
-        )
+        _check_input = {
+            "requestId": request_id,
+            "checkNumber": 0,
+        }
+        check_result = ctx.step(lambda _sc: check_handler(_check_input), "CheckApprovalStatus")
         assert check_result["decision"] == "approved"
 
         # Step 5: EvaluateDecision (Choice state — evaluate inline)
@@ -339,15 +333,12 @@ class TestApprovedFlowSimulation:
 
         # Step 6: ProcessApproval
         process_handler = get_handler("ProcessApproval")
-        process_result = ctx.step(
-            "ProcessApproval",
-            process_handler,
-            {
-                "requestId": request_id,
-                "approvedBy": check_result["approver"],
-                "executionId": "exec-001",
-            },
-        )
+        _process_input = {
+            "requestId": request_id,
+            "approvedBy": check_result["approver"],
+            "executionId": "exec-001",
+        }
+        process_result = ctx.step(lambda _sc: process_handler(_process_input), "ProcessApproval")
         assert process_result["status"] == "completed"
         assert process_result["approvedBy"] == "manager-01"
 
@@ -374,21 +365,18 @@ class TestDeniedFlowSimulation:
 
         # Step 1: SubmitRequest
         submit_handler = get_handler("SubmitRequest")
-        submit_result = ctx.step(
-            "SubmitRequest",
-            submit_handler,
-            {
-                "requestData": {"item": "denied-item"},
-                "submittedBy": "user-20",
-                "executionId": "exec-002",
-                "stateMachine": "ApprovalWorkflow",
-            },
-        )
+        _submit_input = {
+            "requestData": {"item": "denied-item"},
+            "submittedBy": "user-20",
+            "executionId": "exec-002",
+            "stateMachine": "ApprovalWorkflow",
+        }
+        submit_result = ctx.step(lambda _sc: submit_handler(_submit_input), "SubmitRequest")
         request_id = submit_result["requestId"]
 
         # Step 2: SetApprovalContext (Pass — inline)
         # Step 3: WaitForReview
-        ctx.wait("WaitForReview", Duration.seconds(5))
+        ctx.wait(Duration.seconds(5), "WaitForReview")
 
         # Step 4: CheckApprovalStatus — override with denied decision
         ctx.override_step(
@@ -400,14 +388,11 @@ class TestDeniedFlowSimulation:
             },
         )
         check_handler = get_handler("CheckApprovalStatus")
-        check_result = ctx.step(
-            "CheckApprovalStatus",
-            check_handler,
-            {
-                "requestId": request_id,
-                "checkNumber": 0,
-            },
-        )
+        _check_input = {
+            "requestId": request_id,
+            "checkNumber": 0,
+        }
+        check_result = ctx.step(lambda _sc: check_handler(_check_input), "CheckApprovalStatus")
         assert check_result["decision"] == "denied"
 
         # Step 5: EvaluateDecision → RequestDenied (Fail state)
@@ -431,16 +416,13 @@ class TestEscalationFlowSimulation:
 
         # Step 1: SubmitRequest
         submit_handler = get_handler("SubmitRequest")
-        submit_result = ctx.step(
-            "SubmitRequest",
-            submit_handler,
-            {
-                "requestData": {"item": "ambiguous-item"},
-                "submittedBy": "user-30",
-                "executionId": "exec-003",
-                "stateMachine": "ApprovalWorkflow",
-            },
-        )
+        _submit_input = {
+            "requestData": {"item": "ambiguous-item"},
+            "submittedBy": "user-30",
+            "executionId": "exec-003",
+            "stateMachine": "ApprovalWorkflow",
+        }
+        submit_result = ctx.step(lambda _sc: submit_handler(_submit_input), "SubmitRequest")
         request_id = submit_result["requestId"]
 
         # Simulate multiple pending checks that loop back via Default
@@ -448,21 +430,19 @@ class TestEscalationFlowSimulation:
         attempt_count = 0
 
         for attempt in range(4):
-            ctx.wait(f"WaitForReview-{attempt}", Duration.seconds(5))
+            ctx.wait(Duration.seconds(5), f"WaitForReview-{attempt}")
 
+            _step_name = f"CheckApprovalStatus-{attempt}"
             ctx.override_step(
-                f"CheckApprovalStatus-{attempt}",
+                _step_name,
                 {
                     "decision": "pending",
                     "checkNumber": attempt,
                     "requestId": request_id,
                 },
             )
-            check_result = ctx.step(
-                f"CheckApprovalStatus-{attempt}",
-                check_handler,
-                {"requestId": request_id, "checkNumber": attempt},
-            )
+            _check_input = {"requestId": request_id, "checkNumber": attempt}
+            check_result = ctx.step(lambda _sc: check_handler(_check_input), _step_name)
             assert check_result["decision"] == "pending"
             attempt_count += 1
 

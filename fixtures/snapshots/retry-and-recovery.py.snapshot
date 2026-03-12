@@ -70,7 +70,7 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
         if current_state == 'CallPrimaryService':
             try:
                 handler = get_handler('CallPrimaryService')
-                input_data = context.step('CallPrimaryService', handler, input_data)
+                input_data = context.step(lambda _step_ctx: handler(input_data), 'CallPrimaryService')
                 current_state = 'VerifyResult'
             except Exception as _err:
                 if type(_err).__name__ in ['ServiceDownError'] or "States.ALL" in ['ServiceDownError']:
@@ -90,13 +90,13 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
 
         elif current_state == 'VerifyResult':
             handler = get_handler('VerifyResult')
-            input_data = context.step('VerifyResult', handler, input_data)
+            input_data = context.step(lambda _step_ctx: handler(input_data), 'VerifyResult')
             current_state = 'ServiceComplete'
 
         elif current_state == 'TryFallbackService':
             try:
                 handler = get_handler('TryFallbackService')
-                input_data = context.step('TryFallbackService', handler, input_data)
+                input_data = context.step(lambda _step_ctx: handler(input_data), 'TryFallbackService')
                 current_state = 'VerifyResult'
             except Exception as _err:
                 if type(_err).__name__ in ['States.ALL'] or "States.ALL" in ['States.ALL']:
@@ -111,7 +111,7 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
         elif current_state == 'HandleBadData':
             try:
                 handler = get_handler('HandleBadData')
-                input_data = context.step('HandleBadData', handler, input_data)
+                input_data = context.step(lambda _step_ctx: handler(input_data), 'HandleBadData')
                 current_state = 'CallPrimaryService'
             except Exception as _err:
                 if type(_err).__name__ in ['States.ALL'] or "States.ALL" in ['States.ALL']:
@@ -129,7 +129,7 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
         elif current_state == 'RetryAfterThrottle':
             try:
                 handler = get_handler('RetryAfterThrottle')
-                input_data = context.step('RetryAfterThrottle', handler, input_data)
+                input_data = context.step(lambda _step_ctx: handler(input_data), 'RetryAfterThrottle')
                 current_state = 'VerifyResult'
             except Exception as _err:
                 if type(_err).__name__ in ['States.ALL'] or "States.ALL" in ['States.ALL']:

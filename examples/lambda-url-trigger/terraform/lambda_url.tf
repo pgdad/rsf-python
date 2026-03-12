@@ -2,5 +2,6 @@
 
 resource "aws_lambda_function_url" "lambda_url_trigger_url" {
   function_name      = aws_lambda_function.lambda_url_trigger.function_name
+  qualifier          = aws_lambda_alias.live.name
   authorization_type = "NONE"
 }

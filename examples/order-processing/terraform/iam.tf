@@ -45,7 +45,7 @@ resource "aws_iam_role_policy" "lambda_policy" {
         Action = [
           "lambda:InvokeFunction"
         ]
-        Resource = aws_lambda_function.order_processing.arn
+        Resource = "*"
       },
       {
         Sid    = "DurableExecution"
@@ -53,9 +53,10 @@ resource "aws_iam_role_policy" "lambda_policy" {
         Action = [
           "lambda:CheckpointDurableExecution",
           "lambda:GetDurableExecution",
+          "lambda:GetDurableExecutionState",
           "lambda:ListDurableExecutionsByFunction"
         ]
-        Resource = aws_lambda_function.order_processing.arn
+        Resource = "*"
       }
     ]
   })

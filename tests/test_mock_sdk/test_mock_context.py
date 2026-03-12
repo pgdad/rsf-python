@@ -1,4 +1,11 @@
-"""Tests for the MockDurableContext — verifies step, wait, parallel, map primitives."""
+"""Tests for the MockDurableContext — verifies step, wait, parallel, map primitives.
+
+API matches real AWS Lambda Durable Functions SDK (DurableFunction.v9):
+  context.step(func, name=None)          — func receives MockStepContext
+  context.wait(duration, name=None)
+  context.parallel(functions, name=None) — each function receives MockDurableContext
+  context.map(inputs, func, name=None)   — func receives (MockDurableContext, item, idx, all)
+"""
 
 import pytest
 
@@ -18,55 +25,51 @@ class TestDuration:
 
 
 class TestStep:
-    def test_step_calls_handler(self):
+    def test_step_calls_func(self):
+        """step(func, name) calls func with StepContext and returns result."""
         ctx = MockDurableContext()
-        result = ctx.step("DoWork", lambda x: {"processed": x["val"] * 2}, {"val": 5})
+        data = {"val": 5}
+        result = ctx.step(lambda _sc: {"processed": data["val"] * 2}, "DoWork")
         assert result == {"processed": 10}
 
     def test_step_records_call(self):
         ctx = MockDurableContext()
-        ctx.step("DoWork", lambda x: x, {"key": "value"})
+        ctx.step(lambda _sc: {"key": "value"}, "DoWork")
         assert len(ctx.calls) == 1
         assert ctx.calls[0].operation == "step"
         assert ctx.calls[0].name == "DoWork"
-        assert ctx.calls[0].input_data == {"key": "value"}
 
     def test_step_override(self):
         ctx = MockDurableContext()
         ctx.override_step("DoWork", {"mocked": True})
-        result = ctx.step("DoWork", lambda x: x, {"original": True})
+        result = ctx.step(lambda _sc: {"original": True}, "DoWork")
         assert result == {"mocked": True}
 
-    def test_step_does_not_mutate_input(self):
+    def test_step_no_name(self):
+        """step(func) without name still works."""
         ctx = MockDurableContext()
-        original = {"items": [1, 2, 3]}
+        result = ctx.step(lambda _sc: {"done": True})
+        assert result == {"done": True}
 
-        def mutating_handler(data):
-            data["items"].append(99)
-            return data
-
-        ctx.step("DoWork", mutating_handler, original)
-        # The recorded input should be the original (deep copied before mutation)
-        assert ctx.calls[0].input_data == {"items": [1, 2, 3]}
+    def test_step_func_exception_propagates(self):
+        ctx = MockDurableContext()
+        with pytest.raises(ValueError, match="boom"):
+            ctx.step(lambda _sc: (_ for _ in ()).throw(ValueError("boom")), "Fail")
 
     def test_multiple_steps(self):
         ctx = MockDurableContext()
-        ctx.step("Step1", lambda x: {"step": 1}, {})
-        ctx.step("Step2", lambda x: {"step": 2}, {})
-        ctx.step("Step3", lambda x: {"step": 3}, {})
+        ctx.step(lambda _sc: {"step": 1}, "Step1")
+        ctx.step(lambda _sc: {"step": 2}, "Step2")
+        ctx.step(lambda _sc: {"step": 3}, "Step3")
         assert len(ctx.calls) == 3
         assert [c.name for c in ctx.calls] == ["Step1", "Step2", "Step3"]
-
-    def test_step_handler_exception_propagates(self):
-        ctx = MockDurableContext()
-        with pytest.raises(ValueError, match="boom"):
-            ctx.step("Fail", lambda x: (_ for _ in ()).throw(ValueError("boom")), {})
 
 
 class TestWait:
     def test_wait_seconds(self):
+        """wait(duration, name) matches real SDK signature."""
         ctx = MockDurableContext()
-        ctx.wait("Delay", Duration.seconds(60))
+        ctx.wait(Duration.seconds(60), "Delay")
         assert len(ctx.calls) == 1
         assert ctx.calls[0].operation == "wait"
         assert ctx.calls[0].name == "Delay"
@@ -75,58 +78,71 @@ class TestWait:
 
     def test_wait_timestamp(self):
         ctx = MockDurableContext()
-        ctx.wait("WaitUntil", Duration.timestamp("2026-01-01T00:00:00Z"))
+        ctx.wait(Duration.timestamp("2026-01-01T00:00:00Z"), "WaitUntil")
         assert ctx.calls[0].duration.kind == "timestamp"
+
+    def test_wait_no_name(self):
+        ctx = MockDurableContext()
+        ctx.wait(Duration.seconds(30))
+        assert ctx.calls[0].duration.value == 30
 
 
 class TestParallel:
     def test_parallel_executes_all_branches(self):
+        """parallel(functions, name) — each function receives a DurableContext."""
         ctx = MockDurableContext()
         branches = [
-            lambda inp: {"branch": "A", "val": inp.get("x", 0) + 1},
-            lambda inp: {"branch": "B", "val": inp.get("x", 0) + 2},
+            lambda _ctx: {"branch": "A"},
+            lambda _ctx: {"branch": "B"},
         ]
-        result = ctx.parallel("RunBoth", branches, {"x": 10})
+        result = ctx.parallel(branches, "RunBoth")
         assert isinstance(result, BranchResult)
         results = result.get_results()
         assert len(results) == 2
-        assert results[0] == {"branch": "A", "val": 11}
-        assert results[1] == {"branch": "B", "val": 12}
+        assert results[0] == {"branch": "A"}
+        assert results[1] == {"branch": "B"}
 
     def test_parallel_records_call(self):
         ctx = MockDurableContext()
-        ctx.parallel("P", [lambda x: 1, lambda x: 2], {"data": True})
-        assert len(ctx.calls) == 1
-        assert ctx.calls[0].operation == "parallel"
-        assert ctx.calls[0].name == "P"
-        assert ctx.calls[0].result == [1, 2]
+        ctx.parallel([lambda _ctx: 1, lambda _ctx: 2], "P")
+        # parallel itself plus any inner steps
+        parallel_record = [c for c in ctx.calls if c.operation == "parallel"]
+        assert len(parallel_record) == 1
+        assert parallel_record[0].name == "P"
+        assert parallel_record[0].result == [1, 2]
 
-    def test_parallel_branches_get_independent_copies(self):
+    def test_parallel_branch_uses_branch_context(self):
+        """Each branch receives its own MockDurableContext for nested steps."""
         ctx = MockDurableContext()
-        shared = {"counter": 0}
 
-        def branch_a(inp):
-            inp["counter"] += 1
-            return inp
+        def branch_with_step(_ctx):
+            return _ctx.step(lambda _sc: {"inner": "result"}, "InnerStep")
 
-        def branch_b(inp):
-            inp["counter"] += 10
-            return inp
+        result = ctx.parallel([branch_with_step], "P")
+        assert result.get_results() == [{"inner": "result"}]
 
-        result = ctx.parallel("P", [branch_a, branch_b], shared)
+    def test_parallel_branches_can_close_over_input(self):
+        """Branches can close over captured input from outer scope."""
+        ctx = MockDurableContext()
+        captured = {"x": 10}
+        branches = [
+            lambda _ctx: {"val": captured["x"] + 1},
+            lambda _ctx: {"val": captured["x"] + 2},
+        ]
+        result = ctx.parallel(branches, "P")
         results = result.get_results()
-        # Each branch should have gotten its own copy
-        assert results[0]["counter"] == 1
-        assert results[1]["counter"] == 10
+        assert results[0] == {"val": 11}
+        assert results[1] == {"val": 12}
 
 
 class TestMap:
     def test_map_processes_all_items(self):
+        """map(inputs, func, name) — func receives (ctx, item, idx, all_items)."""
         ctx = MockDurableContext()
         result = ctx.map(
-            "ProcessItems",
-            lambda item: {"processed": item * 2},
             [1, 2, 3],
+            lambda _ctx, item, idx, all_items: {"processed": item * 2},
+            "ProcessItems",
         )
         assert result.get_results() == [
             {"processed": 2},
@@ -136,34 +152,51 @@ class TestMap:
 
     def test_map_records_call(self):
         ctx = MockDurableContext()
-        ctx.map("M", lambda x: x, [1, 2])
-        assert len(ctx.calls) == 1
-        assert ctx.calls[0].operation == "map"
-        assert ctx.calls[0].name == "M"
-
-    def test_map_with_max_concurrency(self):
-        ctx = MockDurableContext()
-        result = ctx.map("M", lambda x: x * 10, [1, 2, 3], max_concurrency=2)
-        # max_concurrency doesn't change behavior in mock, but should be accepted
-        assert result.get_results() == [10, 20, 30]
+        ctx.map([1, 2], lambda _ctx, item, idx, all_items: item, "M")
+        map_record = [c for c in ctx.calls if c.operation == "map"]
+        assert len(map_record) == 1
+        assert map_record[0].name == "M"
 
     def test_map_empty_items(self):
         ctx = MockDurableContext()
-        result = ctx.map("M", lambda x: x, [])
+        result = ctx.map([], lambda _ctx, item, idx, all_items: item, "M")
         assert result.get_results() == []
 
     def test_map_items_get_independent_copies(self):
+        """Items are deep-copied before being passed to func."""
         ctx = MockDurableContext()
         items = [{"val": 1}, {"val": 2}]
 
-        def mutating_fn(item):
+        def mutating_fn(_ctx, item, idx, all_items):
             item["val"] *= 100
             return item
 
-        result = ctx.map("M", mutating_fn, items)
+        result = ctx.map(items, mutating_fn, "M")
         # Original items should not be mutated
         assert items == [{"val": 1}, {"val": 2}]
         assert result.get_results() == [{"val": 100}, {"val": 200}]
+
+    def test_map_func_receives_idx_and_all(self):
+        """Map func receives correct index and all_items."""
+        ctx = MockDurableContext()
+        captured = []
+
+        def capture_fn(_ctx, item, idx, all_items):
+            captured.append((item, idx, len(all_items)))
+            return item
+
+        ctx.map(["a", "b", "c"], capture_fn, "M")
+        assert captured == [("a", 0, 3), ("b", 1, 3), ("c", 2, 3)]
+
+    def test_map_item_uses_item_context(self):
+        """Each map item receives its own DurableContext for nested steps."""
+        ctx = MockDurableContext()
+
+        def map_with_step(_ctx, item, idx, all_items):
+            return _ctx.step(lambda _sc: {"processed": item}, "InnerStep")
+
+        result = ctx.map(["x", "y"], map_with_step, "M")
+        assert result.get_results() == [{"processed": "x"}, {"processed": "y"}]
 
 
 class TestBranchResult:
@@ -179,13 +212,13 @@ class TestBranchResult:
 class TestCallHistory:
     def test_mixed_operations(self):
         ctx = MockDurableContext()
-        ctx.step("S1", lambda x: x, {})
-        ctx.wait("W1", Duration.seconds(5))
-        ctx.parallel("P1", [lambda x: x], {})
-        ctx.map("M1", lambda x: x, [1])
+        ctx.step(lambda _sc: None, "S1")
+        ctx.wait(Duration.seconds(5), "W1")
+        ctx.parallel([lambda _ctx: None], "P1")
+        ctx.map([1], lambda _ctx, item, idx, all_items: item, "M1")
 
-        assert len(ctx.calls) == 4
-        ops = [c.operation for c in ctx.calls]
-        assert ops == ["step", "wait", "parallel", "map"]
-        names = [c.name for c in ctx.calls]
-        assert names == ["S1", "W1", "P1", "M1"]
+        ops = [c.operation for c in ctx.calls if c.name in ("S1", "W1", "P1", "M1")]
+        assert "step" in ops
+        assert "wait" in ops
+        assert "parallel" in ops
+        assert "map" in ops

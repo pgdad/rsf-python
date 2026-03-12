@@ -133,11 +133,11 @@ class ChaosFixture:
         original_step = context.step
 
         @functools.wraps(original_step)
-        def patched_step(name: str, handler: Callable, input_data: Any) -> Any:
+        def patched_step(func: Callable, name: str | None = None, config: Any = None) -> Any:
             failure = self._should_trigger(name)
             if failure is not None:
-                return self._trigger_failure(failure, input_data)
-            return original_step(name, handler, input_data)
+                return self._trigger_failure(failure, None)
+            return original_step(func, name, config)
 
         context.step = patched_step
         return context

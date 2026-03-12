@@ -261,7 +261,7 @@ class TestWorkflowSimulation:
 
         # Step 1: ValidateOrder
         validate_handler = get_handler("ValidateOrder")
-        validation_result = ctx.step("ValidateOrder", validate_handler, order_input)
+        validation_result = ctx.step(lambda _sc: validate_handler(order_input), "ValidateOrder")
         assert validation_result["valid"] is True
         assert validation_result["orderId"] == "order-sim-001"
         assert validation_result["itemCount"] == 1
@@ -272,7 +272,7 @@ class TestWorkflowSimulation:
 
         # Step 2: ProcessOrder
         process_handler = get_handler("ProcessOrder")
-        process_result = ctx.step("ProcessOrder", process_handler, state_data)
+        process_result = ctx.step(lambda _sc: process_handler(state_data), "ProcessOrder")
         assert process_result["processed"] is True
         assert process_result["orderId"] == "order-sim-001"
         assert process_result["status"] == "completed"
@@ -297,8 +297,8 @@ class TestWorkflowSimulation:
         }
 
         validate_handler = get_handler("ValidateOrder")
-        ctx.step("ValidateOrder", validate_handler, order_input)
+        ctx.step(lambda _sc: validate_handler(order_input), "ValidateOrder")
 
-        # Verify input was recorded
-        assert ctx.calls[0].input_data["orderId"] == "order-sim-002"
-        assert ctx.calls[0].input_data["total"] == 15.00
+        # Verify the step was recorded
+        assert ctx.calls[0].name == "ValidateOrder"
+        assert ctx.calls[0].operation == "step"

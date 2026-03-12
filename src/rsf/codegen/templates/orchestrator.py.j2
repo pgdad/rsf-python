@@ -129,6 +129,16 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
     return input_data
 
 
+{% for helper in branch_helpers %}
+{{ helper }}
+
+
+{% endfor %}
+{% for helper in map_helpers %}
+{{ helper }}
+
+
+{% endfor %}
 def _resolve_path(data: dict, path: str) -> object:
     """Resolve a simple JSONPath reference ($.field.sub) against data."""
     if path == "$":

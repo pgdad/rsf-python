@@ -34,3 +34,12 @@ resource "aws_lambda_function" "lambda_url_trigger" {
     ignore_changes = [filename, source_code_hash]
   }
 }
+
+# Lambda alias "live" — durable functions must be invoked via a qualified ARN.
+# Invoking with an unqualified function name or $LATEST raises
+# InvalidParameterValueException from the AWS API.
+resource "aws_lambda_alias" "live" {
+  name             = "live"
+  function_name    = aws_lambda_function.lambda_url_trigger.function_name
+  function_version = "$LATEST"
+}

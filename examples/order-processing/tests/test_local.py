@@ -320,7 +320,7 @@ class TestStandardOrderWorkflow:
 
         # Step 1: ValidateOrder
         validate_handler = get_handler("ValidateOrder")
-        validation_result = ctx.step("ValidateOrder", validate_handler, order_input)
+        validation_result = ctx.step(lambda _sc: validate_handler(order_input), "ValidateOrder")
         assert validation_result["valid"] is True
         assert validation_result["total"] == 250.00
         assert validation_result["itemCount"] == 2
@@ -336,11 +336,14 @@ class TestStandardOrderWorkflow:
         # Step 3: ProcessOrder (Parallel) — ProcessPayment + ReserveInventory
         payment_handler = get_handler("ProcessPayment")
         inventory_handler = get_handler("ReserveInventory")
+        _captured = state_data
 
         parallel_result = ctx.parallel(
+            [
+                lambda _ctx: payment_handler(_captured),
+                lambda _ctx: inventory_handler(_captured),
+            ],
             "ProcessOrder",
-            [payment_handler, inventory_handler],
-            state_data,
         )
         results = parallel_result.get_results()
         assert len(results) == 2
@@ -351,7 +354,7 @@ class TestStandardOrderWorkflow:
 
         # Step 4: SendConfirmation
         confirmation_handler = get_handler("SendConfirmation")
-        confirmation_result = ctx.step("SendConfirmation", confirmation_handler, state_data)
+        confirmation_result = ctx.step(lambda _sc: confirmation_handler(state_data), "SendConfirmation")
         assert confirmation_result["emailSent"] is True
         assert confirmation_result["confirmationNumber"].startswith("ORD-")
 
@@ -393,7 +396,7 @@ class TestHighValueOrderWorkflow:
 
         # Step 1: ValidateOrder
         validate_handler = get_handler("ValidateOrder")
-        validation_result = ctx.step("ValidateOrder", validate_handler, order_input)
+        validation_result = ctx.step(lambda _sc: validate_handler(order_input), "ValidateOrder")
         assert validation_result["valid"] is True
         assert validation_result["total"] == 3500.00
 
@@ -405,7 +408,7 @@ class TestHighValueOrderWorkflow:
 
         # Step 3: RequireApproval
         approval_handler = get_handler("RequireApproval")
-        approval_result = ctx.step("RequireApproval", approval_handler, state_data)
+        approval_result = ctx.step(lambda _sc: approval_handler(state_data), "RequireApproval")
         assert approval_result["approved"] is True
 
         state_data["approval"] = approval_result
@@ -413,11 +416,14 @@ class TestHighValueOrderWorkflow:
         # Step 4: ProcessOrder (Parallel)
         payment_handler = get_handler("ProcessPayment")
         inventory_handler = get_handler("ReserveInventory")
+        _captured = state_data
 
         parallel_result = ctx.parallel(
+            [
+                lambda _ctx: payment_handler(_captured),
+                lambda _ctx: inventory_handler(_captured),
+            ],
             "ProcessOrder",
-            [payment_handler, inventory_handler],
-            state_data,
         )
         results = parallel_result.get_results()
         assert len(results) == 2
@@ -428,7 +434,7 @@ class TestHighValueOrderWorkflow:
 
         # Step 5: SendConfirmation
         confirmation_handler = get_handler("SendConfirmation")
-        confirmation_result = ctx.step("SendConfirmation", confirmation_handler, state_data)
+        confirmation_result = ctx.step(lambda _sc: confirmation_handler(state_data), "SendConfirmation")
         assert confirmation_result["emailSent"] is True
 
         state_data["confirmation"] = confirmation_result
@@ -460,7 +466,7 @@ class TestRejectedOrderWorkflow:
 
         # Step 1: ValidateOrder
         validate_handler = get_handler("ValidateOrder")
-        validation_result = ctx.step("ValidateOrder", validate_handler, order_input)
+        validation_result = ctx.step(lambda _sc: validate_handler(order_input), "ValidateOrder")
         assert validation_result["itemCount"] == 0
 
         state_data = {**order_input, "validation": validation_result}

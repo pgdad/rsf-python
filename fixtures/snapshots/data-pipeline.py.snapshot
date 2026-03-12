@@ -70,18 +70,18 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
 
         elif current_state == 'FetchRecords':
             handler = get_handler('FetchRecords')
-            input_data = context.step('FetchRecords', handler, input_data)
+            input_data = context.step(lambda _step_ctx: handler(input_data), 'FetchRecords')
             current_state = 'TransformRecords'
 
         elif current_state == 'TransformRecords':
             _items = _resolve_path(input_data, '$.fetched.records')
-            _result = context.map('TransformRecords', lambda _item: _run_map_transformrecords(context, _item), _items, max_concurrency=5)
+            _result = context.map(_items, lambda _ctx, _item, _idx, _all: _run_map_transformrecords(_ctx, _item), 'TransformRecords')
             input_data = _result.get_results()
             current_state = 'StoreResults'
 
         elif current_state == 'StoreResults':
             handler = get_handler('StoreResults')
-            input_data = context.step('StoreResults', handler, input_data)
+            input_data = context.step(lambda _step_ctx: handler(input_data), 'StoreResults')
             current_state = 'PipelineComplete'
 
         elif current_state == 'PipelineComplete':
@@ -97,6 +97,16 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
         _wf_span.__exit__(None, None, None)
 
     return input_data
+
+
+def _run_map_transformrecords(map_ctx: "DurableContext", item: dict) -> dict:
+    """Execute the TransformRecords map item processor: ValidateRecord -> EnrichRecord."""
+    _data = item
+    _handler_validate_record = get_handler('ValidateRecord')
+    _data = map_ctx.step(lambda _sc, _d=_data: _handler_validate_record(_d), 'ValidateRecord')
+    _handler_enrich_record = get_handler('EnrichRecord')
+    _data = map_ctx.step(lambda _sc, _d=_data: _handler_enrich_record(_d), 'EnrichRecord')
+    return _data
 
 
 def _resolve_path(data: dict, path: str) -> object:

@@ -59,11 +59,12 @@ class TestOrderProcessingIntegration:
         iam_propagation_wait()
 
         fn = outputs["function_name"]
+        alias_arn = outputs["alias_arn"]
         exec_id = make_execution_id("order-processing")
         start_time = datetime.now(timezone.utc)
 
         lambda_client.invoke(
-            FunctionName=fn,
+            FunctionName=alias_arn,
             InvocationType="Event",
             Payload=json.dumps(self.HAPPY_EVENT),
             DurableExecutionName=exec_id,
@@ -76,6 +77,7 @@ class TestOrderProcessingIntegration:
             "outputs": outputs,
             "start_time": start_time,
             "function_name": fn,
+            "alias_arn": alias_arn,
         }
 
         terraform_teardown(self.EXAMPLE_DIR, logs_client, outputs["log_group_name"])
@@ -114,10 +116,11 @@ class TestOrderProcessingIntegration:
         (Fail state), confirming the Fail state type works in real AWS.
         """
         fn = deployment["function_name"]
+        alias_arn = deployment["alias_arn"]
         exec_id = make_execution_id("order-rejected")
 
         lambda_client.invoke(
-            FunctionName=fn,
+            FunctionName=alias_arn,
             InvocationType="Event",
             Payload=json.dumps(self.ERROR_EVENT),
             DurableExecutionName=exec_id,

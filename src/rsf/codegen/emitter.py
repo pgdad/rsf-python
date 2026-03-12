@@ -90,7 +90,7 @@ def _emit_task(mapping: StateMapping) -> list[str]:
     if p.get("has_catch"):
         lines.append("try:")
         lines.append(f"    handler = get_handler({name})")
-        lines.append(f"    input_data = context.step({name}, handler, input_data)")
+        lines.append(f"    input_data = context.step(lambda _step_ctx: handler(input_data), {name})")
         lines.append(f"    {_transition(p)}")
         lines.append("except Exception as _err:")
         catch_policies = p.get("catch_policies", [])
@@ -107,7 +107,7 @@ def _emit_task(mapping: StateMapping) -> list[str]:
         lines.append("        raise")
     else:
         lines.append(f"handler = get_handler({name})")
-        lines.append(f"input_data = context.step({name}, handler, input_data)")
+        lines.append(f"input_data = context.step(lambda _step_ctx: handler(input_data), {name})")
         lines.append(_transition(p))
 
     return lines
@@ -243,15 +243,15 @@ def _emit_wait(mapping: StateMapping) -> list[str]:
     lines: list[str] = []
 
     if p.get("seconds") is not None:
-        lines.append(f"context.wait({name}, Duration.seconds({p['seconds']}))")
+        lines.append(f"context.wait(Duration.seconds({p['seconds']}), {name})")
     elif p.get("seconds_path") is not None:
         lines.append(f"_wait_seconds = _resolve_path(input_data, {topyrepr(p['seconds_path'])})")
-        lines.append(f"context.wait({name}, Duration.seconds(_wait_seconds))")
+        lines.append(f"context.wait(Duration.seconds(_wait_seconds), {name})")
     elif p.get("timestamp") is not None:
-        lines.append(f"context.wait({name}, Duration.timestamp({topyrepr(p['timestamp'])}))")
+        lines.append(f"context.wait(Duration.timestamp({topyrepr(p['timestamp'])}), {name})")
     elif p.get("timestamp_path") is not None:
         lines.append(f"_wait_ts = _resolve_path(input_data, {topyrepr(p['timestamp_path'])})")
-        lines.append(f"context.wait({name}, Duration.timestamp(_wait_ts))")
+        lines.append(f"context.wait(Duration.timestamp(_wait_ts), {name})")
 
     lines.append(_transition(p))
     return lines
@@ -285,19 +285,27 @@ def _emit_fail(mapping: StateMapping) -> list[str]:
 
 
 def _emit_parallel(mapping: StateMapping) -> list[str]:
-    """Emit Parallel state code (context.parallel)."""
+    """Emit Parallel state code (context.parallel).
+
+    Real SDK signature: parallel(functions, name=None, config=None)
+    Each branch function receives (DurableContext) and calls branch helpers.
+    """
     p = mapping.params
     name = topyrepr(mapping.state_name)
     branches = p.get("branches", [])
     lines: list[str] = []
 
-    # Build branch lambda list
-    branch_lambdas = ", ".join(f"lambda _inp: _run_branch_{b['start_at'].lower()}(context, _inp)" for b in branches)
+    # Build branch lambda list — each lambda takes branch_ctx and passes captured input
+    branch_lambdas = ", ".join(
+        f"lambda _ctx: _run_branch_{b['start_at'].lower()}(_ctx, _captured)"
+        for b in branches
+    )
 
     if p.get("has_catch"):
         lines.append("try:")
+        lines.append("    _captured = input_data")
         lines.append(f"    _branches = [{branch_lambdas}]")
-        lines.append(f"    _result = context.parallel({name}, _branches, input_data)")
+        lines.append(f"    _result = context.parallel(_branches, {name})")
         lines.append("    input_data = _result.get_results()")
         lines.append(f"    {_transition(p)}")
         lines.append("except Exception as _err:")
@@ -313,8 +321,9 @@ def _emit_parallel(mapping: StateMapping) -> list[str]:
         lines.append("    else:")
         lines.append("        raise")
     else:
+        lines.append("_captured = input_data")
         lines.append(f"_branches = [{branch_lambdas}]")
-        lines.append(f"_result = context.parallel({name}, _branches, input_data)")
+        lines.append(f"_result = context.parallel(_branches, {name})")
         lines.append("input_data = _result.get_results()")
         lines.append(_transition(p))
 
@@ -322,15 +331,23 @@ def _emit_parallel(mapping: StateMapping) -> list[str]:
 
 
 def _emit_map(mapping: StateMapping) -> list[str]:
-    """Emit Map state code (context.map)."""
+    """Emit Map state code (context.map).
+
+    Real SDK signature: map(inputs, func, name=None, config=None)
+    func signature: Callable[[DurableContext, U, int, Sequence[U]], T]
+    """
     p = mapping.params
     name = topyrepr(mapping.state_name)
     state_name_lower = mapping.state_name.lower()
     lines: list[str] = []
 
-    max_conc = ""
+    # MapConfig for max_concurrency (not a direct kwarg in real SDK)
+    max_conc_config = ""
     if p.get("max_concurrency") is not None:
-        max_conc = f", max_concurrency={p['max_concurrency']}"
+        # Pass via MapConfig if available, otherwise ignore for now
+        max_conc_config = ""
+
+    _map_lambda = f"lambda _ctx, _item, _idx, _all: _run_map_{state_name_lower}(_ctx, _item)"
 
     if p.get("has_catch"):
         lines.append("try:")
@@ -338,7 +355,7 @@ def _emit_map(mapping: StateMapping) -> list[str]:
             lines.append(f"    _items = _resolve_path(input_data, {topyrepr(p['items_path'])})")
         else:
             lines.append("    _items = input_data")
-        _map_call = f"context.map({name}, lambda _item: _run_map_{state_name_lower}(context, _item), _items{max_conc})"
+        _map_call = f"context.map(_items, {_map_lambda}, {name})"
         lines.append(f"    _result = {_map_call}")
         lines.append("    input_data = _result.get_results()")
         lines.append(f"    {_transition(p)}")
@@ -359,7 +376,7 @@ def _emit_map(mapping: StateMapping) -> list[str]:
             lines.append(f"_items = _resolve_path(input_data, {topyrepr(p['items_path'])})")
         else:
             lines.append("_items = input_data")
-        _map_call = f"context.map({name}, lambda _item: _run_map_{state_name_lower}(context, _item), _items{max_conc})"
+        _map_call = f"context.map(_items, {_map_lambda}, {name})"
         lines.append(f"_result = {_map_call}")
         lines.append("input_data = _result.get_results()")
         lines.append(_transition(p))

@@ -247,7 +247,7 @@ class TestWorkflowSimulation:
             "formatted": "Jane Doe has 2 name parts",
         }
         string_handler = get_handler("StringOperations")
-        string_result = ctx.step("StringOperations", string_handler, string_input)
+        string_result = ctx.step(lambda _sc: string_handler(string_input), "StringOperations")
 
         assert string_result["decoded"] == "Jane Doe"
         assert string_result["hash"] == "a1b2c3d4e5f6"
@@ -265,7 +265,7 @@ class TestWorkflowSimulation:
             "uniqueTags": ["a", "b", "c"],
         }
         array_handler = get_handler("ArrayOperations")
-        array_result = ctx.step("ArrayOperations", array_handler, array_input)
+        array_result = ctx.step(lambda _sc: array_handler(array_input), "ArrayOperations")
 
         assert array_result["contains"] is True
         assert array_result["tagCount"] == 3
@@ -280,7 +280,7 @@ class TestWorkflowSimulation:
             "parsed": ["Jane", "Doe"],
         }
         math_handler = get_handler("MathAndJsonOps")
-        math_result = ctx.step("MathAndJsonOps", math_handler, math_input)
+        math_result = ctx.step(lambda _sc: math_handler(math_input), "MathAndJsonOps")
 
         assert math_result["sum"] == 13
         assert math_result["parsed"] == ["Jane", "Doe"]
@@ -338,15 +338,15 @@ class TestWorkflowSimulation:
 
         # Execute steps using overrides
         string_handler = get_handler("StringOperations")
-        result1 = ctx.step("StringOperations", string_handler, {})
+        result1 = ctx.step(lambda _sc: string_handler({}), "StringOperations")
         assert result1["decoded"] == "Test User"
 
         array_handler = get_handler("ArrayOperations")
-        result2 = ctx.step("ArrayOperations", array_handler, {})
+        result2 = ctx.step(lambda _sc: array_handler({}), "ArrayOperations")
         assert result2["contains"] is True
 
         math_handler = get_handler("MathAndJsonOps")
-        result3 = ctx.step("MathAndJsonOps", math_handler, {})
+        result3 = ctx.step(lambda _sc: math_handler({}), "MathAndJsonOps")
         assert result3["sum"] == 12
 
         assert len(ctx.calls) == 3
