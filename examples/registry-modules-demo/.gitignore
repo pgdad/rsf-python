@@ -18,8 +18,6 @@ terraform/terraform.tfvars.json
 # RSF generated source (recreated by rsf generate)
 src/generated/
 
-# RSF scaffolded handlers (recreated by rsf generate)
-src/handlers/
 
 # Python bytecode
 __pycache__/
