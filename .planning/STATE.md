@@ -87,7 +87,7 @@ None.
 | 16 | Push master and create v3.11 tag | 2026-03-11 | v3.11 tag | [16-push-master-to-github-and-create-v3-11-t](./quick/16-push-master-to-github-and-create-v3-11-t/) |
 | 17 | Verify all examples and tutorials still pass | 2026-03-11 | 8e53c28 | [17-verify-all-examples-and-tutorials-still-](./quick/17-verify-all-examples-and-tutorials-still-/) |
 | 18 | Add ManagedBy/Workflow tags to all Terraform-created resources | 2026-03-11 | cdd53a4 | [18-add-tags-to-all-terraform-created-resour](./quick/18-add-tags-to-all-terraform-created-resour/) |
-| 19 | Run all integration tests across all 7 examples with real AWS infrastructure | 2026-03-12 | a27abd9 | [19-run-all-integration-tests-and-examples-w](./quick/19-run-all-integration-tests-and-examples-w/) |
+| 19 | Run all integration tests across all 7 examples with real AWS infrastructure | 2026-03-12 | 2383148 | [19-run-all-integration-tests-and-examples-w](./quick/19-run-all-integration-tests-and-examples-w/) |
 
 ## Session Continuity
 
