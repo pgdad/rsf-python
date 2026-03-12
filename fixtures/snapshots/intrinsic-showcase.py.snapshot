@@ -70,17 +70,20 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
 
         elif current_state == 'StringOperations':
             handler = get_handler('StringOperations')
-            input_data = context.step(lambda _step_ctx: handler(input_data), 'StringOperations')
+            _step_result = context.step(lambda _step_ctx: handler(input_data), 'StringOperations')
+            input_data = _apply_result_path(input_data, _step_result, '$.strings')
             current_state = 'ArrayOperations'
 
         elif current_state == 'ArrayOperations':
             handler = get_handler('ArrayOperations')
-            input_data = context.step(lambda _step_ctx: handler(input_data), 'ArrayOperations')
+            _step_result = context.step(lambda _step_ctx: handler(input_data), 'ArrayOperations')
+            input_data = _apply_result_path(input_data, _step_result, '$.arrays')
             current_state = 'MathAndJsonOps'
 
         elif current_state == 'MathAndJsonOps':
             handler = get_handler('MathAndJsonOps')
-            input_data = context.step(lambda _step_ctx: handler(input_data), 'MathAndJsonOps')
+            _step_result = context.step(lambda _step_ctx: handler(input_data), 'MathAndJsonOps')
+            input_data = _apply_result_path(input_data, _step_result, '$.math')
             current_state = 'CheckResults'
 
         elif current_state == 'CheckResults':

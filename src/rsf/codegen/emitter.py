@@ -87,10 +87,16 @@ def _emit_task(mapping: StateMapping) -> list[str]:
             lines.extend(invoke_lines)
         return lines
 
+    result_path = p.get("result_path")
+
     if p.get("has_catch"):
         lines.append("try:")
         lines.append(f"    handler = get_handler({name})")
-        lines.append(f"    input_data = context.step(lambda _step_ctx: handler(input_data), {name})")
+        lines.append(f"    _step_result = context.step(lambda _step_ctx: handler(input_data), {name})")
+        if result_path:
+            lines.append(f"    input_data = _apply_result_path(input_data, _step_result, {topyrepr(result_path)})")
+        else:
+            lines.append("    input_data = _step_result")
         lines.append(f"    {_transition(p)}")
         lines.append("except Exception as _err:")
         catch_policies = p.get("catch_policies", [])
@@ -107,7 +113,11 @@ def _emit_task(mapping: StateMapping) -> list[str]:
         lines.append("        raise")
     else:
         lines.append(f"handler = get_handler({name})")
-        lines.append(f"input_data = context.step(lambda _step_ctx: handler(input_data), {name})")
+        lines.append(f"_step_result = context.step(lambda _step_ctx: handler(input_data), {name})")
+        if result_path:
+            lines.append(f"input_data = _apply_result_path(input_data, _step_result, {topyrepr(result_path)})")
+        else:
+            lines.append("input_data = _step_result")
         lines.append(_transition(p))
 
     return lines
@@ -301,12 +311,17 @@ def _emit_parallel(mapping: StateMapping) -> list[str]:
         for b in branches
     )
 
+    result_path = p.get("result_path")
+
     if p.get("has_catch"):
         lines.append("try:")
         lines.append("    _captured = input_data")
         lines.append(f"    _branches = [{branch_lambdas}]")
         lines.append(f"    _result = context.parallel(_branches, {name})")
-        lines.append("    input_data = _result.get_results()")
+        if result_path:
+            lines.append(f"    input_data = _apply_result_path(input_data, _result.get_results(), {topyrepr(result_path)})")
+        else:
+            lines.append("    input_data = _result.get_results()")
         lines.append(f"    {_transition(p)}")
         lines.append("except Exception as _err:")
         for i, cp in enumerate(p.get("catch_policies", [])):
@@ -324,7 +339,10 @@ def _emit_parallel(mapping: StateMapping) -> list[str]:
         lines.append("_captured = input_data")
         lines.append(f"_branches = [{branch_lambdas}]")
         lines.append(f"_result = context.parallel(_branches, {name})")
-        lines.append("input_data = _result.get_results()")
+        if result_path:
+            lines.append(f"input_data = _apply_result_path(input_data, _result.get_results(), {topyrepr(result_path)})")
+        else:
+            lines.append("input_data = _result.get_results()")
         lines.append(_transition(p))
 
     return lines
@@ -348,6 +366,7 @@ def _emit_map(mapping: StateMapping) -> list[str]:
         max_conc_config = ""
 
     _map_lambda = f"lambda _ctx, _item, _idx, _all: _run_map_{state_name_lower}(_ctx, _item)"
+    result_path = p.get("result_path")
 
     if p.get("has_catch"):
         lines.append("try:")
@@ -357,7 +376,10 @@ def _emit_map(mapping: StateMapping) -> list[str]:
             lines.append("    _items = input_data")
         _map_call = f"context.map(_items, {_map_lambda}, {name})"
         lines.append(f"    _result = {_map_call}")
-        lines.append("    input_data = _result.get_results()")
+        if result_path:
+            lines.append(f"    input_data = _apply_result_path(input_data, _result.get_results(), {topyrepr(result_path)})")
+        else:
+            lines.append("    input_data = _result.get_results()")
         lines.append(f"    {_transition(p)}")
         lines.append("except Exception as _err:")
         for i, cp in enumerate(p.get("catch_policies", [])):
@@ -378,7 +400,10 @@ def _emit_map(mapping: StateMapping) -> list[str]:
             lines.append("_items = input_data")
         _map_call = f"context.map(_items, {_map_lambda}, {name})"
         lines.append(f"_result = {_map_call}")
-        lines.append("input_data = _result.get_results()")
+        if result_path:
+            lines.append(f"input_data = _apply_result_path(input_data, _result.get_results(), {topyrepr(result_path)})")
+        else:
+            lines.append("input_data = _result.get_results()")
         lines.append(_transition(p))
 
     return lines

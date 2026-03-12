@@ -68,7 +68,8 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
         if current_state == 'ValidateOrder':
             try:
                 handler = get_handler('ValidateOrder')
-                input_data = context.step(lambda _step_ctx: handler(input_data), 'ValidateOrder')
+                _step_result = context.step(lambda _step_ctx: handler(input_data), 'ValidateOrder')
+                input_data = _apply_result_path(input_data, _step_result, '$.validation')
                 current_state = 'CheckOrderValue'
             except Exception as _err:
                 if type(_err).__name__ in ['InvalidOrderError'] or "States.ALL" in ['InvalidOrderError']:
@@ -93,7 +94,7 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
                 _captured = input_data
                 _branches = [lambda _ctx: _run_branch_processpayment(_ctx, _captured), lambda _ctx: _run_branch_reserveinventory(_ctx, _captured)]
                 _result = context.parallel(_branches, 'ProcessOrder')
-                input_data = _result.get_results()
+                input_data = _apply_result_path(input_data, _result.get_results(), '$.processing')
                 current_state = 'SendConfirmation'
             except Exception as _err:
                 if type(_err).__name__ in ['States.ALL'] or "States.ALL" in ['States.ALL']:
@@ -105,7 +106,8 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
         elif current_state == 'RequireApproval':
             try:
                 handler = get_handler('RequireApproval')
-                input_data = context.step(lambda _step_ctx: handler(input_data), 'RequireApproval')
+                _step_result = context.step(lambda _step_ctx: handler(input_data), 'RequireApproval')
+                input_data = _apply_result_path(input_data, _step_result, '$.approval')
                 current_state = 'ProcessOrder'
             except Exception as _err:
                 if type(_err).__name__ in ['States.Timeout', 'ApprovalDenied'] or "States.ALL" in ['States.Timeout', 'ApprovalDenied']:
@@ -116,7 +118,8 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
 
         elif current_state == 'SendConfirmation':
             handler = get_handler('SendConfirmation')
-            input_data = context.step(lambda _step_ctx: handler(input_data), 'SendConfirmation')
+            _step_result = context.step(lambda _step_ctx: handler(input_data), 'SendConfirmation')
+            input_data = _apply_result_path(input_data, _step_result, '$.confirmation')
             current_state = 'OrderComplete'
 
         elif current_state == 'OrderComplete':

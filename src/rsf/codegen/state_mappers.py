@@ -125,6 +125,8 @@ def _map_task(name: str, state: TaskState) -> StateMapping:
             }
             for c in state.catch
         ]
+    if state.result_path is not None:
+        params["result_path"] = state.result_path
     sub_wf = getattr(state, "sub_workflow", None)
     return StateMapping(
         state_name=name,
@@ -336,6 +338,8 @@ def _map_parallel(name: str, state: ParallelState) -> StateMapping:
             }
             for c in state.catch
         ]
+    if state.result_path is not None:
+        params["result_path"] = state.result_path
     return StateMapping(
         state_name=name,
         state_type="Parallel",
@@ -371,6 +375,8 @@ def _map_map(name: str, state: MapState) -> StateMapping:
             }
             for c in state.catch
         ]
+    if state.result_path is not None:
+        params["result_path"] = state.result_path
     return StateMapping(
         state_name=name,
         state_type="Map",

@@ -70,18 +70,20 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
 
         elif current_state == 'FetchRecords':
             handler = get_handler('FetchRecords')
-            input_data = context.step(lambda _step_ctx: handler(input_data), 'FetchRecords')
+            _step_result = context.step(lambda _step_ctx: handler(input_data), 'FetchRecords')
+            input_data = _apply_result_path(input_data, _step_result, '$.fetched')
             current_state = 'TransformRecords'
 
         elif current_state == 'TransformRecords':
             _items = _resolve_path(input_data, '$.fetched.records')
             _result = context.map(_items, lambda _ctx, _item, _idx, _all: _run_map_transformrecords(_ctx, _item), 'TransformRecords')
-            input_data = _result.get_results()
+            input_data = _apply_result_path(input_data, _result.get_results(), '$.transformed')
             current_state = 'StoreResults'
 
         elif current_state == 'StoreResults':
             handler = get_handler('StoreResults')
-            input_data = context.step(lambda _step_ctx: handler(input_data), 'StoreResults')
+            _step_result = context.step(lambda _step_ctx: handler(input_data), 'StoreResults')
+            input_data = _apply_result_path(input_data, _step_result, '$.stored')
             current_state = 'PipelineComplete'
 
         elif current_state == 'PipelineComplete':
