@@ -149,23 +149,23 @@ def poll_execution(
 def query_logs(
     logs_client: Any,
     log_group: str,
-    query: str,
+    filter_pattern: str,
     start_time: datetime,
     end_time: datetime | None = None,
     propagation_wait: float = 15.0,
     max_retries: int = 5,
     retry_interval: float = 5.0,
-) -> list[list[dict[str, str]]]:
-    """Query CloudWatch Logs Insights with propagation buffer and retry.
+) -> list[str]:
+    """Query CloudWatch log events with propagation buffer and retry.
 
-    Applies a propagation wait before the first query to account for log
-    delivery delays and IAM timing. Retries until results are non-empty
-    or max_retries is exhausted.
+    Uses filter_log_events (not Logs Insights) for immediate availability
+    without indexing delays. Applies a propagation wait before the first
+    query and retries until results are non-empty or max_retries exhausted.
 
     Args:
         logs_client: boto3 CloudWatch Logs client.
         log_group: CloudWatch log group name.
-        query: CloudWatch Logs Insights query string.
+        filter_pattern: CloudWatch filter pattern (e.g. "step_name").
         start_time: Query start time (UTC datetime).
         end_time: Query end time (UTC datetime, defaults to now).
         propagation_wait: Seconds to wait before first query (default 15).
@@ -173,8 +173,7 @@ def query_logs(
         retry_interval: Seconds between retries (default 5).
 
     Returns:
-        List of result rows, where each row is a list of
-        {field, value} dicts.
+        List of log message strings matching the filter pattern.
     """
     if end_time is None:
         end_time = datetime.now(timezone.utc)
@@ -183,32 +182,34 @@ def query_logs(
     logger.info("query_logs: waiting %.0fs for log propagation", propagation_wait)
     time.sleep(propagation_wait)
 
+    start_ms = int(start_time.timestamp() * 1000)
+    end_ms = int(end_time.timestamp() * 1000)
+
     for attempt in range(1, max_retries + 1):
-        # Start the Insights query
-        start_response = logs_client.start_query(
-            logGroupName=log_group,
-            startTime=int(start_time.timestamp()),
-            endTime=int(end_time.timestamp()),
-            queryString=query,
-        )
-        query_id = start_response["queryId"]
+        messages: list[str] = []
+        paginator = logs_client.get_paginator("filter_log_events")
+        try:
+            for page in paginator.paginate(
+                logGroupName=log_group,
+                startTime=start_ms,
+                endTime=end_ms,
+                filterPattern=filter_pattern,
+            ):
+                for event in page.get("events", []):
+                    messages.append(event.get("message", ""))
+        except ClientError as e:
+            if e.response["Error"]["Code"] == "ResourceNotFoundException":
+                logger.info("query_logs: log group not found yet on attempt %d", attempt)
+            else:
+                raise
 
-        # Poll for query completion
-        while True:
-            result = logs_client.get_query_results(queryId=query_id)
-            status = result["status"]
-            if status in ("Complete", "Failed", "Cancelled", "Timeout"):
-                break
-            time.sleep(1)
-
-        results = result.get("results", [])
-        if results:
+        if messages:
             logger.info(
-                "query_logs: got %d results on attempt %d",
-                len(results),
+                "query_logs: got %d events on attempt %d",
+                len(messages),
                 attempt,
             )
-            return results
+            return messages
 
         logger.info(
             "query_logs: empty results on attempt %d/%d, retrying in %.0fs",

@@ -182,18 +182,17 @@ class TestRegistryModulesDemoIntegration:
 
         Expected pipeline: ValidateImage -> ResizeImage -> AnalyzeContent -> CatalogueImage
         """
-        query = "fields @message | filter @message like /step_name/ | sort @timestamp asc"
-        results = query_logs(
+        messages = query_logs(
             logs_client,
             deployment["log_group"],
-            query,
+            "step_name",
             deployment["start_time"],
         )
 
-        messages = " ".join(next((f["value"] for f in row if f["field"] == "@message"), "") for row in results)
+        all_text = " ".join(messages)
 
         for handler in ("ValidateImage", "ResizeImage", "AnalyzeContent", "CatalogueImage"):
-            assert handler in messages, f"Handler '{handler}' not found in CloudWatch logs"
+            assert handler in all_text, f"Handler '{handler}' not found in CloudWatch logs"
 
     def test_z_teardown_leaves_empty_state(self, deployment, logs_client):
         """Teardown via rsf deploy --teardown leaves empty terraform state (TEST-03).

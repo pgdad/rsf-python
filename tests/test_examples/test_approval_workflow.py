@@ -93,13 +93,11 @@ class TestApprovalWorkflowIntegration:
         log_group = deployment["outputs"]["log_group_name"]
         start_time = deployment["start_time"]
 
-        query = "fields @message | filter @message like /step_name/ | sort @timestamp asc"
-        results = query_logs(logs_client, log_group, query, start_time)
-
-        messages = " ".join(next((f["value"] for f in row if f["field"] == "@message"), "") for row in results)
+        messages = query_logs(logs_client, log_group, "step_name", start_time)
+        all_text = " ".join(messages)
 
         for step in ("SubmitRequest", "CheckApprovalStatus"):
-            assert step in messages, f"Handler '{step}' not found in CloudWatch logs"
+            assert step in all_text, f"Handler '{step}' not found in CloudWatch logs"
 
     def test_multiple_approval_checks(self, deployment, logs_client):
         """CloudWatch logs show multiple approval checks before escalation.
@@ -110,7 +108,6 @@ class TestApprovalWorkflowIntegration:
         log_group = deployment["outputs"]["log_group_name"]
         start_time = deployment["start_time"]
 
-        query = "fields @message | filter @message like /CheckApprovalStatus/ | sort @timestamp asc"
-        results = query_logs(logs_client, log_group, query, start_time)
+        messages = query_logs(logs_client, log_group, "CheckApprovalStatus", start_time)
 
-        assert len(results) >= 4, f"Expected ≥4 approval checks (escalation path), got {len(results)}"
+        assert len(messages) >= 4, f"Expected ≥4 approval checks (escalation path), got {len(messages)}"

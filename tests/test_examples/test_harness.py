@@ -171,59 +171,63 @@ class TestPollExecution:
 class TestQueryLogs:
     """query_logs applies propagation buffer and retries until non-empty."""
 
-    def _mock_logs_client(self, query_results_sequence):
-        """Create a mock Logs client.
+    def _mock_logs_client(self, pages_sequence):
+        """Create a mock Logs client that paginates filter_log_events results.
 
         Args:
-            query_results_sequence: List of results to return on successive
-                get_query_results calls.
+            pages_sequence: List of page lists, where each page list is a
+                sequence of {"events": [...]} pages returned per paginate() call.
+                Each call to get_paginator().paginate() consumes one page list.
         """
         client = MagicMock()
-        client.start_query = MagicMock(return_value={"queryId": "qid-1"})
-        client.get_query_results = MagicMock(
-            side_effect=[{"status": "Complete", "results": r} for r in query_results_sequence]
-        )
+        paginator = MagicMock()
+
+        # Each call to paginate() returns the next page list from the sequence
+        paginator.paginate = MagicMock(side_effect=[iter(pages) for pages in pages_sequence])
+        client.get_paginator = MagicMock(return_value=paginator)
         return client
 
     def test_returns_results_on_first_try(self):
         """Returns results when first query succeeds."""
-        results = [[{"field": "@message", "value": "hello"}]]
-        client = self._mock_logs_client([results])
+        pages = [{"events": [{"message": "hello"}]}]
+        client = self._mock_logs_client([pages])
         start = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
         with patch("tests.test_examples.conftest.time.sleep"):
-            got = query_logs(client, "/aws/lambda/fn", "fields @message", start)
+            got = query_logs(client, "/aws/lambda/fn", "step_name", start)
 
-        assert got == results
+        assert got == ["hello"]
 
     def test_retries_on_empty_results(self):
         """Retries when initial queries return empty results."""
-        results = [[{"field": "@message", "value": "ok"}]]
-        client = self._mock_logs_client([[], [], results])
+        empty = [{"events": []}]
+        non_empty = [{"events": [{"message": "ok"}]}]
+        client = self._mock_logs_client([empty, empty, non_empty])
         start = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
         with patch("tests.test_examples.conftest.time.sleep"):
             got = query_logs(
                 client,
                 "/aws/lambda/fn",
-                "fields @message",
+                "step_name",
                 start,
                 max_retries=5,
             )
 
-        assert got == results
-        assert client.start_query.call_count == 3
+        assert got == ["ok"]
+        assert client.get_paginator.call_count == 3
 
     def test_returns_empty_after_max_retries(self):
         """Returns empty list after exhausting retries."""
-        client = self._mock_logs_client([[], [], []])
+        empty = [{"events": []}]
+        client = self._mock_logs_client([empty, empty, empty])
         start = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
         with patch("tests.test_examples.conftest.time.sleep"):
             got = query_logs(
                 client,
                 "/aws/lambda/fn",
-                "fields @message",
+                "step_name",
                 start,
                 max_retries=3,
             )
@@ -232,15 +236,15 @@ class TestQueryLogs:
 
     def test_propagation_wait_called(self):
         """Propagation wait is applied before first query."""
-        results = [[{"field": "@message", "value": "ok"}]]
-        client = self._mock_logs_client([results])
+        pages = [{"events": [{"message": "ok"}]}]
+        client = self._mock_logs_client([pages])
         start = datetime(2026, 1, 1, tzinfo=timezone.utc)
 
         with patch("tests.test_examples.conftest.time.sleep") as mock_sleep:
             query_logs(
                 client,
                 "/aws/lambda/fn",
-                "fields @message",
+                "step_name",
                 start,
                 propagation_wait=15.0,
             )
