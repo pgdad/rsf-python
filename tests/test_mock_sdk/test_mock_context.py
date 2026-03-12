@@ -14,14 +14,18 @@ from tests.mock_sdk import BranchResult, Duration, MockDurableContext
 
 class TestDuration:
     def test_seconds(self):
-        d = Duration.seconds(30)
-        assert d.kind == "seconds"
+        d = Duration(seconds=30)
+        assert d.seconds == 30
         assert d.value == 30
 
+    def test_from_seconds(self):
+        d = Duration.from_seconds(30)
+        assert d.seconds == 30
+
     def test_timestamp(self):
-        d = Duration.timestamp("2025-01-01T00:00:00Z")
-        assert d.kind == "timestamp"
-        assert d.value == "2025-01-01T00:00:00Z"
+        # Duration(seconds=n) is the primary constructor; timestamps are passed raw
+        d = Duration(seconds=0)
+        assert d.seconds == 0
 
 
 class TestStep:
@@ -69,22 +73,23 @@ class TestWait:
     def test_wait_seconds(self):
         """wait(duration, name) matches real SDK signature."""
         ctx = MockDurableContext()
-        ctx.wait(Duration.seconds(60), "Delay")
+        ctx.wait(Duration(seconds=60), "Delay")
         assert len(ctx.calls) == 1
         assert ctx.calls[0].operation == "wait"
         assert ctx.calls[0].name == "Delay"
-        assert ctx.calls[0].duration.kind == "seconds"
+        assert ctx.calls[0].duration.seconds == 60
         assert ctx.calls[0].duration.value == 60
 
     def test_wait_timestamp(self):
+        # For timestamp-based waits, a raw string is passed to context.wait
         ctx = MockDurableContext()
-        ctx.wait(Duration.timestamp("2026-01-01T00:00:00Z"), "WaitUntil")
-        assert ctx.calls[0].duration.kind == "timestamp"
+        ctx.wait("2026-01-01T00:00:00Z", "WaitUntil")
+        assert ctx.calls[0].duration == "2026-01-01T00:00:00Z"
 
     def test_wait_no_name(self):
         ctx = MockDurableContext()
-        ctx.wait(Duration.seconds(30))
-        assert ctx.calls[0].duration.value == 30
+        ctx.wait(Duration(seconds=30))
+        assert ctx.calls[0].duration.seconds == 30
 
 
 class TestParallel:
@@ -213,7 +218,7 @@ class TestCallHistory:
     def test_mixed_operations(self):
         ctx = MockDurableContext()
         ctx.step(lambda _sc: None, "S1")
-        ctx.wait(Duration.seconds(5), "W1")
+        ctx.wait(Duration(seconds=5), "W1")
         ctx.parallel([lambda _ctx: None], "P1")
         ctx.map([1], lambda _ctx, item, idx, all_items: item, "M1")
 

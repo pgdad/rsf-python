@@ -72,7 +72,7 @@ def lambda_handler(event: dict, context: DurableContext) -> dict:
             current_state = 'WaitForReview'
 
         elif current_state == 'WaitForReview':
-            context.wait(Duration.seconds(5), 'WaitForReview')
+            context.wait(Duration(seconds=5), 'WaitForReview')
             current_state = 'CheckApprovalStatus'
 
         elif current_state == 'CheckApprovalStatus':

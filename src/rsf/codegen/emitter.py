@@ -253,15 +253,15 @@ def _emit_wait(mapping: StateMapping) -> list[str]:
     lines: list[str] = []
 
     if p.get("seconds") is not None:
-        lines.append(f"context.wait(Duration.seconds({p['seconds']}), {name})")
+        lines.append(f"context.wait(Duration(seconds={p['seconds']}), {name})")
     elif p.get("seconds_path") is not None:
         lines.append(f"_wait_seconds = _resolve_path(input_data, {topyrepr(p['seconds_path'])})")
-        lines.append(f"context.wait(Duration.seconds(_wait_seconds), {name})")
+        lines.append(f"context.wait(Duration(seconds=_wait_seconds), {name})")
     elif p.get("timestamp") is not None:
-        lines.append(f"context.wait(Duration.timestamp({topyrepr(p['timestamp'])}), {name})")
+        lines.append(f"context.wait({topyrepr(p['timestamp'])}, {name})")
     elif p.get("timestamp_path") is not None:
         lines.append(f"_wait_ts = _resolve_path(input_data, {topyrepr(p['timestamp_path'])})")
-        lines.append(f"context.wait(Duration.timestamp(_wait_ts), {name})")
+        lines.append(f"context.wait(_wait_ts, {name})")
 
     lines.append(_transition(p))
     return lines

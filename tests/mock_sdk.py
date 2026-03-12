@@ -18,22 +18,38 @@ from typing import Any, Callable
 
 
 class Duration:
-    """Mock Duration class matching SDK API."""
+    """Mock Duration class matching real SDK dataclass API.
 
-    def __init__(self, kind: str, value: Any):
-        self.kind = kind
-        self.value = value
+    Real SDK: Duration(seconds=n) — dataclass with seconds field.
+    Also provides from_seconds/from_minutes/from_hours/from_days classmethods.
+    """
 
-    @staticmethod
-    def seconds(n: int | float) -> "Duration":
-        return Duration("seconds", n)
+    def __init__(self, seconds: int = 0):
+        self.seconds = seconds
+        # For backward compat with tests that use .value
+        self.value = seconds
 
-    @staticmethod
-    def timestamp(ts: str) -> "Duration":
-        return Duration("timestamp", ts)
+    @classmethod
+    def from_seconds(cls, value: float) -> "Duration":
+        return cls(seconds=int(value))
+
+    @classmethod
+    def from_minutes(cls, value: float) -> "Duration":
+        return cls(seconds=int(value * 60))
+
+    @classmethod
+    def from_hours(cls, value: float) -> "Duration":
+        return cls(seconds=int(value * 3600))
+
+    @classmethod
+    def from_days(cls, value: float) -> "Duration":
+        return cls(seconds=int(value * 86400))
+
+    def to_seconds(self) -> int:
+        return self.seconds
 
     def __repr__(self) -> str:
-        return f"Duration.{self.kind}({self.value!r})"
+        return f"Duration(seconds={self.seconds!r})"
 
 
 class MockStepContext:

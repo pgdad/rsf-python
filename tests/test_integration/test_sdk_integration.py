@@ -271,7 +271,10 @@ class TestWaitWorkflow:
         assert result == {"data": 1}
         assert len(ctx.calls) == 1
         assert ctx.calls[0].operation == "wait"
-        assert ctx.calls[0].duration.value == 60
+        # duration is a Duration object with .seconds attribute
+        dur = ctx.calls[0].duration
+        assert hasattr(dur, "seconds"), f"Expected Duration object, got {type(dur)}"
+        assert dur.seconds == 60
 
 
 class TestFailWorkflow:
