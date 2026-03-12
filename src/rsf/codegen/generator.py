@@ -81,11 +81,31 @@ def generate(
     skipped_handlers: list[Path] = []
     task_mappings = [m for m in mappings if m.state_type == "Task" and not m.sub_workflow]
 
-    if task_mappings:
-        handlers_dir.mkdir(parents=True, exist_ok=True)
-        _ensure_handlers_init(handlers_dir, task_mappings)
+    # Also collect Task states from Map item processors and Parallel branches
+    # so their handlers are included in __init__.py and orchestrator imports
+    extra_task_names: list[str] = []
+    for state_name, state in definition.states.items():
+        if isinstance(state, MapState) and state.item_processor is not None:
+            for sub_name, sub_state in state.item_processor.states.items():
+                if isinstance(sub_state, TaskState):
+                    extra_task_names.append(sub_name)
+        elif isinstance(state, ParallelState):
+            for branch in state.branches:
+                for sub_name, sub_state in branch.states.items():
+                    if isinstance(sub_state, TaskState):
+                        extra_task_names.append(sub_name)
 
-        for mapping in task_mappings:
+    # Create synthetic StateMapping entries for extra handlers (for __init__.py generation)
+    all_task_mappings = task_mappings + [
+        StateMapping(state_name=n, state_type="Task", sdk_primitive="context.step")
+        for n in extra_task_names
+    ]
+
+    if all_task_mappings:
+        handlers_dir.mkdir(parents=True, exist_ok=True)
+        _ensure_handlers_init(handlers_dir, all_task_mappings)
+
+        for mapping in all_task_mappings:
             handler_path = handlers_dir / f"{_to_snake_case(mapping.state_name)}.py"
             if _should_overwrite(handler_path):
                 stub_code = render_handler_stub(mapping.state_name)
@@ -130,6 +150,17 @@ def render_orchestrator(
 
     # Build handler imports for Task states (skip sub-workflow tasks)
     task_names = [m.state_name for m in mappings if m.state_type == "Task" and not m.sub_workflow]
+    # Also collect Task states from Map item processors and Parallel branches
+    for state_name, state in definition.states.items():
+        if isinstance(state, MapState) and state.item_processor is not None:
+            for sub_name, sub_state in state.item_processor.states.items():
+                if isinstance(sub_state, TaskState):
+                    task_names.append(sub_name)
+        elif isinstance(state, ParallelState):
+            for branch in state.branches:
+                for sub_name, sub_state in branch.states.items():
+                    if isinstance(sub_state, TaskState):
+                        task_names.append(sub_name)
     handler_imports = [f"handlers.{_to_snake_case(name)}" for name in task_names]
 
     # Check for sub-workflows

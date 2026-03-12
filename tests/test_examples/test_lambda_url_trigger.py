@@ -12,6 +12,7 @@ Lambda URL feature: auth_type NONE (public endpoint)
 from __future__ import annotations
 
 import logging
+import time
 from datetime import datetime, timezone
 
 import pytest
@@ -20,15 +21,61 @@ import requests
 from tests.test_examples.conftest import (
     EXAMPLES_ROOT,
     iam_propagation_wait,
-    make_execution_id,
-    poll_execution,
     terraform_deploy,
     terraform_teardown,
+    TERMINAL_STATUSES,
 )
 
 logger = logging.getLogger(__name__)
 
 pytestmark = pytest.mark.integration
+
+
+def poll_latest_execution(
+    lambda_client,
+    function_name: str,
+    after_time: datetime,
+    timeout: float = 120.0,
+    poll_interval: float = 5.0,
+) -> dict:
+    """Poll for the most recent durable execution that started after after_time.
+
+    Lists all recent executions and returns the first one that reaches
+    a terminal state.
+    """
+    from botocore.exceptions import ClientError
+
+    deadline = time.monotonic() + timeout
+
+    while time.monotonic() < deadline:
+        try:
+            response = lambda_client.list_durable_executions_by_function(
+                FunctionName=function_name,
+                MaxItems=10,
+            )
+            executions = response.get("DurableExecutions", [])
+
+            for execution in executions:
+                start_ts = execution.get("StartTimestamp")
+                if start_ts is not None:
+                    if hasattr(start_ts, "replace"):
+                        # It's a datetime object
+                        exec_start = start_ts.replace(tzinfo=timezone.utc) if start_ts.tzinfo is None else start_ts
+                    else:
+                        exec_start = start_ts
+                    if exec_start >= after_time:
+                        status = execution.get("Status", "")
+                        if status in TERMINAL_STATUSES:
+                            return execution
+
+        except ClientError as e:
+            error_code = e.response["Error"]["Code"]
+            if error_code not in ("TooManyRequestsException", "ThrottlingException"):
+                raise
+
+        time.sleep(poll_interval)
+
+    raise TimeoutError(f"No completed execution found after {after_time} within {timeout}s")
 
 
 class TestLambdaUrlTriggerIntegration:
@@ -50,7 +97,6 @@ class TestLambdaUrlTriggerIntegration:
 
         fn = outputs["function_name"]
         function_url = outputs["function_url"]
-        exec_id = make_execution_id("lambda-url-trigger")
         start_time = datetime.now(timezone.utc)
 
         # POST to the Lambda Function URL (public, auth_type=NONE)
@@ -67,8 +113,8 @@ class TestLambdaUrlTriggerIntegration:
             response.text[:200],
         )
 
-        # Poll for execution completion
-        execution = poll_execution(lambda_client, fn, exec_id, timeout=120)
+        # Poll for execution completion by listing recent executions
+        execution = poll_latest_execution(lambda_client, fn, start_time, timeout=120)
 
         yield {
             "execution": execution,

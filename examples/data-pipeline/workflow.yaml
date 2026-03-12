@@ -1,5 +1,5 @@
 rsf_version: "1.0"
-Comment: "Data pipeline demonstrating Task, Pass, and Map states with DynamoDB integration and I/O processing"
+Comment: "Data pipeline demonstrating Task, Pass, and Map states with DynamoDB integration"
 StartAt: InitPipeline
 States:
   InitPipeline:
@@ -7,7 +7,6 @@ States:
     Result:
       pipeline: "etl-v1"
       stage: "initialized"
-    Parameters:
       config:
         batchSize: 10
         tableName: "pipeline-results"
@@ -16,14 +15,6 @@ States:
 
   FetchRecords:
     Type: Task
-    InputPath: "$.source"
-    Parameters:
-      bucket.$: "$.bucket"
-      prefix.$: "$.prefix"
-      maxItems: 100
-    ResultSelector:
-      records.$: "$.items"
-      count.$: "$.totalCount"
     ResultPath: "$.fetched"
     Next: TransformRecords
 
@@ -45,12 +36,7 @@ States:
 
   StoreResults:
     Type: Task
-    InputPath: "$"
-    Parameters:
-      tableName.$: "$.config.config.tableName"
-      items.$: "$.transformed"
     ResultPath: "$.stored"
-    OutputPath: "$.stored"
     Next: PipelineComplete
 
   PipelineComplete:

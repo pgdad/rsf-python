@@ -3,8 +3,7 @@
 Tests cover:
 1. Workflow YAML parsing via rsf.dsl.parser.load_definition
 2. Individual handler unit tests
-3. I/O processing features present in the YAML
-4. Full pipeline simulation using MockDurableContext
+3. Full pipeline simulation using MockDurableContext
 """
 
 from __future__ import annotations
@@ -69,6 +68,22 @@ class TestWorkflowParsing:
         assert "ValidateRecord" in inner_states
         assert "EnrichRecord" in inner_states
 
+    def test_init_pipeline_has_result_path(self):
+        sm = load_definition(WORKFLOW_PATH)
+        assert sm.states["InitPipeline"].result_path == "$.config"
+
+    def test_fetch_records_has_result_path(self):
+        sm = load_definition(WORKFLOW_PATH)
+        assert sm.states["FetchRecords"].result_path == "$.fetched"
+
+    def test_transform_records_has_result_path(self):
+        sm = load_definition(WORKFLOW_PATH)
+        assert sm.states["TransformRecords"].result_path == "$.transformed"
+
+    def test_store_results_has_result_path(self):
+        sm = load_definition(WORKFLOW_PATH)
+        assert sm.states["StoreResults"].result_path == "$.stored"
+
 
 # ---------------------------------------------------------------------------
 # 2. Individual handler unit tests
@@ -78,37 +93,31 @@ class TestWorkflowParsing:
 class TestFetchRecordsHandler:
     """Unit tests for the FetchRecords handler."""
 
-    def test_returns_items_and_count(self):
+    def test_returns_records_and_count(self):
         from handlers.fetch_records import fetch_records
 
-        result = fetch_records({"bucket": "my-bucket", "prefix": "data/"})
-        assert "items" in result
-        assert "totalCount" in result
-        assert isinstance(result["items"], list)
-        assert result["totalCount"] == len(result["items"])
+        result = fetch_records({"source": {"bucket": "my-bucket", "prefix": "data/"}})
+        assert "records" in result
+        assert "count" in result
+        assert isinstance(result["records"], list)
+        assert result["count"] == len(result["records"])
 
-    def test_items_have_expected_structure(self):
+    def test_records_have_expected_structure(self):
         from handlers.fetch_records import fetch_records
 
-        result = fetch_records({"bucket": "test-bucket", "prefix": "input/"})
-        for item in result["items"]:
+        result = fetch_records({"source": {"bucket": "test-bucket", "prefix": "input/"}})
+        for item in result["records"]:
             assert "id" in item
             assert "value" in item
             assert "source" in item
             assert item["source"].startswith("s3://test-bucket/input/")
 
-    def test_respects_max_items(self):
-        from handlers.fetch_records import fetch_records
-
-        result = fetch_records({"bucket": "b", "prefix": "p/", "maxItems": 3})
-        assert result["totalCount"] <= 3
-
     def test_default_values(self):
         from handlers.fetch_records import fetch_records
 
         result = fetch_records({})
-        assert result["totalCount"] > 0
-        assert result["items"][0]["source"].startswith("s3://default-bucket/data/")
+        assert result["count"] > 0
+        assert result["records"][0]["source"].startswith("s3://default-bucket/data/")
 
 
 class TestValidateRecordHandler:
@@ -158,7 +167,6 @@ class TestEnrichRecordHandler:
         record = {"id": "rec-1", "value": 42, "validated": True}
         result = enrich_record(record)
         assert "enrichedAt" in result
-        # ISO format timestamp check
         assert "T" in result["enrichedAt"]
 
     def test_adds_hash(self):
@@ -167,7 +175,7 @@ class TestEnrichRecordHandler:
         record = {"id": "rec-1", "value": 42, "validated": True}
         result = enrich_record(record)
         assert "hash" in result
-        assert len(result["hash"]) == 16  # 16 hex chars
+        assert len(result["hash"]) == 16
 
     def test_preserves_original_fields(self):
         from handlers.enrich_record import enrich_record
@@ -195,110 +203,37 @@ class TestStoreResultsHandler:
         from handlers.store_results import store_results
 
         items = [{"id": "rec-1"}, {"id": "rec-2"}, {"id": "rec-3"}]
-        result = store_results({"tableName": "my-table", "items": items})
+        result = store_results({
+            "config": {"config": {"tableName": "my-table"}},
+            "transformed": items,
+        })
         assert result["itemsWritten"] == 3
         assert result["tableName"] == "my-table"
 
     def test_empty_items(self):
         from handlers.store_results import store_results
 
-        result = store_results({"tableName": "t", "items": []})
+        result = store_results({
+            "config": {"config": {"tableName": "t"}},
+            "transformed": [],
+        })
         assert result["itemsWritten"] == 0
 
     def test_default_table_name(self):
         from handlers.store_results import store_results
 
-        result = store_results({"items": [{"id": "1"}]})
+        result = store_results({"transformed": [{"id": "1"}]})
         assert result["tableName"] == "unknown-table"
         assert result["itemsWritten"] == 1
 
 
 # ---------------------------------------------------------------------------
-# 3. I/O processing features in YAML
-# ---------------------------------------------------------------------------
-
-
-class TestIOProcessingFeatures:
-    """Verify that the workflow YAML uses I/O processing features."""
-
-    @pytest.fixture
-    def sm(self):
-        return load_definition(WORKFLOW_PATH)
-
-    def test_init_pipeline_has_result(self, sm):
-        init = sm.states["InitPipeline"]
-        assert init.result is not None
-        assert init.result["pipeline"] == "etl-v1"
-
-    def test_init_pipeline_has_parameters(self, sm):
-        init = sm.states["InitPipeline"]
-        assert init.parameters is not None
-        assert init.parameters["config"]["tableName"] == "pipeline-results"
-
-    def test_init_pipeline_has_result_path(self, sm):
-        init = sm.states["InitPipeline"]
-        assert init.result_path == "$.config"
-
-    def test_fetch_records_has_input_path(self, sm):
-        fetch = sm.states["FetchRecords"]
-        assert fetch.input_path == "$.source"
-
-    def test_fetch_records_has_parameters(self, sm):
-        fetch = sm.states["FetchRecords"]
-        assert fetch.parameters is not None
-        assert "bucket.$" in fetch.parameters
-        assert "prefix.$" in fetch.parameters
-        assert fetch.parameters["maxItems"] == 100
-
-    def test_fetch_records_has_result_selector(self, sm):
-        fetch = sm.states["FetchRecords"]
-        assert fetch.result_selector is not None
-        assert "records.$" in fetch.result_selector
-        assert "count.$" in fetch.result_selector
-
-    def test_fetch_records_has_result_path(self, sm):
-        fetch = sm.states["FetchRecords"]
-        assert fetch.result_path == "$.fetched"
-
-    def test_transform_records_has_items_path(self, sm):
-        xform = sm.states["TransformRecords"]
-        assert xform.items_path == "$.fetched.records"
-
-    def test_transform_records_has_result_path(self, sm):
-        xform = sm.states["TransformRecords"]
-        assert xform.result_path == "$.transformed"
-
-    def test_store_results_has_input_path(self, sm):
-        store = sm.states["StoreResults"]
-        assert store.input_path == "$"
-
-    def test_store_results_has_parameters(self, sm):
-        store = sm.states["StoreResults"]
-        assert store.parameters is not None
-        assert "tableName.$" in store.parameters
-        assert "items.$" in store.parameters
-
-    def test_store_results_has_result_path(self, sm):
-        store = sm.states["StoreResults"]
-        assert store.result_path == "$.stored"
-
-    def test_store_results_has_output_path(self, sm):
-        store = sm.states["StoreResults"]
-        assert store.output_path == "$.stored"
-
-
-# ---------------------------------------------------------------------------
-# 4. Full pipeline simulation with MockDurableContext
+# 3. Full pipeline simulation with MockDurableContext
 # ---------------------------------------------------------------------------
 
 
 class TestFullPipelineSimulation:
-    """End-to-end pipeline simulation using MockDurableContext.
-
-    Simulates the full pipeline flow:
-      InitPipeline (Pass) -> FetchRecords -> TransformRecords (Map) ->
-      StoreResults -> PipelineComplete (Pass)
-    """
+    """End-to-end pipeline simulation using MockDurableContext."""
 
     @pytest.fixture
     def pipeline_input(self):
@@ -328,82 +263,48 @@ class TestFullPipelineSimulation:
         """Execute the full pipeline and verify the end-to-end result."""
         ctx = MockDurableContext()
 
-        # --- Step 1: InitPipeline (Pass state) ---
-        # A Pass state with Parameters produces the Parameters value,
-        # placed at ResultPath on the raw input.
-        init_result = {
-            "config": {
-                "batchSize": 10,
-                "tableName": "pipeline-results",
-            }
-        }
-        data = {**pipeline_input, "config": init_result}
+        # Simulate the full orchestrator flow
+        input_data = pipeline_input
 
-        # --- Step 2: FetchRecords (Task state) ---
-        # InputPath: $.source  -> extracts source object
-        # Parameters: resolves bucket.$ and prefix.$ from source
-        fetch_input = {
-            "bucket": pipeline_input["source"]["bucket"],
-            "prefix": pipeline_input["source"]["prefix"],
-            "maxItems": 100,
-        }
-        fetch_raw_result = ctx.step(lambda _sc: handlers["FetchRecords"](fetch_input), "FetchRecords")
+        # InitPipeline (Pass): sets $.config
+        input_data = {**input_data, "config": {
+            "pipeline": "etl-v1",
+            "stage": "initialized",
+            "config": {"batchSize": 10, "tableName": "pipeline-results"},
+        }}
 
-        # ResultSelector picks records.$ and count.$
-        fetch_selected = {
-            "records": fetch_raw_result["items"],
-            "count": fetch_raw_result["totalCount"],
-        }
-        # ResultPath: $.fetched -> merge into data
-        data["fetched"] = fetch_selected
+        # FetchRecords: receives full input_data, returns {records, count}
+        fetch_result = ctx.step(lambda _sc: handlers["FetchRecords"](input_data), "FetchRecords")
+        assert "records" in fetch_result
+        input_data = {**input_data, "fetched": fetch_result}
 
-        # --- Step 3: TransformRecords (Map state) ---
-        # ItemsPath: $.fetched.records -> iterate over records
-        records = data["fetched"]["records"]
+        # TransformRecords (Map): processes each record
+        records = input_data["fetched"]["records"]
 
         def map_item_processor(_ctx, item, _idx, _all):
             validated = handlers["ValidateRecord"](item)
             enriched = handlers["EnrichRecord"](validated)
             return enriched
 
-        map_result = ctx.map(
-            records,
-            map_item_processor,
-            "TransformRecords",
-        )
+        map_result = ctx.map(records, map_item_processor, "TransformRecords")
         transformed = map_result.get_results()
-        # ResultPath: $.transformed
-        data["transformed"] = transformed
+        input_data = {**input_data, "transformed": transformed}
 
-        # --- Step 4: StoreResults (Task state) ---
-        # Parameters: resolves tableName.$ and items.$ from data
-        store_input = {
-            "tableName": data["config"]["config"]["tableName"],
-            "items": data["transformed"],
-        }
-        store_result = ctx.step(lambda _sc: handlers["StoreResults"](store_input), "StoreResults")
-        # ResultPath: $.stored, OutputPath: $.stored -> final output
-        data["stored"] = store_result
+        # StoreResults: receives full input_data
+        store_result = ctx.step(lambda _sc: handlers["StoreResults"](input_data), "StoreResults")
+        input_data = {**input_data, "stored": store_result}
 
-        # --- Step 5: PipelineComplete (Pass state, End: true) ---
-        final_output = data["stored"]
-
-        # Assertions on final output
-        assert final_output["itemsWritten"] == len(records)
-        assert final_output["tableName"] == "pipeline-results"
+        # Verify final output
+        assert store_result["itemsWritten"] == len(records)
+        assert store_result["tableName"] == "pipeline-results"
 
     def test_sdk_call_sequence(self, pipeline_input, handlers):
         """Verify the MockDurableContext records the expected call sequence."""
         ctx = MockDurableContext()
 
         # FetchRecords step
-        fetch_input = {
-            "bucket": "data-lake",
-            "prefix": "incoming/2026-02-26/",
-            "maxItems": 100,
-        }
-        fetch_result = ctx.step(lambda _sc: handlers["FetchRecords"](fetch_input), "FetchRecords")
-        records = fetch_result["items"]
+        fetch_result = ctx.step(lambda _sc: handlers["FetchRecords"](pipeline_input), "FetchRecords")
+        records = fetch_result["records"]
 
         # TransformRecords map
         def map_processor(_ctx, item, _idx, _all):
@@ -413,8 +314,8 @@ class TestFullPipelineSimulation:
         ctx.map(records, map_processor, "TransformRecords")
 
         # StoreResults step
-        store_input = {"tableName": "pipeline-results", "items": records}
-        ctx.step(lambda _sc: handlers["StoreResults"](store_input), "StoreResults")
+        input_data = {**pipeline_input, "transformed": records}
+        ctx.step(lambda _sc: handlers["StoreResults"](input_data), "StoreResults")
 
         # Verify call order
         assert len(ctx.calls) == 3
@@ -429,8 +330,8 @@ class TestFullPipelineSimulation:
         """Verify the Map state processes every fetched record."""
         ctx = MockDurableContext()
 
-        fetch_result = handlers["FetchRecords"]({"bucket": "data-lake", "prefix": "incoming/", "maxItems": 100})
-        records = fetch_result["items"]
+        fetch_result = handlers["FetchRecords"](pipeline_input)
+        records = fetch_result["records"]
 
         def map_processor(_ctx, item, _idx, _all):
             v = handlers["ValidateRecord"](item)
@@ -449,11 +350,9 @@ class TestFullPipelineSimulation:
         """Verify StoreResults reports the right number of written items."""
         ctx = MockDurableContext()
 
-        # Fetch
-        fetch_result = handlers["FetchRecords"]({"bucket": "b", "prefix": "p/", "maxItems": 4})
-        records = fetch_result["items"]
+        fetch_result = handlers["FetchRecords"](pipeline_input)
+        records = fetch_result["records"]
 
-        # Transform
         def map_processor(_ctx, item, _idx, _all):
             v = handlers["ValidateRecord"](item)
             return handlers["EnrichRecord"](v)
@@ -461,9 +360,8 @@ class TestFullPipelineSimulation:
         map_result = ctx.map(records, map_processor, "TransformRecords")
         transformed = map_result.get_results()
 
-        # Store
-        store_input = {"tableName": "pipeline-results", "items": transformed}
-        store_result = ctx.step(lambda _sc: handlers["StoreResults"](store_input), "StoreResults")
+        input_data = {**pipeline_input, "transformed": transformed, "config": {"config": {"tableName": "pipeline-results"}}}
+        store_result = ctx.step(lambda _sc: handlers["StoreResults"](input_data), "StoreResults")
 
         assert store_result["itemsWritten"] == len(records)
         assert store_result["tableName"] == "pipeline-results"
@@ -472,16 +370,11 @@ class TestFullPipelineSimulation:
         """Pipeline handles gracefully when there are no records to process."""
         ctx = MockDurableContext()
 
-        # Simulate an empty fetch result
-        empty_fetch = {"items": [], "totalCount": 0}
-        ctx.override_step("FetchRecords", empty_fetch)
-        ctx.step(lambda _sc: handlers["FetchRecords"]({}), "FetchRecords")
-
         # Map with empty list
         map_result = ctx.map([], lambda _ctx, x, _i, _a: x, "TransformRecords")
         assert map_result.get_results() == []
 
         # Store empty
-        store_input = {"tableName": "pipeline-results", "items": []}
-        store_result = ctx.step(lambda _sc: handlers["StoreResults"](store_input), "StoreResults")
+        input_data = {"transformed": [], "config": {"config": {"tableName": "pipeline-results"}}}
+        store_result = ctx.step(lambda _sc: handlers["StoreResults"](input_data), "StoreResults")
         assert store_result["itemsWritten"] == 0

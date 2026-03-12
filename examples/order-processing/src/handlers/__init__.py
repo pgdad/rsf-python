@@ -3,3 +3,5 @@
 from handlers.validate_order import validate_order  # noqa: F401
 from handlers.require_approval import require_approval  # noqa: F401
 from handlers.send_confirmation import send_confirmation  # noqa: F401
+from handlers.process_payment import process_payment  # noqa: F401
+from handlers.reserve_inventory import reserve_inventory  # noqa: F401

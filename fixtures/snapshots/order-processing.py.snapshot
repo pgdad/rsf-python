@@ -7,6 +7,8 @@ from rsf.registry import get_handler, get_startup_hooks
 import handlers.validate_order
 import handlers.require_approval
 import handlers.send_confirmation
+import handlers.process_payment
+import handlers.reserve_inventory
 
 # OpenTelemetry tracing (optional — no-op if not installed)
 try:

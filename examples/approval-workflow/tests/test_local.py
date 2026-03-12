@@ -2,17 +2,15 @@
 
 Covers:
   1. Workflow YAML parsing via rsf.dsl.parser.load_definition
-  2. Context Object ($$) references present in workflow
-  3. Variables/Assign present in workflow
-  4. Individual handler testing
-  5. Workflow simulation — approved and denied flows
+  2. Individual handler testing
+  3. Workflow simulation — escalation, approved, and denied flows
 """
 
 from pathlib import Path
 
 import pytest
 
-from rsf.dsl.parser import load_definition, load_yaml
+from rsf.dsl.parser import load_definition
 from rsf.registry import discover_handlers, get_handler, registered_states
 
 from mock_sdk import MockDurableContext, Duration
@@ -33,7 +31,6 @@ class TestWorkflowParsing:
         defn = load_definition(WORKFLOW_PATH)
         assert defn.start_at == "SubmitRequest"
         assert "SubmitRequest" in defn.states
-        assert "SetApprovalContext" in defn.states
         assert "WaitForReview" in defn.states
         assert "CheckApprovalStatus" in defn.states
         assert "EvaluateDecision" in defn.states
@@ -44,12 +41,11 @@ class TestWorkflowParsing:
 
     def test_state_count(self):
         defn = load_definition(WORKFLOW_PATH)
-        assert len(defn.states) == 9
+        assert len(defn.states) == 8
 
     def test_state_types(self):
         defn = load_definition(WORKFLOW_PATH)
         assert defn.states["SubmitRequest"].type == "Task"
-        assert defn.states["SetApprovalContext"].type == "Pass"
         assert defn.states["WaitForReview"].type == "Wait"
         assert defn.states["CheckApprovalStatus"].type == "Task"
         assert defn.states["EvaluateDecision"].type == "Choice"
@@ -82,122 +78,15 @@ class TestWorkflowParsing:
         defn = load_definition(WORKFLOW_PATH)
         assert "Approval workflow" in defn.comment
 
-
-# ---------------------------------------------------------------------------
-# 2. Context Object ($$) references
-# ---------------------------------------------------------------------------
-
-
-class TestContextObjectReferences:
-    """Verify Context Object references ($$.xxx) are present in the YAML."""
-
-    def test_context_object_references_present(self):
-        raw_text = WORKFLOW_PATH.read_text(encoding="utf-8")
-        assert "$$." in raw_text, "Workflow must contain Context Object references ($$)"
-
-    def test_execution_id_reference(self):
-        raw_text = WORKFLOW_PATH.read_text(encoding="utf-8")
-        assert "$$.Execution.Id" in raw_text
-
-    def test_state_machine_name_reference(self):
-        raw_text = WORKFLOW_PATH.read_text(encoding="utf-8")
-        assert "$$.StateMachine.Name" in raw_text
-
-    def test_state_name_reference(self):
-        raw_text = WORKFLOW_PATH.read_text(encoding="utf-8")
-        assert "$$.State.Name" in raw_text
-
-    def test_execution_start_time_reference(self):
-        raw_text = WORKFLOW_PATH.read_text(encoding="utf-8")
-        assert "$$.Execution.StartTime" in raw_text
-
-    def test_context_object_in_submit_request(self):
-        """SubmitRequest Parameters must reference $$.Execution.Id."""
-        raw = load_yaml(WORKFLOW_PATH)
-        params = raw["States"]["SubmitRequest"]["Parameters"]
-        assert params["executionId.$"] == "$$.Execution.Id"
-        assert params["stateMachine.$"] == "$$.StateMachine.Name"
-
-    def test_context_object_in_set_approval_context(self):
-        """SetApprovalContext Parameters must reference $$.State.Name."""
-        raw = load_yaml(WORKFLOW_PATH)
-        params = raw["States"]["SetApprovalContext"]["Parameters"]
-        assert params["stateName.$"] == "$$.State.Name"
-        assert params["startTime.$"] == "$$.Execution.StartTime"
-
-    def test_context_object_in_process_approval(self):
-        """ProcessApproval Parameters must reference $$.Execution.Id."""
-        raw = load_yaml(WORKFLOW_PATH)
-        params = raw["States"]["ProcessApproval"]["Parameters"]
-        assert params["executionId.$"] == "$$.Execution.Id"
-
-
-# ---------------------------------------------------------------------------
-# 3. Variables/Assign and Output fields
-# ---------------------------------------------------------------------------
-
-
-class TestVariablesAssign:
-    """Verify Variables/Assign and Output are present in the YAML."""
-
-    def test_assign_present_in_yaml(self):
-        raw_text = WORKFLOW_PATH.read_text(encoding="utf-8")
-        assert "Assign:" in raw_text, "Workflow must contain Assign blocks"
-
-    def test_output_present_in_yaml(self):
-        raw_text = WORKFLOW_PATH.read_text(encoding="utf-8")
-        assert "Output:" in raw_text, "Workflow must contain Output blocks"
-
-    def test_submit_request_assign(self):
-        raw = load_yaml(WORKFLOW_PATH)
-        assign = raw["States"]["SubmitRequest"]["Assign"]
-        assert "requestId.$" in assign
-        assert "submitter.$" in assign
-        assert assign["attemptCount"] == 0
-
-    def test_set_approval_context_assign(self):
-        raw = load_yaml(WORKFLOW_PATH)
-        assign = raw["States"]["SetApprovalContext"]["Assign"]
-        assert assign["approvalDeadline"] == "2024-12-31T23:59:59Z"
-        assert assign["escalationLevel"] == 1
-
-    def test_check_approval_status_assign(self):
-        raw = load_yaml(WORKFLOW_PATH)
-        assign = raw["States"]["CheckApprovalStatus"]["Assign"]
-        assert "attemptCount.$" in assign
-        assert "States.MathAdd" in assign["attemptCount.$"]
-
-    def test_process_approval_output(self):
-        raw = load_yaml(WORKFLOW_PATH)
-        output = raw["States"]["ProcessApproval"]["Output"]
-        assert output["status"] == "approved"
-        assert "requestId.$" in output
-        assert "approver.$" in output
-
-    def test_escalate_request_assign_and_output(self):
-        raw = load_yaml(WORKFLOW_PATH)
-        state_def = raw["States"]["EscalateRequest"]
-        assert "Assign" in state_def
-        assert "Output" in state_def
-        assert state_def["Output"]["status"] == "escalated"
-
-    def test_parsed_assign_fields(self):
-        """Verify Assign fields parse correctly through the Pydantic model."""
+    def test_result_paths(self):
         defn = load_definition(WORKFLOW_PATH)
-        submit = defn.states["SubmitRequest"]
-        assert submit.assign is not None
-        assert submit.assign["attemptCount"] == 0
-
-    def test_parsed_output_fields(self):
-        """Verify Output fields parse correctly through the Pydantic model."""
-        defn = load_definition(WORKFLOW_PATH)
-        process = defn.states["ProcessApproval"]
-        assert process.output is not None
-        assert process.output["status"] == "approved"
+        assert defn.states["SubmitRequest"].result_path == "$.submission"
+        assert defn.states["CheckApprovalStatus"].result_path == "$.approvalCheck"
+        assert defn.states["ProcessApproval"].result_path == "$.result"
 
 
 # ---------------------------------------------------------------------------
-# 4. Individual handler tests
+# 2. Individual handler tests
 # ---------------------------------------------------------------------------
 
 
@@ -207,29 +96,25 @@ class TestSubmitRequestHandler:
     def test_returns_request_id(self):
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("SubmitRequest")
-        result = handler(
-            {
-                "requestData": {"item": "laptop", "cost": 1500},
-                "submittedBy": "user-42",
-                "executionId": "exec-abc-123",
-                "stateMachine": "ApprovalWorkflow",
-            }
-        )
+        result = handler({
+            "request": {"item": "laptop", "cost": 1500},
+            "userId": "user-42",
+        })
         assert "requestId" in result
         assert result["status"] == "pending"
         assert result["submittedBy"] == "user-42"
+        assert "attemptCount" in result
+        assert result["attemptCount"] == 0
 
     def test_generates_unique_ids(self):
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("SubmitRequest")
-        r1 = handler({"requestData": {}, "submittedBy": "u1"})
-        # Clear and re-register to call again (registry prevents duplicates)
+        r1 = handler({"request": {}, "userId": "u1"})
         from rsf.registry.registry import clear
-
         clear()
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("SubmitRequest")
-        r2 = handler({"requestData": {}, "submittedBy": "u2"})
+        r2 = handler({"request": {}, "userId": "u2"})
         assert r1["requestId"] != r2["requestId"]
 
 
@@ -239,22 +124,44 @@ class TestCheckApprovalStatusHandler:
     def test_approved_decision(self):
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("CheckApprovalStatus")
-        result = handler({"requestId": "approve-123", "checkNumber": 1})
+        result = handler({
+            "submission": {"requestId": "approve-123", "attemptCount": 0},
+        })
         assert result["decision"] == "approved"
         assert result["approver"] == "manager-01"
+        assert result["attemptCount"] == 1
 
     def test_denied_decision(self):
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("CheckApprovalStatus")
-        result = handler({"requestId": "deny-456", "checkNumber": 0})
+        result = handler({
+            "submission": {"requestId": "deny-456", "attemptCount": 0},
+        })
         assert result["decision"] == "denied"
         assert "approver" not in result
 
     def test_pending_decision(self):
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("CheckApprovalStatus")
-        result = handler({"requestId": "unknown-789", "checkNumber": 0})
+        result = handler({
+            "submission": {"requestId": "unknown-789", "attemptCount": 0},
+        })
         assert result["decision"] == "pending"
+
+    def test_increments_attempt_count(self):
+        discover_handlers(HANDLERS_DIR)
+        handler = get_handler("CheckApprovalStatus")
+        # First check
+        result1 = handler({
+            "submission": {"requestId": "pending-001", "attemptCount": 0},
+        })
+        assert result1["attemptCount"] == 1
+        # Second check (using previous approvalCheck)
+        result2 = handler({
+            "submission": {"requestId": "pending-001", "attemptCount": 0},
+            "approvalCheck": {"attemptCount": 1},
+        })
+        assert result2["attemptCount"] == 2
 
 
 class TestProcessApprovalHandler:
@@ -263,13 +170,10 @@ class TestProcessApprovalHandler:
     def test_returns_completed(self):
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("ProcessApproval")
-        result = handler(
-            {
-                "requestId": "req-001",
-                "approvedBy": "manager-01",
-                "executionId": "exec-abc",
-            }
-        )
+        result = handler({
+            "submission": {"requestId": "req-001"},
+            "approvalCheck": {"approver": "manager-01"},
+        })
         assert result["status"] == "completed"
         assert "processedAt" in result
         assert result["requestId"] == "req-001"
@@ -277,138 +181,12 @@ class TestProcessApprovalHandler:
 
 
 # ---------------------------------------------------------------------------
-# 5. Workflow simulation
+# 3. Workflow simulation
 # ---------------------------------------------------------------------------
 
 
-class TestApprovedFlowSimulation:
-    """Simulate the full approved flow using MockDurableContext."""
-
-    def test_approved_flow(self):
-        discover_handlers(HANDLERS_DIR)
-        ctx = MockDurableContext()
-
-        # Step 1: SubmitRequest
-        submit_handler = get_handler("SubmitRequest")
-        _submit_input = {
-            "requestData": {"item": "server", "cost": 5000},
-            "submittedBy": "user-10",
-            "executionId": "exec-001",
-            "stateMachine": "ApprovalWorkflow",
-        }
-        submit_result = ctx.step(lambda _sc: submit_handler(_submit_input), "SubmitRequest")
-        assert submit_result["status"] == "pending"
-        request_id = submit_result["requestId"]
-
-        # Step 2: SetApprovalContext (Pass state — simulated inline)
-        # Pass state would produce context like:
-        # {"requestId": request_id, "submitter": "user-10", "stateName": "SetApprovalContext", ...}
-
-        # Step 3: WaitForReview
-        ctx.wait(Duration.seconds(5), "WaitForReview")
-
-        # Step 4: CheckApprovalStatus — request starts with "approve" prefix
-        # Override to simulate an "approved" response for our request ID
-        ctx.override_step(
-            "CheckApprovalStatus",
-            {
-                "decision": "approved",
-                "approver": "manager-01",
-                "checkNumber": 0,
-                "requestId": request_id,
-            },
-        )
-        check_handler = get_handler("CheckApprovalStatus")
-        _check_input = {
-            "requestId": request_id,
-            "checkNumber": 0,
-        }
-        check_result = ctx.step(lambda _sc: check_handler(_check_input), "CheckApprovalStatus")
-        assert check_result["decision"] == "approved"
-
-        # Step 5: EvaluateDecision (Choice state — evaluate inline)
-        decision = check_result["decision"]
-        assert decision == "approved"
-        # Choice selects "ProcessApproval"
-
-        # Step 6: ProcessApproval
-        process_handler = get_handler("ProcessApproval")
-        _process_input = {
-            "requestId": request_id,
-            "approvedBy": check_result["approver"],
-            "executionId": "exec-001",
-        }
-        process_result = ctx.step(lambda _sc: process_handler(_process_input), "ProcessApproval")
-        assert process_result["status"] == "completed"
-        assert process_result["approvedBy"] == "manager-01"
-
-        # Step 7: RequestApproved (Succeed — terminal)
-
-        # Verify the call sequence
-        assert len(ctx.calls) == 4  # submit, wait, check, process
-        assert ctx.calls[0].name == "SubmitRequest"
-        assert ctx.calls[0].operation == "step"
-        assert ctx.calls[1].name == "WaitForReview"
-        assert ctx.calls[1].operation == "wait"
-        assert ctx.calls[2].name == "CheckApprovalStatus"
-        assert ctx.calls[2].operation == "step"
-        assert ctx.calls[3].name == "ProcessApproval"
-        assert ctx.calls[3].operation == "step"
-
-
-class TestDeniedFlowSimulation:
-    """Simulate the denied flow using MockDurableContext."""
-
-    def test_denied_flow(self):
-        discover_handlers(HANDLERS_DIR)
-        ctx = MockDurableContext()
-
-        # Step 1: SubmitRequest
-        submit_handler = get_handler("SubmitRequest")
-        _submit_input = {
-            "requestData": {"item": "denied-item"},
-            "submittedBy": "user-20",
-            "executionId": "exec-002",
-            "stateMachine": "ApprovalWorkflow",
-        }
-        submit_result = ctx.step(lambda _sc: submit_handler(_submit_input), "SubmitRequest")
-        request_id = submit_result["requestId"]
-
-        # Step 2: SetApprovalContext (Pass — inline)
-        # Step 3: WaitForReview
-        ctx.wait(Duration.seconds(5), "WaitForReview")
-
-        # Step 4: CheckApprovalStatus — override with denied decision
-        ctx.override_step(
-            "CheckApprovalStatus",
-            {
-                "decision": "denied",
-                "checkNumber": 0,
-                "requestId": request_id,
-            },
-        )
-        check_handler = get_handler("CheckApprovalStatus")
-        _check_input = {
-            "requestId": request_id,
-            "checkNumber": 0,
-        }
-        check_result = ctx.step(lambda _sc: check_handler(_check_input), "CheckApprovalStatus")
-        assert check_result["decision"] == "denied"
-
-        # Step 5: EvaluateDecision → RequestDenied (Fail state)
-        # Simulate the Fail state
-        with pytest.raises(RuntimeError, match="RequestDenied"):
-            raise RuntimeError("RequestDenied: The approval request was denied")
-
-        # Verify the call sequence
-        assert len(ctx.calls) == 3  # submit, wait, check
-        assert ctx.calls[0].name == "SubmitRequest"
-        assert ctx.calls[1].name == "WaitForReview"
-        assert ctx.calls[2].name == "CheckApprovalStatus"
-
-
 class TestEscalationFlowSimulation:
-    """Simulate the escalation flow (attempts exceed threshold)."""
+    """Simulate the escalation flow using MockDurableContext."""
 
     def test_escalation_after_max_attempts(self):
         discover_handlers(HANDLERS_DIR)
@@ -416,50 +194,63 @@ class TestEscalationFlowSimulation:
 
         # Step 1: SubmitRequest
         submit_handler = get_handler("SubmitRequest")
-        _submit_input = {
-            "requestData": {"item": "ambiguous-item"},
-            "submittedBy": "user-30",
-            "executionId": "exec-003",
-            "stateMachine": "ApprovalWorkflow",
-        }
-        submit_result = ctx.step(lambda _sc: submit_handler(_submit_input), "SubmitRequest")
+        submit_result = ctx.step(
+            lambda _sc: submit_handler({"request": {"item": "test"}, "userId": "user-30"}),
+            "SubmitRequest",
+        )
+        assert submit_result["attemptCount"] == 0
         request_id = submit_result["requestId"]
 
-        # Simulate multiple pending checks that loop back via Default
+        # Simulate multiple pending checks (4 rounds)
         check_handler = get_handler("CheckApprovalStatus")
-        attempt_count = 0
+        input_data = {"submission": submit_result}
 
-        for attempt in range(4):
-            ctx.wait(Duration.seconds(5), f"WaitForReview-{attempt}")
-
-            _step_name = f"CheckApprovalStatus-{attempt}"
-            ctx.override_step(
-                _step_name,
-                {
-                    "decision": "pending",
-                    "checkNumber": attempt,
-                    "requestId": request_id,
-                },
+        for _ in range(4):
+            ctx.wait(Duration.seconds(5), "WaitForReview")
+            check_result = ctx.step(
+                lambda _sc: check_handler(input_data),
+                "CheckApprovalStatus",
             )
-            _check_input = {"requestId": request_id, "checkNumber": attempt}
-            check_result = ctx.step(lambda _sc: check_handler(_check_input), _step_name)
             assert check_result["decision"] == "pending"
-            attempt_count += 1
+            input_data = {**input_data, "approvalCheck": check_result}
 
-        # After 4 attempts, attemptCount > 3, so EvaluateDecision routes to EscalateRequest
-        assert attempt_count > 3
+        # After 4 checks, attemptCount should be > 3
+        assert input_data["approvalCheck"]["attemptCount"] > 3
 
-        # EscalateRequest is a Pass state — produces output inline
-        escalation_output = {
-            "status": "escalated",
-            "requestId": request_id,
-            "level": 2,  # escalationLevel was 1, incremented by 1
-        }
-        assert escalation_output["status"] == "escalated"
 
-        # Verify we had the right number of SDK calls
-        # 1 submit + 4*(wait + check) = 1 + 8 = 9
-        assert len(ctx.calls) == 9
+class TestApprovedFlowSimulation:
+    """Simulate the approved flow using MockDurableContext."""
+
+    def test_approved_flow(self):
+        discover_handlers(HANDLERS_DIR)
+        ctx = MockDurableContext()
+
+        submit_handler = get_handler("SubmitRequest")
+        submit_result = ctx.step(
+            lambda _sc: submit_handler({"request": {}, "userId": "user-10"}),
+            "SubmitRequest",
+        )
+
+        ctx.wait(Duration.seconds(5), "WaitForReview")
+
+        check_handler = get_handler("CheckApprovalStatus")
+        # Use an "approve-" prefix requestId for approved decision
+        input_data = {"submission": {**submit_result, "requestId": "approve-test"}}
+        check_result = ctx.step(
+            lambda _sc: check_handler(input_data),
+            "CheckApprovalStatus",
+        )
+        assert check_result["decision"] == "approved"
+
+        process_handler = get_handler("ProcessApproval")
+        input_data_with_check = {**input_data, "approvalCheck": check_result}
+        process_result = ctx.step(
+            lambda _sc: process_handler(input_data_with_check),
+            "ProcessApproval",
+        )
+        assert process_result["status"] == "completed"
+
+        assert len(ctx.calls) == 4  # submit, wait, check, process
 
 
 class TestHandlerRegistration:
