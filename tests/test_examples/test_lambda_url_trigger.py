@@ -100,11 +100,12 @@ class TestLambdaUrlTriggerIntegration:
         start_time = datetime.now(timezone.utc)
 
         # POST to the Lambda Function URL (public, auth_type=NONE)
+        # Use a 120s timeout — durable functions may take >30s to complete
         response = requests.post(
             function_url,
             json=self.ORDER_EVENT,
             headers={"Content-Type": "application/json"},
-            timeout=30,
+            timeout=120,
         )
 
         logger.info(
