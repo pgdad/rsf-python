@@ -10,7 +10,7 @@ badge:
 highlight:
   border_color: "#f59e0b"
   border_width: 3
-  corner_radius: 6
+
   label_font_size: 14
   label_background: "#f59e0b"
   label_text_color: "#1e293b"
