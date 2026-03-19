@@ -2,6 +2,7 @@ name: Tutorial Tests & Docs
 
 on:
   push:
+    branches: [master, main]
     paths:
       - 'ui/src/**'
       - 'tests/ui-tutorials/**'
