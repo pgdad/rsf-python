@@ -53,7 +53,7 @@ export function MonacoEditor({ schemaUri, schema }: MonacoEditorProps) {
   );
 
   return (
-    <div className="editor-pane">
+    <div className="editor-pane" data-testid="yaml-editor">
       <div className="pane-header">YAML Editor</div>
       <Editor
         height="100%"

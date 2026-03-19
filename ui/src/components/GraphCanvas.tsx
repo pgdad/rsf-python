@@ -446,6 +446,7 @@ export function GraphCanvas({ onGraphChange }: GraphCanvasProps) {
       <div className="pane-header">Workflow Graph</div>
       <div
         className="graph-container"
+        data-testid="graph-canvas"
         ref={containerRef}
         tabIndex={0}
       >

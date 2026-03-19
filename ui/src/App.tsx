@@ -122,7 +122,7 @@ function EditorApp() {
 
   return (
     <div className="app">
-      <header className="app-header">
+      <header className="app-header" data-testid="app-header">
         <h1>RSF Graph Editor</h1>
         <div className="save-controls">
           <span className={`save-status ${isDirty ? 'unsaved' : 'saved'}`}>

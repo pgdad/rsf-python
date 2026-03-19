@@ -45,6 +45,7 @@ export function BaseNode({ nodeProps, color, icon, children, expandedContent }: 
   return (
     <div
       className={`flow-node ${selected ? 'selected' : ''} ${hasErrors ? 'has-errors' : ''} ${isExpanded ? 'expanded' : ''} ${isShaking ? 'shake' : ''}`}
+      data-testid={`state-${data.label}`}
       style={{ borderColor: color }}
       onClick={() => selectNode(id)}
       onAnimationEnd={handleAnimationEnd}

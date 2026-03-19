@@ -36,6 +36,7 @@ export function Palette() {
           <div
             key={item.type}
             className="palette-item"
+            data-testid={`palette-${item.type.toLowerCase()}`}
             draggable
             onDragStart={(e) => handleDragStart(e, item.type)}
             style={{ borderLeftColor: item.color }}
