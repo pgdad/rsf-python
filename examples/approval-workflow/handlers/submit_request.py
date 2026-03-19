@@ -26,7 +26,7 @@ def submit_request(event: dict) -> dict:
     """
     request_id = str(uuid.uuid4())[:8]
     submitter = event.get("userId", "unknown")
-    request = event.get("request", {})
+    _ = event.get("request", {})  # extracted for future use
 
     _log(
         "SubmitRequest",

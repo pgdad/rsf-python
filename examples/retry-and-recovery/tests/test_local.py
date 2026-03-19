@@ -420,7 +420,7 @@ class TestFallbackPath:
 
         # CallPrimaryService fails with ServiceDownError; the Catch routes
         # to TryFallbackService.  We simulate the error-capture result.
-        primary_error = {
+        _primary_error = {  # noqa: F841 — documents the error state after Catch
             "primaryError": {
                 "Error": "ServiceDownError",
                 "Cause": "503 Service Unavailable",

@@ -360,7 +360,11 @@ class TestFullPipelineSimulation:
         map_result = ctx.map(records, map_processor, "TransformRecords")
         transformed = map_result.get_results()
 
-        input_data = {**pipeline_input, "transformed": transformed, "config": {"config": {"tableName": "pipeline-results"}}}
+        input_data = {
+            **pipeline_input,
+            "transformed": transformed,
+            "config": {"config": {"tableName": "pipeline-results"}},
+        }
         store_result = ctx.step(lambda _sc: handlers["StoreResults"](input_data), "StoreResults")
 
         assert store_result["itemsWritten"] == len(records)

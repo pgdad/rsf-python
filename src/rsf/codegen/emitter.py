@@ -319,7 +319,8 @@ def _emit_parallel(mapping: StateMapping) -> list[str]:
         lines.append(f"    _branches = [{branch_lambdas}]")
         lines.append(f"    _result = context.parallel(_branches, {name})")
         if result_path:
-            lines.append(f"    input_data = _apply_result_path(input_data, _result.get_results(), {topyrepr(result_path)})")
+            rp = topyrepr(result_path)
+            lines.append(f"    input_data = _apply_result_path(input_data, _result.get_results(), {rp})")
         else:
             lines.append("    input_data = _result.get_results()")
         lines.append(f"    {_transition(p)}")
@@ -359,11 +360,7 @@ def _emit_map(mapping: StateMapping) -> list[str]:
     state_name_lower = mapping.state_name.lower()
     lines: list[str] = []
 
-    # MapConfig for max_concurrency (not a direct kwarg in real SDK)
-    max_conc_config = ""
-    if p.get("max_concurrency") is not None:
-        # Pass via MapConfig if available, otherwise ignore for now
-        max_conc_config = ""
+    # max_concurrency: not a direct kwarg in real SDK; reserved for future MapConfig support
 
     _map_lambda = f"lambda _ctx, _item, _idx, _all: _run_map_{state_name_lower}(_ctx, _item)"
     result_path = p.get("result_path")
@@ -377,7 +374,8 @@ def _emit_map(mapping: StateMapping) -> list[str]:
         _map_call = f"context.map(_items, {_map_lambda}, {name})"
         lines.append(f"    _result = {_map_call}")
         if result_path:
-            lines.append(f"    input_data = _apply_result_path(input_data, _result.get_results(), {topyrepr(result_path)})")
+            rp = topyrepr(result_path)
+            lines.append(f"    input_data = _apply_result_path(input_data, _result.get_results(), {rp})")
         else:
             lines.append("    input_data = _result.get_results()")
         lines.append(f"    {_transition(p)}")

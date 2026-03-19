@@ -215,7 +215,7 @@ def _generate_branch_helpers(definition: StateMachineDefinition) -> list[str]:
                 f'    """Execute the {branch.start_at} parallel branch."""',
             ]
             if steps:
-                lines.append(f"    _data = _input")
+                lines.append("    _data = _input")
                 for step_name in steps:
                     snake = _to_snake_case(step_name)
                     lines.append(f"    _handler_{snake} = get_handler({step_name!r})")

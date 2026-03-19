@@ -8,8 +8,6 @@ Covers:
 
 from pathlib import Path
 
-import pytest
-
 from rsf.dsl.parser import load_definition
 from rsf.registry import discover_handlers, get_handler, registered_states
 
@@ -199,7 +197,7 @@ class TestEscalationFlowSimulation:
             "SubmitRequest",
         )
         assert submit_result["attemptCount"] == 0
-        request_id = submit_result["requestId"]
+        _ = submit_result["requestId"]  # verified exists
 
         # Simulate multiple pending checks (4 rounds)
         check_handler = get_handler("CheckApprovalStatus")
