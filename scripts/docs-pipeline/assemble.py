@@ -185,7 +185,7 @@ def process_tutorial(
 
 
 def main() -> None:
-    print(f"Assembling tutorial docs...")
+    print("Assembling tutorial docs...")
     print(f"Captures: {CAPTURES_DIR}")
     print(f"Output:   {DOCS_TUTORIALS_DIR}")
 
