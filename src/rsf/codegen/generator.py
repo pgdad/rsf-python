@@ -97,8 +97,7 @@ def generate(
 
     # Create synthetic StateMapping entries for extra handlers (for __init__.py generation)
     all_task_mappings = task_mappings + [
-        StateMapping(state_name=n, state_type="Task", sdk_primitive="context.step")
-        for n in extra_task_names
+        StateMapping(state_name=n, state_type="Task", sdk_primitive="context.step") for n in extra_task_names
     ]
 
     if all_task_mappings:
@@ -256,9 +255,7 @@ def _generate_map_helpers(definition: StateMachineDefinition) -> list[str]:
             for step_name in steps:
                 snake = _to_snake_case(step_name)
                 lines.append(f"    _handler_{snake} = get_handler({step_name!r})")
-                lines.append(
-                    f"    _data = map_ctx.step(lambda _sc, _d=_data: _handler_{snake}(_d), {step_name!r})"
-                )
+                lines.append(f"    _data = map_ctx.step(lambda _sc, _d=_data: _handler_{snake}(_d), {step_name!r})")
             lines.append("    return _data")
         else:
             lines.append("    return item")

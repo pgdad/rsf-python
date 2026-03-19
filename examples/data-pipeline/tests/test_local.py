@@ -203,20 +203,24 @@ class TestStoreResultsHandler:
         from handlers.store_results import store_results
 
         items = [{"id": "rec-1"}, {"id": "rec-2"}, {"id": "rec-3"}]
-        result = store_results({
-            "config": {"config": {"tableName": "my-table"}},
-            "transformed": items,
-        })
+        result = store_results(
+            {
+                "config": {"config": {"tableName": "my-table"}},
+                "transformed": items,
+            }
+        )
         assert result["itemsWritten"] == 3
         assert result["tableName"] == "my-table"
 
     def test_empty_items(self):
         from handlers.store_results import store_results
 
-        result = store_results({
-            "config": {"config": {"tableName": "t"}},
-            "transformed": [],
-        })
+        result = store_results(
+            {
+                "config": {"config": {"tableName": "t"}},
+                "transformed": [],
+            }
+        )
         assert result["itemsWritten"] == 0
 
     def test_default_table_name(self):
@@ -267,11 +271,14 @@ class TestFullPipelineSimulation:
         input_data = pipeline_input
 
         # InitPipeline (Pass): sets $.config
-        input_data = {**input_data, "config": {
-            "pipeline": "etl-v1",
-            "stage": "initialized",
-            "config": {"batchSize": 10, "tableName": "pipeline-results"},
-        }}
+        input_data = {
+            **input_data,
+            "config": {
+                "pipeline": "etl-v1",
+                "stage": "initialized",
+                "config": {"batchSize": 10, "tableName": "pipeline-results"},
+            },
+        }
 
         # FetchRecords: receives full input_data, returns {records, count}
         fetch_result = ctx.step(lambda _sc: handlers["FetchRecords"](input_data), "FetchRecords")

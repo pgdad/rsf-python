@@ -306,10 +306,7 @@ def _emit_parallel(mapping: StateMapping) -> list[str]:
     lines: list[str] = []
 
     # Build branch lambda list — each lambda takes branch_ctx and passes captured input
-    branch_lambdas = ", ".join(
-        f"lambda _ctx: _run_branch_{b['start_at'].lower()}(_ctx, _captured)"
-        for b in branches
-    )
+    branch_lambdas = ", ".join(f"lambda _ctx: _run_branch_{b['start_at'].lower()}(_ctx, _captured)" for b in branches)
 
     result_path = p.get("result_path")
 

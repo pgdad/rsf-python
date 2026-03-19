@@ -94,10 +94,12 @@ class TestSubmitRequestHandler:
     def test_returns_request_id(self):
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("SubmitRequest")
-        result = handler({
-            "request": {"item": "laptop", "cost": 1500},
-            "userId": "user-42",
-        })
+        result = handler(
+            {
+                "request": {"item": "laptop", "cost": 1500},
+                "userId": "user-42",
+            }
+        )
         assert "requestId" in result
         assert result["status"] == "pending"
         assert result["submittedBy"] == "user-42"
@@ -109,6 +111,7 @@ class TestSubmitRequestHandler:
         handler = get_handler("SubmitRequest")
         r1 = handler({"request": {}, "userId": "u1"})
         from rsf.registry.registry import clear
+
         clear()
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("SubmitRequest")
@@ -122,9 +125,11 @@ class TestCheckApprovalStatusHandler:
     def test_approved_decision(self):
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("CheckApprovalStatus")
-        result = handler({
-            "submission": {"requestId": "approve-123", "attemptCount": 0},
-        })
+        result = handler(
+            {
+                "submission": {"requestId": "approve-123", "attemptCount": 0},
+            }
+        )
         assert result["decision"] == "approved"
         assert result["approver"] == "manager-01"
         assert result["attemptCount"] == 1
@@ -132,33 +137,41 @@ class TestCheckApprovalStatusHandler:
     def test_denied_decision(self):
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("CheckApprovalStatus")
-        result = handler({
-            "submission": {"requestId": "deny-456", "attemptCount": 0},
-        })
+        result = handler(
+            {
+                "submission": {"requestId": "deny-456", "attemptCount": 0},
+            }
+        )
         assert result["decision"] == "denied"
         assert "approver" not in result
 
     def test_pending_decision(self):
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("CheckApprovalStatus")
-        result = handler({
-            "submission": {"requestId": "unknown-789", "attemptCount": 0},
-        })
+        result = handler(
+            {
+                "submission": {"requestId": "unknown-789", "attemptCount": 0},
+            }
+        )
         assert result["decision"] == "pending"
 
     def test_increments_attempt_count(self):
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("CheckApprovalStatus")
         # First check
-        result1 = handler({
-            "submission": {"requestId": "pending-001", "attemptCount": 0},
-        })
+        result1 = handler(
+            {
+                "submission": {"requestId": "pending-001", "attemptCount": 0},
+            }
+        )
         assert result1["attemptCount"] == 1
         # Second check (using previous approvalCheck)
-        result2 = handler({
-            "submission": {"requestId": "pending-001", "attemptCount": 0},
-            "approvalCheck": {"attemptCount": 1},
-        })
+        result2 = handler(
+            {
+                "submission": {"requestId": "pending-001", "attemptCount": 0},
+                "approvalCheck": {"attemptCount": 1},
+            }
+        )
         assert result2["attemptCount"] == 2
 
 
@@ -168,10 +181,12 @@ class TestProcessApprovalHandler:
     def test_returns_completed(self):
         discover_handlers(HANDLERS_DIR)
         handler = get_handler("ProcessApproval")
-        result = handler({
-            "submission": {"requestId": "req-001"},
-            "approvalCheck": {"approver": "manager-01"},
-        })
+        result = handler(
+            {
+                "submission": {"requestId": "req-001"},
+                "approvalCheck": {"approver": "manager-01"},
+            }
+        )
         assert result["status"] == "completed"
         assert "processedAt" in result
         assert result["requestId"] == "req-001"

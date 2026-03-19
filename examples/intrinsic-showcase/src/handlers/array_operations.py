@@ -33,7 +33,7 @@ def array_operations(event: dict) -> dict:
     range_val = list(range(1, 10, 2))
 
     # Simulate States.ArrayPartition(tagArray, 2)
-    partitioned = [tag_array[i:i + 2] for i in range(0, len(tag_array), 2)]
+    partitioned = [tag_array[i : i + 2] for i in range(0, len(tag_array), 2)]
 
     # Simulate States.ArrayContains(tagArray, 'demo')
     contains = "demo" in tag_array

@@ -5,6 +5,7 @@ Reads manifest.json from each tutorial's .captures/ directory,
 copies annotated screenshots (or raw if no annotated/ subdir) to docs/tutorials/assets/,
 copies GIF and MP4 files, and renders Jinja2 templates to produce markdown files.
 """
+
 from __future__ import annotations
 
 import json
