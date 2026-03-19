@@ -1,0 +1,79 @@
+name: Tutorial Tests & Docs
+
+on:
+  push:
+    paths:
+      - 'ui/src/**'
+      - 'tests/ui-tutorials/**'
+      - 'scripts/docs-pipeline/**'
+      - '.github/workflows/tutorials.yml'
+  workflow_dispatch:
+
+permissions:
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Python package
+        run: pip install -e .
+
+      - name: Install Playwright dependencies
+        working-directory: tests/ui-tutorials
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Build UI
+        working-directory: ui
+        run: |
+          npm ci
+          npm run build
+
+      - name: Run tutorial tests
+        working-directory: tests/ui-tutorials
+        run: npx playwright test
+
+      - name: Install ImageMagick and FFmpeg
+        run: sudo apt-get install -y imagemagick ffmpeg
+
+      - name: Annotate screenshots
+        run: bash scripts/docs-pipeline/annotate.sh
+
+      - name: Process videos
+        run: bash scripts/docs-pipeline/video-process.sh
+
+      - name: Assemble tutorial pages
+        run: python3 scripts/docs-pipeline/assemble.py
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/tutorials
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
