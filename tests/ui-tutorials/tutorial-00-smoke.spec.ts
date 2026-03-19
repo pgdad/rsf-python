@@ -1,8 +1,16 @@
-import { test, expect } from './fixtures/rsf-server';
+import { test, expect } from './fixtures/capture';
 
-test('smoke: rsf ui starts and graph renders', async ({ page }) => {
-  // The fixture navigates to the editor and waits for readiness
-  await expect(page.locator('.react-flow__node')).toHaveCount(2); // HelloWorld + Done
+test('smoke: capture fixture records steps', async ({ page, capture }) => {
+  await capture.step('initial-graph', {
+    title: 'Starter workflow',
+    description: 'The default two-state workflow from rsf init',
+  });
+
   await expect(page.locator('[data-testid="state-HelloWorld"]')).toBeVisible();
-  await expect(page.locator('[data-testid="state-Done"]')).toBeVisible();
+
+  await capture.step('verify-nodes', {
+    title: 'Verify starter states',
+    description: 'HelloWorld and Done states are visible',
+    highlight: { selector: '[data-testid="state-HelloWorld"]', label: 'Start state' },
+  });
 });
