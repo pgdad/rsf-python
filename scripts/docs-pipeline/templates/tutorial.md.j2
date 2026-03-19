@@ -1,0 +1,53 @@
+# {{ tutorial.title }}
+
+<div class="tutorial-meta">
+  <span class="badge badge-difficulty badge-{{ tutorial.difficulty | lower }}">{{ tutorial.difficulty }}</span>
+  <span class="tutorial-time">{{ tutorial.time }}</span>
+</div>
+
+{{ tutorial.description }}
+
+---
+
+## Steps
+
+{% for step in steps %}
+### Step {{ step.step }}: {{ step.title }}
+
+{{ step.description }}
+
+{% if step.format == "gif-start" and gif_file %}
+![Step {{ step.step }} — {{ step.title }}](assets/{{ gif_file }}){ .tutorial-gif }
+{% elif step.annotated_screenshot %}
+![Step {{ step.step }} — {{ step.title }}](assets/{{ step.annotated_screenshot }}){ .tutorial-screenshot }
+{% elif step.screenshot %}
+![Step {{ step.step }} — {{ step.title }}](assets/{{ step.screenshot }}){ .tutorial-screenshot }
+{% endif %}
+
+{% if step.format in ("gif-start", "gif-end") %}
+{% endif %}
+{% endfor %}
+
+---
+
+{% if video_file %}
+## Full Walkthrough Video
+
+<video controls width="100%" style="border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);">
+  <source src="assets/{{ video_file }}" type="video/mp4">
+  Your browser does not support the video tag.
+</video>
+
+{% endif %}
+---
+
+{% if prev_tutorial or next_tutorial %}
+<div class="tutorial-nav">
+{% if prev_tutorial %}
+  [← {{ prev_tutorial.title }}]({{ prev_tutorial.slug }}.md)
+{% endif %}
+{% if next_tutorial %}
+  [{{ next_tutorial.title }} →]({{ next_tutorial.slug }}.md)
+{% endif %}
+</div>
+{% endif %}

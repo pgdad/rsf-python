@@ -1,0 +1,21 @@
+# Annotation styles for ImageMagick post-processing
+badge:
+  size: 36
+  font_size: 18
+  background: "#3b82f6"
+  text_color: "white"
+  offset_x: 12
+  offset_y: 12
+
+highlight:
+  border_color: "#f59e0b"
+  border_width: 3
+  corner_radius: 6
+  label_font_size: 14
+  label_background: "#f59e0b"
+  label_text_color: "#1e293b"
+  label_padding: 4
+
+output:
+  captures_dir: "tests/ui-tutorials/.captures"
+  annotated_subdir: "annotated"
