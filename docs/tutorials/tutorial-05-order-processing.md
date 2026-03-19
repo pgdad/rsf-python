@@ -109,7 +109,7 @@ The full order processing workflow demonstrates Task, Choice, Parallel, Succeed,
 
 <div class="tutorial-nav">
 
-  [← Tutorial 4: Parallel Processing](tutorial-04-parallel-processing.md)
+  [← Tutorial 4: Parallel Processing](tutorial-04-parallel-processing.html)
 
 
 </div>

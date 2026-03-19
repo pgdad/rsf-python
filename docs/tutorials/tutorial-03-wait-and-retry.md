@@ -89,10 +89,10 @@ All five states are connected. The workflow demonstrates retry with backoff, err
 
 <div class="tutorial-nav">
 
-  [← Tutorial 2: Branching Logic](tutorial-02-branching-logic.md)
+  [← Tutorial 2: Branching Logic](tutorial-02-branching-logic.html)
 
 
-  [Tutorial 4: Parallel Processing →](tutorial-04-parallel-processing.md)
+  [Tutorial 4: Parallel Processing →](tutorial-04-parallel-processing.html)
 
 </div>
 

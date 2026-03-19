@@ -44,10 +44,10 @@
 {% if prev_tutorial or next_tutorial %}
 <div class="tutorial-nav">
 {% if prev_tutorial %}
-  [← {{ prev_tutorial.title }}]({{ prev_tutorial.slug }}.md)
+  [← {{ prev_tutorial.title }}]({{ prev_tutorial.slug }}.html)
 {% endif %}
 {% if next_tutorial %}
-  [{{ next_tutorial.title }} →]({{ next_tutorial.slug }}.md)
+  [{{ next_tutorial.title }} →]({{ next_tutorial.slug }}.html)
 {% endif %}
 </div>
 {% endif %}

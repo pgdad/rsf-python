@@ -79,10 +79,10 @@ All four main states are connected. The workflow demonstrates parallel execution
 
 <div class="tutorial-nav">
 
-  [← Tutorial 3: Wait & Retry](tutorial-03-wait-and-retry.md)
+  [← Tutorial 3: Wait & Retry](tutorial-03-wait-and-retry.html)
 
 
-  [Tutorial 5: Order Processing →](tutorial-05-order-processing.md)
+  [Tutorial 5: Order Processing →](tutorial-05-order-processing.html)
 
 </div>
 

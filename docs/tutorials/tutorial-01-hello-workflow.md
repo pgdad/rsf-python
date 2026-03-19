@@ -91,10 +91,10 @@ All three states are connected: HelloWorld → ProcessData → Done. The workflo
 
 <div class="tutorial-nav">
 
-  [← Smoke Test — Capture Fixture](tutorial-00-smoke.md)
+  [← Smoke Test — Capture Fixture](tutorial-00-smoke.html)
 
 
-  [Tutorial 2: Branching Logic →](tutorial-02-branching-logic.md)
+  [Tutorial 2: Branching Logic →](tutorial-02-branching-logic.html)
 
 </div>
 

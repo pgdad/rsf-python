@@ -79,10 +79,10 @@ All five states are connected with proper Choice branching. The workflow validat
 
 <div class="tutorial-nav">
 
-  [← Tutorial 1: Hello Workflow](tutorial-01-hello-workflow.md)
+  [← Tutorial 1: Hello Workflow](tutorial-01-hello-workflow.html)
 
 
-  [Tutorial 3: Wait & Retry →](tutorial-03-wait-and-retry.md)
+  [Tutorial 3: Wait & Retry →](tutorial-03-wait-and-retry.html)
 
 </div>
 
