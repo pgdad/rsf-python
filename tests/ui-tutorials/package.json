@@ -1,0 +1,14 @@
+{
+  "name": "rsf-ui-tutorials",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "playwright test",
+    "test:headed": "playwright test --headed",
+    "test:one": "playwright test --grep"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.58.2",
+    "tsx": "^4.19.0"
+  }
+}
