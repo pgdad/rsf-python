@@ -1,19 +1,7 @@
 {
   "Comment": "Parity test: SQS message collector (Step Functions version)",
-  "StartAt": "Initialize",
+  "StartAt": "PollSQS",
   "States": {
-    "Initialize": {
-      "Type": "Pass",
-      "Result": {
-        "messages": [],
-        "receipt_handles": [],
-        "count": 0,
-        "queue_url": "${sqs_queue_url}",
-        "output_key": "${output_key_prefix}/result.json",
-        "s3_bucket": "${s3_bucket}"
-      },
-      "Next": "PollSQS"
-    },
     "PollSQS": {
       "Type": "Task",
       "Resource": "arn:aws:states:::aws-sdk:sqs:receiveMessage",

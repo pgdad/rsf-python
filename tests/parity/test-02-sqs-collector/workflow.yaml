@@ -1,16 +1,8 @@
 rsf_version: "1.0"
 Comment: "Parity test: SQS message collector"
-StartAt: Initialize
+StartAt: PollSQS
 
 States:
-  Initialize:
-    Type: Pass
-    Result:
-      messages: []
-      receipt_handles: []
-      count: 0
-    Next: PollSQS
-
   PollSQS:
     Type: Task
     ResultPath: "$.poll_result"
@@ -25,7 +17,7 @@ States:
     Default: WaitBeforePoll
 
   AppendMessage:
-    Type: Pass
+    Type: Task
     Next: CheckCount
 
   CheckCount:
