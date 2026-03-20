@@ -1,0 +1,39 @@
+rsf_version: "1.0"
+Comment: "Parity test: choice-based format routing"
+StartAt: ReadConfig
+
+States:
+  ReadConfig:
+    Type: Task
+    Next: RouteByFormat
+
+  RouteByFormat:
+    Type: Choice
+    Choices:
+      - Variable: "$.format"
+        StringEquals: "csv"
+        Next: ProcessCSV
+      - Variable: "$.format"
+        StringEquals: "json"
+        Next: ProcessJSON
+    Default: HandleUnknownFormat
+
+  ProcessCSV:
+    Type: Task
+    Next: WriteResult
+
+  ProcessJSON:
+    Type: Task
+    Next: WriteResult
+
+  WriteResult:
+    Type: Task
+    Next: Done
+
+  HandleUnknownFormat:
+    Type: Fail
+    Error: "UnsupportedFormat"
+    Cause: "The format field must be 'csv' or 'json'"
+
+  Done:
+    Type: Succeed

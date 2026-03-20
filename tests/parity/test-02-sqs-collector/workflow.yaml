@@ -1,0 +1,53 @@
+rsf_version: "1.0"
+Comment: "Parity test: SQS message collector"
+StartAt: Initialize
+
+States:
+  Initialize:
+    Type: Pass
+    Result:
+      messages: []
+      receipt_handles: []
+      count: 0
+    Next: PollSQS
+
+  PollSQS:
+    Type: Task
+    ResultPath: "$.poll_result"
+    Next: CheckMessages
+
+  CheckMessages:
+    Type: Choice
+    Choices:
+      - Variable: "$.poll_result.received"
+        BooleanEquals: true
+        Next: AppendMessage
+    Default: WaitBeforePoll
+
+  AppendMessage:
+    Type: Pass
+    Next: CheckCount
+
+  CheckCount:
+    Type: Choice
+    Choices:
+      - Variable: "$.count"
+        NumericGreaterThanEquals: 10
+        Next: WriteCollected
+    Default: WaitBeforePoll
+
+  WaitBeforePoll:
+    Type: Wait
+    Seconds: 10
+    Next: PollSQS
+
+  WriteCollected:
+    Type: Task
+    Next: DeleteMessages
+
+  DeleteMessages:
+    Type: Task
+    Next: Done
+
+  Done:
+    Type: Succeed
