@@ -1,0 +1,56 @@
+{
+  "Comment": "Parity test: S3 ETL pipeline (Step Functions version)",
+  "StartAt": "ReadFromS3",
+  "States": {
+    "ReadFromS3": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+      "Parameters": {
+        "Bucket": "${s3_bucket}",
+        "Key.$": "$.source_key"
+      },
+      "ResultSelector": {
+        "records.$": "States.StringToJson($.Body)"
+      },
+      "ResultPath": "$.s3_result",
+      "Next": "PrepareRecords"
+    },
+    "PrepareRecords": {
+      "Type": "Pass",
+      "InputPath": "$.s3_result.records",
+      "ResultPath": "$.records",
+      "Next": "TransformRecords"
+    },
+    "TransformRecords": {
+      "Type": "Map",
+      "ItemsPath": "$.records",
+      "ItemProcessor": {
+        "StartAt": "TransformOne",
+        "States": {
+          "TransformOne": {
+            "Type": "Task",
+            "Resource": "${transform_lambda_arn}",
+            "End": true
+          }
+        }
+      },
+      "ResultPath": "$.records",
+      "Next": "WriteETLResult"
+    },
+    "WriteETLResult": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:putObject",
+      "Parameters": {
+        "Bucket": "${s3_bucket}",
+        "Key.$": "$.output_key",
+        "Body.$": "States.JsonToString($.records)",
+        "ContentType": "application/json"
+      },
+      "ResultPath": "$.write_result",
+      "Next": "Done"
+    },
+    "Done": {
+      "Type": "Succeed"
+    }
+  }
+}

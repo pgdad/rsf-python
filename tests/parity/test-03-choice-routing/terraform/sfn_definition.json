@@ -1,0 +1,109 @@
+{
+  "Comment": "Parity test: choice-based format routing (Step Functions version)",
+  "StartAt": "ReadConfig",
+  "States": {
+    "ReadConfig": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+      "Parameters": {
+        "Bucket": "${s3_bucket}",
+        "Key.$": "$.config_key"
+      },
+      "ResultSelector": {
+        "config.$": "States.StringToJson($.Body)"
+      },
+      "ResultPath": "$.s3_result",
+      "Next": "ExtractConfig"
+    },
+    "ExtractConfig": {
+      "Type": "Pass",
+      "Parameters": {
+        "format.$": "$.s3_result.config.format",
+        "source_key.$": "$.s3_result.config.source_key",
+        "output_prefix.$": "$.output_prefix",
+        "s3_bucket.$": "$.s3_bucket"
+      },
+      "Next": "RouteByFormat"
+    },
+    "RouteByFormat": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.format",
+          "StringEquals": "csv",
+          "Next": "ReadSourceCSV"
+        },
+        {
+          "Variable": "$.format",
+          "StringEquals": "json",
+          "Next": "ReadSourceJSON"
+        }
+      ],
+      "Default": "HandleUnknownFormat"
+    },
+    "ReadSourceCSV": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+      "Parameters": {
+        "Bucket.$": "$.s3_bucket",
+        "Key.$": "$.source_key"
+      },
+      "ResultSelector": {
+        "csv_text.$": "$.Body"
+      },
+      "ResultPath": "$.source_data",
+      "Next": "ProcessCSV"
+    },
+    "ProcessCSV": {
+      "Type": "Task",
+      "Resource": "${csv_lambda_arn}",
+      "Parameters": {
+        "csv_text.$": "$.source_data.csv_text"
+      },
+      "ResultPath": "$.processed",
+      "Next": "WriteResult"
+    },
+    "ReadSourceJSON": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:getObject",
+      "Parameters": {
+        "Bucket.$": "$.s3_bucket",
+        "Key.$": "$.source_key"
+      },
+      "ResultSelector": {
+        "records.$": "States.StringToJson($.Body)"
+      },
+      "ResultPath": "$.source_data",
+      "Next": "ProcessJSON"
+    },
+    "ProcessJSON": {
+      "Type": "Task",
+      "Resource": "${json_lambda_arn}",
+      "Parameters": {
+        "records.$": "$.source_data.records"
+      },
+      "ResultPath": "$.processed",
+      "Next": "WriteResult"
+    },
+    "WriteResult": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:putObject",
+      "Parameters": {
+        "Bucket.$": "$.s3_bucket",
+        "Key.$": "States.Format('{}/{}/result.json', $.output_prefix, $.format)",
+        "Body.$": "States.JsonToString($.processed.records)",
+        "ContentType": "application/json"
+      },
+      "ResultPath": "$.write_result",
+      "Next": "Done"
+    },
+    "HandleUnknownFormat": {
+      "Type": "Fail",
+      "Error": "UnsupportedFormat",
+      "Cause": "The format field must be 'csv' or 'json'"
+    },
+    "Done": {
+      "Type": "Succeed"
+    }
+  }
+}

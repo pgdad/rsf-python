@@ -1,0 +1,95 @@
+{
+  "Comment": "Parity test: SQS message collector (Step Functions version)",
+  "StartAt": "Initialize",
+  "States": {
+    "Initialize": {
+      "Type": "Pass",
+      "Result": {
+        "messages": [],
+        "receipt_handles": [],
+        "count": 0,
+        "queue_url": "${sqs_queue_url}",
+        "output_key": "${output_key_prefix}/result.json",
+        "s3_bucket": "${s3_bucket}"
+      },
+      "Next": "PollSQS"
+    },
+    "PollSQS": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:sqs:receiveMessage",
+      "Parameters": {
+        "QueueUrl.$": "$.queue_url",
+        "MaxNumberOfMessages": 1,
+        "WaitTimeSeconds": 5
+      },
+      "ResultPath": "$.poll_result",
+      "Next": "CheckMessages"
+    },
+    "CheckMessages": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.poll_result.Messages[0]",
+          "IsPresent": true,
+          "Next": "AppendMessage"
+        }
+      ],
+      "Default": "WaitBeforePoll"
+    },
+    "AppendMessage": {
+      "Type": "Task",
+      "Resource": "${append_lambda_arn}",
+      "Parameters": {
+        "messages.$": "$.messages",
+        "receipt_handles.$": "$.receipt_handles",
+        "count.$": "$.count",
+        "new_message.$": "$.poll_result.Messages[0].Body",
+        "new_receipt_handle.$": "$.poll_result.Messages[0].ReceiptHandle",
+        "queue_url.$": "$.queue_url",
+        "output_key.$": "$.output_key",
+        "s3_bucket.$": "$.s3_bucket"
+      },
+      "Next": "CheckCount"
+    },
+    "CheckCount": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.count",
+          "NumericGreaterThanEquals": 10,
+          "Next": "WriteCollected"
+        }
+      ],
+      "Default": "WaitBeforePoll"
+    },
+    "WaitBeforePoll": {
+      "Type": "Wait",
+      "Seconds": 10,
+      "Next": "PollSQS"
+    },
+    "WriteCollected": {
+      "Type": "Task",
+      "Resource": "arn:aws:states:::aws-sdk:s3:putObject",
+      "Parameters": {
+        "Bucket.$": "$.s3_bucket",
+        "Key.$": "$.output_key",
+        "Body.$": "States.JsonToString($.messages)",
+        "ContentType": "application/json"
+      },
+      "ResultPath": "$.write_result",
+      "Next": "DeleteMessages"
+    },
+    "DeleteMessages": {
+      "Type": "Task",
+      "Resource": "${delete_lambda_arn}",
+      "Parameters": {
+        "receipt_handles.$": "$.receipt_handles"
+      },
+      "ResultPath": "$.delete_result",
+      "Next": "Done"
+    },
+    "Done": {
+      "Type": "Succeed"
+    }
+  }
+}
