@@ -1,0 +1,12 @@
+[
+  {"event_type": "page_view", "page": "/home", "user_id": "u001"},
+  {"event_type": "click", "element": "buy_button", "user_id": "u002"},
+  {"event_type": "page_view", "page": "/products", "user_id": "u003"},
+  {"event_type": "signup", "email": "test@example.com", "user_id": "u004"},
+  {"event_type": "click", "element": "search_bar", "user_id": "u005"},
+  {"event_type": "page_view", "page": "/checkout", "user_id": "u001"},
+  {"event_type": "purchase", "amount": 59.99, "user_id": "u002"},
+  {"event_type": "page_view", "page": "/about", "user_id": "u006"},
+  {"event_type": "click", "element": "nav_menu", "user_id": "u003"},
+  {"event_type": "logout", "user_id": "u001"}
+]
