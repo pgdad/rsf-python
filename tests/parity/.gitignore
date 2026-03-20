@@ -1,0 +1,11 @@
+# Terraform state and providers
+**/.terraform/
+**/.terraform.lock.hcl
+*.tfstate
+*.tfstate.backup
+
+# Generated Lambda zips
+*.zip
+
+# Python cache
+**/__pycache__/

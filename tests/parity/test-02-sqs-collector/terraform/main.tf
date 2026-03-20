@@ -37,9 +37,6 @@ resource "aws_lambda_function" "sf_append" {
     }
   }
 
-  lifecycle {
-    ignore_changes = [filename, source_code_hash]
-  }
 }
 
 # --- SF Handler Lambda (DeleteMessages) ---
@@ -61,9 +58,6 @@ resource "aws_lambda_function" "sf_delete" {
     }
   }
 
-  lifecycle {
-    ignore_changes = [filename, source_code_hash]
-  }
 }
 
 # --- Step Functions State Machine ---
@@ -115,9 +109,6 @@ resource "aws_lambda_function" "rsf_sqs" {
     }
   }
 
-  lifecycle {
-    ignore_changes = [filename, source_code_hash]
-  }
 }
 
 resource "aws_lambda_alias" "rsf_live" {

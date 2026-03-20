@@ -36,9 +36,6 @@ resource "aws_lambda_function" "sf_transform" {
     }
   }
 
-  lifecycle {
-    ignore_changes = [filename, source_code_hash]
-  }
 }
 
 # --- Step Functions State Machine ---
@@ -86,9 +83,6 @@ resource "aws_lambda_function" "rsf_etl" {
     }
   }
 
-  lifecycle {
-    ignore_changes = [filename, source_code_hash]
-  }
 }
 
 resource "aws_lambda_alias" "rsf_live" {
