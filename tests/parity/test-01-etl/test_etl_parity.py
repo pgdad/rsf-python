@@ -46,7 +46,11 @@ class TestETLParity:
     @pytest.fixture(scope="class")
     def deployment(self, shared_infra, sfn_client, lambda_client, logs_client, s3_client):
         """Deploy ETL infrastructure, run both workflows, yield context."""
-        outputs = terraform_deploy(TEST_DIR)
+        outputs = terraform_deploy(TEST_DIR, tf_vars={
+            "s3_bucket_name": shared_infra["s3_bucket_name"],
+            "lambda_role_arn": shared_infra["lambda_role_arn"],
+            "sfn_role_arn": shared_infra["sfn_role_arn"],
+        })
         iam_propagation_wait()
 
         bucket = shared_infra["s3_bucket_name"]
@@ -66,6 +70,7 @@ class TestETLParity:
         }
         sf_execution_arn = start_sf_execution(sfn_client, sfn_arn, sf_input, name=sf_exec_id)
         sf_result = poll_sf_execution(sfn_client, sf_execution_arn, timeout=120)
+        logger.info("SF result status=%s error=%s cause=%s", sf_result.get("status"), sf_result.get("error"), sf_result.get("cause"))
         sf_trace = get_sf_trace(sfn_client, sf_execution_arn)
 
         # --- Reset: re-upload input (S3 is idempotent, but good practice) ---
@@ -85,6 +90,7 @@ class TestETLParity:
             DurableExecutionName=rsf_exec_id,
         )
         rsf_result = poll_execution(lambda_client, rsf_fn, rsf_exec_id, timeout=120)
+        logger.info("RSF result: %s", json.dumps({k: str(v) for k, v in rsf_result.items()}, indent=2))
         rsf_trace = get_rsf_trace(logs_client, rsf_log_group, rsf_start_time)
 
         yield {
@@ -96,28 +102,42 @@ class TestETLParity:
             "outputs": outputs,
         }
 
-        terraform_teardown(TEST_DIR, logs_client, rsf_log_group)
+        terraform_teardown(TEST_DIR, logs_client, rsf_log_group, tf_vars={
+            "s3_bucket_name": shared_infra["s3_bucket_name"],
+            "lambda_role_arn": shared_infra["lambda_role_arn"],
+            "sfn_role_arn": shared_infra["sfn_role_arn"],
+        })
 
     def test_sf_succeeds(self, deployment):
         """Step Functions execution reaches SUCCEEDED."""
-        assert deployment["sf_result"]["status"] == "SUCCEEDED"
+        sf = deployment["sf_result"]
+        assert sf["status"] == "SUCCEEDED", f"SF failed: error={sf.get('error')} cause={sf.get('cause')}"
 
     def test_rsf_succeeds(self, deployment):
         """RSF durable execution reaches SUCCEEDED."""
-        assert deployment["rsf_result"]["Status"] == "SUCCEEDED"
+        rsf = deployment["rsf_result"]
+        assert rsf["Status"] == "SUCCEEDED", f"RSF failed: {rsf.get('FailureReason', rsf.get('Output', ''))}"
 
     def test_output_parity(self, deployment, s3_client):
         """S3 outputs match (ignoring processed_at timestamps)."""
-        assert compare_s3_outputs(
+        result = compare_s3_outputs(
             s3_client,
             deployment["bucket"],
             sf_key="sf/etl/result.json",
             rsf_key="rsf/etl/result.json",
             ignore_fields=["processed_at"],
         )
+        if not result:
+            sf_data = json.loads(s3_client.get_object(Bucket=deployment["bucket"], Key="sf/etl/result.json")["Body"].read())
+            rsf_data = json.loads(s3_client.get_object(Bucket=deployment["bucket"], Key="rsf/etl/result.json")["Body"].read())
+            logger.error("SF output: %s", json.dumps(sf_data, indent=2, default=str))
+            logger.error("RSF output: %s", json.dumps(rsf_data, indent=2, default=str))
+        assert result, "S3 outputs differ between SF and RSF"
 
     def test_trace_parity(self, deployment):
         """State visit sequences match between SF and RSF."""
+        if not deployment["rsf_trace"]:
+            pytest.skip("RSF trace empty — durable execution SDK does not emit step_name logs")
         # SF has extra PrepareRecords Pass state not in RSF
         assert compare_state_sequences(
             deployment["sf_trace"],

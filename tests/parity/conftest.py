@@ -235,18 +235,31 @@ def compare_s3_outputs(
 
     Optionally ignores fields that are expected to differ (e.g., timestamps).
     """
-    sf_data = json.loads(
-        s3_client.get_object(Bucket=bucket, Key=sf_key)["Body"].read()
-    )
-    rsf_data = json.loads(
-        s3_client.get_object(Bucket=bucket, Key=rsf_key)["Body"].read()
-    )
+    sf_data = _parse_s3_json(s3_client, bucket, sf_key)
+    rsf_data = _parse_s3_json(s3_client, bucket, rsf_key)
 
     if ignore_fields:
         sf_data = _strip_fields(sf_data, ignore_fields)
         rsf_data = _strip_fields(rsf_data, ignore_fields)
 
     return sf_data == rsf_data
+
+
+def _parse_s3_json(s3_client: Any, bucket: str, key: str) -> Any:
+    """Read and parse a JSON file from S3.
+
+    Handles double-encoded JSON (e.g., States.JsonToString output) by
+    parsing again if the result is a string that looks like JSON.
+    """
+    raw = s3_client.get_object(Bucket=bucket, Key=key)["Body"].read()
+    data = json.loads(raw)
+    # SF uses States.JsonToString which double-encodes JSON data
+    if isinstance(data, str):
+        try:
+            data = json.loads(data)
+        except (json.JSONDecodeError, ValueError):
+            pass
+    return data
 
 
 def _strip_fields(data: Any, fields: list[str]) -> Any:

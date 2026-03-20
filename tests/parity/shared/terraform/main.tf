@@ -102,12 +102,20 @@ data "aws_iam_policy_document" "lambda_policy" {
   }
 
   statement {
-    sid = "S3Access"
+    sid = "S3ObjectAccess"
     actions = [
       "s3:GetObject",
       "s3:PutObject",
     ]
     resources = ["${aws_s3_bucket.parity.arn}/*"]
+  }
+
+  statement {
+    sid = "S3ListBucket"
+    actions = [
+      "s3:ListBucket",
+    ]
+    resources = [aws_s3_bucket.parity.arn]
   }
 
   statement {
@@ -131,6 +139,7 @@ data "aws_iam_policy_document" "lambda_policy" {
     sid = "DurableExecution"
     actions = [
       "lambda:Checkpoint",
+      "lambda:CheckpointDurableExecution",
       "lambda:GetDurableExecution",
       "lambda:GetDurableExecutionState",
       "lambda:ListDurableExecutionsByFunction",
@@ -176,12 +185,20 @@ data "aws_iam_policy_document" "sfn_policy" {
   }
 
   statement {
-    sid = "S3Access"
+    sid = "S3ObjectAccess"
     actions = [
       "s3:GetObject",
       "s3:PutObject",
     ]
     resources = ["${aws_s3_bucket.parity.arn}/*"]
+  }
+
+  statement {
+    sid = "S3ListBucket"
+    actions = [
+      "s3:ListBucket",
+    ]
+    resources = [aws_s3_bucket.parity.arn]
   }
 
   statement {

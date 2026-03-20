@@ -1,7 +1,7 @@
 """SF Lambda handlers for choice-based format routing."""
 from __future__ import annotations
-from handlers.choice_routing.process_csv import process_csv
-from handlers.choice_routing.process_json import process_json
+from choice_routing.process_csv import process_csv
+from choice_routing.process_json import process_json
 
 def csv_handler(event: dict, context) -> dict:
     csv_text = event.get("csv_text", "")

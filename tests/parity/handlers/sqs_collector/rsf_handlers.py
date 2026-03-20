@@ -12,6 +12,25 @@ def poll_sqs_handler(event: dict) -> dict:
         return {**event, "received": True, "message": msg["body"], "receipt_handle": msg["receipt_handle"]}
     return {**event, "received": False}
 
+@state("AppendMessage")
+def append_message_handler(event: dict) -> dict:
+    import json
+    messages = event.get("messages", [])
+    receipt_handles = event.get("receipt_handles", [])
+    poll_result = event.get("poll_result", {})
+    new_message = poll_result.get("message")
+    new_receipt_handle = poll_result.get("receipt_handle")
+    if isinstance(new_message, str):
+        try:
+            new_message = json.loads(new_message)
+        except json.JSONDecodeError:
+            pass
+    if new_message is not None:
+        messages.append(new_message)
+    if new_receipt_handle is not None:
+        receipt_handles.append(new_receipt_handle)
+    return {**event, "messages": messages, "receipt_handles": receipt_handles, "count": len(messages)}
+
 @state("WriteCollected")
 def write_collected_handler(event: dict) -> dict:
     output_key = event["output_key"]
