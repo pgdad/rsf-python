@@ -3,6 +3,7 @@
 All Task states use Lambda handlers (no SDK integrations) so the SF
 and RSF versions exercise identical handler code.
 """
+
 from __future__ import annotations
 
 import json
@@ -18,7 +19,9 @@ def poll_handler(event: dict, context) -> dict:
     """Poll SQS for one message."""
     queue_url = os.environ["PARITY_SQS_QUEUE_URL"]
     response = _sqs.receive_message(
-        QueueUrl=queue_url, MaxNumberOfMessages=1, WaitTimeSeconds=5,
+        QueueUrl=queue_url,
+        MaxNumberOfMessages=1,
+        WaitTimeSeconds=5,
     )
     messages = response.get("Messages", [])
     if messages:
@@ -77,9 +80,6 @@ def delete_handler(event: dict, context) -> dict:
     receipt_handles = event.get("receipt_handles", [])
     if not receipt_handles:
         return {**event, "deleted": 0}
-    entries = [
-        {"Id": str(i), "ReceiptHandle": rh}
-        for i, rh in enumerate(receipt_handles)
-    ]
+    entries = [{"Id": str(i), "ReceiptHandle": rh} for i, rh in enumerate(receipt_handles)]
     _sqs.delete_message_batch(QueueUrl=queue_url, Entries=entries)
     return {**event, "deleted": len(receipt_handles)}

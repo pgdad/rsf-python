@@ -229,7 +229,10 @@ def query_logs(
 # ---------------------------------------------------------------------------
 
 
-def terraform_deploy(example_dir: Path) -> dict[str, str]:
+def terraform_deploy(
+    example_dir: Path,
+    tf_vars: dict[str, str] | None = None,
+) -> dict[str, str]:
     """Deploy an example's Terraform infrastructure.
 
     Runs terraform init + apply in the example's terraform/ directory.
@@ -237,6 +240,7 @@ def terraform_deploy(example_dir: Path) -> dict[str, str]:
 
     Args:
         example_dir: Path to the example directory (e.g. examples/order-processing).
+        tf_vars: Optional dict of terraform variables to pass via -var flags.
 
     Returns:
         Dict of terraform output values (function_name, function_arn,
@@ -254,9 +258,14 @@ def terraform_deploy(example_dir: Path) -> dict[str, str]:
         text=True,
     )
 
+    apply_cmd = ["terraform", "apply", "-auto-approve", "-input=false"]
+    if tf_vars:
+        for key, value in tf_vars.items():
+            apply_cmd.extend(["-var", f"{key}={value}"])
+
     logger.info("terraform_deploy: apply %s", tf_dir)
     subprocess.run(
-        ["terraform", "apply", "-auto-approve", "-input=false"],
+        apply_cmd,
         cwd=tf_dir,
         check=True,
         capture_output=True,
@@ -281,6 +290,7 @@ def terraform_teardown(
     example_dir: Path,
     logs_client: Any | None = None,
     log_group_name: str | None = None,
+    tf_vars: dict[str, str] | None = None,
 ) -> None:
     """Destroy an example's Terraform infrastructure and clean orphaned resources.
 
@@ -291,12 +301,18 @@ def terraform_teardown(
         example_dir: Path to the example directory.
         logs_client: boto3 CloudWatch Logs client (optional).
         log_group_name: Log group to delete (optional).
+        tf_vars: Optional dict of terraform variables to pass via -var flags.
     """
     tf_dir = example_dir / "terraform"
 
+    destroy_cmd = ["terraform", "destroy", "-auto-approve", "-input=false"]
+    if tf_vars:
+        for key, value in tf_vars.items():
+            destroy_cmd.extend(["-var", f"{key}={value}"])
+
     logger.info("terraform_teardown: destroy %s", tf_dir)
     subprocess.run(
-        ["terraform", "destroy", "-auto-approve", "-input=false"],
+        destroy_cmd,
         cwd=tf_dir,
         check=True,
         capture_output=True,

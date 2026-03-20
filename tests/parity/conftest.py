@@ -12,7 +12,7 @@ import threading
 import time
 import uuid
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -22,8 +22,6 @@ import pytest
 # Reuse existing integration test helpers
 from tests.test_examples.conftest import (
     iam_propagation_wait,
-    make_execution_id,
-    poll_execution,
     query_logs,
     terraform_deploy,
     terraform_teardown,
@@ -157,16 +155,20 @@ def get_sf_trace(sfn_client: Any, execution_arn: str) -> list[StateTransition]:
             # Map SF event types to state transitions
             if "StateEntered" in event_type:
                 detail = event.get("stateEnteredEventDetails", {})
-                transitions.append(StateTransition(
-                    state_name=detail.get("name", ""),
-                    status="entered",
-                ))
+                transitions.append(
+                    StateTransition(
+                        state_name=detail.get("name", ""),
+                        status="entered",
+                    )
+                )
             elif "StateExited" in event_type:
                 detail = event.get("stateExitedEventDetails", {})
-                transitions.append(StateTransition(
-                    state_name=detail.get("name", ""),
-                    status="succeeded",
-                ))
+                transitions.append(
+                    StateTransition(
+                        state_name=detail.get("name", ""),
+                        status="succeeded",
+                    )
+                )
     return transitions
 
 
@@ -193,10 +195,12 @@ def get_rsf_trace(
     for msg in messages:
         try:
             data = json.loads(msg)
-            transitions.append(StateTransition(
-                state_name=data.get("step_name", ""),
-                status="entered" if "starting" in msg.lower() else "succeeded",
-            ))
+            transitions.append(
+                StateTransition(
+                    state_name=data.get("step_name", ""),
+                    status="entered" if "starting" in msg.lower() else "succeeded",
+                )
+            )
         except json.JSONDecodeError:
             continue
     return transitions
@@ -293,6 +297,7 @@ def send_sqs_messages(
     stagger_seconds: float = 9.0,
 ) -> None:
     """Send messages to SQS with staggered timing (in a background thread)."""
+
     def _send():
         for i, msg in enumerate(messages):
             sqs_client.send_message(

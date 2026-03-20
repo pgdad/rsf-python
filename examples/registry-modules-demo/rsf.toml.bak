@@ -1,0 +1,17 @@
+# RSF Custom Provider Configuration
+# ---
+# This example uses a custom provider (deploy.sh) to deploy via
+# Terraform registry modules instead of RSF's built-in Terraform provider.
+#
+# IMPORTANT: Replace the program path below with your absolute path.
+# Find it with:
+#   echo "$(cd examples/registry-modules-demo && pwd)/deploy.sh"
+
+[infrastructure]
+provider = "custom"
+
+[infrastructure.custom]
+program         = "/REPLACE/WITH/YOUR/ABSOLUTE/PATH/TO/examples/registry-modules-demo/deploy.sh"
+args            = ["deploy"]
+teardown_args   = ["destroy"]
+metadata_transport = "file"

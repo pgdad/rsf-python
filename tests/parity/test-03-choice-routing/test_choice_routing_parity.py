@@ -11,7 +11,6 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime, timezone
-from pathlib import Path
 
 import pytest
 
@@ -51,11 +50,14 @@ class TestChoiceRoutingParity:
     @pytest.fixture(scope="class")
     def deployment(self, shared_infra, sfn_client, lambda_client, logs_client, s3_client):
         """Deploy choice routing infrastructure, run all workflows, yield context."""
-        outputs = terraform_deploy(TEST_DIR, tf_vars={
-            "s3_bucket_name": shared_infra["s3_bucket_name"],
-            "lambda_role_arn": shared_infra["lambda_role_arn"],
-            "sfn_role_arn": shared_infra["sfn_role_arn"],
-        })
+        outputs = terraform_deploy(
+            TEST_DIR,
+            tf_vars={
+                "s3_bucket_name": shared_infra["s3_bucket_name"],
+                "lambda_role_arn": shared_infra["lambda_role_arn"],
+                "sfn_role_arn": shared_infra["sfn_role_arn"],
+            },
+        )
         iam_propagation_wait()
 
         bucket = shared_infra["s3_bucket_name"]
@@ -81,7 +83,9 @@ class TestChoiceRoutingParity:
 
         # --- CSV format ---
         csv_sf = _run_sf_workflow(
-            sfn_client, sfn_arn, bucket,
+            sfn_client,
+            sfn_arn,
+            bucket,
             config_key="input/choice-routing/config_csv.json",
             output_prefix="sf/choice-routing",
             exec_name="choice-csv-sf",
@@ -89,7 +93,12 @@ class TestChoiceRoutingParity:
         results["csv_sf"] = csv_sf
 
         csv_rsf = _run_rsf_workflow(
-            lambda_client, logs_client, rsf_alias, rsf_fn, rsf_log_group, bucket,
+            lambda_client,
+            logs_client,
+            rsf_alias,
+            rsf_fn,
+            rsf_log_group,
+            bucket,
             config_key="input/choice-routing/config_csv.json",
             output_prefix="rsf/choice-routing",
             exec_name="choice-csv-rsf",
@@ -98,7 +107,9 @@ class TestChoiceRoutingParity:
 
         # --- JSON format ---
         json_sf = _run_sf_workflow(
-            sfn_client, sfn_arn, bucket,
+            sfn_client,
+            sfn_arn,
+            bucket,
             config_key="input/choice-routing/config_json.json",
             output_prefix="sf/choice-routing",
             exec_name="choice-json-sf",
@@ -106,7 +117,12 @@ class TestChoiceRoutingParity:
         results["json_sf"] = json_sf
 
         json_rsf = _run_rsf_workflow(
-            lambda_client, logs_client, rsf_alias, rsf_fn, rsf_log_group, bucket,
+            lambda_client,
+            logs_client,
+            rsf_alias,
+            rsf_fn,
+            rsf_log_group,
+            bucket,
             config_key="input/choice-routing/config_json.json",
             output_prefix="rsf/choice-routing",
             exec_name="choice-json-rsf",
@@ -126,8 +142,13 @@ class TestChoiceRoutingParity:
         # SF unknown format
         sf_fail_id = make_execution_id("choice-xml-sf")
         sf_fail_arn = start_sf_execution(
-            sfn_client, sfn_arn,
-            {"config_key": "input/choice-routing/config_xml.json", "output_prefix": "sf/choice-routing", "s3_bucket": bucket},
+            sfn_client,
+            sfn_arn,
+            {
+                "config_key": "input/choice-routing/config_xml.json",
+                "output_prefix": "sf/choice-routing",
+                "s3_bucket": bucket,
+            },
             name=sf_fail_id,
         )
         sf_fail_result = poll_sf_execution(sfn_client, sf_fail_arn, timeout=120)
@@ -135,15 +156,17 @@ class TestChoiceRoutingParity:
 
         # RSF unknown format
         rsf_fail_id = make_execution_id("choice-xml-rsf")
-        rsf_fail_start = datetime.now(timezone.utc)
+        _ = datetime.now(timezone.utc)  # timestamp for potential log query
         lambda_client.invoke(
             FunctionName=rsf_alias,
             InvocationType="Event",
-            Payload=json.dumps({
-                "config_key": "input/choice-routing/config_xml.json",
-                "output_prefix": "rsf/choice-routing",
-                "s3_bucket": bucket,
-            }),
+            Payload=json.dumps(
+                {
+                    "config_key": "input/choice-routing/config_xml.json",
+                    "output_prefix": "rsf/choice-routing",
+                    "s3_bucket": bucket,
+                }
+            ),
             DurableExecutionName=rsf_fail_id,
         )
         rsf_fail_result = poll_execution(lambda_client, rsf_fn, rsf_fail_id, timeout=120)
@@ -151,11 +174,16 @@ class TestChoiceRoutingParity:
 
         yield results
 
-        terraform_teardown(TEST_DIR, logs_client, rsf_log_group, tf_vars={
-            "s3_bucket_name": shared_infra["s3_bucket_name"],
-            "lambda_role_arn": shared_infra["lambda_role_arn"],
-            "sfn_role_arn": shared_infra["sfn_role_arn"],
-        })
+        terraform_teardown(
+            TEST_DIR,
+            logs_client,
+            rsf_log_group,
+            tf_vars={
+                "s3_bucket_name": shared_infra["s3_bucket_name"],
+                "lambda_role_arn": shared_infra["lambda_role_arn"],
+                "sfn_role_arn": shared_infra["sfn_role_arn"],
+            },
+        )
 
     # --- CSV tests ---
 
@@ -224,8 +252,13 @@ class TestChoiceRoutingParity:
 
 
 def _run_sf_workflow(
-    sfn_client, sfn_arn: str, bucket: str, *,
-    config_key: str, output_prefix: str, exec_name: str,
+    sfn_client,
+    sfn_arn: str,
+    bucket: str,
+    *,
+    config_key: str,
+    output_prefix: str,
+    exec_name: str,
 ) -> dict:
     """Run a Step Functions workflow and return result + trace."""
     exec_id = make_execution_id(exec_name)
@@ -241,9 +274,16 @@ def _run_sf_workflow(
 
 
 def _run_rsf_workflow(
-    lambda_client, logs_client, rsf_alias: str, rsf_fn: str,
-    rsf_log_group: str, bucket: str, *,
-    config_key: str, output_prefix: str, exec_name: str,
+    lambda_client,
+    logs_client,
+    rsf_alias: str,
+    rsf_fn: str,
+    rsf_log_group: str,
+    bucket: str,
+    *,
+    config_key: str,
+    output_prefix: str,
+    exec_name: str,
 ) -> dict:
     """Run an RSF workflow and return result + trace."""
     exec_id = make_execution_id(exec_name)

@@ -10,13 +10,11 @@ import json
 import logging
 import time
 from datetime import datetime, timezone
-from pathlib import Path
 
 import pytest
 
 from tests.parity.conftest import (
     PARITY_ROOT,
-    compare_state_sequences,
     get_rsf_trace,
     get_sf_trace,
     poll_sf_execution,
@@ -47,13 +45,16 @@ class TestSQSCollectorParity:
     @pytest.fixture(scope="class")
     def deployment(self, shared_infra, sfn_client, lambda_client, logs_client, sqs_client, s3_client):
         """Deploy SQS collector infrastructure, run both workflows, yield context."""
-        outputs = terraform_deploy(TEST_DIR, tf_vars={
-            "s3_bucket_name": shared_infra["s3_bucket_name"],
-            "sqs_queue_url": shared_infra["sqs_queue_url"],
-            "sqs_queue_arn": shared_infra["sqs_queue_arn"],
-            "lambda_role_arn": shared_infra["lambda_role_arn"],
-            "sfn_role_arn": shared_infra["sfn_role_arn"],
-        })
+        outputs = terraform_deploy(
+            TEST_DIR,
+            tf_vars={
+                "s3_bucket_name": shared_infra["s3_bucket_name"],
+                "sqs_queue_url": shared_infra["sqs_queue_url"],
+                "sqs_queue_arn": shared_infra["sqs_queue_arn"],
+                "lambda_role_arn": shared_infra["lambda_role_arn"],
+                "sfn_role_arn": shared_infra["sfn_role_arn"],
+            },
+        )
         iam_propagation_wait()
 
         bucket = shared_infra["s3_bucket_name"]
@@ -160,13 +161,18 @@ class TestSQSCollectorParity:
             "outputs": outputs,
         }
 
-        terraform_teardown(TEST_DIR, logs_client, rsf_log_group, tf_vars={
-            "s3_bucket_name": shared_infra["s3_bucket_name"],
-            "sqs_queue_url": shared_infra["sqs_queue_url"],
-            "sqs_queue_arn": shared_infra["sqs_queue_arn"],
-            "lambda_role_arn": shared_infra["lambda_role_arn"],
-            "sfn_role_arn": shared_infra["sfn_role_arn"],
-        })
+        terraform_teardown(
+            TEST_DIR,
+            logs_client,
+            rsf_log_group,
+            tf_vars={
+                "s3_bucket_name": shared_infra["s3_bucket_name"],
+                "sqs_queue_url": shared_infra["sqs_queue_url"],
+                "sqs_queue_arn": shared_infra["sqs_queue_arn"],
+                "lambda_role_arn": shared_infra["lambda_role_arn"],
+                "sfn_role_arn": shared_infra["sfn_role_arn"],
+            },
+        )
 
     def test_sf_succeeds(self, deployment):
         """Step Functions execution reaches SUCCEEDED."""
@@ -220,9 +226,7 @@ class TestSQSCollectorParity:
 
 def _check_queue_empty(sqs_client, queue_url: str) -> bool:
     """Check if SQS queue has no messages available."""
-    resp = sqs_client.receive_message(
-        QueueUrl=queue_url, MaxNumberOfMessages=1, WaitTimeSeconds=2
-    )
+    resp = sqs_client.receive_message(QueueUrl=queue_url, MaxNumberOfMessages=1, WaitTimeSeconds=2)
     return len(resp.get("Messages", [])) == 0
 
 

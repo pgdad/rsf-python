@@ -9,7 +9,6 @@ from __future__ import annotations
 import json
 import logging
 from datetime import datetime, timezone
-from pathlib import Path
 
 import pytest
 
@@ -46,11 +45,14 @@ class TestETLParity:
     @pytest.fixture(scope="class")
     def deployment(self, shared_infra, sfn_client, lambda_client, logs_client, s3_client):
         """Deploy ETL infrastructure, run both workflows, yield context."""
-        outputs = terraform_deploy(TEST_DIR, tf_vars={
-            "s3_bucket_name": shared_infra["s3_bucket_name"],
-            "lambda_role_arn": shared_infra["lambda_role_arn"],
-            "sfn_role_arn": shared_infra["sfn_role_arn"],
-        })
+        outputs = terraform_deploy(
+            TEST_DIR,
+            tf_vars={
+                "s3_bucket_name": shared_infra["s3_bucket_name"],
+                "lambda_role_arn": shared_infra["lambda_role_arn"],
+                "sfn_role_arn": shared_infra["sfn_role_arn"],
+            },
+        )
         iam_propagation_wait()
 
         bucket = shared_infra["s3_bucket_name"]
@@ -70,7 +72,12 @@ class TestETLParity:
         }
         sf_execution_arn = start_sf_execution(sfn_client, sfn_arn, sf_input, name=sf_exec_id)
         sf_result = poll_sf_execution(sfn_client, sf_execution_arn, timeout=120)
-        logger.info("SF result status=%s error=%s cause=%s", sf_result.get("status"), sf_result.get("error"), sf_result.get("cause"))
+        logger.info(
+            "SF result status=%s error=%s cause=%s",
+            sf_result.get("status"),
+            sf_result.get("error"),
+            sf_result.get("cause"),
+        )
         sf_trace = get_sf_trace(sfn_client, sf_execution_arn)
 
         # --- Reset: re-upload input (S3 is idempotent, but good practice) ---
@@ -102,11 +109,16 @@ class TestETLParity:
             "outputs": outputs,
         }
 
-        terraform_teardown(TEST_DIR, logs_client, rsf_log_group, tf_vars={
-            "s3_bucket_name": shared_infra["s3_bucket_name"],
-            "lambda_role_arn": shared_infra["lambda_role_arn"],
-            "sfn_role_arn": shared_infra["sfn_role_arn"],
-        })
+        terraform_teardown(
+            TEST_DIR,
+            logs_client,
+            rsf_log_group,
+            tf_vars={
+                "s3_bucket_name": shared_infra["s3_bucket_name"],
+                "lambda_role_arn": shared_infra["lambda_role_arn"],
+                "sfn_role_arn": shared_infra["sfn_role_arn"],
+            },
+        )
 
     def test_sf_succeeds(self, deployment):
         """Step Functions execution reaches SUCCEEDED."""
@@ -128,8 +140,9 @@ class TestETLParity:
             ignore_fields=["processed_at"],
         )
         if not result:
-            sf_data = json.loads(s3_client.get_object(Bucket=deployment["bucket"], Key="sf/etl/result.json")["Body"].read())
-            rsf_data = json.loads(s3_client.get_object(Bucket=deployment["bucket"], Key="rsf/etl/result.json")["Body"].read())
+            bucket = deployment["bucket"]
+            sf_data = json.loads(s3_client.get_object(Bucket=bucket, Key="sf/etl/result.json")["Body"].read())
+            rsf_data = json.loads(s3_client.get_object(Bucket=bucket, Key="rsf/etl/result.json")["Body"].read())
             logger.error("SF output: %s", json.dumps(sf_data, indent=2, default=str))
             logger.error("RSF output: %s", json.dumps(rsf_data, indent=2, default=str))
         assert result, "S3 outputs differ between SF and RSF"
