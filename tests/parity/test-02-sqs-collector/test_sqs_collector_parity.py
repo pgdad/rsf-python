@@ -85,6 +85,7 @@ class TestSQSCollectorParity:
         # Start SF immediately (it will poll for messages)
         sf_execution_arn = start_sf_execution(sfn_client, sfn_arn, sf_input, name=sf_exec_id)
         sf_result = poll_sf_execution(sfn_client, sf_execution_arn, timeout=300)
+        logger.info("SF SQS result: status=%s error=%s", sf_result.get("status"), sf_result.get("error"))
         sf_trace = get_sf_trace(sfn_client, sf_execution_arn)
 
         # Wait for send thread to finish
@@ -127,9 +128,19 @@ class TestSQSCollectorParity:
         # Verify queue is drained after RSF run
         rsf_queue_empty = _check_queue_empty(sqs_client, queue_url)
 
-        # Read S3 outputs for comparison
-        sf_output = _read_s3_json(s3_client, bucket, "sf/sqs-collector/result.json")
-        rsf_output = _read_s3_json(s3_client, bucket, "rsf/sqs-collector/result.json")
+        # Read S3 outputs for comparison (only if execution succeeded)
+        sf_output = None
+        rsf_output = None
+        if sf_result.get("status") == "SUCCEEDED":
+            try:
+                sf_output = _read_s3_json(s3_client, bucket, "sf/sqs-collector/result.json")
+            except Exception:
+                pass
+        if rsf_result.get("Status") == "SUCCEEDED":
+            try:
+                rsf_output = _read_s3_json(s3_client, bucket, "rsf/sqs-collector/result.json")
+            except Exception:
+                pass
 
         yield {
             "sf_result": sf_result,
