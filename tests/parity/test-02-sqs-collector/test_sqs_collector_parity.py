@@ -39,6 +39,7 @@ TEST_DATA_DIR = TEST_DIR / "test_data"
 
 
 @pytest.mark.parity
+@pytest.mark.integration
 class TestSQSCollectorParity:
     """Deploy, run SF and RSF SQS collector workflows, and compare results."""
 

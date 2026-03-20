@@ -44,6 +44,7 @@ SF_EXTRA_STATES = {"ExtractConfig", "ReadSourceCSV", "ReadSourceJSON"}
 
 
 @pytest.mark.parity
+@pytest.mark.integration
 class TestChoiceRoutingParity:
     """Deploy, run SF and RSF choice routing workflows, and compare results."""
 

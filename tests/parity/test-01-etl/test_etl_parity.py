@@ -39,6 +39,7 @@ TEST_DATA_DIR = TEST_DIR / "test_data"
 
 
 @pytest.mark.parity
+@pytest.mark.integration
 class TestETLParity:
     """Deploy, run SF and RSF ETL workflows, and compare results."""
 
