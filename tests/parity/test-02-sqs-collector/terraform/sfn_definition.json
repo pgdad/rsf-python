@@ -4,12 +4,7 @@
   "States": {
     "PollSQS": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::aws-sdk:sqs:receiveMessage",
-      "Parameters": {
-        "QueueUrl.$": "$.queue_url",
-        "MaxNumberOfMessages": 1,
-        "WaitTimeSeconds": 5
-      },
+      "Resource": "${poll_lambda_arn}",
       "ResultPath": "$.poll_result",
       "Next": "CheckMessages"
     },
@@ -17,8 +12,8 @@
       "Type": "Choice",
       "Choices": [
         {
-          "Variable": "$.poll_result.Messages[0]",
-          "IsPresent": true,
+          "Variable": "$.poll_result.received",
+          "BooleanEquals": true,
           "Next": "AppendMessage"
         }
       ],
@@ -27,16 +22,6 @@
     "AppendMessage": {
       "Type": "Task",
       "Resource": "${append_lambda_arn}",
-      "Parameters": {
-        "messages.$": "$.messages",
-        "receipt_handles.$": "$.receipt_handles",
-        "count.$": "$.count",
-        "new_message.$": "$.poll_result.Messages[0].Body",
-        "new_receipt_handle.$": "$.poll_result.Messages[0].ReceiptHandle",
-        "queue_url.$": "$.queue_url",
-        "output_key.$": "$.output_key",
-        "s3_bucket.$": "$.s3_bucket"
-      },
       "Next": "CheckCount"
     },
     "CheckCount": {
@@ -57,23 +42,12 @@
     },
     "WriteCollected": {
       "Type": "Task",
-      "Resource": "arn:aws:states:::aws-sdk:s3:putObject",
-      "Parameters": {
-        "Bucket.$": "$.s3_bucket",
-        "Key.$": "$.output_key",
-        "Body.$": "States.JsonToString($.messages)",
-        "ContentType": "application/json"
-      },
-      "ResultPath": "$.write_result",
+      "Resource": "${write_lambda_arn}",
       "Next": "DeleteMessages"
     },
     "DeleteMessages": {
       "Type": "Task",
       "Resource": "${delete_lambda_arn}",
-      "Parameters": {
-        "receipt_handles.$": "$.receipt_handles"
-      },
-      "ResultPath": "$.delete_result",
       "Next": "Done"
     },
     "Done": {

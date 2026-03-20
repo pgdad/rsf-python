@@ -12,12 +12,30 @@ locals {
   handlers_dir = "${path.module}/../../handlers"
 }
 
-# --- SF Handler Lambda (AppendMessage) ---
+# --- SF Handler Lambdas (all 4 tasks use Lambda — no SDK integrations) ---
 
 data "archive_file" "sf_handler_zip" {
   type        = "zip"
   source_dir  = local.handlers_dir
   output_path = "${path.module}/sf_handler.zip"
+}
+
+resource "aws_lambda_function" "sf_poll" {
+  function_name    = "${var.name_prefix}-sf-poll"
+  handler          = "sqs_collector.sf_handler.poll_handler"
+  runtime          = "python3.13"
+  role             = var.lambda_role_arn
+  filename         = data.archive_file.sf_handler_zip.output_path
+  source_code_hash = data.archive_file.sf_handler_zip.output_base64sha256
+  timeout          = 60
+  memory_size      = 256
+
+  environment {
+    variables = {
+      PARITY_S3_BUCKET     = var.s3_bucket_name
+      PARITY_SQS_QUEUE_URL = var.sqs_queue_url
+    }
+  }
 }
 
 resource "aws_lambda_function" "sf_append" {
@@ -32,14 +50,29 @@ resource "aws_lambda_function" "sf_append" {
 
   environment {
     variables = {
-      PARITY_S3_BUCKET    = var.s3_bucket_name
+      PARITY_S3_BUCKET     = var.s3_bucket_name
       PARITY_SQS_QUEUE_URL = var.sqs_queue_url
     }
   }
-
 }
 
-# --- SF Handler Lambda (DeleteMessages) ---
+resource "aws_lambda_function" "sf_write" {
+  function_name    = "${var.name_prefix}-sf-write"
+  handler          = "sqs_collector.sf_handler.write_handler"
+  runtime          = "python3.13"
+  role             = var.lambda_role_arn
+  filename         = data.archive_file.sf_handler_zip.output_path
+  source_code_hash = data.archive_file.sf_handler_zip.output_base64sha256
+  timeout          = 60
+  memory_size      = 256
+
+  environment {
+    variables = {
+      PARITY_S3_BUCKET     = var.s3_bucket_name
+      PARITY_SQS_QUEUE_URL = var.sqs_queue_url
+    }
+  }
+}
 
 resource "aws_lambda_function" "sf_delete" {
   function_name    = "${var.name_prefix}-sf-delete"
@@ -53,11 +86,10 @@ resource "aws_lambda_function" "sf_delete" {
 
   environment {
     variables = {
-      PARITY_S3_BUCKET    = var.s3_bucket_name
+      PARITY_S3_BUCKET     = var.s3_bucket_name
       PARITY_SQS_QUEUE_URL = var.sqs_queue_url
     }
   }
-
 }
 
 # --- Step Functions State Machine ---
@@ -67,11 +99,10 @@ resource "aws_sfn_state_machine" "sqs_collector" {
   role_arn = var.sfn_role_arn
 
   definition = templatefile("${path.module}/sfn_definition.json", {
-    sqs_queue_url      = var.sqs_queue_url
-    s3_bucket          = var.s3_bucket_name
-    append_lambda_arn  = aws_lambda_function.sf_append.arn
-    output_key_prefix  = "parity/sqs-collector"
-    delete_lambda_arn  = aws_lambda_function.sf_delete.arn
+    poll_lambda_arn   = aws_lambda_function.sf_poll.arn
+    append_lambda_arn = aws_lambda_function.sf_append.arn
+    write_lambda_arn  = aws_lambda_function.sf_write.arn
+    delete_lambda_arn = aws_lambda_function.sf_delete.arn
   })
 }
 
@@ -104,11 +135,10 @@ resource "aws_lambda_function" "rsf_sqs" {
 
   environment {
     variables = {
-      PARITY_S3_BUCKET    = var.s3_bucket_name
+      PARITY_S3_BUCKET     = var.s3_bucket_name
       PARITY_SQS_QUEUE_URL = var.sqs_queue_url
     }
   }
-
 }
 
 resource "aws_lambda_alias" "rsf_live" {
